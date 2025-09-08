@@ -129,8 +129,94 @@ BREAKING CHANGE: The legacy login() method has been removed. Use authenticateUse
 Run the test suite to ensure your changes don't break existing functionality:
 
 ```bash
-# Add test commands here
+make test        # Run pytest test suite
+make test-cov    # Run tests with coverage report (same as make test)
 ```
+
+## Development Commands (Makefile)
+
+This project uses a comprehensive Makefile to manage development tasks. All commands use PDM for Python package management and maintain consistent development workflows.
+
+### Quick Start Commands
+
+```bash
+make install-dev  # Install all dependencies (including development tools)
+make check        # Run all quality checks (format, lint, type-check, test)
+```
+
+### Installation Commands
+
+```bash
+make install      # Install production dependencies only
+make install-dev  # Install all dependencies including dev tools (pytest, black, flake8, mypy)
+make sync         # Sync dependencies and update lock file
+```
+
+### Code Quality Commands
+
+```bash
+make format       # Format code with black (src/ and tests/ directories)
+make lint         # Run flake8 linting on src/ and tests/
+make type-check   # Run mypy type checking on src/ directory
+make test         # Run pytest test suite with coverage reporting
+make check        # Run all quality checks: format + lint + type-check + test
+```
+
+The `make check` command runs all quality checks in sequence and is the recommended command before committing changes.
+
+### Build and Deployment Commands
+
+```bash
+make docker-build        # Build the Docker container image
+make docker-run-save     # Run container to save GitHub data (requires env vars)
+make docker-run-restore  # Run container to restore GitHub data (requires env vars)
+```
+
+**Docker Environment Variables:**
+- `GITHUB_TOKEN`: Your GitHub personal access token
+- `GITHUB_REPO`: Repository in format "owner/repo"
+
+**Example Docker Usage:**
+```bash
+# Build the container
+make docker-build
+
+# Save repository data
+GITHUB_TOKEN=your_token GITHUB_REPO=owner/repo make docker-run-save
+
+# Restore repository data  
+GITHUB_TOKEN=your_token GITHUB_REPO=owner/repo make docker-run-restore
+```
+
+### Maintenance Commands
+
+```bash
+make clean        # Remove all build artifacts, caches, and temporary files
+```
+
+The clean command removes:
+- `build/`, `dist/`, `*.egg-info/` directories
+- `.pytest_cache/`, `htmlcov/` directories
+- `.pdm-python` directory
+- All `__pycache__` directories
+- All `.pyc` files
+
+### Development Workflow
+
+**Recommended development workflow:**
+
+1. **Setup**: `make install-dev` (install all dependencies)
+2. **Development**: Make your code changes
+3. **Quality Check**: `make check` (run all quality checks)
+4. **Commit**: Only commit if all checks pass
+5. **Cleanup**: `make clean` (optional, to remove build artifacts)
+
+**Before committing changes:**
+```bash
+make check  # This runs: format + lint + type-check + test
+```
+
+All commands are configured through `pyproject.toml` and use PDM's virtual environment automatically. No need to manually activate virtual environments.
 
 ## Coding Standards
 
