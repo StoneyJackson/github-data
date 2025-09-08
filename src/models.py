@@ -7,7 +7,7 @@ that will be serialized to/from JSON files.
 
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class GitHubUser(BaseModel):
@@ -58,8 +58,7 @@ class Issue(BaseModel):
     html_url: str
     comments_count: int = Field(alias="comments")
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class RepositoryData(BaseModel):

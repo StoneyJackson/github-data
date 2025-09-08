@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from src.storage.json_storage import save_json_data, load_json_data
 
 
-class TestModel(BaseModel):
-    """Test model for JSON storage operations."""
+class SampleModel(BaseModel):
+    """Sample model for JSON storage operations."""
 
     name: str
     value: int
@@ -24,10 +24,10 @@ class TestJsonStorage:
         """Test saving and loading a single model."""
         with TemporaryDirectory() as temp_dir:
             file_path = Path(temp_dir) / "test.json"
-            test_data = TestModel(name="test", value=42)
+            test_data = SampleModel(name="test", value=42)
 
             save_json_data(test_data, file_path)
-            loaded_data = load_json_data(file_path, TestModel)
+            loaded_data = load_json_data(file_path, SampleModel)
 
             assert len(loaded_data) == 1
             assert loaded_data[0].name == "test"
@@ -39,12 +39,12 @@ class TestJsonStorage:
         with TemporaryDirectory() as temp_dir:
             file_path = Path(temp_dir) / "test_list.json"
             test_data = [
-                TestModel(name="first", value=1),
-                TestModel(name="second", value=2, active=False),
+                SampleModel(name="first", value=1),
+                SampleModel(name="second", value=2, active=False),
             ]
 
             save_json_data(test_data, file_path)
-            loaded_data = load_json_data(file_path, TestModel)
+            loaded_data = load_json_data(file_path, SampleModel)
 
             assert len(loaded_data) == 2
             assert loaded_data[0].name == "first"
@@ -56,7 +56,7 @@ class TestJsonStorage:
         """Test that save_json_data creates parent directories."""
         with TemporaryDirectory() as temp_dir:
             nested_path = Path(temp_dir) / "nested" / "deep" / "test.json"
-            test_data = TestModel(name="nested", value=99)
+            test_data = SampleModel(name="nested", value=99)
 
             save_json_data(test_data, nested_path)
 
@@ -68,7 +68,7 @@ class TestJsonStorage:
         non_existent_path = Path("does_not_exist.json")
 
         with pytest.raises(FileNotFoundError):
-            load_json_data(non_existent_path, TestModel)
+            load_json_data(non_existent_path, SampleModel)
 
     def test_load_invalid_json_raises_error(self):
         """Test that loading invalid JSON raises appropriate error."""
@@ -80,7 +80,7 @@ class TestJsonStorage:
                 f.write("{ invalid json }")
 
             with pytest.raises(json.JSONDecodeError):
-                load_json_data(file_path, TestModel)
+                load_json_data(file_path, SampleModel)
 
     def test_load_non_object_or_array_json_raises_error(self):
         """Test that loading JSON that is neither object nor array raises ValueError."""
@@ -93,13 +93,13 @@ class TestJsonStorage:
                 json.dump("invalid_data_type", f)
 
             with pytest.raises(ValueError, match="Expected JSON array or object"):
-                load_json_data(file_path, TestModel)
+                load_json_data(file_path, SampleModel)
 
     def test_json_formatting_is_readable(self):
         """Test that saved JSON is properly formatted and readable."""
         with TemporaryDirectory() as temp_dir:
             file_path = Path(temp_dir) / "formatted.json"
-            test_data = [TestModel(name="readable", value=123)]
+            test_data = [SampleModel(name="readable", value=123)]
 
             save_json_data(test_data, file_path)
 
