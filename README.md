@@ -1,45 +1,81 @@
-# DinD Claude Code Template
+# GitHub Data
 
-This is a template project that provides...
-
-- ✅ DevContainer with Docker-in-Docker and Claude Code
-- ✅ MIT licensing (so relicense as you see fit)
-- ✅ Standard project files (README, CONTRIBUTING, CHANGELOG, CODE_OF_CONDUCT)
-- ✅ Tooling for REUSE and Claude
-
-To get started...
-
-- Update README.md
-- Use scripts/reuse to download the license you want, and update REUSE.toml
-- Add contact information to CODE_OF_CONDUCT.md
-- Update CONTRIBUTING.md with contact information
-- Update .devcontainer/* files to install development tools and application stack
-- Update CLAUDE.md as needed
-
----
-
-# DinD Claude Code Template
-
-A Docker-in-Docker development template optimized for Claude Code with pre-configured DevContainer environment and development tools.
+A containerized tool for saving and restoring GitHub repository labels, issues, subissues, and comments to/from JSON files. This tool allows you to backup and restore GitHub repository issue-related data.
 
 ## Table of Contents
 
-- [Installation](#installation)
+- [Overview](#overview)
 - [Usage](#usage)
+  - [Save Data](#save-data)
+  - [Restore Data](#restore-data)
+  - [Environment Variables](#environment-variables)
+- [Data Format](#data-format)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Installation
+## Overview
 
-```bash
-# Add installation instructions here
-```
+The `github-data` container provides two main operations:
+- **Save**: Extract labels, issues, subissues, and comments from a GitHub repository and save them to JSON files
+- **Restore**: Read JSON data files and restore/recreate repository labels, issues, subissues, and comments
+
+All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
 
 ## Usage
 
+### Save Data
+
+Save GitHub repository labels, issues, subissues, and comments to JSON files:
+
 ```bash
-# Add usage examples here
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  github-data
 ```
+
+### Restore Data
+
+Restore GitHub repository labels, issues, subissues, and comments from JSON files:
+
+```bash
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=restore \
+  github-data
+```
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `OPERATION` | Yes | Operation to perform: `save` or `restore` |
+| `GITHUB_TOKEN` | Yes | GitHub personal access token with appropriate permissions |
+| `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
+| `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
+
+#### GitHub Token Permissions
+
+Your GitHub token should have the following permissions:
+- `repo` - For repository access and labels
+- `issues` - For reading and writing issues and comments
+
+## Data Format
+
+The container saves/restores data in JSON format with the following structure:
+
+```
+/data/
+├── labels.json         # Repository labels
+├── issues.json         # Issues, subissues, and their metadata
+└── comments.json       # All issue and subissue comments
+```
+
+Each JSON file contains structured data that can be used to recreate the repository's issue management state.
 
 ## Contributing
 

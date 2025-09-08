@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is the DinD Claude Code Template - a Docker-in-Docker development template repository providing a pre-configured DevContainer environment. The repository is currently empty and serves as a starting point for development projects.
+This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, subissues, and comments. It provides tools to backup and restore GitHub repository issue management data.
 
 ## Development Environment
 
@@ -28,11 +28,12 @@ Usage: `./scripts/reuse [command]` (e.g., `./scripts/reuse lint`)
 
 ## Getting Started
 
-Since this is the DinD Claude Code Template repository, you'll typically want to:
+This GitHub Data project provides containerized tools for backing up and restoring GitHub repository issue management data:
 
-1. Initialize your specific project type (e.g., `npm init`, `cargo init`, `python -m venv`)
-2. Add your project-specific dependencies and configuration files
-3. Update this CLAUDE.md file with your project's specific build, test, and lint commands
+1. Configure your GitHub access credentials and target repositories
+2. Use the backup tools to save repository labels, issues, subissues, and comments
+3. Use the restore tools to recreate issue management state from saved JSON data
+4. Customize backup/restore operations for specific label and issue requirements
 
 ## Commit Message Standards
 
@@ -54,9 +55,41 @@ This creates a searchable history of development decisions and Claude Code inter
 
 ## Current Project Status
 
-This repository contains only DevContainer configuration and no actual project code. Once you add your project files, you should update this document with:
+This GitHub Data project is in initial development phase. The foundation includes:
 
-- Build commands for your specific technology stack
-- Test commands and testing framework information
-- Lint/formatting commands
-- Project architecture and structure details
+- DevContainer environment for consistent development
+- Docker-in-Docker support for containerized operations
+- Python project with PDM package management
+- Development tooling (pytest, black, flake8, mypy)
+- Base tooling for GitHub API interactions
+
+## Development Commands
+
+All development uses PDM for package management:
+
+- `make install-dev` - Install all dependencies (including dev tools)
+- `make test` - Run tests with pytest
+- `make lint` - Run flake8 linting
+- `make format` - Format code with black
+- `make type-check` - Run mypy type checking
+- `make check` - Run all quality checks (format, lint, type-check, test)
+- `make docker-build` - Build the container image
+
+## Coding Standards
+
+This project follows **Clean Code** principles from Robert C. Martin's "Clean Code". All code must adhere to the Step-Down Rule and other Clean Code standards. See [CONTRIBUTING.md](CONTRIBUTING.md) for complete coding standards and examples.
+
+## Package Management
+
+This project uses [PDM](https://pdm.fming.dev/) for modern Python dependency management:
+- Dependencies defined in `pyproject.toml` following PEP 621
+- Lock file (`pdm.lock`) ensures reproducible builds
+- Development dependencies separate from production
+
+Next development phases will include:
+- GitHub API client implementation for issues and labels
+- Label backup and restore functionality
+- Issue and subissue backup and restore capabilities
+- Comment backup and restore functionality
+- CLI interface for issue management operations
+- Configuration management for multiple repositories

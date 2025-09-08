@@ -1,5 +1,5 @@
 version = 1
-SPDX-PackageName = "claude-code-template"
+SPDX-PackageName = "github-data"
 SPDX-PackageSupplier = "Person: Stoney Jackson <dr.stoney@gmail.com>"
 SPDX-PackageDownloadLocation = "NOASSERTION"
 

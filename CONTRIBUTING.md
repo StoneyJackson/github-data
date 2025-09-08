@@ -132,12 +132,98 @@ Run the test suite to ensure your changes don't break existing functionality:
 # Add test commands here
 ```
 
-## Style Guide
+## Coding Standards
+
+This project follows **Clean Code** principles as outlined in Robert C. Martin's "Clean Code: A Handbook of Agile Software Craftsmanship". All contributions are expected to adhere to these standards.
+
+### Clean Code Principles
+
+**Function Design:**
+- **Single Responsibility**: Each function should do one thing and do it well
+- **Step-Down Rule**: Functions should be organized from high-level abstractions to low-level details within each file
+- **Small Functions**: Functions should be small (typically 10-20 lines)
+- **Descriptive Names**: Use intention-revealing names that explain what the function does
+- **Minimal Arguments**: Prefer functions with 0-3 parameters
+
+**Naming Conventions:**
+- Use clear, searchable, pronounceable names
+- Avoid abbreviations and mental mapping
+- Use verbs for functions (`get_user()`, `save_data()`)
+- Use nouns for classes and variables (`Configuration`, `github_token`)
+- Avoid misleading names and noise words
+
+**Code Organization:**
+- Follow the **Step-Down Rule**: Higher-level functions come before lower-level ones
+- Dependencies should point downward in files
+- Group related functionality together
+- Keep files focused on a single concept
+
+**Error Handling:**
+- Use exceptions rather than return codes
+- Don't return or pass `None` when possible
+- Write error messages that help users understand what went wrong
+
+**Testing:**
+- Follow Test-Driven Development (TDD) when possible
+- Write clean, readable tests that serve as documentation
+- One assertion per test method
+- Fast, Independent, Repeatable, Self-Validating, and Timely (FIRST) principles
+
+### Python-Specific Guidelines
+
+- Follow PEP 8 for code formatting (enforced by `black`)
+- Use type hints for all function parameters and return values
+- Prefer composition over inheritance
+- Use `dataclasses` or `pydantic` models for data structures
+- Private functions should be prefixed with `_`
+
+### Code Quality Tools
+
+All code must pass the following quality checks:
+
+```bash
+make format      # Format code with black
+make lint        # Check with flake8
+make type-check  # Verify types with mypy
+make test        # Run test suite
+make check       # Run all quality checks
+```
+
+### Examples
+
+**Good:**
+```python
+def save_repository_issues(github_client: Github, repo_name: str, output_path: str) -> None:
+    """Save all issues from a repository to a JSON file."""
+    issues = _fetch_all_issues(github_client, repo_name)
+    issue_data = _serialize_issues(issues)
+    _write_json_file(output_path, issue_data)
+
+def _fetch_all_issues(github_client: Github, repo_name: str) -> List[Issue]:
+    """Fetch all issues from the specified repository."""
+    # Implementation details...
+```
+
+**Bad:**
+```python
+def do_stuff(gc, rn, op):  # Unclear names, abbreviations
+    """Do repository stuff."""  # Vague description
+    # Mixed levels of abstraction
+    issues = gc.get_repo(rn).get_issues()
+    data = []
+    for issue in issues:
+        data.append({"title": issue.title, "body": issue.body})
+    with open(op, 'w') as f:
+        json.dump(data, f)  # Low-level details mixed with high-level logic
+```
+
+### Style Guide
 
 - Follow the existing code style in the project
-- Use meaningful variable and function names
+- Use meaningful variable and function names following Clean Code principles
 - Follow the Conventional Commits standard for commit messages
 - Keep changes focused and atomic
+- Organize code following the Step-Down Rule
 
 ## License
 
