@@ -87,7 +87,8 @@ class TestJsonStorage:
         with TemporaryDirectory() as temp_dir:
             file_path = Path(temp_dir) / "invalid_type.json"
 
-            # Write valid JSON but neither object nor array (e.g., string, number, boolean)
+            # Write valid JSON but neither object nor array
+            # (e.g., string, number, boolean)
             with open(file_path, "w") as f:
                 json.dump("invalid_data_type", f)
 
