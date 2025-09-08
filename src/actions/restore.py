@@ -8,14 +8,14 @@ recreates labels, issues, and comments in GitHub repositories.
 from pathlib import Path
 from typing import List
 
-from ..github_client import GitHubClient
+from ..github import GitHubService
 from ..models import Label, Issue, Comment
 from ..storage.json_storage import load_json_data
 
 
 def restore_repository_data(github_token: str, repo_name: str, data_path: str) -> None:
     """Restore GitHub repository labels, issues, and comments from JSON files."""
-    client = GitHubClient(github_token)
+    client = GitHubService(github_token)
     input_dir = Path(data_path)
 
     _validate_data_files_exist(input_dir)
@@ -36,13 +36,13 @@ def _validate_data_files_exist(input_dir: Path) -> None:
             raise FileNotFoundError(f"Required data file not found: {file_path}")
 
 
-def _restore_labels(client: GitHubClient, repo_name: str, input_dir: Path) -> None:
+def _restore_labels(client: GitHubService, repo_name: str, input_dir: Path) -> None:
     """Restore labels to the repository."""
     labels = _load_labels_from_file(input_dir)
     _create_repository_labels(client, repo_name, labels)
 
 
-def _restore_issues(client: GitHubClient, repo_name: str, input_dir: Path) -> None:
+def _restore_issues(client: GitHubService, repo_name: str, input_dir: Path) -> None:
     """Restore issues to the repository."""
     issues = _load_issues_from_file(input_dir)
     _create_repository_issues(client, repo_name, issues)
@@ -67,7 +67,7 @@ def _load_comments_from_file(input_dir: Path) -> List[Comment]:
 
 
 def _create_repository_labels(
-    client: GitHubClient, repo_name: str, labels: List[Label]
+    client: GitHubService, repo_name: str, labels: List[Label]
 ) -> None:
     """Create labels in the repository."""
     for label in labels:
@@ -79,7 +79,7 @@ def _create_repository_labels(
 
 
 def _create_repository_issues(
-    client: GitHubClient, repo_name: str, issues: List[Issue]
+    client: GitHubService, repo_name: str, issues: List[Issue]
 ) -> None:
     """Create issues in the repository."""
     for issue in issues:

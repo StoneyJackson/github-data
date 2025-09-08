@@ -8,21 +8,21 @@ and comments from GitHub repositories and saves them to JSON files.
 from pathlib import Path
 from typing import List
 
-from ..github_client import GitHubClient
+from ..github import GitHubService
 from ..models import RepositoryData, Label, Issue, Comment
 from ..storage.json_storage import save_json_data
 
 
 def save_repository_data(github_token: str, repo_name: str, data_path: str) -> None:
     """Save GitHub repository labels, issues, and comments to JSON files."""
-    client = GitHubClient(github_token)
+    client = GitHubService(github_token)
     output_dir = Path(data_path)
 
     repository_data = _collect_repository_data(client, repo_name)
     _save_data_to_files(repository_data, output_dir)
 
 
-def _collect_repository_data(client: GitHubClient, repo_name: str) -> RepositoryData:
+def _collect_repository_data(client: GitHubService, repo_name: str) -> RepositoryData:
     """Collect all repository data from GitHub API."""
     from datetime import datetime
 
@@ -48,17 +48,17 @@ def _save_data_to_files(repository_data: RepositoryData, output_dir: Path) -> No
     _save_comments_to_file(repository_data.comments, output_dir)
 
 
-def _fetch_repository_labels(client: GitHubClient, repo_name: str) -> List[Label]:
+def _fetch_repository_labels(client: GitHubService, repo_name: str) -> List[Label]:
     """Fetch all labels from the repository."""
     return client.get_repository_labels(repo_name)
 
 
-def _fetch_repository_issues(client: GitHubClient, repo_name: str) -> List[Issue]:
+def _fetch_repository_issues(client: GitHubService, repo_name: str) -> List[Issue]:
     """Fetch all issues from the repository."""
     return client.get_repository_issues(repo_name)
 
 
-def _fetch_all_issue_comments(client: GitHubClient, repo_name: str) -> List[Comment]:
+def _fetch_all_issue_comments(client: GitHubService, repo_name: str) -> List[Comment]:
     """Fetch all comments from all issues in the repository."""
     return client.get_all_issue_comments(repo_name)
 
