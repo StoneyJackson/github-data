@@ -5,12 +5,13 @@ Provides a clean interface to GitHub API operations, abstracting away
 the complexity of PyGithub and providing type-safe data access.
 """
 
-from typing import List, Iterator
+from typing import List, Any
 from github import Github
 from github.Repository import Repository
 from github.Issue import Issue as PyGithubIssue
 from github.Label import Label as PyGithubLabel
 from github.IssueComment import IssueComment as PyGithubComment
+from github.PaginatedList import PaginatedList
 
 from .models import Issue, Label, Comment, GitHubUser
 
@@ -80,19 +81,23 @@ class GitHubClient:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)
 
-    def _fetch_all_labels(self, repo: Repository) -> Iterator[PyGithubLabel]:
+    def _fetch_all_labels(self, repo: Repository) -> PaginatedList[PyGithubLabel]:
         """Fetch all labels from a repository."""
         return repo.get_labels()
 
-    def _fetch_all_issues(self, repo: Repository) -> Iterator[PyGithubIssue]:
+    def _fetch_all_issues(self, repo: Repository) -> PaginatedList[PyGithubIssue]:
         """Fetch all issues from a repository."""
         return repo.get_issues(state="all")
 
-    def _fetch_issue_comments(self, issue: PyGithubIssue) -> Iterator[PyGithubComment]:
+    def _fetch_issue_comments(
+        self, issue: PyGithubIssue
+    ) -> PaginatedList[PyGithubComment]:
         """Fetch all comments from a specific issue."""
         return issue.get_comments()
 
-    def _convert_labels_to_models(self, labels: Iterator[PyGithubLabel]) -> List[Label]:
+    def _convert_labels_to_models(
+        self, labels: PaginatedList[PyGithubLabel]
+    ) -> List[Label]:
         """Convert PyGithub label objects to our data models."""
         return [self._convert_label_to_model(label) for label in labels]
 
@@ -106,7 +111,9 @@ class GitHubClient:
             id=label.id,
         )
 
-    def _convert_issues_to_models(self, issues: Iterator[PyGithubIssue]) -> List[Issue]:
+    def _convert_issues_to_models(
+        self, issues: PaginatedList[PyGithubIssue]
+    ) -> List[Issue]:
         """Convert PyGithub issue objects to our data models."""
         return [self._convert_issue_to_model(issue) for issue in issues]
 
@@ -131,7 +138,7 @@ class GitHubClient:
         )
 
     def _convert_comments_to_models(
-        self, comments: Iterator[PyGithubComment]
+        self, comments: PaginatedList[PyGithubComment]
     ) -> List[Comment]:
         """Convert PyGithub comment objects to our data models."""
         return [self._convert_comment_to_model(comment) for comment in comments]
@@ -148,7 +155,7 @@ class GitHubClient:
             issue_url=comment.issue_url,
         )
 
-    def _convert_user_to_model(self, user) -> GitHubUser:
+    def _convert_user_to_model(self, user: Any) -> GitHubUser:
         """Convert PyGithub user object to our data model."""
         return GitHubUser(
             login=user.login,

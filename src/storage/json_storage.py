@@ -7,14 +7,16 @@ using Pydantic models for serialization and deserialization.
 
 import json
 from pathlib import Path
-from typing import List, Type, TypeVar, Union
+from typing import List, Sequence, Type, TypeVar, Union
 from pydantic import BaseModel
 
 # Type variable for Pydantic models
 T = TypeVar("T", bound=BaseModel)
 
 
-def save_json_data(data: Union[List[BaseModel], BaseModel], file_path: Path) -> None:
+def save_json_data(
+    data: Union[Sequence[BaseModel], BaseModel], file_path: Path
+) -> None:
     """Save Pydantic model data to JSON file."""
     _ensure_parent_directory_exists(file_path)
     json_content = _serialize_data_to_json(data)
@@ -28,22 +30,25 @@ def load_json_data(file_path: Path, model_class: Type[T]) -> List[T]:
     return _deserialize_json_to_models(json_content, model_class)
 
 
-def _serialize_data_to_json(data: Union[List[BaseModel], BaseModel]) -> str:
+def _serialize_data_to_json(data: Union[Sequence[BaseModel], BaseModel]) -> str:
     """Convert Pydantic models to JSON string."""
-    if isinstance(data, list):
-        return json.dumps([item.dict() for item in data], indent=2, default=str)
+    if isinstance(data, BaseModel):
+        return json.dumps(data.model_dump(), indent=2, default=str)
     else:
-        return json.dumps(data.dict(), indent=2, default=str)
+        return json.dumps([item.model_dump() for item in data], indent=2, default=str)
 
 
 def _deserialize_json_to_models(json_content: str, model_class: Type[T]) -> List[T]:
     """Convert JSON string to list of Pydantic model instances."""
     data = json.loads(json_content)
 
-    if not isinstance(data, list):
-        raise ValueError(f"Expected JSON array, got {type(data).__name__}")
-
-    return [model_class(**item) for item in data]
+    if isinstance(data, list):
+        return [model_class(**item) for item in data]
+    elif isinstance(data, dict):
+        # Single model case - wrap in a list
+        return [model_class(**data)]
+    else:
+        raise ValueError(f"Expected JSON array or object, got {type(data).__name__}")
 
 
 def _ensure_parent_directory_exists(file_path: Path) -> None:

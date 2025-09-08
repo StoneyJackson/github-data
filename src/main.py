@@ -56,9 +56,9 @@ def _print_completion_message(operation: str) -> None:
 
 def _load_configuration() -> "Configuration":
     """Load configuration from environment variables."""
-    operation = _get_env_var("OPERATION")
-    github_token = _get_env_var("GITHUB_TOKEN")
-    github_repo = _get_env_var("GITHUB_REPO")
+    operation = _get_required_env_var("OPERATION")
+    github_token = _get_required_env_var("GITHUB_TOKEN")
+    github_repo = _get_required_env_var("GITHUB_REPO")
     data_path = _get_env_var("DATA_PATH", required=False) or "/data"
 
     return Configuration(
@@ -83,6 +83,15 @@ def _get_env_var(name: str, required: bool = True) -> Optional[str]:
     """Get environment variable with optional requirement check."""
     value = os.getenv(name)
     if required and not value:
+        print(f"Error: Required environment variable {name} not set", file=sys.stderr)
+        sys.exit(1)
+    return value
+
+
+def _get_required_env_var(name: str) -> str:
+    """Get required environment variable, guaranteed to return non-None value."""
+    value = os.getenv(name)
+    if not value:
         print(f"Error: Required environment variable {name} not set", file=sys.stderr)
         sys.exit(1)
     return value
