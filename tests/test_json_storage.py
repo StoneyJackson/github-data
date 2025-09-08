@@ -82,16 +82,16 @@ class TestJsonStorage:
             with pytest.raises(json.JSONDecodeError):
                 load_json_data(file_path, TestModel)
 
-    def test_load_non_array_json_raises_error(self):
-        """Test that loading non-array JSON raises ValueError."""
+    def test_load_non_object_or_array_json_raises_error(self):
+        """Test that loading JSON that is neither object nor array raises ValueError."""
         with TemporaryDirectory() as temp_dir:
-            file_path = Path(temp_dir) / "non_array.json"
+            file_path = Path(temp_dir) / "invalid_type.json"
 
-            # Write valid JSON but not an array
+            # Write valid JSON but neither object nor array (e.g., string, number, boolean)
             with open(file_path, "w") as f:
-                json.dump({"name": "test", "value": 1}, f)
+                json.dump("invalid_data_type", f)
 
-            with pytest.raises(ValueError, match="Expected JSON array"):
+            with pytest.raises(ValueError, match="Expected JSON array or object"):
                 load_json_data(file_path, TestModel)
 
     def test_json_formatting_is_readable(self):
