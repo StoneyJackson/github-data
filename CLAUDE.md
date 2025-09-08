@@ -46,7 +46,7 @@ This repository follows the [Conventional Commits](https://www.conventionalcommi
 Always end Claude Code sessions by asking: "Please generate a session summary"
 
 - Save summaries to `docs/claude-sessions/YYYY-MM-DD-topic.md`
-- Include prompts and resulting actions.
+- Include all prompts and their resulting actions.
 - Include key decisions, commands learned, and outcomes
 - Document any new tools, scripts, or processes introduced
 - Note follow-up items or unresolved issues
