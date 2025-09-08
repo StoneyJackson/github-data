@@ -45,7 +45,8 @@ This repository follows the [Conventional Commits](https://www.conventionalcommi
 
 Always end Claude Code sessions by asking: "Please generate a session summary"
 
-- Save summaries to `docs/claude-sessions/YYYY-MM-DD-topic.md`
+- Save summaries to `docs/claude-sessions/YYYY-MM-DD-HH-MM-topic.md`
+- Use 24-hour format for timestamps (e.g., `2025-09-08-14-30-feature-implementation.md`)
 - Include all prompts and their resulting actions.
 - Include key decisions, commands learned, and outcomes
 - Document any new tools, scripts, or processes introduced
