@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# REUSE wrapper script
+# Runs REUSE tool from Docker container with current directory mounted as /data
+
+docker run --rm --volume "$(pwd):/data" fsfe/reuse "$@"

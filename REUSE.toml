@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "claude-code-template"
+SPDX-PackageSupplier = "Person: Stoney Jackson <dr.stoney@gmail.com>"
+SPDX-PackageDownloadLocation = "NOASSERTION"
+
+[[annotations]]
+path = ["**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2025 Stoney Jackson <dr.stoney@gmail.com>"
+SPDX-License-Identifier = "MIT"
