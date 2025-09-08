@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 class GitHubUser(BaseModel):
     """GitHub user information."""
-    
+
     login: str
     id: int
     avatar_url: str
@@ -21,7 +21,7 @@ class GitHubUser(BaseModel):
 
 class Label(BaseModel):
     """GitHub repository label."""
-    
+
     name: str
     color: str
     description: Optional[str] = None
@@ -31,7 +31,7 @@ class Label(BaseModel):
 
 class Comment(BaseModel):
     """GitHub issue or pull request comment."""
-    
+
     id: int
     body: str
     user: GitHubUser
@@ -43,7 +43,7 @@ class Comment(BaseModel):
 
 class Issue(BaseModel):
     """GitHub repository issue."""
-    
+
     id: int
     number: int
     title: str
@@ -57,14 +57,14 @@ class Issue(BaseModel):
     closed_at: Optional[datetime] = None
     html_url: str
     comments_count: int = Field(alias="comments")
-    
+
     class Config:
         allow_population_by_field_name = True
 
 
 class RepositoryData(BaseModel):
     """Complete repository data for backup/restore."""
-    
+
     repository_name: str
     exported_at: datetime
     labels: List[Label] = Field(default_factory=list)

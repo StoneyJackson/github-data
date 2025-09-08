@@ -11,7 +11,7 @@ from typing import List, Type, TypeVar, Union
 from pydantic import BaseModel
 
 # Type variable for Pydantic models
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 def save_json_data(data: Union[List[BaseModel], BaseModel], file_path: Path) -> None:
@@ -39,10 +39,10 @@ def _serialize_data_to_json(data: Union[List[BaseModel], BaseModel]) -> str:
 def _deserialize_json_to_models(json_content: str, model_class: Type[T]) -> List[T]:
     """Convert JSON string to list of Pydantic model instances."""
     data = json.loads(json_content)
-    
+
     if not isinstance(data, list):
         raise ValueError(f"Expected JSON array, got {type(data).__name__}")
-    
+
     return [model_class(**item) for item in data]
 
 
@@ -55,7 +55,7 @@ def _validate_file_exists(file_path: Path) -> None:
     """Validate that the specified file exists."""
     if not file_path.exists():
         raise FileNotFoundError(f"JSON file not found: {file_path}")
-    
+
     if not file_path.is_file():
         raise ValueError(f"Path is not a file: {file_path}")
 
@@ -63,7 +63,7 @@ def _validate_file_exists(file_path: Path) -> None:
 def _write_json_to_file(json_content: str, file_path: Path) -> None:
     """Write JSON string to file."""
     try:
-        with open(file_path, 'w', encoding='utf-8') as file:
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(json_content)
     except IOError as e:
         raise IOError(f"Failed to write JSON file {file_path}: {e}") from e
@@ -72,7 +72,7 @@ def _write_json_to_file(json_content: str, file_path: Path) -> None:
 def _read_json_from_file(file_path: Path) -> str:
     """Read JSON string from file."""
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
     except IOError as e:
         raise IOError(f"Failed to read JSON file {file_path}: {e}") from e

@@ -2,7 +2,7 @@
 """
 GitHub Data - Main entry point for the container.
 
-This script handles saving and restoring GitHub repository labels, issues, 
+This script handles saving and restoring GitHub repository labels, issues,
 subissues, and comments based on environment variables.
 """
 
@@ -15,14 +15,14 @@ def main() -> None:
     """Main entry point for the github-data container."""
     config = _load_configuration()
     _validate_operation(config.operation)
-    
+
     _print_operation_info(config)
-    
+
     if config.operation == "save":
         _perform_save_operation(config)
     else:
         _perform_restore_operation(config)
-    
+
     _print_completion_message(config.operation)
 
 
@@ -30,6 +30,7 @@ def _perform_save_operation(config: "Configuration") -> None:
     """Perform the save operation to backup GitHub data."""
     print("Saving GitHub data...")
     from .actions.save import save_repository_data
+
     save_repository_data(config.github_token, config.github_repo, config.data_path)
 
 
@@ -37,6 +38,7 @@ def _perform_restore_operation(config: "Configuration") -> None:
     """Perform the restore operation to restore GitHub data."""
     print("Restoring GitHub data...")
     from .actions.restore import restore_repository_data
+
     restore_repository_data(config.github_token, config.github_repo, config.data_path)
 
 
@@ -58,19 +60,22 @@ def _load_configuration() -> "Configuration":
     github_token = _get_env_var("GITHUB_TOKEN")
     github_repo = _get_env_var("GITHUB_REPO")
     data_path = _get_env_var("DATA_PATH", required=False) or "/data"
-    
+
     return Configuration(
         operation=operation,
         github_token=github_token,
         github_repo=github_repo,
-        data_path=data_path
+        data_path=data_path,
     )
 
 
 def _validate_operation(operation: str) -> None:
     """Validate that the operation is supported."""
     if operation not in ["save", "restore"]:
-        print(f"Error: OPERATION must be 'save' or 'restore', got '{operation}'", file=sys.stderr)
+        print(
+            f"Error: OPERATION must be 'save' or 'restore', got '{operation}'",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 
@@ -85,8 +90,10 @@ def _get_env_var(name: str, required: bool = True) -> Optional[str]:
 
 class Configuration:
     """Configuration data class for application settings."""
-    
-    def __init__(self, operation: str, github_token: str, github_repo: str, data_path: str):
+
+    def __init__(
+        self, operation: str, github_token: str, github_repo: str, data_path: str
+    ):
         self.operation = operation
         self.github_token = github_token
         self.github_repo = github_repo

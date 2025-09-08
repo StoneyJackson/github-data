@@ -1,7 +1,7 @@
 """
 Save actions for GitHub repository data.
 
-Implements the save functionality that extracts labels, issues, 
+Implements the save functionality that extracts labels, issues,
 and comments from GitHub repositories and saves them to JSON files.
 """
 
@@ -17,7 +17,7 @@ def save_repository_data(github_token: str, repo_name: str, data_path: str) -> N
     """Save GitHub repository labels, issues, and comments to JSON files."""
     client = GitHubClient(github_token)
     output_dir = Path(data_path)
-    
+
     repository_data = _collect_repository_data(client, repo_name)
     _save_data_to_files(repository_data, output_dir)
 
@@ -25,24 +25,24 @@ def save_repository_data(github_token: str, repo_name: str, data_path: str) -> N
 def _collect_repository_data(client: GitHubClient, repo_name: str) -> RepositoryData:
     """Collect all repository data from GitHub API."""
     from datetime import datetime
-    
+
     labels = _fetch_repository_labels(client, repo_name)
     issues = _fetch_repository_issues(client, repo_name)
     comments = _fetch_all_issue_comments(client, repo_name)
-    
+
     return RepositoryData(
         repository_name=repo_name,
         exported_at=datetime.now(),
         labels=labels,
         issues=issues,
-        comments=comments
+        comments=comments,
     )
 
 
 def _save_data_to_files(repository_data: RepositoryData, output_dir: Path) -> None:
     """Save repository data to separate JSON files."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     _save_labels_to_file(repository_data.labels, output_dir)
     _save_issues_to_file(repository_data.issues, output_dir)
     _save_comments_to_file(repository_data.comments, output_dir)

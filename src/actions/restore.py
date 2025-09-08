@@ -1,7 +1,7 @@
 """
 Restore actions for GitHub repository data.
 
-Implements the restore functionality that reads JSON files and 
+Implements the restore functionality that reads JSON files and
 recreates labels, issues, and comments in GitHub repositories.
 """
 
@@ -17,9 +17,9 @@ def restore_repository_data(github_token: str, repo_name: str, data_path: str) -
     """Restore GitHub repository labels, issues, and comments from JSON files."""
     client = GitHubClient(github_token)
     input_dir = Path(data_path)
-    
+
     _validate_data_files_exist(input_dir)
-    
+
     _restore_labels(client, repo_name, input_dir)
     _restore_issues(client, repo_name, input_dir)
     # Note: Comments are typically restored as part of issues
@@ -29,7 +29,7 @@ def restore_repository_data(github_token: str, repo_name: str, data_path: str) -
 def _validate_data_files_exist(input_dir: Path) -> None:
     """Validate that required data files exist."""
     required_files = ["labels.json", "issues.json", "comments.json"]
-    
+
     for filename in required_files:
         file_path = input_dir / filename
         if not file_path.exists():
@@ -66,7 +66,9 @@ def _load_comments_from_file(input_dir: Path) -> List[Comment]:
     return load_json_data(comments_file, Comment)
 
 
-def _create_repository_labels(client: GitHubClient, repo_name: str, labels: List[Label]) -> None:
+def _create_repository_labels(
+    client: GitHubClient, repo_name: str, labels: List[Label]
+) -> None:
     """Create labels in the repository."""
     for label in labels:
         try:
@@ -76,7 +78,9 @@ def _create_repository_labels(client: GitHubClient, repo_name: str, labels: List
             print(f"Failed to create label {label.name}: {e}")
 
 
-def _create_repository_issues(client: GitHubClient, repo_name: str, issues: List[Issue]) -> None:
+def _create_repository_issues(
+    client: GitHubClient, repo_name: str, issues: List[Issue]
+) -> None:
     """Create issues in the repository."""
     for issue in issues:
         try:

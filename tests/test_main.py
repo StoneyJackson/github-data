@@ -40,7 +40,7 @@ class TestMain:
             "OPERATION": "save",
             "GITHUB_TOKEN": "token123",
             "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": "/data"
+            "DATA_PATH": "/data",
         }.get(name)
 
         main()
@@ -51,7 +51,7 @@ class TestMain:
             "Repository: owner/repo",
             "Data path: /data",
             "Saving GitHub data...",
-            "Save operation completed successfully"
+            "Save operation completed successfully",
         ]
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
@@ -64,7 +64,7 @@ class TestMain:
             "OPERATION": "restore",
             "GITHUB_TOKEN": "token123",
             "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": "/data"
+            "DATA_PATH": "/data",
         }.get(name)
 
         main()
@@ -75,7 +75,7 @@ class TestMain:
             "Repository: owner/repo",
             "Data path: /data",
             "Restoring GitHub data...",
-            "Restore operation completed successfully"
+            "Restore operation completed successfully",
         ]
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
@@ -87,7 +87,7 @@ class TestMain:
             "OPERATION": "invalid",
             "GITHUB_TOKEN": "token123",
             "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": "/data"
+            "DATA_PATH": "/data",
         }.get(name)
 
         with pytest.raises(SystemExit) as exc_info:

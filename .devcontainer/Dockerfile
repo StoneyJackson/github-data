@@ -29,12 +29,14 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
     && apt-get install -y nodejs
 
-# Install Python (useful for development)
+# Install Python and pipx (useful for development)
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    pipx \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Install Claude Code
 RUN npm install -g @anthropic-ai/claude-code
@@ -49,8 +51,11 @@ WORKDIR /workspace
 # Switch to vscode user
 USER vscode
 
+# Install PDM for vscode user using pipx
+RUN pipx install pdm
+
 # Set up shell aliases and environment for vscode user
-RUN echo 'export PATH="$(npm bin -g):$PATH"' >> ~/.bashrc
+RUN echo 'export PATH="$(npm bin -g):$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 # Switch back to root for any final setup
 USER root
