@@ -24,17 +24,30 @@ class DockerComposeTestHelper:
         services: list = None,
         environment: dict = None,
         capture_output: bool = True,
-        timeout: int = 60
+        timeout: int = 60,
+        profiles: list = None
     ) -> subprocess.CompletedProcess:
         """Run docker-compose command with test configuration."""
         cmd = [
             "docker-compose",
             "-f", DockerComposeTestHelper.COMPOSE_FILE,
-            "-p", DockerComposeTestHelper.PROJECT_NAME,
-            command
+            "-p", DockerComposeTestHelper.PROJECT_NAME
         ]
         
-        if services:
+        # Check if services parameter contains profile arguments
+        if services and len(services) >= 2 and services[0] == "--profile":
+            # Handle explicit profile in services parameter
+            cmd.extend(services)  # Add the --profile arguments directly
+        else:
+            # Add default profile flags if no explicit profile specified
+            active_profiles = profiles or ["test"]
+            for profile in active_profiles:
+                cmd.extend(["--profile", profile])
+        
+        cmd.append(command)
+        
+        # Add remaining services if they're not profile arguments
+        if services and not (len(services) >= 2 and services[0] == "--profile"):
             cmd.extend(services)
         
         env = os.environ.copy()

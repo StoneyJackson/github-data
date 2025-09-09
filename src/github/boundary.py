@@ -6,7 +6,7 @@ This creates a true API boundary that's not coupled to PyGithub types.
 """
 
 from typing import Dict, List, Any
-from github import Github
+from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
 
@@ -16,7 +16,7 @@ class GitHubApiBoundary:
 
     def __init__(self, token: str):
         """Initialize GitHub API client with authentication token."""
-        self._github = Github(token)
+        self._github = Github(auth=Auth.Token(token))
 
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository as raw JSON data."""

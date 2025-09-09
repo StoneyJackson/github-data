@@ -6,8 +6,8 @@ RUN pip install --no-cache-dir pdm
 # Set working directory
 WORKDIR /app
 
-# Copy PDM files first for better caching
-COPY pyproject.toml pdm.lock* ./
+# Copy PDM files and README first for better caching
+COPY pyproject.toml pdm.lock* README.md ./
 
 # Install dependencies
 RUN pdm install --prod --no-editable
