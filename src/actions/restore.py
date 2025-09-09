@@ -75,7 +75,7 @@ def _create_repository_labels(
             client.create_label(repo_name, label)
             print(f"Created label: {label.name}")
         except Exception as e:
-            print(f"Failed to create label {label.name}: {e}")
+            raise RuntimeError(f"Failed to create label '{label.name}': {e}") from e
 
 
 def _create_repository_issues(
@@ -87,4 +87,4 @@ def _create_repository_issues(
             created_issue = client.create_issue(repo_name, issue)
             print(f"Created issue #{created_issue.number}: {created_issue.title}")
         except Exception as e:
-            print(f"Failed to create issue '{issue.title}': {e}")
+            raise RuntimeError(f"Failed to create issue '{issue.title}': {e}") from e

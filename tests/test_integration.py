@@ -233,12 +233,64 @@ class TestSaveRestoreIntegration:
 
         # Mock return values for create operations
         mock_boundary.create_label.side_effect = [
-            {"name": "bug", "id": 5001, "color": "d73a4a"},
-            {"name": "enhancement", "id": 5002, "color": "a2eeef"},
+            {
+                "name": "bug",
+                "id": 5001,
+                "color": "d73a4a",
+                "description": "Something isn't working",
+                "url": "https://api.github.com/repos/owner/target_repo/labels/bug",
+            },
+            {
+                "name": "enhancement",
+                "id": 5002,
+                "color": "a2eeef",
+                "description": "New feature or request",
+                "url": "https://api.github.com/repos/owner/target_repo/labels/enhancement",  # noqa: E501
+            },
         ]
         mock_boundary.create_issue.side_effect = [
-            {"number": 10, "title": "Fix authentication bug", "id": 6001},
-            {"number": 11, "title": "Add user dashboard", "id": 6002},
+            {
+                "number": 10,
+                "title": "Fix authentication bug",
+                "id": 6001,
+                "body": "Test issue body",
+                "state": "open",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-12T16:45:00Z",
+                "updated_at": "2023-01-12T16:45:00Z",
+                "closed_at": None,
+                "html_url": "https://github.com/owner/target_repo/issues/10",
+                "comments": 0,
+            },
+            {
+                "number": 11,
+                "title": "Add user dashboard",
+                "id": 6002,
+                "body": "Test issue body",
+                "state": "open",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-15T09:30:00Z",
+                "updated_at": "2023-01-15T09:30:00Z",
+                "closed_at": None,
+                "html_url": "https://github.com/owner/target_repo/issues/11",
+                "comments": 0,
+            },
         ]
 
         # Execute restore operation
@@ -298,8 +350,34 @@ class TestSaveRestoreIntegration:
         # Phase 2: Restore operation with fresh mock
         restore_boundary = Mock()
         mock_boundary_class.return_value = restore_boundary
-        restore_boundary.create_label.return_value = {"id": 999}
-        restore_boundary.create_issue.return_value = {"number": 999}
+        restore_boundary.create_label.return_value = {
+            "id": 999,
+            "name": "test",
+            "color": "ffffff",
+            "description": "test",
+            "url": "https://api.github.com/repos/owner/target_repo/labels/test",
+        }
+        restore_boundary.create_issue.return_value = {
+            "number": 999,
+            "title": "test",
+            "id": 999,
+            "body": "test",
+            "state": "open",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                "url": "https://api.github.com/users/testuser",
+                "html_url": "https://github.com/testuser",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/target_repo/issues/999",
+            "comments": 0,
+        }
 
         restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
 
@@ -465,14 +543,21 @@ class TestErrorHandlingIntegration:
 
         # First label succeeds, second fails
         mock_boundary.create_label.side_effect = [
-            {"id": 100, "name": "bug"},  # Success
+            {
+                "id": 100,
+                "name": "bug",
+                "color": "ff0000",
+                "description": "Bug label",
+                "url": "http://example.com",
+            },  # Success
             Exception("API rate limit exceeded"),  # Failure
         ]
 
-        # Execute restore operation - should not crash despite failure
-        restore_repository_data("fake_token", "owner/repo", temp_data_dir)
+        # Execute restore operation - should fail fast on second error
+        with pytest.raises(RuntimeError, match="Failed to create label 'feature'"):
+            restore_repository_data("fake_token", "owner/repo", temp_data_dir)
 
-        # Verify both labels were attempted
+        # Verify first label succeeded, second failed and stopped execution
         assert mock_boundary.create_label.call_count == 2
 
     def test_restore_handles_malformed_json_files(self, temp_data_dir):

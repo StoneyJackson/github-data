@@ -75,7 +75,6 @@ class GitHubApiBoundary:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)
 
-
     def _issue_has_comments(self, issue: Any) -> bool:
         """Check if issue has comments without triggering extra API calls."""
         issue_data = self._extract_raw_data(issue)
@@ -99,4 +98,7 @@ class GitHubApiBoundary:
         elif hasattr(pygithub_obj, "raw_data"):
             return dict(pygithub_obj.raw_data)
         else:
-            raise ValueError(f"Cannot extract raw data from {type(pygithub_obj)}")
+            raise ValueError(
+                f"Cannot extract raw data from {type(pygithub_obj).__name__}: "
+                f"object has no '_rawData' or 'raw_data' attribute"
+            )
