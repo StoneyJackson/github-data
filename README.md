@@ -2,6 +2,8 @@
 
 A containerized tool for saving and restoring GitHub repository labels, issues, subissues, and comments to/from JSON files. This tool allows you to backup and restore GitHub repository issue-related data.
 
+> **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
+
 ## Table of Contents
 
 - [Overview](#overview)
