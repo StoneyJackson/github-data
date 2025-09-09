@@ -126,97 +126,51 @@ BREAKING CHANGE: The legacy login() method has been removed. Use authenticateUse
 
 ### Testing
 
-Run the test suite to ensure your changes don't break existing functionality:
+This project uses comprehensive multi-layered testing. Run tests to ensure your changes don't break existing functionality:
 
 ```bash
-make test        # Run pytest test suite
-make test-cov    # Run tests with coverage report (same as make test)
+make test-fast   # Fast feedback (recommended during development)
+make test        # All tests including slower container tests
+make check       # All quality checks (fast)
+make check-all   # All quality checks including container tests
 ```
 
-## Development Commands (Makefile)
+For complete testing documentation, test categories, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
-This project uses a comprehensive Makefile to manage development tasks. All commands use PDM for Python package management and maintain consistent development workflows.
+## Development Setup and Workflow
 
-### Quick Start Commands
+This project uses PDM for package management and a comprehensive Makefile for development tasks.
+
+### Quick Start
 
 ```bash
 make install-dev  # Install all dependencies (including development tools)
-make check        # Run all quality checks (format, lint, type-check, test)
+make check        # Run all quality checks (recommended before committing)
 ```
 
-### Installation Commands
+### Essential Commands
 
 ```bash
-make install      # Install production dependencies only
-make install-dev  # Install all dependencies including dev tools (pytest, black, flake8, mypy)
-make sync         # Sync dependencies and update lock file
+make install-dev  # Setup development environment
+make check        # Fast quality checks (format, lint, type-check, test-fast)
+make check-all    # All quality checks including container integration tests
+make test-fast    # Quick test feedback (excludes slow container tests)
+make clean        # Remove build artifacts and caches
 ```
-
-### Code Quality Commands
-
-```bash
-make format       # Format code with black (src/ and tests/ directories)
-make lint         # Run flake8 linting on src/ and tests/
-make type-check   # Run mypy type checking on src/ directory
-make test         # Run pytest test suite with coverage reporting
-make check        # Run all quality checks: format + lint + type-check + test
-```
-
-The `make check` command runs all quality checks in sequence and is the recommended command before committing changes.
-
-### Build and Deployment Commands
-
-```bash
-make docker-build        # Build the Docker container image
-make docker-run-save     # Run container to save GitHub data (requires env vars)
-make docker-run-restore  # Run container to restore GitHub data (requires env vars)
-```
-
-**Docker Environment Variables:**
-- `GITHUB_TOKEN`: Your GitHub personal access token
-- `GITHUB_REPO`: Repository in format "owner/repo"
-
-**Example Docker Usage:**
-```bash
-# Build the container
-make docker-build
-
-# Save repository data
-GITHUB_TOKEN=your_token GITHUB_REPO=owner/repo make docker-run-save
-
-# Restore repository data  
-GITHUB_TOKEN=your_token GITHUB_REPO=owner/repo make docker-run-restore
-```
-
-### Maintenance Commands
-
-```bash
-make clean        # Remove all build artifacts, caches, and temporary files
-```
-
-The clean command removes:
-- `build/`, `dist/`, `*.egg-info/` directories
-- `.pytest_cache/`, `htmlcov/` directories
-- `.pdm-python` directory
-- All `__pycache__` directories
-- All `.pyc` files
 
 ### Development Workflow
 
-**Recommended development workflow:**
-
-1. **Setup**: `make install-dev` (install all dependencies)
+1. **Setup**: `make install-dev`
 2. **Development**: Make your code changes
-3. **Quality Check**: `make check` (run all quality checks)
-4. **Commit**: Only commit if all checks pass
-5. **Cleanup**: `make clean` (optional, to remove build artifacts)
+3. **Quality Check**: `make check` (fast feedback)
+4. **Full Validation**: `make check-all` (before final commit)
+5. **Commit**: Use signed-off commits with conventional format
 
-**Before committing changes:**
-```bash
-make check  # This runs: format + lint + type-check + test
-```
+All commands use PDM's virtual environment automatically - no manual activation needed.
 
-All commands are configured through `pyproject.toml` and use PDM's virtual environment automatically. No need to manually activate virtual environments.
+### AI Development Tools
+
+This project supports AI-assisted development. For Claude Code usage, session documentation, and AI development best practices, see **[docs/claude.md](docs/claude.md)**.
 
 ## Coding Standards
 

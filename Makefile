@@ -1,4 +1,4 @@
-.PHONY: install install-dev test lint format type-check clean build docker-build docker-run sync
+.PHONY: install install-dev test test-unit test-integration test-container test-fast lint format type-check clean build docker-build docker-run sync check check-all docker-compose-up-save docker-compose-up-restore docker-compose-test docker-compose-health docker-compose-down
 
 # Install production dependencies only
 install:
@@ -16,6 +16,22 @@ sync:
 test:
 	pdm run pytest
 
+# Run unit tests only
+test-unit:
+	pdm run pytest -v -m unit
+
+# Run integration tests (non-container)
+test-integration:
+	pdm run pytest -v -m "integration and not container"
+
+# Run container integration tests only
+test-container:
+	pdm run pytest -v -m container --timeout=300
+
+# Run all tests except container tests
+test-fast:
+	pdm run pytest -v -m "not container"
+
 # Run linting
 lint:
 	pdm run flake8 src tests
@@ -28,8 +44,11 @@ format:
 type-check:
 	pdm run mypy src
 
-# Run all quality checks
-check: format lint type-check test
+# Run all quality checks (excluding container tests for speed)
+check: format lint type-check test-fast
+
+# Run all quality checks including container integration tests
+check-all: format lint type-check test
 
 # Clean build artifacts
 clean:
@@ -62,3 +81,19 @@ docker-run-restore:
 		-e GITHUB_REPO=$(GITHUB_REPO) \
 		-e OPERATION=restore \
 		github-data
+
+# Docker Compose commands
+docker-compose-up-save:
+	docker-compose -f docker-compose.test.yml --profile save up --build github-data-save
+
+docker-compose-up-restore:
+	docker-compose -f docker-compose.test.yml --profile restore up --build github-data-restore
+
+docker-compose-test:
+	docker-compose -f docker-compose.test.yml --profile test up --build github-data-test
+
+docker-compose-health:
+	docker-compose -f docker-compose.test.yml --profile health up --build github-data-health
+
+docker-compose-down:
+	docker-compose -f docker-compose.test.yml down -v --remove-orphans

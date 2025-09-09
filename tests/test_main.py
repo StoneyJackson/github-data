@@ -5,6 +5,8 @@ import pytest
 from unittest.mock import patch
 from src.main import _get_env_var, main
 
+pytestmark = [pytest.mark.unit]
+
 
 class TestGetEnvVar:
     """Test cases for _get_env_var function."""

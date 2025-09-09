@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 from src.storage.json_storage import save_json_data, load_json_data
 
+pytestmark = [pytest.mark.unit]
+
 
 class SampleModel(BaseModel):
     """Sample model for JSON storage operations."""

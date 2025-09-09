@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  github-data-save:
+    build: .
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-fake_token}
+      - GITHUB_REPO=${GITHUB_REPO:-owner/repo}
+      - OPERATION=save
+      - DATA_PATH=/data
+    volumes:
+      - ./data:/data
+    profiles:
+      - save
+      - test
+
+  github-data-restore:
+    build: .
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-fake_token}
+      - GITHUB_REPO=${GITHUB_REPO:-owner/repo}
+      - OPERATION=restore
+      - DATA_PATH=/data
+    volumes:
+      - ./data:/data
+    profiles:
+      - restore
+      - test
+    depends_on:
+      - github-data-save
+
+  # Test service for integration testing
+  github-data-test:
+    build: .
+    environment:
+      - GITHUB_TOKEN=test_token_123
+      - GITHUB_REPO=test/repo
+      - DATA_PATH=/data
+    volumes:
+      - ./test-data:/data
+    profiles:
+      - test
+    command: ["python", "-c", "print('Docker Compose test completed successfully')"]
+
+  # Health check service
+  github-data-health:
+    build: .
+    environment:
+      - DATA_PATH=/data
+    volumes:
+      - ./data:/data
+    profiles:
+      - health
+    command: ["pdm", "run", "python", "-c", "import src.main; print('Health check passed')"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import src.main"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  default:
+    name: github-data-network

@@ -69,12 +69,39 @@ This GitHub Data project is in initial development phase. The foundation include
 All development uses PDM for package management:
 
 - `make install-dev` - Install all dependencies (including dev tools)
-- `make test` - Run tests with pytest
+- `make test` - Run all tests with pytest
+- `make test-fast` - Run all tests except slow container tests (recommended for development)
 - `make lint` - Run flake8 linting
 - `make format` - Format code with black
 - `make type-check` - Run mypy type checking
-- `make check` - Run all quality checks (format, lint, type-check, test)
+- `make check` - Run all quality checks (excluding container tests for speed)
+- `make check-all` - Run all quality checks including container integration tests
 - `make docker-build` - Build the container image
+
+## Testing
+
+This project uses a comprehensive multi-layered testing approach:
+
+- **Unit Tests**: Fast, isolated component tests
+- **Integration Tests**: Component interaction and workflow tests  
+- **Container Integration Tests**: Full Docker workflow validation
+
+For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
+
+### Quick Testing Commands
+
+```bash
+make test-fast      # Fast feedback (excludes slow container tests)
+make test-container # Full Docker workflow tests (requires Docker)
+make check          # All quality checks (fast)
+make check-all      # All quality checks including container tests
+```
+
+## Developer Resources
+
+For comprehensive development information, see:
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Main developer documentation, setup, workflow, and coding standards
+- **[docs/testing.md](docs/testing.md)** - Complete testing guide and best practices
 
 ## Coding Standards
 
@@ -94,3 +121,5 @@ Next development phases will include:
 - Comment backup and restore functionality
 - CLI interface for issue management operations
 - Configuration management for multiple repositories
+- Always include all prompts and their resulting actions when creating a session summary.
+- Always use the current date and time to create the file name when creating a session summary.

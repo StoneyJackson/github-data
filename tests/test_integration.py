@@ -6,6 +6,8 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 
+pytestmark = [pytest.mark.integration]
+
 from src.actions.save import save_repository_data
 from src.actions.restore import restore_repository_data
 
