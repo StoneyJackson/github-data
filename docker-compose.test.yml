@@ -10,6 +10,7 @@ services:
       - ./data:/data
     profiles:
       - save
+      - restore
       - test
 
   github-data-restore:
@@ -24,6 +25,8 @@ services:
     profiles:
       - restore
       - test
+    depends_on:
+      - github-data-save
 
   # Test service for integration testing
   github-data-test:
@@ -48,7 +51,7 @@ services:
     profiles:
       - health
       - test
-    command: ["pdm", "run", "python", "-c", "import src.main; print('Health check passed')"]
+    command: ["python", "-c", "import src.main; print('Health check passed')"]
     healthcheck:
       test: ["CMD", "python", "-c", "import src.main"]
       interval: 10s

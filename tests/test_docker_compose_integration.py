@@ -240,6 +240,8 @@ class TestDockerComposeExecution:
 
     def test_test_service_runs_successfully(self, temp_data_dir, monkeypatch):
         """Test that the test service runs and completes successfully."""
+        import subprocess
+
         # Change to temp directory to avoid affecting real data directory
         monkeypatch.chdir(temp_data_dir)
 
@@ -257,14 +259,21 @@ class TestDockerComposeExecution:
         result = DockerComposeTestHelper.run_compose_command("build", timeout=300)
         assert result.returncode == 0, f"Build failed: {result.stderr}"
 
-        # Run test service
-        result = DockerComposeTestHelper.run_compose_command(
-            "up", ["--profile", "test", "github-data-test"], timeout=60
-        )
+        # Run test service using 'run' to capture output directly
+        run_cmd = [
+            "docker-compose",
+            "-f",
+            "docker-compose.test.yml",
+            "-p",
+            DockerComposeTestHelper.PROJECT_NAME,
+            "run",
+            "--rm",
+            "github-data-test",
+        ]
+        result = subprocess.run(run_cmd, capture_output=True, text=True, timeout=60)
 
         # Check if service completed successfully
-        logs = DockerComposeTestHelper.get_service_logs("github-data-test")
-        assert "Docker Compose test completed successfully" in logs
+        assert "Docker Compose test completed successfully" in result.stdout
 
     def test_health_check_service_works(self, temp_data_dir, monkeypatch):
         """Test that health check service works correctly."""
@@ -285,10 +294,23 @@ class TestDockerComposeExecution:
         result = DockerComposeTestHelper.run_compose_command("build", timeout=300)
         assert result.returncode == 0, f"Build failed: {result.stderr}"
 
-        # Run health check service
-        result = DockerComposeTestHelper.run_compose_command(
-            "up", ["--profile", "health", "-d", "github-data-health"], timeout=60
-        )
+        # Run health check service (build and start in detached mode)
+        # First create a subprocess call directly to handle the -d flag correctly
+        import subprocess
+
+        cmd = [
+            "docker-compose",
+            "-f",
+            DockerComposeTestHelper.COMPOSE_FILE,
+            "-p",
+            DockerComposeTestHelper.PROJECT_NAME,
+            "--profile",
+            "health",
+            "up",
+            "-d",
+            "github-data-health",
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
         assert result.returncode == 0, f"Health service start failed: {result.stderr}"
 
         # Wait a bit for health check to run
@@ -344,9 +366,9 @@ class TestDockerComposeExecution:
         )
         compose_dest.write_text(modified_compose)
 
-        # Run the modified test service
+        # Run the modified test service using 'run' to wait for completion
         result = DockerComposeTestHelper.run_compose_command(
-            "up", ["--profile", "test", "github-data-test"], timeout=60
+            "run", ["--rm", "github-data-test"], timeout=60
         )
 
         # Check that file was created in host directory
