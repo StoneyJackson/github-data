@@ -4,11 +4,16 @@
 
 ## Immediate Development Priorities
 
-### Testing Implementation (Mostly Complete)
+### Testing Implementation ✅ (COMPLETE)
 - [x] Implement GitHub API client method tests with PyGithub mocking
 - [x] Create save/restore integration tests for end-to-end workflow validation
 - [x] Add error scenario testing (network failures, API rate limits, invalid data)
-- [ ] Implement container integration testing for full Docker workflow
+- [x] Implement container integration testing for full Docker workflow
+  - [x] Docker container build and runtime testing
+  - [x] Docker Compose integration testing with service orchestration
+  - [x] Pytest markers for organized test execution (unit, integration, container, docker, slow)
+  - [x] Container test helper script with advanced options and cleanup
+  - [x] Comprehensive testing documentation in docs/testing.md
 
 ### Core Development Tasks (Next Priority)
 - [x] Complete GitHub API client implementation for labels, issues, and comments
@@ -18,6 +23,10 @@
 - [ ] Add progress reporting for backup/restore operations
 
 ## Configuration & Documentation
+- [x] Create comprehensive testing documentation (docs/testing.md)
+- [x] Refactor documentation hierarchy (CONTRIBUTING.md as developer entry point)
+- [x] Apply DRY principles across README.md, CONTRIBUTING.md, and CLAUDE.md
+- [x] Add AI usage legal notice with Anthropic terms and restrictions
 - [ ] Create configuration documentation for GitHub token setup
 - [ ] Document backup/restore file format specifications
 - [ ] Add troubleshooting guide for common issues
@@ -36,6 +45,9 @@
 - [ ] **ENHANCEMENT**: Improve docstring completeness with parameter/return documentation and usage examples
 
 ## Infrastructure & Tooling
+- [x] Enhanced Makefile with comprehensive test commands and Docker Compose targets
+- [x] Container test helper script with advanced options and cleanup
+- [x] Pytest configuration with custom markers and timeout handling
 - [ ] Set up automated DCO enforcement (GitHub App installation)
 - [ ] Configure branch protection rules requiring DCO checks
 - [ ] Set up CI/CD pipeline for automated testing
@@ -76,10 +88,17 @@
 - [x] Error handling tests for API failures and malformed data
 - [x] Code style compliance (line length, formatting standards)
 - [x] REUSE license compliance verification (all 48 files compliant)
+- [x] Complete container integration testing framework
+- [x] Docker Compose integration testing with service orchestration
+- [x] Multi-layered testing approach with pytest markers
+- [x] Comprehensive testing documentation and developer guides
+- [x] Documentation refactoring following DRY principles
+- [x] AI usage legal compliance notices
 
 ## Notes
 - Development environment ready with DevContainer
 - All commits must use `git commit -s` for DCO compliance
 - Follow Conventional Commits specification for all commit messages
-- Next major milestone: Core development tasks and container integration testing
+- Testing framework complete: Use `make test-fast` for development, `make check-all` for full validation
+- Next major milestone: Core development tasks (issue subissue relationships, error handling)
 - Project scope: GitHub repository labels, issues, subissues, and comments only
