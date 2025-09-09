@@ -43,7 +43,15 @@ class GitHubApiBoundary:
         """Get all comments from all issues as raw JSON data."""
         repo = self._get_repository(repo_name)
         issues = repo.get_issues(state="all")
-        return self._collect_all_comments_from_issues(issues)
+        all_comments = []
+
+        for issue in issues:
+            if self._issue_has_comments(issue):
+                comments = issue.get_comments()
+                comment_data = self._extract_raw_data_list(comments)
+                all_comments.extend(comment_data)
+
+        return all_comments
 
     def create_label(
         self, repo_name: str, name: str, color: str, description: str
@@ -67,19 +75,6 @@ class GitHubApiBoundary:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)
 
-    def _collect_all_comments_from_issues(
-        self, issues: PaginatedList[Any]
-    ) -> List[Dict[str, Any]]:
-        """Collect comments from all issues that have comments."""
-        all_comments = []
-
-        for issue in issues:
-            if self._issue_has_comments(issue):
-                comments = issue.get_comments()
-                comment_data = self._extract_raw_data_list(comments)
-                all_comments.extend(comment_data)
-
-        return all_comments
 
     def _issue_has_comments(self, issue: Any) -> bool:
         """Check if issue has comments without triggering extra API calls."""

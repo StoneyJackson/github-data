@@ -24,11 +24,18 @@ def save_repository_data(github_token: str, repo_name: str, data_path: str) -> N
 
 def _collect_repository_data(client: GitHubService, repo_name: str) -> RepositoryData:
     """Collect all repository data from GitHub API."""
-    from datetime import datetime
-
     labels = _fetch_repository_labels(client, repo_name)
     issues = _fetch_repository_issues(client, repo_name)
     comments = _fetch_all_issue_comments(client, repo_name)
+
+    return _create_repository_data(repo_name, labels, issues, comments)
+
+
+def _create_repository_data(
+    repo_name: str, labels: List[Label], issues: List[Issue], comments: List[Comment]
+) -> RepositoryData:
+    """Create RepositoryData instance with current timestamp."""
+    from datetime import datetime
 
     return RepositoryData(
         repository_name=repo_name,

@@ -14,20 +14,28 @@ from typing import Optional
 def main() -> None:
     """Main entry point for the github-data container."""
     try:
-        config = _load_configuration()
-        _validate_operation(config.operation)
-
-        _print_operation_info(config)
-
-        if config.operation == "save":
-            _perform_save_operation(config)
-        else:
-            _perform_restore_operation(config)
-
+        config = _setup_and_validate_configuration()
+        _execute_operation(config)
         _print_completion_message(config.operation)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+
+
+def _setup_and_validate_configuration() -> "Configuration":
+    """Set up and validate configuration for the operation."""
+    config = _load_configuration()
+    _validate_operation(config.operation)
+    _print_operation_info(config)
+    return config
+
+
+def _execute_operation(config: "Configuration") -> None:
+    """Execute the requested operation based on configuration."""
+    if config.operation == "save":
+        _perform_save_operation(config)
+    else:
+        _perform_restore_operation(config)
 
 
 def _perform_save_operation(config: "Configuration") -> None:
