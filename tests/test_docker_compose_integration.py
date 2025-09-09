@@ -77,50 +77,10 @@ class DockerComposeTestHelper:
             pass  # Ignore timeout on cleanup
 
     @staticmethod
-    def wait_for_service_completion(service_name: str, timeout: int = 30) -> bool:
-        """Wait for a service to complete and exit."""
-        start_time = time.time()
-
-        while time.time() - start_time < timeout:
-            result = DockerComposeTestHelper.run_compose_command(
-                "ps", ["-q", service_name]
-            )
-
-            if not result.stdout.strip():  # No running containers
-                return True
-
-            time.sleep(1)
-
-        return False
-
-    @staticmethod
     def get_service_logs(service_name: str) -> str:
         """Get logs from a specific service."""
         result = DockerComposeTestHelper.run_compose_command("logs", [service_name])
         return result.stdout
-
-    @staticmethod
-    def get_service_exit_code(service_name: str) -> int:
-        """Get exit code of a completed service."""
-        result = DockerComposeTestHelper.run_compose_command("ps", ["-a", service_name])
-
-        # Parse the output to get exit code
-        # This is a simplified approach - in real scenarios you might want
-        # more robust parsing
-        lines = result.stdout.strip().split("\n")
-        if len(lines) > 1:  # Skip header line
-            # Exit code is typically in the status column
-            status_line = lines[1]
-            if "Exited (0)" in status_line:
-                return 0
-            elif "Exited (" in status_line:
-                # Extract exit code from "Exited (N)" format
-                import re
-
-                match = re.search(r"Exited \((\d+)\)", status_line)
-                return int(match.group(1)) if match else 1
-
-        return 1  # Default to error if we can't determine
 
 
 class TestDockerComposeSetup:

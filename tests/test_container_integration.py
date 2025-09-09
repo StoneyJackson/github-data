@@ -1,7 +1,7 @@
 """Container integration tests for Docker workflow."""
 
 import errno
-import json
+
 import os
 import shutil
 import stat
@@ -71,18 +71,6 @@ class DockerTestHelper:
             cmd.extend(command)
 
         return subprocess.run(cmd, capture_output=True, text=True)
-
-    @staticmethod
-    def get_container_logs(container_name: str) -> str:
-        """Get logs from a running container."""
-        cmd = ["docker", "logs", container_name]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        return result.stdout
-
-    @staticmethod
-    def stop_container(container_name: str) -> None:
-        """Stop a running container."""
-        subprocess.run(["docker", "stop", container_name], capture_output=True)
 
     @staticmethod
     def cleanup_containers() -> None:
@@ -350,49 +338,6 @@ class TestDockerWorkflow:
                     import warnings
 
                     warnings.warn(f"Could not clean up temp directory: {temp_dir}")
-
-    @pytest.fixture
-    def sample_test_data(self, temp_data_dir):
-        """Create sample JSON data files for testing restore workflow."""
-        data_path = Path(temp_data_dir)
-
-        # Create sample labels.json
-        labels_data = [
-            {
-                "name": "bug",
-                "color": "d73a4a",
-                "description": "Something isn't working",
-                "url": "https://api.github.com/repos/owner/repo/labels/bug",
-                "id": 1001,
-            }
-        ]
-        with open(data_path / "labels.json", "w") as f:
-            json.dump(labels_data, f)
-
-        # Create sample issues.json
-        issues_data = [
-            {
-                "id": 2001,
-                "number": 1,
-                "title": "Test issue",
-                "body": "Test issue body",
-                "state": "open",
-                "user": {"login": "testuser", "id": 3001},
-                "assignees": [],
-                "labels": [{"name": "bug"}],
-                "created_at": "2023-01-15T10:30:00Z",
-                "updated_at": "2023-01-15T14:20:00Z",
-                "closed_at": None,
-                "html_url": "https://github.com/owner/repo/issues/1",
-                "comments": 0,
-            }
-        ]
-        with open(data_path / "issues.json", "w") as f:
-            json.dump(issues_data, f)
-
-        # Create sample comments.json
-        with open(data_path / "comments.json", "w") as f:
-            json.dump([], f)
 
     def test_makefile_docker_build_command_works(self):
         """Test that Makefile docker-build target works correctly."""
