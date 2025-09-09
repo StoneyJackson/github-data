@@ -43,7 +43,7 @@ This repository follows the [Conventional Commits](https://www.conventionalcommi
 
 ## Session Documentation
 
-Always end Claude Code sessions by asking: "Please generate a session summary"
+Always end Claude Code sessions by asking: "Save session"
 
 - Save summaries to `docs/claude-sessions/YYYY-MM-DD-HH-MM-topic.md`
 - Use 24-hour format for timestamps (e.g., `2025-09-08-14-30-feature-implementation.md`)
