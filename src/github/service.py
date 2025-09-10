@@ -61,6 +61,21 @@ class GitHubService:
         )
         return convert_to_issue(raw_issue)
 
+    def delete_label(self, repo_name: str, label_name: str) -> None:
+        """Delete a label from the repository."""
+        self._boundary.delete_label(repo_name, label_name)
+
+    def update_label(self, repo_name: str, old_name: str, label: Label) -> Label:
+        """Update an existing label in the repository."""
+        raw_label = self._boundary.update_label(
+            repo_name=repo_name,
+            old_name=old_name,
+            name=label.name,
+            color=label.color,
+            description=label.description or "",
+        )
+        return convert_to_label(raw_label)
+
     def _convert_labels(self, raw_labels: List[dict]) -> List[Label]:
         """Convert list of raw label data to Label models."""
         return [convert_to_label(raw_label) for raw_label in raw_labels]

@@ -71,6 +71,21 @@ class GitHubApiBoundary:
         created_issue = repo.create_issue(title=title, body=body, labels=labels)
         return self._extract_raw_data(created_issue)
 
+    def delete_label(self, repo_name: str, label_name: str) -> None:
+        """Delete a label from the repository."""
+        repo = self._get_repository(repo_name)
+        label = repo.get_label(label_name)
+        label.delete()
+
+    def update_label(
+        self, repo_name: str, old_name: str, name: str, color: str, description: str
+    ) -> Dict[str, Any]:
+        """Update an existing label and return raw JSON data."""
+        repo = self._get_repository(repo_name)
+        label = repo.get_label(old_name)
+        label.edit(name=name, color=color, description=description)
+        return self._extract_raw_data(label)
+
     def _get_repository(self, repo_name: str) -> Repository:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)

@@ -59,6 +59,28 @@ docker run --rm \
 | `GITHUB_TOKEN` | Yes | GitHub personal access token with appropriate permissions |
 | `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
+| `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
+
+#### Label Conflict Strategies
+
+When restoring labels to a repository that already has labels, you can choose how conflicts are handled:
+
+- **`fail-if-existing`** (default): Fail if any labels exist in the target repository
+- **`fail-if-conflict`**: Fail only if labels with the same names exist
+- **`overwrite`**: Update existing labels with restored data, create non-conflicting ones
+- **`skip`**: Skip restoring labels that already exist, create only new ones  
+- **`delete-all`**: Delete all existing labels before restoring
+
+Example with conflict strategy:
+```bash
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=restore \
+  -e LABEL_CONFLICT_STRATEGY=overwrite \
+  github-data
+```
 
 #### GitHub Token Permissions
 

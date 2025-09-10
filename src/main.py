@@ -51,7 +51,12 @@ def _perform_restore_operation(config: "Configuration") -> None:
     print("Restoring GitHub data...")
     from .actions.restore import restore_repository_data
 
-    restore_repository_data(config.github_token, config.github_repo, config.data_path)
+    restore_repository_data(
+        config.github_token,
+        config.github_repo,
+        config.data_path,
+        config.label_conflict_strategy,
+    )
 
 
 def _print_operation_info(config: "Configuration") -> None:
@@ -72,12 +77,16 @@ def _load_configuration() -> "Configuration":
     github_token = _get_required_env_var("GITHUB_TOKEN")
     github_repo = _get_required_env_var("GITHUB_REPO")
     data_path = _get_env_var("DATA_PATH", required=False) or "/data"
+    label_conflict_strategy = (
+        _get_env_var("LABEL_CONFLICT_STRATEGY", required=False) or "fail-if-existing"
+    )
 
     return Configuration(
         operation=operation,
         github_token=github_token,
         github_repo=github_repo,
         data_path=data_path,
+        label_conflict_strategy=label_conflict_strategy,
     )
 
 
@@ -113,12 +122,18 @@ class Configuration:
     """Configuration data class for application settings."""
 
     def __init__(
-        self, operation: str, github_token: str, github_repo: str, data_path: str
+        self,
+        operation: str,
+        github_token: str,
+        github_repo: str,
+        data_path: str,
+        label_conflict_strategy: str,
     ):
         self.operation = operation
         self.github_token = github_token
         self.github_repo = github_repo
         self.data_path = data_path
+        self.label_conflict_strategy = label_conflict_strategy
 
 
 if __name__ == "__main__":

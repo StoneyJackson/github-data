@@ -231,6 +231,9 @@ class TestSaveRestoreIntegration:
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
 
+        # Mock get_repository_labels for conflict detection (default: empty repository)
+        mock_boundary.get_repository_labels.return_value = []
+
         # Mock return values for create operations
         mock_boundary.create_label.side_effect = [
             {
@@ -350,6 +353,10 @@ class TestSaveRestoreIntegration:
         # Phase 2: Restore operation with fresh mock
         restore_boundary = Mock()
         mock_boundary_class.return_value = restore_boundary
+
+        # Mock get_repository_labels for conflict detection (default: empty repository)
+        restore_boundary.get_repository_labels.return_value = []
+
         restore_boundary.create_label.return_value = {
             "id": 999,
             "name": "test",
@@ -454,6 +461,9 @@ class TestSaveRestoreIntegration:
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
 
+        # Mock get_repository_labels for conflict detection (default: empty repository)
+        mock_boundary.get_repository_labels.return_value = []
+
         # Execute restore operation
         restore_repository_data("fake_token", "owner/repo", temp_data_dir)
 
@@ -540,6 +550,9 @@ class TestErrorHandlingIntegration:
         # Setup mock to simulate GitHub API failures
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
+
+        # Mock get_repository_labels for conflict detection (default: empty repository)
+        mock_boundary.get_repository_labels.return_value = []
 
         # First label succeeds, second fails
         mock_boundary.create_label.side_effect = [
