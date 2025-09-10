@@ -49,14 +49,25 @@ class GitHubService:
         )
         return convert_to_label(raw_label)
 
-    def create_issue(self, repo_name: str, issue: Issue) -> Issue:
+    def create_issue(
+        self, repo_name: str, issue: Issue, include_original_metadata: bool = True
+    ) -> Issue:
         """Create a new issue in the repository."""
+        from .metadata import add_issue_metadata_footer
+
         label_names = self._extract_label_names(issue.labels)
+
+        # Add original metadata footer if requested
+        body = (
+            add_issue_metadata_footer(issue)
+            if include_original_metadata
+            else (issue.body or "")
+        )
 
         raw_issue = self._boundary.create_issue(
             repo_name=repo_name,
             title=issue.title,
-            body=issue.body or "",
+            body=body,
             labels=label_names,
         )
         return convert_to_issue(raw_issue)
@@ -77,13 +88,26 @@ class GitHubService:
         return convert_to_label(raw_label)
 
     def create_issue_comment(
-        self, repo_name: str, issue_number: int, comment: Comment
+        self,
+        repo_name: str,
+        issue_number: int,
+        comment: Comment,
+        include_original_metadata: bool = True,
     ) -> Comment:
         """Create a new comment on an issue."""
+        from .metadata import add_comment_metadata_footer
+
+        # Add original metadata footer if requested
+        body = (
+            add_comment_metadata_footer(comment)
+            if include_original_metadata
+            else comment.body
+        )
+
         raw_comment = self._boundary.create_issue_comment(
             repo_name=repo_name,
             issue_number=issue_number,
-            body=comment.body,
+            body=body,
         )
         return convert_to_comment(raw_comment)
 

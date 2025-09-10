@@ -19,6 +19,7 @@ def restore_repository_data(
     repo_name: str,
     data_path: str,
     label_conflict_strategy: str = "fail-if-existing",
+    include_original_metadata: bool = True,
 ) -> None:
     """Restore GitHub repository labels, issues, and comments from JSON files."""
     client = GitHubService(github_token)
@@ -27,8 +28,12 @@ def restore_repository_data(
     _validate_data_files_exist(input_dir)
 
     _restore_labels(client, repo_name, input_dir, label_conflict_strategy)
-    issue_number_mapping = _restore_issues(client, repo_name, input_dir)
-    _restore_comments(client, repo_name, input_dir, issue_number_mapping)
+    issue_number_mapping = _restore_issues(
+        client, repo_name, input_dir, include_original_metadata
+    )
+    _restore_comments(
+        client, repo_name, input_dir, issue_number_mapping, include_original_metadata
+    )
 
 
 def _validate_data_files_exist(input_dir: Path) -> None:
@@ -74,11 +79,16 @@ def _restore_labels(
 
 
 def _restore_issues(
-    client: GitHubService, repo_name: str, input_dir: Path
+    client: GitHubService,
+    repo_name: str,
+    input_dir: Path,
+    include_original_metadata: bool = True,
 ) -> Dict[int, int]:
     """Restore issues and return mapping of original to new issue numbers."""
     issues = _load_issues_from_file(input_dir)
-    return _create_repository_issues(client, repo_name, issues)
+    return _create_repository_issues(
+        client, repo_name, issues, include_original_metadata
+    )
 
 
 def _load_labels_from_file(input_dir: Path) -> List[Label]:
@@ -104,13 +114,18 @@ def _restore_comments(
     repo_name: str,
     input_dir: Path,
     issue_number_mapping: Dict[int, int],
+    include_original_metadata: bool = True,
 ) -> None:
     """Restore comments to the repository using issue number mapping."""
     comments = _load_comments_from_file(input_dir)
     # Sort comments by creation time to maintain chronological conversation order
     sorted_comments = sorted(comments, key=lambda comment: comment.created_at)
     _create_repository_comments(
-        client, repo_name, sorted_comments, issue_number_mapping
+        client,
+        repo_name,
+        sorted_comments,
+        issue_number_mapping,
+        include_original_metadata,
     )
 
 
@@ -127,14 +142,19 @@ def _create_repository_labels(
 
 
 def _create_repository_issues(
-    client: GitHubService, repo_name: str, issues: List[Issue]
+    client: GitHubService,
+    repo_name: str,
+    issues: List[Issue],
+    include_original_metadata: bool = True,
 ) -> Dict[int, int]:
     """Create issues and return mapping of original to new issue numbers."""
     issue_number_mapping = {}
 
     for issue in issues:
         try:
-            created_issue = client.create_issue(repo_name, issue)
+            created_issue = client.create_issue(
+                repo_name, issue, include_original_metadata
+            )
             issue_number_mapping[issue.number] = created_issue.number
             print(
                 f"Created issue #{created_issue.number}: "
@@ -228,6 +248,7 @@ def _create_repository_comments(
     repo_name: str,
     comments: List[Comment],
     issue_number_mapping: Dict[int, int],
+    include_original_metadata: bool = True,
 ) -> None:
     """Create comments in the repository using issue number mapping."""
     for comment in comments:
@@ -242,7 +263,9 @@ def _create_repository_comments(
                 )
                 continue
 
-            client.create_issue_comment(repo_name, new_issue_number, comment)
+            client.create_issue_comment(
+                repo_name, new_issue_number, comment, include_original_metadata
+            )
             print(
                 f"Created comment for issue #{new_issue_number} "
                 f"(was #{original_issue_number})"

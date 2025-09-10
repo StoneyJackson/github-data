@@ -32,6 +32,12 @@
   - [x] Skip pull request comments during comment collection
   - [x] Add comprehensive test coverage for pull request exclusion
   - [x] Document pull request exclusion behavior in README.md
+- [x] Implement original metadata preservation for restored issues and comments
+  - [x] Add metadata footer with original author, creation time, and update time
+  - [x] Support for closed issue timestamps and smart formatting
+  - [x] Configuration option (include_original_metadata: bool = True) with backwards compatibility
+  - [x] Comprehensive test coverage (100% for new metadata module)
+  - [x] Full integration testing including container workflow validation
 - [ ] Implement issue subissue relationship handling
 - [ ] Add comprehensive error handling for GitHub API rate limits
 - [ ] Implement data validation and sanitization for restore operations

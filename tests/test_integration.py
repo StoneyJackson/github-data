@@ -333,7 +333,12 @@ class TestSaveRestoreIntegration:
         ]
 
         # Execute restore operation
-        restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
+        restore_repository_data(
+            "fake_token",
+            "owner/target_repo",
+            temp_data_dir,
+            include_original_metadata=False,
+        )
 
         # Verify boundary methods were called correctly
         assert mock_boundary.create_label.call_count == 2
@@ -453,7 +458,12 @@ class TestSaveRestoreIntegration:
             "issue_url": "https://api.github.com/repos/owner/target_repo/issues/999",
         }
 
-        restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
+        restore_repository_data(
+            "fake_token",
+            "owner/target_repo",
+            temp_data_dir,
+            include_original_metadata=False,
+        )
 
         # Verify data integrity by checking that saved data matches restored data
 
@@ -723,7 +733,12 @@ class TestSaveRestoreIntegration:
         }
 
         # Execute restore
-        restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
+        restore_repository_data(
+            "fake_token",
+            "owner/target_repo",
+            temp_data_dir,
+            include_original_metadata=False,
+        )
 
         # Verify comments were called in chronological order (earliest first)
         comment_calls = mock_boundary.create_issue_comment.call_args_list
