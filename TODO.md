@@ -40,7 +40,17 @@
 - [ ] Add progress reporting for backup/restore operations
 - [ ] Add option to prevent user notifications by replacing @username with [AT]username in restored content
 - [ ] Update internal issue links to use new issue numbers after restore (handle URL and shortcut syntax)
+- [ ] Update internal links to wiki, releases, and other repository resources after restore
 - [ ] Add option to break external issue links to prevent unwanted backlinks to restored repository
+- [ ] Add repository handling options: create if missing/fail if exists, create if missing/use if exists, or fail if missing
+- [ ] Save/restore project metadata and configuration
+- [ ] Save/restore git repository
+- [ ] Save/restore PRs
+- [ ] Save/restore milestones
+- [ ] Save/restore releases and tags
+- [ ] Save/restore wiki pages
+- [ ] Save/restore repository settings (description, homepage, topics, visibility)
+- [ ] Save/restore branch protection rules
 
 ## Configuration & Documentation
 - [x] Create comprehensive testing documentation (docs/testing.md)
@@ -59,10 +69,10 @@
 - [ ] Test DCO sign-off requirements in practice
 
 ### Clean Code Improvements (From Audit)
-- [x] **HIGH PRIORITY**: Fix Step-Down Rule violations in main.py:14-27, boundary.py:42-46, save.py:25-39
-- [x] **MEDIUM PRIORITY**: Standardize error handling patterns across codebase (restore.py:77-78, boundary.py:107)
-- [ ] **LOW PRIORITY**: Eliminate DRY violations for error messages (main.py:86,95) and file operations
-- [ ] **ENHANCEMENT**: Improve docstring completeness with parameter/return documentation and usage examples
+- [x] Fix Step-Down Rule violations in main.py:14-27, boundary.py:42-46, save.py:25-39
+- [x] Standardize error handling patterns across codebase (restore.py:77-78, boundary.py:107)
+- [ ] Eliminate DRY violations for error messages (main.py:86,95) and file operations
+- [ ] Improve docstring completeness with parameter/return documentation and usage examples
 
 ## Infrastructure & Tooling
 - [x] Enhanced Makefile with comprehensive test commands and Docker Compose targets
