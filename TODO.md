@@ -4,17 +4,6 @@
 
 ## Immediate Development Priorities
 
-### Testing Implementation ✅ (COMPLETE)
-- [x] Implement GitHub API client method tests with PyGithub mocking
-- [x] Create save/restore integration tests for end-to-end workflow validation
-- [x] Add error scenario testing (network failures, API rate limits, invalid data)
-- [x] Implement container integration testing for full Docker workflow
-  - [x] Docker container build and runtime testing
-  - [x] Docker Compose integration testing with service orchestration
-  - [x] Pytest markers for organized test execution (unit, integration, container, docker, slow)
-  - [x] Container test helper script with advanced options and cleanup
-  - [x] Comprehensive testing documentation in docs/testing.md
-
 ### Core Development Tasks (Next Priority)
 - [x] Complete GitHub API client implementation for labels, issues, and comments
 - [x] Implement comment-to-issue relationship mapping for restore operations
@@ -49,6 +38,9 @@
 - [ ] Add comprehensive error handling for GitHub API rate limits
 - [ ] Implement data validation and sanitization for restore operations
 - [ ] Add progress reporting for backup/restore operations
+- [ ] Add option to prevent user notifications by replacing @username with [AT]username in restored content
+- [ ] Update internal issue links to use new issue numbers after restore (handle URL and shortcut syntax)
+- [ ] Add option to break external issue links to prevent unwanted backlinks to restored repository
 
 ## Configuration & Documentation
 - [x] Create comprehensive testing documentation (docs/testing.md)
@@ -84,7 +76,7 @@
 - [ ] Implement commit message linting (commitlint) for Conventional Commits
 
 ## Platform Integration
-- [ ] Test GitHub license recognition (currently working with LICENSE file)
+- [x] Test GitHub license recognition (currently working with LICENSE file)
 - [ ] Validate PR template functionality on GitHub
 - [ ] Test GitLab MR template functionality
 - [ ] Verify cross-platform compatibility
@@ -95,10 +87,10 @@
 - [ ] Plan team onboarding documentation
 - [ ] Design template iteration process based on user feedback
 
-## Session Documentation
-- [ ] Maintain session summary workflow for all future Claude interactions
-- [ ] Document development decisions and rationale
-- [ ] Keep searchable history of Claude Code interactions
+## Session Documentation ✅
+- [X] Maintain session summary workflow for all future Claude interactions
+- [X] Document development decisions and rationale
+- [X] Keep searchable history of Claude Code interactions
 
 ## Completed Infrastructure ✅
 - [x] Project renamed from "DinD Claude Code Template" to "GitHub Data"
@@ -122,6 +114,17 @@
 - [x] Comprehensive testing documentation and developer guides
 - [x] Documentation refactoring following DRY principles
 - [x] AI usage legal compliance notices
+
+### Testing Implementation ✅ (COMPLETE)
+- [x] Implement GitHub API client method tests with PyGithub mocking
+- [x] Create save/restore integration tests for end-to-end workflow validation
+- [x] Add error scenario testing (network failures, API rate limits, invalid data)
+- [x] Implement container integration testing for full Docker workflow
+  - [x] Docker container build and runtime testing
+  - [x] Docker Compose integration testing with service orchestration
+  - [x] Pytest markers for organized test execution (unit, integration, container, docker, slow)
+  - [x] Container test helper script with advanced options and cleanup
+  - [x] Comprehensive testing documentation in docs/testing.md
 
 ## Notes
 - Development environment ready with DevContainer
