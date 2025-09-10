@@ -575,6 +575,172 @@ class TestSaveRestoreIntegration:
         assert (nested_path / "issues.json").exists()
         assert (nested_path / "comments.json").exists()
 
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_comments_restored_in_chronological_order(
+        self, mock_boundary_class, temp_data_dir
+    ):
+        """Test comments restored in chronological order regardless of JSON order."""
+        data_path = Path(temp_data_dir)
+
+        # Create test data with comments in REVERSE chronological order in JSON
+        # but they should be restored in correct chronological order
+        labels_data = [
+            {
+                "name": "bug",
+                "id": 1001,
+                "color": "d73a4a",
+                "description": "Something isn't working",
+                "url": "https://api.github.com/repos/owner/repo/labels/bug",
+            }
+        ]
+
+        issues_data = [
+            {
+                "number": 1,
+                "title": "Test issue",
+                "id": 2001,
+                "body": "Test issue body",
+                "state": "open",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/testuser.png",
+                    "html_url": "https://github.com/testuser",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-10T10:00:00Z",
+                "updated_at": "2023-01-10T10:00:00Z",
+                "closed_at": None,
+                "html_url": "https://github.com/owner/repo/issues/1",
+                "comments": 3,
+            }
+        ]
+
+        # Comments in REVERSE chronological order (latest first)
+        comments_data = [
+            {
+                "id": 4003,
+                "body": "Third comment (latest)",
+                "user": {
+                    "login": "user3",
+                    "id": 3003,
+                    "avatar_url": "https://github.com/user3.png",
+                    "html_url": "https://github.com/user3",
+                },
+                "created_at": "2023-01-10T14:00:00Z",  # Latest timestamp
+                "updated_at": "2023-01-10T14:00:00Z",
+                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4003",
+                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+            },
+            {
+                "id": 4002,
+                "body": "Second comment (middle)",
+                "user": {
+                    "login": "user2",
+                    "id": 3002,
+                    "avatar_url": "https://github.com/user2.png",
+                    "html_url": "https://github.com/user2",
+                },
+                "created_at": "2023-01-10T12:00:00Z",  # Middle timestamp
+                "updated_at": "2023-01-10T12:00:00Z",
+                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4002",
+                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+            },
+            {
+                "id": 4001,
+                "body": "First comment (earliest)",
+                "user": {
+                    "login": "user1",
+                    "id": 3001,
+                    "avatar_url": "https://github.com/user1.png",
+                    "html_url": "https://github.com/user1",
+                },
+                "created_at": "2023-01-10T10:30:00Z",  # Earliest timestamp
+                "updated_at": "2023-01-10T10:30:00Z",
+                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4001",
+                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+            },
+        ]
+
+        # Write test data to JSON files
+        with open(data_path / "labels.json", "w") as f:
+            json.dump(labels_data, f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump(issues_data, f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump(comments_data, f)  # Comments in reverse chronological order
+
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+        mock_boundary.get_repository_labels.return_value = []
+
+        mock_boundary.create_label.return_value = {
+            "name": "bug",
+            "id": 5001,
+            "color": "d73a4a",
+            "description": "Something isn't working",
+            "url": "https://api.github.com/repos/owner/target_repo/labels/bug",
+        }
+
+        mock_boundary.create_issue.return_value = {
+            "number": 10,
+            "title": "Test issue",
+            "id": 6001,
+            "body": "Test issue body",
+            "state": "open",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/testuser.png",
+                "html_url": "https://github.com/testuser",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-10T10:00:00Z",
+            "updated_at": "2023-01-10T10:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/target_repo/issues/10",
+            "comments": 0,
+        }
+
+        mock_boundary.create_issue_comment.return_value = {
+            "id": 7001,
+            "body": "test comment",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/testuser.png",
+                "html_url": "https://github.com/testuser",
+            },
+            "created_at": "2023-01-10T10:30:00Z",
+            "updated_at": "2023-01-10T10:30:00Z",
+            "html_url": (
+                "https://github.com/owner/target_repo/issues/10#issuecomment-7001"
+            ),
+            "issue_url": "https://api.github.com/repos/owner/target_repo/issues/10",
+        }
+
+        # Execute restore
+        restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
+
+        # Verify comments were called in chronological order (earliest first)
+        comment_calls = mock_boundary.create_issue_comment.call_args_list
+        assert len(comment_calls) == 3
+
+        # First call should be the earliest comment (2023-01-10T10:30:00Z)
+        first_call = comment_calls[0][1]
+        assert first_call["body"] == "First comment (earliest)"
+
+        # Second call should be the middle comment (2023-01-10T12:00:00Z)
+        second_call = comment_calls[1][1]
+        assert second_call["body"] == "Second comment (middle)"
+
+        # Third call should be the latest comment (2023-01-10T14:00:00Z)
+        third_call = comment_calls[2][1]
+        assert third_call["body"] == "Third comment (latest)"
+
 
 class TestErrorHandlingIntegration:
     """Integration tests for error scenarios and edge cases."""

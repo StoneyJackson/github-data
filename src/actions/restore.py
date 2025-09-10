@@ -107,7 +107,11 @@ def _restore_comments(
 ) -> None:
     """Restore comments to the repository using issue number mapping."""
     comments = _load_comments_from_file(input_dir)
-    _create_repository_comments(client, repo_name, comments, issue_number_mapping)
+    # Sort comments by creation time to maintain chronological conversation order
+    sorted_comments = sorted(comments, key=lambda comment: comment.created_at)
+    _create_repository_comments(
+        client, repo_name, sorted_comments, issue_number_mapping
+    )
 
 
 def _create_repository_labels(

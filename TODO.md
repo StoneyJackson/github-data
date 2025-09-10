@@ -17,6 +17,16 @@
 
 ### Core Development Tasks (Next Priority)
 - [x] Complete GitHub API client implementation for labels, issues, and comments
+- [x] Implement comment-to-issue relationship mapping for restore operations
+  - [x] Issue number mapping strategy during restore (original → new number mapping)
+  - [x] URL parsing to extract original issue numbers from comment issue_url fields
+  - [x] Comment restoration with proper issue association using mapping
+  - [x] Comprehensive test coverage and integration tests
+- [x] Implement chronological comment ordering during restore operations
+  - [x] Sort comments by created_at timestamp to maintain conversation order
+  - [x] Prevent conversation scrambling regardless of JSON file order
+  - [x] Add comprehensive regression test to detect functionality removal
+  - [x] Test validation using reverse-order JSON input data
 - [ ] Implement issue subissue relationship handling
 - [ ] Add comprehensive error handling for GitHub API rate limits
 - [ ] Implement data validation and sanitization for restore operations
