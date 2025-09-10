@@ -76,6 +76,17 @@ class GitHubService:
         )
         return convert_to_label(raw_label)
 
+    def create_issue_comment(
+        self, repo_name: str, issue_number: int, comment: Comment
+    ) -> Comment:
+        """Create a new comment on an issue."""
+        raw_comment = self._boundary.create_issue_comment(
+            repo_name=repo_name,
+            issue_number=issue_number,
+            body=comment.body,
+        )
+        return convert_to_comment(raw_comment)
+
     def _convert_labels(self, raw_labels: List[dict]) -> List[Label]:
         """Convert list of raw label data to Label models."""
         return [convert_to_label(raw_label) for raw_label in raw_labels]

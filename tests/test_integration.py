@@ -139,9 +139,9 @@ class TestSaveRestoreIntegration:
                     "created_at": "2023-01-15T14:00:00Z",
                     "updated_at": "2023-01-15T14:00:00Z",
                     "html_url": (
-                        "https://github.com/owner/repo/issues/1#issuecomment-4002"
+                        "https://github.com/owner/repo/issues/2#issuecomment-4002"
                     ),
-                    "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+                    "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
                 },
             ],
         }
@@ -295,6 +295,42 @@ class TestSaveRestoreIntegration:
                 "comments": 0,
             },
         ]
+        mock_boundary.create_issue_comment.side_effect = [
+            {
+                "id": 7001,
+                "body": "I can reproduce this issue",
+                "user": {
+                    "login": "charlie",
+                    "id": 3003,
+                    "avatar_url": "https://github.com/images/error/charlie_happy.gif",
+                    "url": "https://api.github.com/users/charlie",
+                    "html_url": "https://github.com/charlie",
+                },
+                "created_at": "2023-01-12T17:00:00Z",
+                "updated_at": "2023-01-12T17:00:00Z",
+                "html_url": (
+                    "https://github.com/owner/target_repo/issues/10#issuecomment-7001"
+                ),
+                "issue_url": "https://api.github.com/repos/owner/target_repo/issues/10",
+            },
+            {
+                "id": 7002,
+                "body": "Fixed in PR #3",
+                "user": {
+                    "login": "alice",
+                    "id": 2002,
+                    "avatar_url": "https://github.com/images/error/alice_happy.gif",
+                    "url": "https://api.github.com/users/alice",
+                    "html_url": "https://github.com/alice",
+                },
+                "created_at": "2023-01-15T10:00:00Z",
+                "updated_at": "2023-01-15T10:00:00Z",
+                "html_url": (
+                    "https://github.com/owner/target_repo/issues/11#issuecomment-7002"
+                ),
+                "issue_url": "https://api.github.com/repos/owner/target_repo/issues/11",
+            },
+        ]
 
         # Execute restore operation
         restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
@@ -302,6 +338,7 @@ class TestSaveRestoreIntegration:
         # Verify boundary methods were called correctly
         assert mock_boundary.create_label.call_count == 2
         assert mock_boundary.create_issue.call_count == 2
+        assert mock_boundary.create_issue_comment.call_count == 2
 
         # Verify label creation calls
         label_calls = mock_boundary.create_label.call_args_list
@@ -332,6 +369,19 @@ class TestSaveRestoreIntegration:
         assert second_issue_call["title"] == "Add user dashboard"
         assert second_issue_call["body"] == ""  # None converted to empty string
         assert second_issue_call["labels"] == ["enhancement"]
+
+        # Verify comment creation calls
+        comment_calls = mock_boundary.create_issue_comment.call_args_list
+
+        # First comment call (mapped to issue #10)
+        first_comment_call = comment_calls[0][1]
+        assert first_comment_call["issue_number"] == 10  # Mapped from original issue #1
+        assert first_comment_call["body"] == "I can reproduce this issue"
+
+        # Second comment call (mapped to issue #11)
+        second_comment_call = comment_calls[1][1]
+        assert second_comment_call["issue_number"] == 11  # Mapped from issue #2
+        assert second_comment_call["body"] == "Fixed in PR #3"
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_complete_save_restore_cycle_preserves_data_integrity(
@@ -385,6 +435,23 @@ class TestSaveRestoreIntegration:
             "html_url": "https://github.com/owner/target_repo/issues/999",
             "comments": 0,
         }
+        restore_boundary.create_issue_comment.return_value = {
+            "id": 888,
+            "body": "test comment",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                "url": "https://api.github.com/users/testuser",
+                "html_url": "https://github.com/testuser",
+            },
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
+            "html_url": (
+                "https://github.com/owner/target_repo/issues/999#issuecomment-888"
+            ),
+            "issue_url": "https://api.github.com/repos/owner/target_repo/issues/999",
+        }
 
         restore_repository_data("fake_token", "owner/target_repo", temp_data_dir)
 
@@ -396,6 +463,9 @@ class TestSaveRestoreIntegration:
 
         assert save_boundary.get_repository_issues.call_count == 1
         assert restore_boundary.create_issue.call_count == 2
+
+        assert save_boundary.get_all_issue_comments.call_count == 1
+        assert restore_boundary.create_issue_comment.call_count == 2
 
         # Verify that all original label data was preserved in restore calls
         restore_label_calls = restore_boundary.create_label.call_args_list

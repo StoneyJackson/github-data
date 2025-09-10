@@ -86,6 +86,15 @@ class GitHubApiBoundary:
         label.edit(name=name, color=color, description=description)
         return self._extract_raw_data(label)
 
+    def create_issue_comment(
+        self, repo_name: str, issue_number: int, body: str
+    ) -> Dict[str, Any]:
+        """Create a new comment on an issue and return raw JSON data."""
+        repo = self._get_repository(repo_name)
+        issue = repo.get_issue(issue_number)
+        created_comment = issue.create_comment(body)
+        return self._extract_raw_data(created_comment)
+
     def _get_repository(self, repo_name: str) -> Repository:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)

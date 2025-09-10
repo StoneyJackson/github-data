@@ -6,7 +6,8 @@ recreates labels, issues, and comments in GitHub repositories.
 """
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
+from urllib.parse import urlparse
 
 from ..github import GitHubService
 from ..models import Label, Issue, Comment
@@ -26,9 +27,8 @@ def restore_repository_data(
     _validate_data_files_exist(input_dir)
 
     _restore_labels(client, repo_name, input_dir, label_conflict_strategy)
-    _restore_issues(client, repo_name, input_dir)
-    # Note: Comments are typically restored as part of issues
-    # or through separate comment creation API calls
+    issue_number_mapping = _restore_issues(client, repo_name, input_dir)
+    _restore_comments(client, repo_name, input_dir, issue_number_mapping)
 
 
 def _validate_data_files_exist(input_dir: Path) -> None:
@@ -73,10 +73,12 @@ def _restore_labels(
     _create_repository_labels(client, repo_name, labels_to_restore)
 
 
-def _restore_issues(client: GitHubService, repo_name: str, input_dir: Path) -> None:
-    """Restore issues to the repository."""
+def _restore_issues(
+    client: GitHubService, repo_name: str, input_dir: Path
+) -> Dict[int, int]:
+    """Restore issues and return mapping of original to new issue numbers."""
     issues = _load_issues_from_file(input_dir)
-    _create_repository_issues(client, repo_name, issues)
+    return _create_repository_issues(client, repo_name, issues)
 
 
 def _load_labels_from_file(input_dir: Path) -> List[Label]:
@@ -97,6 +99,17 @@ def _load_comments_from_file(input_dir: Path) -> List[Comment]:
     return load_json_data(comments_file, Comment)
 
 
+def _restore_comments(
+    client: GitHubService,
+    repo_name: str,
+    input_dir: Path,
+    issue_number_mapping: Dict[int, int],
+) -> None:
+    """Restore comments to the repository using issue number mapping."""
+    comments = _load_comments_from_file(input_dir)
+    _create_repository_comments(client, repo_name, comments, issue_number_mapping)
+
+
 def _create_repository_labels(
     client: GitHubService, repo_name: str, labels: List[Label]
 ) -> None:
@@ -111,14 +124,22 @@ def _create_repository_labels(
 
 def _create_repository_issues(
     client: GitHubService, repo_name: str, issues: List[Issue]
-) -> None:
-    """Create issues in the repository."""
+) -> Dict[int, int]:
+    """Create issues and return mapping of original to new issue numbers."""
+    issue_number_mapping = {}
+
     for issue in issues:
         try:
             created_issue = client.create_issue(repo_name, issue)
-            print(f"Created issue #{created_issue.number}: {created_issue.title}")
+            issue_number_mapping[issue.number] = created_issue.number
+            print(
+                f"Created issue #{created_issue.number}: "
+                f"{created_issue.title} (was #{issue.number})"
+            )
         except Exception as e:
             raise RuntimeError(f"Failed to create issue '{issue.title}': {e}") from e
+
+    return issue_number_mapping
 
 
 def _handle_fail_if_existing(existing_labels: List[Label]) -> None:
@@ -196,3 +217,51 @@ def _handle_skip(
         print(f"Skipping {skipped_count} labels that already exist")
 
     return non_conflicting_labels
+
+
+def _create_repository_comments(
+    client: GitHubService,
+    repo_name: str,
+    comments: List[Comment],
+    issue_number_mapping: Dict[int, int],
+) -> None:
+    """Create comments in the repository using issue number mapping."""
+    for comment in comments:
+        try:
+            original_issue_number = _extract_issue_number_from_url(comment.issue_url)
+            new_issue_number = issue_number_mapping.get(original_issue_number)
+
+            if new_issue_number is None:
+                print(
+                    f"Warning: Skipping comment for unmapped issue "
+                    f"#{original_issue_number}"
+                )
+                continue
+
+            client.create_issue_comment(repo_name, new_issue_number, comment)
+            print(
+                f"Created comment for issue #{new_issue_number} "
+                f"(was #{original_issue_number})"
+            )
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to create comment for issue #{original_issue_number}: {e}"
+            ) from e
+
+
+def _extract_issue_number_from_url(issue_url: str) -> int:
+    """Extract issue number from GitHub issue URL."""
+    # Example URL: https://api.github.com/repos/owner/repo/issues/123
+    try:
+        parsed_url = urlparse(issue_url)
+        path_parts = parsed_url.path.strip("/").split("/")
+
+        # Find 'issues' in path and get the next part
+        if "issues" in path_parts:
+            issues_index = path_parts.index("issues")
+            if issues_index + 1 < len(path_parts):
+                return int(path_parts[issues_index + 1])
+
+        raise ValueError(f"Could not find issue number in URL path: {parsed_url.path}")
+    except (ValueError, IndexError) as e:
+        raise ValueError(f"Invalid issue URL format: {issue_url}") from e
