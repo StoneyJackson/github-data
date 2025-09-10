@@ -160,6 +160,24 @@ def _create_repository_issues(
                 f"Created issue #{created_issue.number}: "
                 f"{created_issue.title} (was #{issue.number})"
             )
+
+            # Close the issue if it was originally closed
+            if issue.state == "closed":
+                try:
+                    client.close_issue(
+                        repo_name, created_issue.number, issue.state_reason
+                    )
+                    reason_text = (
+                        f"with reason: {issue.state_reason}"
+                        if issue.state_reason
+                        else ""
+                    )
+                    print(f"Closed issue #{created_issue.number} {reason_text}")
+                except Exception as e:
+                    print(
+                        f"Warning: Failed to close issue #{created_issue.number}: {e}"
+                    )
+
         except Exception as e:
             raise RuntimeError(f"Failed to create issue '{issue.title}': {e}") from e
 

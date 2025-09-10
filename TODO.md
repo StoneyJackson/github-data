@@ -38,6 +38,13 @@
   - [x] Configuration option (include_original_metadata: bool = True) with backwards compatibility
   - [x] Comprehensive test coverage (100% for new metadata module)
   - [x] Full integration testing including container workflow validation
+- [x] Implement closed issue restoration functionality
+  - [x] Capture closure metadata (state_reason, closed_by, closed_at) in Issue model
+  - [x] Include original closure details in issue body during restore
+  - [x] Automatically close restored issues with original state_reason
+  - [x] Add close_issue() API methods to boundary and service layers
+  - [x] Comprehensive test coverage for full and minimal closure metadata
+  - [x] Error handling for closure API failures with graceful warnings
 - [ ] Implement issue subissue relationship handling
 - [ ] Add comprehensive error handling for GitHub API rate limits
 - [ ] Implement data validation and sanitization for restore operations

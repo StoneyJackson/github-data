@@ -55,6 +55,8 @@ class Issue(BaseModel):
     created_at: datetime
     updated_at: datetime
     closed_at: Optional[datetime] = None
+    closed_by: Optional[GitHubUser] = None
+    state_reason: Optional[str] = None
     html_url: str
     comments_count: int = Field(alias="comments")
 

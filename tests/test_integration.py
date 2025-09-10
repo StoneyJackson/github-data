@@ -913,3 +913,248 @@ class TestErrorHandlingIntegration:
         assert isinstance(
             issues_data[0]["created_at"], str
         )  # Datetime serialized as string
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_closed_issue_restoration_with_metadata(
+        self, mock_boundary_class, temp_data_dir
+    ):
+        """Test closed issues are restored with their state and metadata."""
+        from src.actions.restore import restore_repository_data
+        from src.models import Issue, GitHubUser
+        from datetime import datetime
+        import json
+
+        # Setup boundary mock
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+        mock_boundary.get_repository_labels.return_value = []
+
+        # Mock raw GitHub API responses for boundary
+        created_issue_raw = {
+            "id": 2001,
+            "number": 101,
+            "title": "Closed issue with all metadata",
+            "body": (
+                "This issue was completed successfully\n\n---\n"
+                "*Originally created by @reporter on 2023-01-01 10:00:00 UTC*\n"
+                "*Last updated on 2023-01-02 15:30:00 UTC*\n"
+                "*Closed on 2023-01-02 15:30:00 UTC by @admin-user as completed*"
+            ),
+            "state": "open",
+            "user": {
+                "login": "test-bot",
+                "id": 9001,
+                "avatar_url": "https://github.com/test-bot.png",
+                "html_url": "https://github.com/test-bot",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-03T10:00:00Z",
+            "updated_at": "2023-01-03T10:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/repo/issues/101",
+            "comments": 0,
+        }
+
+        closed_issue_raw = {
+            "id": 2001,
+            "number": 101,
+            "title": "Closed issue with all metadata",
+            "body": (
+                "This issue was completed successfully\n\n---\n"
+                "*Originally created by @reporter on 2023-01-01 10:00:00 UTC*\n"
+                "*Last updated on 2023-01-02 15:30:00 UTC*\n"
+                "*Closed on 2023-01-02 15:30:00 UTC by @admin-user as completed*"
+            ),
+            "state": "closed",
+            "user": {
+                "login": "test-bot",
+                "id": 9001,
+                "avatar_url": "https://github.com/test-bot.png",
+                "html_url": "https://github.com/test-bot",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-03T10:00:00Z",
+            "updated_at": "2023-01-03T10:00:00Z",
+            "closed_at": "2023-01-03T10:05:00Z",
+            "html_url": "https://github.com/owner/repo/issues/101",
+            "comments": 0,
+        }
+
+        mock_boundary.create_issue.return_value = created_issue_raw
+        mock_boundary.close_issue.return_value = closed_issue_raw
+
+        # Create test data with closed issue containing all closure metadata
+        closed_issue = Issue(
+            id=1001,
+            number=1,
+            title="Closed issue with all metadata",
+            body="This issue was completed successfully",
+            state="closed",
+            user=GitHubUser(
+                login="reporter",
+                id=4001,
+                avatar_url="https://github.com/reporter.png",
+                html_url="https://github.com/reporter",
+            ),
+            assignees=[],
+            labels=[],
+            created_at=datetime(2023, 1, 1, 10, 0, 0),
+            updated_at=datetime(2023, 1, 2, 15, 30, 0),
+            closed_at=datetime(2023, 1, 2, 15, 30, 0),
+            closed_by=GitHubUser(
+                login="admin-user",
+                id=5001,
+                avatar_url="https://github.com/admin-user.png",
+                html_url="https://github.com/admin-user",
+            ),
+            state_reason="completed",
+            html_url="https://github.com/owner/repo/issues/1",
+            comments_count=0,
+        )
+
+        # Create test data files
+        data_path = Path(temp_data_dir) / "test_data"
+        data_path.mkdir()
+
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+
+        with open(data_path / "issues.json", "w") as f:
+            json.dump([closed_issue.model_dump(mode="json")], f, default=str)
+
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+
+        # Test restoration
+        restore_repository_data(
+            github_token="fake-token",
+            repo_name="owner/repo",
+            data_path=str(data_path),
+            include_original_metadata=True,
+        )
+
+        # Verify boundary methods were called
+        mock_boundary.create_issue.assert_called_once()
+        create_call_args = mock_boundary.create_issue.call_args
+
+        # Check that metadata footer was added to body
+        created_body = create_call_args[1]["body"]  # keyword argument
+        assert (
+            "Originally created by @reporter on 2023-01-01 10:00:00 UTC" in created_body
+        )
+        assert (
+            "Closed on 2023-01-02 15:30:00 UTC by @admin-user as completed"
+            in created_body
+        )
+
+        # Verify issue was closed with correct state reason
+        mock_boundary.close_issue.assert_called_once_with(
+            repo_name="owner/repo", issue_number=101, state_reason="completed"
+        )
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_closed_issue_restoration_minimal_metadata(
+        self, mock_boundary_class, temp_data_dir
+    ):
+        """Test closed issue restoration with minimal closure metadata."""
+        from src.actions.restore import restore_repository_data
+        from src.models import Issue, GitHubUser
+        from datetime import datetime
+        import json
+
+        # Setup boundary mock
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+        mock_boundary.get_repository_labels.return_value = []
+
+        # Mock raw GitHub API response
+        created_issue_raw = {
+            "id": 2002,
+            "number": 102,
+            "title": "Closed issue minimal metadata",
+            "body": (
+                "Basic closed issue\n\n---\n"
+                "*Originally created by @test-user on 2023-01-01 10:00:00 UTC*\n"
+                "*Closed on 2023-01-01 16:00:00 UTC*"
+            ),
+            "state": "open",
+            "user": {
+                "login": "test-user",
+                "id": 4001,
+                "avatar_url": "https://github.com/test-user.png",
+                "html_url": "https://github.com/test-user",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-03T10:00:00Z",
+            "updated_at": "2023-01-03T10:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/repo/issues/102",
+            "comments": 0,
+        }
+
+        mock_boundary.create_issue.return_value = created_issue_raw
+        mock_boundary.close_issue.return_value = created_issue_raw
+
+        # Closed issue with minimal metadata (no closed_by or state_reason)
+        closed_issue = Issue(
+            id=1002,
+            number=2,
+            title="Closed issue minimal metadata",
+            body="Basic closed issue",
+            state="closed",
+            user=GitHubUser(
+                login="test-user",
+                id=4001,
+                avatar_url="https://github.com/test-user.png",
+                html_url="https://github.com/test-user",
+            ),
+            assignees=[],
+            labels=[],
+            created_at=datetime(2023, 1, 1, 10, 0, 0),
+            updated_at=datetime(2023, 1, 1, 10, 0, 0),
+            closed_at=datetime(2023, 1, 1, 16, 0, 0),
+            closed_by=None,  # No closer info
+            state_reason=None,  # No reason
+            html_url="https://github.com/owner/repo/issues/2",
+            comments_count=0,
+        )
+
+        # Create test data files
+        data_path = Path(temp_data_dir) / "test_data_minimal"
+        data_path.mkdir()
+
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+
+        with open(data_path / "issues.json", "w") as f:
+            json.dump([closed_issue.model_dump(mode="json")], f, default=str)
+
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+
+        # Test restoration
+        restore_repository_data(
+            github_token="fake-token",
+            repo_name="owner/repo",
+            data_path=str(data_path),
+            include_original_metadata=True,
+        )
+
+        # Verify boundary methods were called
+        mock_boundary.create_issue.assert_called_once()
+        create_call_args = mock_boundary.create_issue.call_args
+
+        # Check metadata footer - should have closed date but no closer or reason
+        created_body = create_call_args[1]["body"]  # keyword argument
+        assert "Closed on 2023-01-01 16:00:00 UTC*" in created_body
+        # Check that there's no "closed by" info (only "created by" should be present)
+        assert "Closed on 2023-01-01 16:00:00 UTC by @" not in created_body
+        assert " as " not in created_body  # No reason
+
+        # Verify issue was closed without state reason (None passed)
+        mock_boundary.close_issue.assert_called_once_with(
+            repo_name="owner/repo", issue_number=102, state_reason=None
+        )

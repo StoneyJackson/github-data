@@ -5,7 +5,7 @@ Provides business logic and data conversion on top of the GitHub API boundary.
 This is the main interface that application code should use.
 """
 
-from typing import List
+from typing import List, Optional
 
 from .boundary import GitHubApiBoundary
 from .converters import convert_to_label, convert_to_issue, convert_to_comment
@@ -110,6 +110,17 @@ class GitHubService:
             body=body,
         )
         return convert_to_comment(raw_comment)
+
+    def close_issue(
+        self, repo_name: str, issue_number: int, state_reason: Optional[str] = None
+    ) -> Issue:
+        """Close an issue with optional state reason."""
+        raw_issue = self._boundary.close_issue(
+            repo_name=repo_name,
+            issue_number=issue_number,
+            state_reason=state_reason,
+        )
+        return convert_to_issue(raw_issue)
 
     def _convert_labels(self, raw_labels: List[dict]) -> List[Label]:
         """Convert list of raw label data to Label models."""

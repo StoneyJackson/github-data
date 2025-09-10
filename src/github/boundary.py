@@ -5,7 +5,7 @@ Ultra-thin wrapper around PyGithub that returns raw JSON data.
 This creates a true API boundary that's not coupled to PyGithub types.
 """
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
@@ -95,6 +95,21 @@ class GitHubApiBoundary:
         issue = repo.get_issue(issue_number)
         created_comment = issue.create_comment(body)
         return self._extract_raw_data(created_comment)
+
+    def close_issue(
+        self, repo_name: str, issue_number: int, state_reason: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Close an issue with optional state reason and return raw JSON data."""
+        repo = self._get_repository(repo_name)
+        issue = repo.get_issue(issue_number)
+
+        # Close the issue with state reason if provided
+        if state_reason:
+            issue.edit(state="closed", state_reason=state_reason)
+        else:
+            issue.edit(state="closed")
+
+        return self._extract_raw_data(issue)
 
     def _get_repository(self, repo_name: str) -> Repository:
         """Get repository object from GitHub API."""

@@ -60,7 +60,18 @@ def _format_issue_metadata(issue: Issue) -> str:
     # Add closed time if issue was closed
     if issue.closed_at:
         closed_at = _format_datetime(issue.closed_at)
-        metadata_lines.append(f"*Closed on {closed_at}*")
+        closed_info = f"*Closed on {closed_at}"
+
+        # Add who closed it if available
+        if issue.closed_by:
+            closed_info += f" by @{issue.closed_by.login}"
+
+        # Add state reason if available
+        if issue.state_reason:
+            closed_info += f" as {issue.state_reason}"
+
+        closed_info += "*"
+        metadata_lines.append(closed_info)
 
     return "\n".join(metadata_lines)
 
