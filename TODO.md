@@ -27,6 +27,11 @@
   - [x] Prevent conversation scrambling regardless of JSON file order
   - [x] Add comprehensive regression test to detect functionality removal
   - [x] Test validation using reverse-order JSON input data
+- [x] Implement pull request filtering during save operations
+  - [x] Filter out pull requests from issue collection in boundary layer
+  - [x] Skip pull request comments during comment collection
+  - [x] Add comprehensive test coverage for pull request exclusion
+  - [x] Document pull request exclusion behavior in README.md
 - [ ] Implement issue subissue relationship handling
 - [ ] Add comprehensive error handling for GitHub API rate limits
 - [ ] Implement data validation and sanitization for restore operations

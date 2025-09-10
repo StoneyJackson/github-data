@@ -23,6 +23,10 @@ The `github-data` container provides two main operations:
 
 All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
 
+## Important Notes
+
+- **Pull Requests**: Pull requests are not currently supported and are automatically excluded from both save and restore operations. Only regular issues are processed.
+
 ## Usage
 
 ### Save Data

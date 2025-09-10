@@ -25,10 +25,11 @@ class GitHubApiBoundary:
         return self._extract_raw_data_list(labels)
 
     def get_repository_issues(self, repo_name: str) -> List[Dict[str, Any]]:
-        """Get all issues from repository as raw JSON data."""
+        """Get all issues from repository as raw JSON data, excluding pull requests."""
         repo = self._get_repository(repo_name)
         issues = repo.get_issues(state="all")
-        return self._extract_raw_data_list(issues)
+        all_issues_data = self._extract_raw_data_list(issues)
+        return self._filter_out_pull_requests(all_issues_data)
 
     def get_issue_comments(
         self, repo_name: str, issue_number: int
@@ -40,13 +41,13 @@ class GitHubApiBoundary:
         return self._extract_raw_data_list(comments)
 
     def get_all_issue_comments(self, repo_name: str) -> List[Dict[str, Any]]:
-        """Get all comments from all issues as raw JSON data."""
+        """Get all comments from all issues as raw JSON data, excluding PR comments."""
         repo = self._get_repository(repo_name)
         issues = repo.get_issues(state="all")
         all_comments = []
 
         for issue in issues:
-            if self._issue_has_comments(issue):
+            if not self._is_pull_request(issue) and self._issue_has_comments(issue):
                 comments = issue.get_comments()
                 comment_data = self._extract_raw_data_list(comments)
                 all_comments.extend(comment_data)
@@ -126,3 +127,20 @@ class GitHubApiBoundary:
                 f"Cannot extract raw data from {type(pygithub_obj).__name__}: "
                 f"object has no '_rawData' or 'raw_data' attribute"
             )
+
+    def _is_pull_request(self, issue: Any) -> bool:
+        """Check if an issue is actually a pull request."""
+        issue_data = self._extract_raw_data(issue)
+        return "pull_request" in issue_data and issue_data["pull_request"] is not None
+
+    def _filter_out_pull_requests(
+        self, issues_data: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Filter out pull requests from a list of issue data."""
+        return [
+            issue_data
+            for issue_data in issues_data
+            if not (
+                "pull_request" in issue_data and issue_data["pull_request"] is not None
+            )
+        ]
