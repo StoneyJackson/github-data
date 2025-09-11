@@ -92,6 +92,17 @@ Your GitHub token should have the following permissions:
 - `repo` - For repository access and labels
 - `issues` - For reading and writing issues and comments
 
+#### Rate Limiting
+
+The tool automatically handles GitHub API rate limiting with intelligent retry logic:
+
+- **Automatic Retries**: Operations are automatically retried when rate limits are hit
+- **Exponential Backoff**: Retry delays increase exponentially (1s, 2s, 4s, etc.) up to 60 seconds
+- **Smart Monitoring**: Warns when rate limit is low (< 100 requests remaining)  
+- **Maximum 3 Retries**: After 3 failed attempts due to rate limiting, the operation will fail
+
+For large repositories, operations may take longer when approaching rate limits as the tool waits for the rate limit window to reset.
+
 ## Data Format
 
 The container saves/restores data in JSON format with the following structure:

@@ -137,6 +137,8 @@ make check-all   # All quality checks including container tests
 
 For complete testing documentation, test categories, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
+For detailed information about GitHub API rate limiting implementation, see **[docs/rate-limiting.md](docs/rate-limiting.md)**.
+
 ## Development Setup and Workflow
 
 This project uses PDM for package management and a comprehensive Makefile for development tasks.
