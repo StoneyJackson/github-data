@@ -1,139 +1,206 @@
 """
-GitHub service layer.
+GitHub service layer that coordinates API access with cross-cutting concerns.
 
-Provides business logic and data conversion on top of the GitHub API boundary.
-This is the main interface that application code should use.
+Provides business logic operations with rate limiting, caching, and retry logic.
+Maintains clean separation from the ultra-thin boundary layer.
 """
 
-from typing import List, Optional
-
+import logging
+from typing import Dict, List, Any, Optional, Callable
 from .boundary import GitHubApiBoundary
-from .converters import convert_to_label, convert_to_issue, convert_to_comment
-from ..models import Label, Issue, Comment
+from .rate_limiter import RateLimitHandler
+from .cache import CacheService, CacheConfig
+
+logger = logging.getLogger(__name__)
 
 
 class GitHubService:
-    """GitHub service providing business logic and data conversion."""
+    """
+    Service layer for GitHub API operations.
 
-    def __init__(self, token: str):
-        """Initialize GitHub service with authentication token."""
-        self._boundary = GitHubApiBoundary(token)
+    Coordinates boundary layer API access with cross-cutting concerns
+    like rate limiting, caching, and retry logic.
+    """
 
-    def get_repository_labels(self, repo_name: str) -> List[Label]:
-        """Get all labels from the specified repository."""
-        raw_labels = self._boundary.get_repository_labels(repo_name)
-        return self._convert_labels(raw_labels)
+    def __init__(
+        self,
+        boundary: GitHubApiBoundary,
+        rate_limiter: Optional[RateLimitHandler] = None,
+        cache_service: Optional[CacheService] = None,
+    ):
+        """
+        Initialize GitHub service with dependencies.
 
-    def get_repository_issues(self, repo_name: str) -> List[Issue]:
-        """Get all issues from the specified repository."""
-        raw_issues = self._boundary.get_repository_issues(repo_name)
-        return self._convert_issues(raw_issues)
+        Args:
+            boundary: Ultra-thin API boundary layer
+            rate_limiter: Optional rate limiting handler
+            cache_service: Optional caching service
+        """
+        self._boundary = boundary
+        self._rate_limiter = rate_limiter or RateLimitHandler()
+        self._cache_service = cache_service
 
-    def get_issue_comments(self, repo_name: str, issue_number: int) -> List[Comment]:
-        """Get all comments for a specific issue."""
-        raw_comments = self._boundary.get_issue_comments(repo_name, issue_number)
-        return self._convert_comments(raw_comments)
+    # Public API - Repository Data Operations
 
-    def get_all_issue_comments(self, repo_name: str) -> List[Comment]:
-        """Get all comments from all issues in the repository."""
-        raw_comments = self._boundary.get_all_issue_comments(repo_name)
-        return self._convert_comments(raw_comments)
-
-    def create_label(self, repo_name: str, label: Label) -> Label:
-        """Create a new label in the repository."""
-        raw_label = self._boundary.create_label(
-            repo_name=repo_name,
-            name=label.name,
-            color=label.color,
-            description=label.description or "",
-        )
-        return convert_to_label(raw_label)
-
-    def create_issue(
-        self, repo_name: str, issue: Issue, include_original_metadata: bool = True
-    ) -> Issue:
-        """Create a new issue in the repository."""
-        from .metadata import add_issue_metadata_footer
-
-        label_names = self._extract_label_names(issue.labels)
-
-        # Add original metadata footer if requested
-        body = (
-            add_issue_metadata_footer(issue)
-            if include_original_metadata
-            else (issue.body or "")
+    def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all labels from repository with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"labels:{repo_name}",
+            operation=lambda: self._boundary.get_repository_labels(repo_name),
         )
 
-        raw_issue = self._boundary.create_issue(
-            repo_name=repo_name,
-            title=issue.title,
-            body=body,
-            labels=label_names,
+    def get_repository_issues(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all issues from repository with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"issues:{repo_name}",
+            operation=lambda: self._boundary.get_repository_issues(repo_name),
         )
-        return convert_to_issue(raw_issue)
+
+    def get_issue_comments(
+        self, repo_name: str, issue_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific issue with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"comments:{repo_name}:{issue_number}",
+            operation=lambda: self._boundary.get_issue_comments(
+                repo_name, issue_number
+            ),
+        )
+
+    def get_all_issue_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all issue comments with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_comments:{repo_name}",
+            operation=lambda: self._boundary.get_all_issue_comments(repo_name),
+        )
+
+    def get_rate_limit_status(self) -> Dict[str, Any]:
+        """Get current rate limit status."""
+        # Rate limit status should not be cached
+        return self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.get_rate_limit_status(), self._boundary._github
+        )
+
+    # Public API - Repository Modification Operations
+
+    def create_label(
+        self, repo_name: str, name: str, color: str, description: str
+    ) -> Dict[str, Any]:
+        """Create a new label with rate limiting."""
+        # Modifications should not be cached and should clear related caches
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_label(repo_name, name, color, description),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "labels")
+        return result
 
     def delete_label(self, repo_name: str, label_name: str) -> None:
-        """Delete a label from the repository."""
-        self._boundary.delete_label(repo_name, label_name)
-
-    def update_label(self, repo_name: str, old_name: str, label: Label) -> Label:
-        """Update an existing label in the repository."""
-        raw_label = self._boundary.update_label(
-            repo_name=repo_name,
-            old_name=old_name,
-            name=label.name,
-            color=label.color,
-            description=label.description or "",
+        """Delete a label with rate limiting."""
+        self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.delete_label(repo_name, label_name),
+            self._boundary._github,
         )
-        return convert_to_label(raw_label)
+        self._invalidate_cache_for_repository(repo_name, "labels")
+
+    def update_label(
+        self, repo_name: str, old_name: str, name: str, color: str, description: str
+    ) -> Dict[str, Any]:
+        """Update an existing label with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.update_label(
+                repo_name, old_name, name, color, description
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "labels")
+        return result
+
+    def create_issue(
+        self, repo_name: str, title: str, body: str, labels: List[str]
+    ) -> Dict[str, Any]:
+        """Create a new issue with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_issue(repo_name, title, body, labels),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "issues")
+        return result
 
     def create_issue_comment(
-        self,
-        repo_name: str,
-        issue_number: int,
-        comment: Comment,
-        include_original_metadata: bool = True,
-    ) -> Comment:
-        """Create a new comment on an issue."""
-        from .metadata import add_comment_metadata_footer
-
-        # Add original metadata footer if requested
-        body = (
-            add_comment_metadata_footer(comment)
-            if include_original_metadata
-            else comment.body
+        self, repo_name: str, issue_number: int, body: str
+    ) -> Dict[str, Any]:
+        """Create a new comment with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_issue_comment(repo_name, issue_number, body),
+            self._boundary._github,
         )
-
-        raw_comment = self._boundary.create_issue_comment(
-            repo_name=repo_name,
-            issue_number=issue_number,
-            body=body,
-        )
-        return convert_to_comment(raw_comment)
+        self._invalidate_cache_for_repository(repo_name, "comments")
+        return result
 
     def close_issue(
         self, repo_name: str, issue_number: int, state_reason: Optional[str] = None
-    ) -> Issue:
-        """Close an issue with optional state reason."""
-        raw_issue = self._boundary.close_issue(
-            repo_name=repo_name,
-            issue_number=issue_number,
-            state_reason=state_reason,
+    ) -> Dict[str, Any]:
+        """Close an issue with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.close_issue(repo_name, issue_number, state_reason),
+            self._boundary._github,
         )
-        return convert_to_issue(raw_issue)
+        self._invalidate_cache_for_repository(repo_name, "issues")
+        return result
 
-    def _convert_labels(self, raw_labels: List[dict]) -> List[Label]:
-        """Convert list of raw label data to Label models."""
-        return [convert_to_label(raw_label) for raw_label in raw_labels]
+    # Cross-cutting Concern Coordination
 
-    def _convert_issues(self, raw_issues: List[dict]) -> List[Issue]:
-        """Convert list of raw issue data to Issue models."""
-        return [convert_to_issue(raw_issue) for raw_issue in raw_issues]
+    def _execute_with_cross_cutting_concerns(
+        self, cache_key: str, operation: Callable[[], List[Dict[str, Any]]]
+    ) -> List[Dict[str, Any]]:
+        """Execute operation with rate limiting and caching."""
+        if self._cache_service:
+            return self._cache_service.get_or_fetch(
+                key=cache_key,
+                fetch_fn=lambda: self._rate_limiter.execute_with_retry(
+                    operation, self._boundary._github
+                ),
+            )
+        else:
+            return self._rate_limiter.execute_with_retry(
+                operation, self._boundary._github
+            )
 
-    def _convert_comments(self, raw_comments: List[dict]) -> List[Comment]:
-        """Convert list of raw comment data to Comment models."""
-        return [convert_to_comment(raw_comment) for raw_comment in raw_comments]
+    def _invalidate_cache_for_repository(self, repo_name: str, data_type: str) -> None:
+        """Invalidate cached data for repository after modifications."""
+        if self._cache_service:
+            # For now, we'll clear all cache
+            # In the future, we can implement more granular invalidation
+            logger.info(f"Clearing cache after {data_type} modification in {repo_name}")
+            self._cache_service.clear_cache()
 
-    def _extract_label_names(self, labels: List[Label]) -> List[str]:
-        """Extract label names for GitHub API calls."""
-        return [label.name for label in labels]
+
+def create_github_service(
+    token: str,
+    enable_rate_limiting: bool = True,
+    enable_caching: bool = True,
+    cache_config: Optional[CacheConfig] = None,
+) -> GitHubService:
+    """
+    Factory function to create a configured GitHub service.
+
+    Args:
+        token: GitHub authentication token
+        enable_rate_limiting: Whether to enable rate limiting
+        enable_caching: Whether to enable caching
+        cache_config: Optional cache configuration
+
+    Returns:
+        Configured GitHubService instance
+    """
+    boundary = GitHubApiBoundary(token)
+
+    rate_limiter = RateLimitHandler() if enable_rate_limiting else None
+
+    cache_service = None
+    if enable_caching:
+        config = cache_config or CacheConfig()
+        cache_service = CacheService(config)
+
+    return GitHubService(boundary, rate_limiter, cache_service)

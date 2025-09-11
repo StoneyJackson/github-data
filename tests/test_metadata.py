@@ -247,8 +247,8 @@ class TestMetadataIntegration:
             json.dump(comments_data, f)
 
         # Mock the GitHubService to capture what gets sent to API
-        with patch("src.actions.restore.GitHubService") as mock_service:
-            mock_client = mock_service.return_value
+        with patch("src.actions.restore.create_github_service") as mock_create_service:
+            mock_client = mock_create_service.return_value
             mock_client.get_repository_labels.return_value = []
 
             # Set up return values for issue creation

@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import List, Dict
 from urllib.parse import urlparse
 
-from ..github import GitHubService
+from ..github import create_github_service
+from ..github.service import GitHubService
+from ..github import converters
 from ..models import Label, Issue, Comment
 from ..storage.json_storage import load_json_data
 
@@ -22,7 +24,7 @@ def restore_repository_data(
     include_original_metadata: bool = True,
 ) -> None:
     """Restore GitHub repository labels, issues, and comments from JSON files."""
-    client = GitHubService(github_token)
+    client = create_github_service(github_token)
     input_dir = Path(data_path)
 
     _validate_data_files_exist(input_dir)
@@ -58,7 +60,10 @@ def _restore_labels(
     print(f"Using label conflict strategy: {strategy.value}")
 
     # Get existing labels for conflict detection
-    existing_labels = client.get_repository_labels(repo_name)
+    raw_existing_labels = client.get_repository_labels(repo_name)
+    existing_labels = [
+        converters.convert_to_label(label_dict) for label_dict in raw_existing_labels
+    ]
 
     # Apply conflict resolution strategy
     if strategy == LabelConflictStrategy.FAIL_IF_EXISTING:
@@ -135,7 +140,9 @@ def _create_repository_labels(
     """Create labels in the repository."""
     for label in labels:
         try:
-            client.create_label(repo_name, label)
+            client.create_label(
+                repo_name, label.name, label.color, label.description or ""
+            )
             print(f"Created label: {label.name}")
         except Exception as e:
             raise RuntimeError(f"Failed to create label '{label.name}': {e}") from e
@@ -152,30 +159,42 @@ def _create_repository_issues(
 
     for issue in issues:
         try:
-            created_issue = client.create_issue(
-                repo_name, issue, include_original_metadata
+            # Prepare issue data for creation
+            if include_original_metadata:
+                from ..github.metadata import add_issue_metadata_footer
+
+                issue_body = add_issue_metadata_footer(issue)
+            else:
+                issue_body = issue.body or ""
+
+            # Convert labels to string names
+            label_names = [label.name for label in issue.labels]
+
+            created_issue_data = client.create_issue(
+                repo_name, issue.title, issue_body, label_names
             )
-            issue_number_mapping[issue.number] = created_issue.number
+            issue_number_mapping[issue.number] = created_issue_data["number"]
             print(
-                f"Created issue #{created_issue.number}: "
-                f"{created_issue.title} (was #{issue.number})"
+                f"Created issue #{created_issue_data['number']}: "
+                f"{created_issue_data['title']} (was #{issue.number})"
             )
 
             # Close the issue if it was originally closed
             if issue.state == "closed":
                 try:
                     client.close_issue(
-                        repo_name, created_issue.number, issue.state_reason
+                        repo_name, created_issue_data["number"], issue.state_reason
                     )
                     reason_text = (
                         f"with reason: {issue.state_reason}"
                         if issue.state_reason
                         else ""
                     )
-                    print(f"Closed issue #{created_issue.number} {reason_text}")
+                    print(f"Closed issue #{created_issue_data['number']} {reason_text}")
                 except Exception as e:
                     print(
-                        f"Warning: Failed to close issue #{created_issue.number}: {e}"
+                        f"Warning: Failed to close issue "
+                        f"#{created_issue_data['number']}: {e}"
                     )
 
         except Exception as e:
@@ -234,11 +253,19 @@ def _handle_overwrite(
         try:
             if label.name in existing_names:
                 # Update existing label
-                client.update_label(repo_name, label.name, label)
+                client.update_label(
+                    repo_name,
+                    label.name,
+                    label.name,
+                    label.color,
+                    label.description or "",
+                )
                 print(f"Updated label: {label.name}")
             else:
                 # Create new label
-                client.create_label(repo_name, label)
+                client.create_label(
+                    repo_name, label.name, label.color, label.description or ""
+                )
                 print(f"Created label: {label.name}")
         except Exception as e:
             action = "update" if label.name in existing_names else "create"
@@ -281,9 +308,15 @@ def _create_repository_comments(
                 )
                 continue
 
-            client.create_issue_comment(
-                repo_name, new_issue_number, comment, include_original_metadata
-            )
+            # Prepare comment body with metadata if needed
+            if include_original_metadata:
+                from ..github.metadata import add_comment_metadata_footer
+
+                comment_body = add_comment_metadata_footer(comment)
+            else:
+                comment_body = comment.body
+
+            client.create_issue_comment(repo_name, new_issue_number, comment_body)
             print(
                 f"Created comment for issue #{new_issue_number} "
                 f"(was #{original_issue_number})"

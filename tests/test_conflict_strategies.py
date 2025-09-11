@@ -367,7 +367,8 @@ class TestConflictStrategyIntegration:
 
         # Get the actual call arguments to verify it was 'enhancement'
         call_args = mock_boundary.create_label.call_args
-        assert call_args[1]["name"] == "enhancement"
+        # Arguments are: (repo_name, label.name, label.color, label.description)
+        assert call_args[0][1] == "enhancement"
 
     def test_overwrite_strategy(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
@@ -406,10 +407,12 @@ class TestConflictStrategyIntegration:
         # Verify conflicting label was updated
         assert mock_boundary.update_label.call_count == 1
         update_call = mock_boundary.update_label.call_args
-        assert update_call[1]["old_name"] == "bug"
-        assert update_call[1]["name"] == "bug"
+        # Arguments are: (repo_name, old_name, name, color, description)
+        assert update_call[0][1] == "bug"  # old_name
+        assert update_call[0][2] == "bug"  # name
 
         # Verify non-conflicting label was created
         assert mock_boundary.create_label.call_count == 1
         create_call = mock_boundary.create_label.call_args
-        assert create_call[1]["name"] == "enhancement"
+        # Arguments are: (repo_name, label.name, label.color, label.description)
+        assert create_call[0][1] == "enhancement"

@@ -348,45 +348,49 @@ class TestSaveRestoreIntegration:
         # Verify label creation calls
         label_calls = mock_boundary.create_label.call_args_list
 
-        # First label call
-        first_label_call = label_calls[0][1]  # keyword arguments
-        assert first_label_call["name"] == "bug"
-        assert first_label_call["color"] == "d73a4a"
-        assert first_label_call["description"] == "Something isn't working"
+        # First label call - check positional arguments
+        first_label_call = label_calls[0][0]  # positional arguments
+        assert first_label_call[1] == "bug"  # name
+        assert first_label_call[2] == "d73a4a"  # color
+        assert first_label_call[3] == "Something isn't working"  # description
 
         # Second label call
-        second_label_call = label_calls[1][1]
-        assert second_label_call["name"] == "enhancement"
-        assert second_label_call["color"] == "a2eeef"
-        assert second_label_call["description"] == "New feature or request"
+        second_label_call = label_calls[1][0]  # positional arguments
+        assert second_label_call[1] == "enhancement"  # name
+        assert second_label_call[2] == "a2eeef"  # color
+        assert second_label_call[3] == "New feature or request"  # description
 
         # Verify issue creation calls
         issue_calls = mock_boundary.create_issue.call_args_list
 
-        # First issue call
-        first_issue_call = issue_calls[0][1]
-        assert first_issue_call["title"] == "Fix authentication bug"
-        assert first_issue_call["body"] == "Users cannot login with valid credentials"
-        assert first_issue_call["labels"] == ["bug"]
+        # First issue call - check positional arguments
+        first_issue_call = issue_calls[0][0]  # positional arguments
+        assert first_issue_call[1] == "Fix authentication bug"  # title
+        assert (
+            first_issue_call[2] == "Users cannot login with valid credentials"
+        )  # body
+        assert first_issue_call[3] == ["bug"]  # labels
 
         # Second issue call (with None body converted to empty string)
-        second_issue_call = issue_calls[1][1]
-        assert second_issue_call["title"] == "Add user dashboard"
-        assert second_issue_call["body"] == ""  # None converted to empty string
-        assert second_issue_call["labels"] == ["enhancement"]
+        second_issue_call = issue_calls[1][0]  # positional arguments
+        assert second_issue_call[1] == "Add user dashboard"  # title
+        assert second_issue_call[2] == ""  # None converted to empty string
+        assert second_issue_call[3] == ["enhancement"]  # labels
 
         # Verify comment creation calls
         comment_calls = mock_boundary.create_issue_comment.call_args_list
 
         # First comment call (mapped to issue #10)
-        first_comment_call = comment_calls[0][1]
-        assert first_comment_call["issue_number"] == 10  # Mapped from original issue #1
-        assert first_comment_call["body"] == "I can reproduce this issue"
+        first_comment_call = comment_calls[0][0]  # positional arguments
+        assert (
+            first_comment_call[1] == 10
+        )  # issue_number - Mapped from original issue #1
+        assert first_comment_call[2] == "I can reproduce this issue"  # body
 
         # Second comment call (mapped to issue #11)
-        second_comment_call = comment_calls[1][1]
-        assert second_comment_call["issue_number"] == 11  # Mapped from issue #2
-        assert second_comment_call["body"] == "Fixed in PR #3"
+        second_comment_call = comment_calls[1][0]  # positional arguments
+        assert second_comment_call[1] == 11  # issue_number - Mapped from issue #2
+        assert second_comment_call[2] == "Fixed in PR #3"  # body
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_complete_save_restore_cycle_preserves_data_integrity(
@@ -482,24 +486,36 @@ class TestSaveRestoreIntegration:
         original_labels = sample_github_data["labels"]
 
         for i, (original, call) in enumerate(zip(original_labels, restore_label_calls)):
-            restored_args = call[1]  # keyword arguments
-            assert restored_args["name"] == original["name"]
-            assert restored_args["color"] == original["color"]
-            assert restored_args["description"] == original["description"]
+            restored_args = call[
+                0
+            ]  # positional arguments: (repo_name, name, color, description)
+            assert restored_args[1] == original["name"]  # name is second positional arg
+            assert (
+                restored_args[2] == original["color"]
+            )  # color is third positional arg
+            assert (
+                restored_args[3] == original["description"]
+            )  # description is fourth positional arg
 
         # Verify that all original issue data was preserved
         restore_issue_calls = restore_boundary.create_issue.call_args_list
         original_issues = sample_github_data["issues"]
 
         for i, (original, call) in enumerate(zip(original_issues, restore_issue_calls)):
-            restored_args = call[1]
-            assert restored_args["title"] == original["title"]
+            restored_args = call[
+                0
+            ]  # positional arguments: (repo_name, title, body, labels)
+            assert (
+                restored_args[1] == original["title"]
+            )  # title is second positional arg
             # Handle None body conversion
             expected_body = original["body"] or ""
-            assert restored_args["body"] == expected_body
+            assert restored_args[2] == expected_body  # body is third positional arg
             # Check that labels were extracted correctly
             expected_labels = [label["name"] for label in original["labels"]]
-            assert restored_args["labels"] == expected_labels
+            assert (
+                restored_args[3] == expected_labels
+            )  # labels is fourth positional arg
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_save_handles_empty_repository(self, mock_boundary_class, temp_data_dir):
@@ -745,16 +761,26 @@ class TestSaveRestoreIntegration:
         assert len(comment_calls) == 3
 
         # First call should be the earliest comment (2023-01-10T10:30:00Z)
-        first_call = comment_calls[0][1]
-        assert first_call["body"] == "First comment (earliest)"
+        first_call = comment_calls[0][
+            0
+        ]  # positional arguments: (repo_name, issue_number, body)
+        assert (
+            first_call[2] == "First comment (earliest)"
+        )  # body is third positional arg
 
         # Second call should be the middle comment (2023-01-10T12:00:00Z)
-        second_call = comment_calls[1][1]
-        assert second_call["body"] == "Second comment (middle)"
+        second_call = comment_calls[1][
+            0
+        ]  # positional arguments: (repo_name, issue_number, body)
+        assert (
+            second_call[2] == "Second comment (middle)"
+        )  # body is third positional arg
 
         # Third call should be the latest comment (2023-01-10T14:00:00Z)
-        third_call = comment_calls[2][1]
-        assert third_call["body"] == "Third comment (latest)"
+        third_call = comment_calls[2][
+            0
+        ]  # positional arguments: (repo_name, issue_number, body)
+        assert third_call[2] == "Third comment (latest)"  # body is third positional arg
 
 
 class TestErrorHandlingIntegration:
@@ -1040,7 +1066,9 @@ class TestErrorHandlingIntegration:
         create_call_args = mock_boundary.create_issue.call_args
 
         # Check that metadata footer was added to body
-        created_body = create_call_args[1]["body"]  # keyword argument
+        created_body = create_call_args[0][
+            2
+        ]  # positional arguments: (repo_name, title, body, labels) - body is 3rd
         assert (
             "Originally created by @reporter on 2023-01-01 10:00:00 UTC" in created_body
         )
@@ -1051,7 +1079,9 @@ class TestErrorHandlingIntegration:
 
         # Verify issue was closed with correct state reason
         mock_boundary.close_issue.assert_called_once_with(
-            repo_name="owner/repo", issue_number=101, state_reason="completed"
+            "owner/repo",
+            101,
+            "completed",  # positional args: (repo_name, issue_number, state_reason)
         )
 
     @patch("src.github.service.GitHubApiBoundary")
@@ -1148,7 +1178,9 @@ class TestErrorHandlingIntegration:
         create_call_args = mock_boundary.create_issue.call_args
 
         # Check metadata footer - should have closed date but no closer or reason
-        created_body = create_call_args[1]["body"]  # keyword argument
+        created_body = create_call_args[0][
+            2
+        ]  # positional arguments: (repo_name, title, body, labels) - body is 3rd
         assert "Closed on 2023-01-01 16:00:00 UTC*" in created_body
         # Check that there's no "closed by" info (only "created by" should be present)
         assert "Closed on 2023-01-01 16:00:00 UTC by @" not in created_body
@@ -1156,5 +1188,7 @@ class TestErrorHandlingIntegration:
 
         # Verify issue was closed without state reason (None passed)
         mock_boundary.close_issue.assert_called_once_with(
-            repo_name="owner/repo", issue_number=102, state_reason=None
+            "owner/repo",
+            102,
+            None,  # positional args: (repo_name, issue_number, state_reason)
         )
