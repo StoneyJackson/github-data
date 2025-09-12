@@ -11,6 +11,22 @@ from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
 
+# Required GraphQL imports
+from gql import Client
+from gql.transport.requests import RequestsHTTPTransport
+from .graphql_queries import (
+    REPOSITORY_LABELS_QUERY,
+    REPOSITORY_ISSUES_QUERY,
+    REPOSITORY_COMMENTS_QUERY,
+    RATE_LIMIT_QUERY,
+)
+from .graphql_converters import (
+    convert_graphql_labels_to_rest_format,
+    convert_graphql_issues_to_rest_format,
+    convert_graphql_comments_to_rest_format,
+    convert_graphql_rate_limit_to_rest_format,
+)
+
 
 class GitHubApiBoundary:
     """
@@ -28,21 +44,57 @@ class GitHubApiBoundary:
             token: GitHub authentication token
         """
         self._github = Github(auth=Auth.Token(token))
+        self._token = token
+        self._gql_client = self._create_graphql_client(token)
 
-    # Public API - Repository Data Operations
+    # GraphQL Client Setup
+
+    def _create_graphql_client(self, token: str) -> Client:
+        """Create and configure GraphQL client for GitHub API."""
+        transport = RequestsHTTPTransport(
+            url="https://api.github.com/graphql",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        return Client(transport=transport, fetch_schema_from_transport=True)
+
+    # Public API - Repository Data Operations (GraphQL-enhanced)
 
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
-        """Get all labels from repository as raw JSON data."""
-        repo = self._get_repository(repo_name)
-        labels = repo.get_labels()
-        return self._extract_raw_data_list(labels)
+        """Get all labels from repository using GraphQL for better performance."""
+        owner, name = self._parse_repo_name(repo_name)
+
+        result = self._gql_client.execute(
+            REPOSITORY_LABELS_QUERY, variable_values={"owner": owner, "name": name}
+        )
+
+        graphql_labels = result["repository"]["labels"]["nodes"]
+        return convert_graphql_labels_to_rest_format(graphql_labels)
 
     def get_repository_issues(self, repo_name: str) -> List[Dict[str, Any]]:
-        """Get all issues from repository as raw JSON data, excluding pull requests."""
-        repo = self._get_repository(repo_name)
-        issues = repo.get_issues(state="all")
-        all_issues_data = self._extract_raw_data_list(issues)
-        return self._filter_out_pull_requests(all_issues_data)
+        """Get all issues from repository using GraphQL for better performance."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_issues = []
+        cursor = None
+
+        while True:
+            result = self._gql_client.execute(
+                REPOSITORY_ISSUES_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            issues_data = result["repository"]["issues"]
+            all_issues.extend(issues_data["nodes"])
+
+            if not issues_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = issues_data["pageInfo"]["endCursor"]
+
+        return convert_graphql_issues_to_rest_format(all_issues, repo_name)
 
     def get_issue_comments(
         self, repo_name: str, issue_number: int
@@ -54,18 +106,34 @@ class GitHubApiBoundary:
         return self._extract_raw_data_list(comments)
 
     def get_all_issue_comments(self, repo_name: str) -> List[Dict[str, Any]]:
-        """Get all comments from all issues as raw JSON data, excluding PR comments."""
-        repo = self._get_repository(repo_name)
-        issues = repo.get_issues(state="all")
-
+        """Get all comments from all issues using GraphQL for better performance."""
+        owner, name = self._parse_repo_name(repo_name)
         all_comments = []
-        for issue in issues:
-            if self._should_include_issue_comments(issue):
-                comments = issue.get_comments()
-                comment_data = self._extract_raw_data_list(comments)
-                all_comments.extend(comment_data)
+        cursor = None
 
-        return all_comments
+        while True:
+            result = self._gql_client.execute(
+                REPOSITORY_COMMENTS_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            issues_data = result["repository"]["issues"]
+
+            for issue in issues_data["nodes"]:
+                for comment in issue["comments"]["nodes"]:
+                    comment["issue_url"] = issue["url"]
+                    all_comments.append(comment)
+
+            if not issues_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = issues_data["pageInfo"]["endCursor"]
+
+        return convert_graphql_comments_to_rest_format(all_comments)
 
     # Public API - Repository Modification Operations
 
@@ -128,9 +196,30 @@ class GitHubApiBoundary:
     # Public API - Rate Limit Monitoring
 
     def get_rate_limit_status(self) -> Dict[str, Any]:
-        """Get current rate limit status from GitHub API."""
-        rate_limit = self._github.get_rate_limit()
-        return self._build_rate_limit_response(rate_limit)
+        """Get current rate limit status using GraphQL."""
+        result = self._gql_client.execute(RATE_LIMIT_QUERY)
+        rate_limit_data = result["rateLimit"]
+
+        rate_limit_response = {
+            "core": {
+                "limit": rate_limit_data["limit"],
+                "remaining": rate_limit_data["remaining"],
+                "reset": rate_limit_data["resetAt"],
+            }
+        }
+        return convert_graphql_rate_limit_to_rest_format(rate_limit_response)
+
+    # GraphQL Utility Methods
+
+    def _parse_repo_name(self, repo_name: str) -> tuple[str, str]:
+        """Parse owner/repo format into separate components."""
+        if "/" not in repo_name:
+            raise ValueError(
+                f"Repository name must be in 'owner/repo' format, got: {repo_name}"
+            )
+
+        owner, name = repo_name.split("/", 1)
+        return owner, name
 
     # Low-level Repository Operations
 
@@ -138,26 +227,12 @@ class GitHubApiBoundary:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)
 
-    # Data Processing Utilities
-
-    def _should_include_issue_comments(self, issue: Any) -> bool:
-        """Check if issue comments should be included (not PR, has comments)."""
-        return not self._is_pull_request(issue) and self._issue_has_comments(issue)
-
-    def _issue_has_comments(self, issue: Any) -> bool:
-        """Check if issue has comments without triggering extra API calls."""
-        issue_data = self._extract_raw_data(issue)
-        return bool(issue_data.get("comments", 0) > 0)
-
-    def _is_pull_request(self, issue: Any) -> bool:
-        """Check if an issue is actually a pull request."""
-        issue_data = self._extract_raw_data(issue)
-        return "pull_request" in issue_data and issue_data["pull_request"] is not None
+    # Utility Methods
 
     def _filter_out_pull_requests(
         self, issues_data: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """Filter out pull requests from a list of issue data."""
+        """Filter out pull requests (backward compatibility)."""
         return [
             issue_data
             for issue_data in issues_data
@@ -168,34 +243,7 @@ class GitHubApiBoundary:
         """Check if issue data represents a pull request."""
         return "pull_request" in issue_data and issue_data["pull_request"] is not None
 
-    def _build_rate_limit_response(self, rate_limit: Any) -> Dict[str, Any]:
-        """Build rate limit response from API data."""
-        core = getattr(rate_limit, "core", None)
-        search = getattr(rate_limit, "search", None)
-
-        result = {}
-        if core:
-            result["core"] = self._build_rate_limit_section(core)
-        if search:
-            result["search"] = self._build_rate_limit_section(search)
-
-        return result
-
-    def _build_rate_limit_section(self, section: Any) -> Dict[str, Any]:
-        """Build rate limit section data."""
-        return {
-            "limit": getattr(section, "limit", None),
-            "remaining": getattr(section, "remaining", None),
-            "reset": self._format_reset_time(section),
-        }
-
-    def _format_reset_time(self, section: Any) -> Optional[str]:
-        """Format reset time from rate limit section."""
-        if hasattr(section, "reset") and section.reset:
-            return str(section.reset.isoformat())
-        return None
-
-    # Raw Data Extraction Utilities
+    # Raw Data Extraction Utilities (for REST write operations)
 
     def _extract_raw_data_list(
         self, pygithub_objects: PaginatedList[Any]

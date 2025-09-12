@@ -96,23 +96,48 @@ class TestPullRequestFiltering:
         for issue in filtered_issues:
             assert "pull_request" not in issue or issue["pull_request"] is None
 
+    @patch("src.github.boundary.Client")
     @patch("src.github.boundary.Github")
     def test_get_repository_issues_filters_pull_requests(
-        self, mock_github, sample_issues_with_pr
+        self, mock_github, mock_client, sample_issues_with_pr
     ):
         """Test that get_repository_issues filters out pull requests."""
-        # Setup mock
-        mock_repo = Mock()
-        mock_github.return_value.get_repo.return_value = mock_repo
+        # Setup GraphQL mock
+        mock_gql_client = Mock()
+        mock_client.return_value = mock_gql_client
 
-        # Create mock issue objects with _rawData
-        mock_issues = []
-        for issue_data in sample_issues_with_pr:
-            mock_issue = Mock()
-            mock_issue._rawData = issue_data
-            mock_issues.append(mock_issue)
+        # Mock GraphQL response - return issues, not PRs, in GraphQL format
+        issues_only = [
+            issue
+            for issue in sample_issues_with_pr
+            if "pull_request" not in issue or issue["pull_request"] is None
+        ]
 
-        mock_repo.get_issues.return_value = mock_issues
+        # Convert REST format to GraphQL format for the test
+        graphql_issues = []
+        for issue in issues_only:
+            graphql_issue = {
+                "number": issue["number"],
+                "title": issue["title"],
+                "body": issue["body"],
+                "state": issue["state"].upper(),
+                "stateReason": None,
+                "url": issue["html_url"],
+                "createdAt": issue["created_at"],
+                "updatedAt": issue["updated_at"],
+                "author": {"login": issue["user"]["login"]},
+                "labels": {"nodes": []},  # Empty labels for simplicity
+            }
+            graphql_issues.append(graphql_issue)
+
+        mock_gql_client.execute.return_value = {
+            "repository": {
+                "issues": {
+                    "nodes": graphql_issues,
+                    "pageInfo": {"hasNextPage": False, "endCursor": None},
+                }
+            }
+        }
 
         # Test the boundary
         boundary = GitHubApiBoundary("fake-token")
@@ -127,43 +152,51 @@ class TestPullRequestFiltering:
         for issue in result:
             assert "pull_request" not in issue or issue["pull_request"] is None
 
+    @patch("src.github.boundary.Client")
     @patch("src.github.boundary.Github")
-    def test_get_all_issue_comments_skips_pull_request_comments(self, mock_github):
+    def test_get_all_issue_comments_skips_pull_request_comments(
+        self, mock_github, mock_client
+    ):
         """Test that get_all_issue_comments skips pull request comments."""
-        # Setup mock repo
-        mock_repo = Mock()
-        mock_github.return_value.get_repo.return_value = mock_repo
+        # Setup GraphQL mock
+        mock_gql_client = Mock()
+        mock_client.return_value = mock_gql_client
 
-        # Create mock issues: one regular issue, one pull request
-        mock_regular_issue = Mock()
-        mock_regular_issue._rawData = {"id": 1, "number": 1, "comments": 1}
-
-        mock_pr_issue = Mock()
-        mock_pr_issue._rawData = {
-            "id": 2,
-            "number": 2,
-            "comments": 1,
-            "pull_request": {"url": "https://api.github.com/repos/owner/repo/pulls/2"},
+        # Mock GraphQL response - only includes comments from regular issues
+        mock_gql_client.execute.return_value = {
+            "repository": {
+                "issues": {
+                    "nodes": [
+                        {
+                            "number": 1,
+                            "url": "https://api.github.com/repos/owner/repo/issues/1",
+                            "comments": {
+                                "nodes": [
+                                    {
+                                        "body": "Regular comment",
+                                        "createdAt": "2023-01-15T10:30:00Z",
+                                        "updatedAt": "2023-01-15T10:30:00Z",
+                                        "url": "https://github.com/owner/repo/"
+                                        "issues/1#issuecomment-1001",
+                                        "author": {"login": "user1"},
+                                    }
+                                ],
+                                "pageInfo": {
+                                    "hasNextPage": False,
+                                    "endCursor": None,
+                                },
+                            },
+                        }
+                        # Note: PR comments not included - GraphQL issues query
+                        # naturally excludes pull requests
+                    ],
+                    "pageInfo": {
+                        "hasNextPage": False,
+                        "endCursor": None,
+                    },
+                }
+            }
         }
-
-        mock_repo.get_issues.return_value = [mock_regular_issue, mock_pr_issue]
-
-        # Setup mock comments for the regular issue
-        mock_comment = Mock()
-        mock_comment._rawData = {
-            "id": 1001,
-            "body": "Regular comment",
-            "user": {"login": "user1"},
-            "created_at": "2023-01-15T10:30:00Z",
-            "updated_at": "2023-01-15T10:30:00Z",
-            "html_url": "https://github.com/owner/repo/issues/1#issuecomment-1001",
-            "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
-        }
-
-        mock_regular_issue.get_comments.return_value = [mock_comment]
-        mock_pr_issue.get_comments.return_value = [
-            mock_comment
-        ]  # This should not be called
 
         # Test the boundary
         boundary = GitHubApiBoundary("fake-token")
@@ -171,8 +204,7 @@ class TestPullRequestFiltering:
 
         # Should only have comments from regular issues
         assert len(result) == 1
-        assert result[0]["id"] == 1001
+        assert result[0]["body"] == "Regular comment"
+        assert result[0]["user"]["login"] == "user1"
 
-        # Verify PR comments were not retrieved
-        mock_regular_issue.get_comments.assert_called_once()
-        mock_pr_issue.get_comments.assert_not_called()
+        # GraphQL naturally excludes PR comments by only querying issues
