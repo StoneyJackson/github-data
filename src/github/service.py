@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Any, Optional, Callable
 from .boundary import GitHubApiBoundary
 from .rate_limiter import RateLimitHandler
-from .cache import CacheService, CacheConfig
+from .cache import setup_global_cache, clear_cache, CacheConfig
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class GitHubService:
         self,
         boundary: GitHubApiBoundary,
         rate_limiter: Optional[RateLimitHandler] = None,
-        cache_service: Optional[CacheService] = None,
+        caching_enabled: bool = True,
     ):
         """
         Initialize GitHub service with dependencies.
@@ -34,11 +34,11 @@ class GitHubService:
         Args:
             boundary: Ultra-thin API boundary layer
             rate_limiter: Optional rate limiting handler
-            cache_service: Optional caching service
+            caching_enabled: Whether caching is enabled globally
         """
         self._boundary = boundary
         self._rate_limiter = rate_limiter or RateLimitHandler()
-        self._cache_service = cache_service
+        self._caching_enabled = caching_enabled
 
     # Public API - Repository Data Operations
 
@@ -155,25 +155,17 @@ class GitHubService:
         self, cache_key: str, operation: Callable[[], List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """Execute operation with rate limiting and caching."""
-        if self._cache_service:
-            return self._cache_service.get_or_fetch(
-                key=cache_key,
-                fetch_fn=lambda: self._rate_limiter.execute_with_retry(
-                    operation, self._boundary._github
-                ),
-            )
-        else:
-            return self._rate_limiter.execute_with_retry(
-                operation, self._boundary._github
-            )
+        # With global caching, requests are automatically cached
+        # We just need to execute with rate limiting
+        return self._rate_limiter.execute_with_retry(operation, self._boundary._github)
 
     def _invalidate_cache_for_repository(self, repo_name: str, data_type: str) -> None:
         """Invalidate cached data for repository after modifications."""
-        if self._cache_service:
+        if self._caching_enabled:
             # For now, we'll clear all cache
             # In the future, we can implement more granular invalidation
             logger.info(f"Clearing cache after {data_type} modification in {repo_name}")
-            self._cache_service.clear_cache()
+            clear_cache()
 
 
 def create_github_service(
@@ -198,9 +190,8 @@ def create_github_service(
 
     rate_limiter = RateLimitHandler() if enable_rate_limiting else None
 
-    cache_service = None
     if enable_caching:
         config = cache_config or CacheConfig()
-        cache_service = CacheService(config)
+        setup_global_cache(config)
 
-    return GitHubService(boundary, rate_limiter, cache_service)
+    return GitHubService(boundary, rate_limiter, enable_caching)

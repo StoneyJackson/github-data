@@ -1,5 +1,5 @@
 """
-Caching service for GitHub API responses.
+Global caching setup for GitHub API responses.
 
 Provides ETag-based conditional requests and response caching
 to reduce redundant API calls and improve performance.
@@ -7,11 +7,9 @@ to reduce redundant API calls and improve performance.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Callable, TypeVar
+from typing import Dict, List, Any, Optional
 
 import requests_cache
-
-T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -27,65 +25,45 @@ class CacheConfig:
     stale_if_error: bool = True
 
 
-class CacheService:
+def setup_global_cache(config: Optional[CacheConfig] = None) -> None:
     """
-    Service for caching GitHub API responses with ETag support.
+    Install global caching for all HTTP requests.
 
-    Uses requests-cache to provide automatic ETag handling,
-    conditional requests, and response caching.
+    Args:
+        config: Optional cache configuration, uses defaults if None
     """
+    if config is None:
+        config = CacheConfig()
 
-    def __init__(self, config: CacheConfig):
-        """
-        Initialize cache service with configuration.
+    requests_cache.install_cache(
+        cache_name=config.cache_name,
+        expire_after=config.expire_after,
+        backend=config.backend,
+        allowable_codes=config.allowable_codes,
+        stale_if_error=config.stale_if_error,
+    )
+    logger.info(f"Global cache installed: {config.cache_name}")
 
-        Args:
-            config: Cache configuration settings
-        """
-        self._config = config
-        self._session = self._create_cached_session()
 
-    def get_or_fetch(self, key: str, fetch_fn: Callable[[], T]) -> T:
-        """
-        Get data from cache or fetch from API if not cached.
+def clear_cache() -> None:
+    """Clear all cached data."""
+    requests_cache.clear()
 
-        Args:
-            key: Cache key for the data
-            fetch_fn: Function to fetch data if not in cache
 
-        Returns:
-            Cached or freshly fetched data
-        """
-        # For now, we'll implement a simple wrapper
-        # In the future, we can enhance this with more sophisticated
-        # ETag handling specific to GitHub API responses
+def get_cache_info() -> Dict[str, Any]:
+    """Get information about cache state."""
+    if requests_cache.is_installed():
+        # Get the current cache backend
         try:
-            return fetch_fn()
-        except Exception as e:
-            logger.error(f"Failed to fetch data for key {key}: {e}")
-            raise
-
-    def clear_cache(self) -> None:
-        """Clear all cached data."""
-        if hasattr(self._session, "cache"):
-            self._session.cache.clear()
-
-    def get_cache_info(self) -> Dict[str, Any]:
-        """Get information about cache state."""
-        if hasattr(self._session, "cache"):
-            cache = self._session.cache
-            return {
-                "backend": str(type(cache)),
-                "size": len(cache) if hasattr(cache, "__len__") else "unknown",
-            }
-        return {"backend": "none", "size": 0}
-
-    def _create_cached_session(self) -> requests_cache.CachedSession:
-        """Create a cached session with configuration."""
-        return requests_cache.CachedSession(
-            cache_name=self._config.cache_name,
-            expire_after=self._config.expire_after,
-            backend=self._config.backend,
-            allowable_codes=self._config.allowable_codes,
-            stale_if_error=self._config.stale_if_error,
-        )
+            cache = requests_cache.get_cache()
+            if cache is not None:
+                return {
+                    "backend": str(type(cache)),
+                    "size": len(cache) if hasattr(cache, "__len__") else "unknown",
+                    "installed": True,
+                }
+            else:
+                return {"backend": "unknown", "size": "unknown", "installed": True}
+        except Exception:
+            return {"backend": "unknown", "size": "unknown", "installed": True}
+    return {"backend": "none", "size": 0, "installed": False}
