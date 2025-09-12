@@ -6,7 +6,7 @@ that will be serialized to/from JSON files.
 """
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -14,7 +14,7 @@ class GitHubUser(BaseModel):
     """GitHub user information."""
 
     login: str
-    id: int
+    id: Union[int, str]
     avatar_url: str
     html_url: str
 
@@ -26,13 +26,13 @@ class Label(BaseModel):
     color: str
     description: Optional[str] = None
     url: str
-    id: int
+    id: Union[int, str]
 
 
 class Comment(BaseModel):
     """GitHub issue or pull request comment."""
 
-    id: int
+    id: Union[int, str]
     body: str
     user: GitHubUser
     created_at: datetime
@@ -44,7 +44,7 @@ class Comment(BaseModel):
 class Issue(BaseModel):
     """GitHub repository issue."""
 
-    id: int
+    id: Union[int, str]
     number: int
     title: str
     body: Optional[str] = None

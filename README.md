@@ -88,9 +88,14 @@ docker run --rm \
 
 #### GitHub Token Permissions
 
-Your GitHub token should have the following permissions:
-- `repo` - For repository access and labels
-- `issues` - For reading and writing issues and comments
+**Create Token**: Visit [https://github.com/settings/tokens/new](https://github.com/settings/tokens/new)
+
+**Required scopes:**
+- `repo` (Full control of private repositories) - for both public and private repositories
+- OR `public_repo` (Access public repositories) - for public repositories only
+
+**Optional scopes:**
+- `read:org` (Read org membership) - for organization repositories
 
 #### Rate Limiting
 

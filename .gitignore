@@ -171,6 +171,11 @@ cython_debug/
 data/
 *.json
 
+# Manual testing data and configuration
+manual-test-data/
+manual-test-repos.local.yml
+.env.local
+
 # macOS
 .DS_Store
 .DS_Store?

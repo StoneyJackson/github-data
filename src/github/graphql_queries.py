@@ -22,6 +22,7 @@ REPOSITORY_BACKUP_QUERY = gql(
             url
             labels(first: 100) {
                 nodes {
+                    id
                     name
                     color
                     description
@@ -36,6 +37,7 @@ REPOSITORY_BACKUP_QUERY = gql(
                 orderBy: {field: CREATED_AT, direction: ASC}
             ) {
                 nodes {
+                    id
                     number
                     title
                     body
@@ -46,9 +48,15 @@ REPOSITORY_BACKUP_QUERY = gql(
                     updatedAt
                     author {
                         login
+                        ... on User {
+                            id
+                            avatarUrl
+                            url
+                        }
                     }
                     labels(first: 20) {
                         nodes {
+                            id
                             name
                             color
                             description
@@ -56,15 +64,21 @@ REPOSITORY_BACKUP_QUERY = gql(
                     }
                     comments(
                         first: $commentsFirst,
-                        orderBy: {field: CREATED_AT, direction: ASC}
+                        orderBy: {field: UPDATED_AT, direction: ASC}
                     ) {
                         nodes {
+                            id
                             body
                             createdAt
                             updatedAt
                             url
                             author {
                                 login
+                                ... on User {
+                                    id
+                                    avatarUrl
+                                    url
+                                }
                             }
                         }
                         pageInfo {
@@ -90,6 +104,7 @@ REPOSITORY_LABELS_QUERY = gql(
         repository(owner: $owner, name: $name) {
             labels(first: 100) {
                 nodes {
+                    id
                     name
                     color
                     description
@@ -120,6 +135,7 @@ REPOSITORY_ISSUES_QUERY = gql(
                 orderBy: {field: CREATED_AT, direction: ASC}
             ) {
                 nodes {
+                    id
                     number
                     title
                     body
@@ -130,9 +146,15 @@ REPOSITORY_ISSUES_QUERY = gql(
                     updatedAt
                     author {
                         login
+                        ... on User {
+                            id
+                            avatarUrl
+                            url
+                        }
                     }
                     labels(first: 20) {
                         nodes {
+                            id
                             name
                             color
                             description
@@ -164,15 +186,21 @@ ISSUE_COMMENTS_QUERY = gql(
                 comments(
                     first: $first,
                     after: $after,
-                    orderBy: {field: CREATED_AT, direction: ASC}
+                    orderBy: {field: UPDATED_AT, direction: ASC}
                 ) {
                     nodes {
+                        id
                         body
                         createdAt
                         updatedAt
                         url
                         author {
                             login
+                            ... on User {
+                                id
+                                avatarUrl
+                                url
+                            }
                         }
                     }
                     pageInfo {
@@ -206,15 +234,21 @@ REPOSITORY_COMMENTS_QUERY = gql(
                     url
                     comments(
                         first: 100,
-                        orderBy: {field: CREATED_AT, direction: ASC}
+                        orderBy: {field: UPDATED_AT, direction: ASC}
                     ) {
                         nodes {
+                            id
                             body
                             createdAt
                             updatedAt
                             url
                             author {
                                 login
+                                ... on User {
+                                    id
+                                    avatarUrl
+                                    url
+                                }
                             }
                         }
                         pageInfo {

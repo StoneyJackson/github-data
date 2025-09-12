@@ -1,0 +1,32 @@
+# Test Repository Configurations for Manual Testing
+# Copy this file to manual-test-repos.local.yml and customize with real repositories
+
+test_repositories:
+  small_repo:
+    name: "Small Test Repository"
+    repo: "owner/small-repo"
+    description: "Repository with few issues and labels for quick testing"
+    expected_issues: "<10"
+    expected_labels: "<20"
+    
+  medium_repo:
+    name: "Medium Test Repository" 
+    repo: "owner/medium-repo"
+    description: "Repository with moderate issues and labels"
+    expected_issues: "10-100"
+    expected_labels: "20-50"
+    
+  large_repo:
+    name: "Large Test Repository"
+    repo: "owner/large-repo"
+    description: "Repository with many issues and complex label structure"
+    expected_issues: ">100"
+    expected_labels: ">50"
+    
+  # Add your own repositories here
+  your_repo_1:
+    name: "Your Repository 1"
+    repo: "your-username/your-repo"
+    description: "Your repository for testing"
+    expected_issues: "?"
+    expected_labels: "?"

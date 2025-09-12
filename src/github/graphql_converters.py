@@ -14,6 +14,7 @@ def convert_graphql_labels_to_rest_format(
     """Convert GraphQL label nodes to REST API format."""
     return [
         {
+            "id": label["id"],
             "name": label["name"],
             "color": label["color"],
             "description": label["description"],
@@ -35,6 +36,7 @@ def convert_graphql_issues_to_rest_format(
         # Convert labels
         labels = [
             {
+                "id": label["id"],
                 "name": label["name"],
                 "color": label["color"],
                 "description": label["description"],
@@ -50,17 +52,19 @@ def convert_graphql_issues_to_rest_format(
         if issue.get("author"):
             author = {
                 "login": issue["author"]["login"],
-                "id": None,  # GraphQL response doesn't include ID in this query
-                "url": f"https://api.github.com/users/{issue['author']['login']}",
+                "id": issue["author"].get("id"),
+                "avatar_url": issue["author"].get("avatarUrl"),
+                "html_url": issue["author"].get("url"),
             }
 
         rest_issue = {
+            "id": issue["id"],
             "number": issue["number"],
             "title": issue["title"],
             "body": issue.get("body"),
             "state": issue["state"].lower(),
             "state_reason": issue.get("stateReason"),
-            "url": issue["url"],
+            "html_url": issue["url"],
             "created_at": issue["createdAt"],
             "updated_at": issue["updatedAt"],
             "user": author,
@@ -89,16 +93,17 @@ def convert_graphql_comments_to_rest_format(
         if comment.get("author"):
             author = {
                 "login": comment["author"]["login"],
-                "id": None,  # GraphQL response doesn't include ID in this query
-                "url": f"https://api.github.com/users/{comment['author']['login']}",
+                "id": comment["author"].get("id"),
+                "avatar_url": comment["author"].get("avatarUrl"),
+                "html_url": comment["author"].get("url"),
             }
 
         rest_comment = {
-            "id": None,  # Not provided in basic GraphQL query
+            "id": comment["id"],
             "body": comment["body"],
             "created_at": comment["createdAt"],
             "updated_at": comment["updatedAt"],
-            "url": comment["url"],
+            "html_url": comment["url"],
             "user": author,
             "author_association": "NONE",  # Not provided in basic GraphQL query
             "issue_url": comment.get("issue_url"),  # Added by our processing
