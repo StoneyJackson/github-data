@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from src.actions.restore import restore_repository_data
+from src.operations.restore import restore_repository_data
 from src.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,

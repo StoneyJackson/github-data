@@ -7,8 +7,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.actions.save import save_repository_data
-from src.actions.restore import restore_repository_data
+from src.operations.save import save_repository_data
+from src.operations.restore import restore_repository_data
 
 pytestmark = [pytest.mark.integration]
 
@@ -945,7 +945,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issues are restored with their state and metadata."""
-        from src.actions.restore import restore_repository_data
+        from src.operations.restore import restore_repository_data
         from src.models import Issue, GitHubUser
         from datetime import datetime
         import json
@@ -1089,7 +1089,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issue restoration with minimal closure metadata."""
-        from src.actions.restore import restore_repository_data
+        from src.operations.restore import restore_repository_data
         from src.models import Issue, GitHubUser
         from datetime import datetime
         import json

@@ -34,7 +34,7 @@ class TestGetEnvVar:
 class TestMain:
     """Test cases for main function."""
 
-    @patch("src.actions.save.save_repository_data")
+    @patch("src.operations.save.save_repository_data")
     @patch("src.main._get_required_env_var")
     @patch("src.main._get_env_var")
     @patch("builtins.print")
@@ -62,7 +62,7 @@ class TestMain:
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
 
-    @patch("src.actions.restore.restore_repository_data")
+    @patch("src.operations.restore.restore_repository_data")
     @patch("src.main._get_required_env_var")
     @patch("src.main._get_env_var")
     @patch("builtins.print")

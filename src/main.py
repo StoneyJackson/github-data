@@ -41,7 +41,7 @@ def _execute_operation(config: "Configuration") -> None:
 def _perform_save_operation(config: "Configuration") -> None:
     """Perform the save operation to backup GitHub data."""
     print("Saving GitHub data...")
-    from .actions.save import save_repository_data
+    from .operations.save import save_repository_data
 
     save_repository_data(config.github_token, config.github_repo, config.data_path)
 
@@ -49,7 +49,7 @@ def _perform_save_operation(config: "Configuration") -> None:
 def _perform_restore_operation(config: "Configuration") -> None:
     """Perform the restore operation to restore GitHub data."""
     print("Restoring GitHub data...")
-    from .actions.restore import restore_repository_data
+    from .operations.restore import restore_repository_data
 
     restore_repository_data(
         config.github_token,

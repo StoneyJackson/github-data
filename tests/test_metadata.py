@@ -190,7 +190,7 @@ class TestMetadataIntegration:
     def test_restore_creates_issues_and_comments_successfully(self, tmp_path):
         """Test that restore operations work with our new metadata functionality."""
         from unittest.mock import patch, MagicMock
-        from src.actions.restore import restore_repository_data
+        from src.operations.restore import restore_repository_data
         import json
 
         # Create test data directory
@@ -247,7 +247,9 @@ class TestMetadataIntegration:
             json.dump(comments_data, f)
 
         # Mock the GitHubService to capture what gets sent to API
-        with patch("src.actions.restore.create_github_service") as mock_create_service:
+        with patch(
+            "src.operations.restore.create_github_service"
+        ) as mock_create_service:
             mock_client = mock_create_service.return_value
             mock_client.get_repository_labels.return_value = []
 
