@@ -60,7 +60,7 @@ docker run --rm \
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `OPERATION` | Yes | Operation to perform: `save` or `restore` |
-| `GITHUB_TOKEN` | Yes | GitHub personal access token with appropriate permissions |
+| `GITHUB_TOKEN` | Yes | GitHub personal access token with repo and read:user permissions. See [Token Setup Guide](docs/github-token-setup.md) |
 | `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
