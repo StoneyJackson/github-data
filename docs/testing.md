@@ -103,7 +103,7 @@ def test_dockerfile_builds_successfully(self):
 ### Quick Commands
 
 ```bash
-# Run all tests
+# Run all tests with source code coverage
 make test
 
 # Run only unit tests (fastest)
@@ -117,6 +117,12 @@ make test-fast
 
 # Run container integration tests only (requires Docker)
 make test-container
+
+# Run tests with test file coverage analysis
+make test-with-test-coverage
+
+# Run fast tests with test file coverage analysis
+make test-fast-with-test-coverage
 
 # Run quality checks without container tests
 make check
@@ -364,29 +370,42 @@ def docker_image():
 
 ### pytest.ini Configuration
 
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = --cov=src --cov-report=term-missing --cov-report=html
-markers =
-    unit: marks tests as unit tests
-    integration: marks tests as integration tests
-    container: marks tests as container integration tests
-    slow: marks tests as slow
-    docker: marks tests as requiring Docker
-timeout = 300
-```
+Test configuration is centralized in the [`pytest.ini`](../pytest.ini) file, which includes:
+
+- Test discovery paths and naming conventions
+- Test markers for categorization  
+- Coverage reporting settings
+- Branch coverage configuration
+- Output formatting (concise with short tracebacks)
+- Timeout settings for different test types
 
 ### Coverage Configuration
 
-Coverage is automatically generated for all test runs:
+The project uses pytest-cov with branch coverage enabled by default:
 
-- **Terminal**: Shows missing lines during test execution
-- **HTML Report**: Generated in `htmlcov/` directory
+#### Coverage Types
+
+- **Source Coverage** (default): Measures coverage of `src/` files only
+  - Commands: `make test`, `make test-fast`, `make test-unit`, etc.
+  - Purpose: Monitor production code test coverage
+  
+- **Test Coverage** (optional): Measures coverage of test files only  
+  - Commands: `make test-with-test-coverage`, `make test-fast-with-test-coverage`
+  - Purpose: Analyze how thoroughly test files themselves are tested
+
+#### Coverage Features
+
+- **Branch Coverage**: Enabled for all test scenarios to catch untested code paths
+- **Terminal Report**: Shows missing lines during test execution with short tracebacks
+- **HTML Report**: Detailed coverage analysis generated in `htmlcov/` directory
 - **Target**: Aim for >90% coverage on `src/` directory
+
+#### Configuration Files
+
+Coverage settings are centralized in `pytest.ini`:
+- Shared test configuration (markers, filterwarnings, timeout)
+- Branch coverage enabled by default
+- Concise output with detailed failure information
 
 ### Timeout Configuration
 

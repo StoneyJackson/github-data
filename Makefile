@@ -12,25 +12,33 @@ install-dev:
 sync:
 	pdm sync
 
-# Run tests
+# Run tests (excludes test files from coverage)
 test:
-	pdm run pytest
+	pdm run pytest --cov=src --cov-config=pytest.ini
 
-# Run unit tests only
+# Run unit tests only (excludes test files from coverage)
 test-unit:
-	pdm run pytest -v -m unit
+	pdm run pytest --cov=src --cov-config=pytest.ini -m unit
 
-# Run integration tests (non-container)
+# Run integration tests (non-container, excludes test files from coverage)
 test-integration:
-	pdm run pytest -v -m "integration and not container"
+	pdm run pytest --cov=src --cov-config=pytest.ini -m "integration and not container"
 
-# Run container integration tests only
+# Run container integration tests only (excludes test files from coverage)
 test-container:
-	pdm run pytest -v -m container --timeout=300
+	pdm run pytest --cov=src --cov-config=pytest.ini -m container --timeout=300
 
-# Run all tests except container tests
+# Run all tests except container tests (excludes test files from coverage)
 test-fast:
-	pdm run pytest -v -m "not container"
+	pdm run pytest --cov=src --cov-config=pytest.ini -m "not container"
+
+# Run tests with coverage of test files only
+test-with-test-coverage:
+	pdm run pytest --cov=tests --cov-config=pytest.ini
+
+# Run fast tests with coverage of test files only  
+test-fast-with-test-coverage:
+	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container"
 
 # Run linting
 lint:

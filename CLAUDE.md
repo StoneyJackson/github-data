@@ -63,8 +63,10 @@ This project uses [PDM](https://pdm.fming.dev/) for modern Python dependency man
 All development uses PDM for package management:
 
 - `make install-dev` - Install all dependencies (including dev tools)
-- `make test` - Run all tests with pytest
+- `make test` - Run all tests with source code coverage
 - `make test-fast` - Run all tests except slow container tests (recommended for development)
+- `make test-with-test-coverage` - Run all tests with test file coverage analysis
+- `make test-fast-with-test-coverage` - Run fast tests with test file coverage analysis
 - `make lint` - Run flake8 linting
 - `make format` - Format code with black
 - `make type-check` - Run mypy type checking
@@ -85,11 +87,22 @@ For complete testing documentation, commands, and best practices, see **[docs/te
 ### Quick Testing Commands
 
 ```bash
-make test-fast      # Fast feedback (excludes slow container tests)
-make test-container # Full Docker workflow tests (requires Docker)
-make check          # All quality checks (fast)
-make check-all      # All quality checks including container tests
+make test-fast                    # Fast feedback (excludes slow container tests)
+make test-container               # Full Docker workflow tests (requires Docker)
+make test-with-test-coverage      # Analyze test file coverage
+make test-fast-with-test-coverage # Fast tests with test file coverage
+make check                        # All quality checks (fast)
+make check-all                    # All quality checks including container tests
 ```
+
+### Coverage Configuration
+
+The project uses pytest-cov with branch coverage enabled by default:
+
+- **Source Coverage**: Default test commands measure coverage of `src/` files only
+- **Test Coverage**: Special commands (`*-with-test-coverage`) measure coverage of test files
+- **Branch Coverage**: Enabled for all test scenarios to catch untested code paths
+- **Reports**: Terminal output with missing lines + HTML reports in `htmlcov/`
 
 ## Scripts and Tools
 
