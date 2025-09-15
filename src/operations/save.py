@@ -11,7 +11,14 @@ from typing import List
 from ..github import create_github_service
 from ..github.service import GitHubService
 from ..github import converters
-from ..models import RepositoryData, Label, Issue, Comment
+from ..models import (
+    RepositoryData,
+    Label,
+    Issue,
+    Comment,
+    PullRequest,
+    PullRequestComment,
+)
 from ..storage.json_storage import save_json_data
 
 
@@ -29,12 +36,21 @@ def _collect_repository_data(client: GitHubService, repo_name: str) -> Repositor
     labels = _fetch_repository_labels(client, repo_name)
     issues = _fetch_repository_issues(client, repo_name)
     comments = _fetch_all_issue_comments(client, repo_name)
+    pull_requests = _fetch_repository_pull_requests(client, repo_name)
+    pr_comments = _fetch_all_pr_comments(client, repo_name)
 
-    return _create_repository_data(repo_name, labels, issues, comments)
+    return _create_repository_data(
+        repo_name, labels, issues, comments, pull_requests, pr_comments
+    )
 
 
 def _create_repository_data(
-    repo_name: str, labels: List[Label], issues: List[Issue], comments: List[Comment]
+    repo_name: str,
+    labels: List[Label],
+    issues: List[Issue],
+    comments: List[Comment],
+    pull_requests: List[PullRequest],
+    pr_comments: List[PullRequestComment],
 ) -> RepositoryData:
     """Create RepositoryData instance with current timestamp."""
     from datetime import datetime
@@ -45,6 +61,8 @@ def _create_repository_data(
         labels=labels,
         issues=issues,
         comments=comments,
+        pull_requests=pull_requests,
+        pr_comments=pr_comments,
     )
 
 
@@ -55,6 +73,8 @@ def _save_data_to_files(repository_data: RepositoryData, output_dir: Path) -> No
     _save_labels_to_file(repository_data.labels, output_dir)
     _save_issues_to_file(repository_data.issues, output_dir)
     _save_comments_to_file(repository_data.comments, output_dir)
+    _save_pull_requests_to_file(repository_data.pull_requests, output_dir)
+    _save_pr_comments_to_file(repository_data.pr_comments, output_dir)
 
 
 def _fetch_repository_labels(client: GitHubService, repo_name: str) -> List[Label]:
@@ -77,6 +97,24 @@ def _fetch_all_issue_comments(client: GitHubService, repo_name: str) -> List[Com
     ]
 
 
+def _fetch_repository_pull_requests(
+    client: GitHubService, repo_name: str
+) -> List[PullRequest]:
+    """Fetch all pull requests from the repository."""
+    raw_prs = client.get_repository_pull_requests(repo_name)
+    return [converters.convert_to_pull_request(pr_dict) for pr_dict in raw_prs]
+
+
+def _fetch_all_pr_comments(
+    client: GitHubService, repo_name: str
+) -> List[PullRequestComment]:
+    """Fetch all comments from all pull requests in the repository."""
+    raw_comments = client.get_all_pull_request_comments(repo_name)
+    return [
+        converters.convert_to_pr_comment(comment_dict) for comment_dict in raw_comments
+    ]
+
+
 def _save_labels_to_file(labels: List[Label], output_dir: Path) -> None:
     """Save labels to labels.json file."""
     labels_file = output_dir / "labels.json"
@@ -93,3 +131,19 @@ def _save_comments_to_file(comments: List[Comment], output_dir: Path) -> None:
     """Save comments to comments.json file."""
     comments_file = output_dir / "comments.json"
     save_json_data(comments, comments_file)
+
+
+def _save_pull_requests_to_file(
+    pull_requests: List[PullRequest], output_dir: Path
+) -> None:
+    """Save pull requests to pull_requests.json file."""
+    prs_file = output_dir / "pull_requests.json"
+    save_json_data(pull_requests, prs_file)
+
+
+def _save_pr_comments_to_file(
+    pr_comments: List[PullRequestComment], output_dir: Path
+) -> None:
+    """Save PR comments to pr_comments.json file."""
+    pr_comments_file = output_dir / "pr_comments.json"
+    save_json_data(pr_comments, pr_comments_file)

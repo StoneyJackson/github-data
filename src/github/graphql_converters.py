@@ -113,6 +113,119 @@ def convert_graphql_comments_to_rest_format(
     return rest_comments
 
 
+def convert_graphql_pull_requests_to_rest_format(
+    graphql_prs: List[Dict[str, Any]], repo_name: str
+) -> List[Dict[str, Any]]:
+    """Convert GraphQL pull request nodes to REST API format."""
+    owner, name = repo_name.split("/", 1)
+
+    rest_prs = []
+    for pr in graphql_prs:
+        # Convert labels
+        labels = [
+            {
+                "id": label["id"],
+                "name": label["name"],
+                "color": label["color"],
+                "description": label["description"],
+                "url": f"https://api.github.com/repos/{repo_name}/labels/"
+                f"{label['name']}",
+                "default": False,
+            }
+            for label in pr.get("labels", {}).get("nodes", [])
+        ]
+
+        # Convert author
+        author = None
+        if pr.get("author"):
+            author = {
+                "login": pr["author"]["login"],
+                "id": pr["author"].get("id"),
+                "avatar_url": pr["author"].get("avatarUrl"),
+                "html_url": pr["author"].get("url"),
+            }
+
+        # Convert assignees
+        assignees = [
+            {
+                "login": assignee["login"],
+                "id": assignee.get("id"),
+                "avatar_url": assignee.get("avatarUrl"),
+                "html_url": assignee.get("url"),
+            }
+            for assignee in pr.get("assignees", {}).get("nodes", [])
+        ]
+
+        # Extract merge commit SHA
+        merge_commit_sha = None
+        if pr.get("mergeCommit"):
+            merge_commit_sha = pr["mergeCommit"]["oid"]
+
+        # Extract branch references
+        base_ref = pr.get("baseRef", {}).get("name") if pr.get("baseRef") else None
+        head_ref = pr.get("headRef", {}).get("name") if pr.get("headRef") else None
+
+        # Extract comment count
+        comments_count = pr.get("comments", {}).get("totalCount", 0)
+
+        rest_pr = {
+            "id": pr["id"],
+            "number": pr["number"],
+            "title": pr["title"],
+            "body": pr.get("body"),
+            "state": pr["state"].upper(),
+            "html_url": pr["url"],
+            "created_at": pr["createdAt"],
+            "updated_at": pr["updatedAt"],
+            "closed_at": pr.get("closedAt"),
+            "merged_at": pr.get("mergedAt"),
+            "merge_commit_sha": merge_commit_sha,
+            "base_ref": base_ref,
+            "head_ref": head_ref,
+            "user": author,
+            "assignees": assignees,
+            "labels": labels,
+            "comments": comments_count,
+        }
+        rest_prs.append(rest_pr)
+
+    return rest_prs
+
+
+def convert_graphql_pr_comments_to_rest_format(
+    graphql_comments: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Convert GraphQL PR comment nodes to REST API format."""
+    rest_comments = []
+
+    for comment in graphql_comments:
+        # Convert author
+        author = None
+        if comment.get("author"):
+            author = {
+                "login": comment["author"]["login"],
+                "id": comment["author"].get("id"),
+                "avatar_url": comment["author"].get("avatarUrl"),
+                "html_url": comment["author"].get("url"),
+            }
+
+        rest_comment = {
+            "id": comment["id"],
+            "body": comment["body"],
+            "created_at": comment["createdAt"],
+            "updated_at": comment["updatedAt"],
+            "html_url": comment["url"],
+            "user": author,
+            "author_association": "NONE",  # Not provided in basic GraphQL query
+            "pull_request_url": comment.get(
+                "pull_request_url"
+            ),  # Added by our processing
+        }
+        rest_comments.append(rest_comment)
+
+    return rest_comments
+
+
 def convert_graphql_rate_limit_to_rest_format(
     graphql_rate_limit: Dict[str, Any],
 ) -> Dict[str, Any]:

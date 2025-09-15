@@ -13,6 +13,12 @@ from src.operations.restore import restore_repository_data
 pytestmark = [pytest.mark.integration]
 
 
+def _add_pr_method_mocks(mock_boundary):
+    """Add PR method mocks to boundary for compatibility with new PR support."""
+    mock_boundary.get_repository_pull_requests.return_value = []
+    mock_boundary.get_all_pull_request_comments.return_value = []
+
+
 class TestSaveRestoreIntegration:
     """Integration tests for complete save/restore workflows."""
 
@@ -159,6 +165,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
+        _add_pr_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/repo", temp_data_dir)
@@ -406,6 +413,7 @@ class TestSaveRestoreIntegration:
         save_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
+        _add_pr_method_mocks(save_boundary)
 
         save_repository_data("fake_token", "owner/source_repo", temp_data_dir)
 
@@ -526,6 +534,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
+        _add_pr_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/empty_repo", temp_data_dir)
@@ -585,6 +594,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
+        _add_pr_method_mocks(mock_boundary)
 
         # Use nested directory that doesn't exist
         nested_path = Path(temp_data_dir) / "backup" / "github-data"
@@ -916,6 +926,7 @@ class TestErrorHandlingIntegration:
         mock_boundary.get_all_issue_comments.return_value = complex_github_data[
             "comments"
         ]
+        _add_pr_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/repo", temp_data_dir)

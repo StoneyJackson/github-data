@@ -1,14 +1,14 @@
 [project]
 name = "github-data"
 version = "0.1.0"
-description = "A containerized tool for saving and restoring GitHub repository labels, issues, and comments"
+description = "A containerized tool for saving and restoring GitHub repository labels, issues, comments, and pull requests"
 authors = [
     {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
 ]
 license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["github", "backup", "issues", "labels", "data"]
+keywords = ["github", "backup", "issues", "labels", "pull-requests", "data"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

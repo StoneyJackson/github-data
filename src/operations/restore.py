@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from ..github import create_github_service
 from ..github.service import GitHubService
 from ..github import converters
-from ..models import Label, Issue, Comment
+from ..models import Label, Issue, Comment, PullRequest, PullRequestComment
 from ..storage.json_storage import load_json_data
 
 
@@ -22,12 +22,13 @@ def restore_repository_data(
     data_path: str,
     label_conflict_strategy: str = "fail-if-existing",
     include_original_metadata: bool = True,
+    include_prs: bool = False,
 ) -> None:
-    """Restore GitHub repository labels, issues, and comments from JSON files."""
+    """Restore GitHub repository labels, issues, comments and PRs from JSON files."""
     client = create_github_service(github_token)
     input_dir = Path(data_path)
 
-    _validate_data_files_exist(input_dir)
+    _validate_data_files_exist(input_dir, include_prs)
 
     _restore_labels(client, repo_name, input_dir, label_conflict_strategy)
     issue_number_mapping = _restore_issues(
@@ -37,10 +38,21 @@ def restore_repository_data(
         client, repo_name, input_dir, issue_number_mapping, include_original_metadata
     )
 
+    if include_prs:
+        pr_number_mapping = _restore_pull_requests(
+            client, repo_name, input_dir, include_original_metadata
+        )
+        _restore_pr_comments(
+            client, repo_name, input_dir, pr_number_mapping, include_original_metadata
+        )
 
-def _validate_data_files_exist(input_dir: Path) -> None:
+
+def _validate_data_files_exist(input_dir: Path, include_prs: bool = False) -> None:
     """Validate that required data files exist."""
     required_files = ["labels.json", "issues.json", "comments.json"]
+
+    if include_prs:
+        required_files.extend(["pull_requests.json", "pr_comments.json"])
 
     for filename in required_files:
         file_path = input_dir / filename
@@ -112,6 +124,18 @@ def _load_comments_from_file(input_dir: Path) -> List[Comment]:
     """Load comments from comments.json file."""
     comments_file = input_dir / "comments.json"
     return load_json_data(comments_file, Comment)
+
+
+def _load_pull_requests_from_file(input_dir: Path) -> List[PullRequest]:
+    """Load pull requests from pull_requests.json file."""
+    prs_file = input_dir / "pull_requests.json"
+    return load_json_data(prs_file, PullRequest)
+
+
+def _load_pr_comments_from_file(input_dir: Path) -> List[PullRequestComment]:
+    """Load PR comments from pr_comments.json file."""
+    pr_comments_file = input_dir / "pr_comments.json"
+    return load_json_data(pr_comments_file, PullRequestComment)
 
 
 def _restore_comments(
@@ -327,6 +351,121 @@ def _create_repository_comments(
             ) from e
 
 
+def _restore_pull_requests(
+    client: GitHubService,
+    repo_name: str,
+    input_dir: Path,
+    include_original_metadata: bool = True,
+) -> Dict[int, int]:
+    """Restore pull requests and return mapping of original to new PR numbers."""
+    pull_requests = _load_pull_requests_from_file(input_dir)
+    return _create_repository_pull_requests(
+        client, repo_name, pull_requests, include_original_metadata
+    )
+
+
+def _restore_pr_comments(
+    client: GitHubService,
+    repo_name: str,
+    input_dir: Path,
+    pr_number_mapping: Dict[int, int],
+    include_original_metadata: bool = True,
+) -> None:
+    """Restore PR comments to the repository using PR number mapping."""
+    pr_comments = _load_pr_comments_from_file(input_dir)
+    # Sort comments by creation time to maintain chronological conversation order
+    sorted_comments = sorted(pr_comments, key=lambda comment: comment.created_at)
+    _create_repository_pr_comments(
+        client,
+        repo_name,
+        sorted_comments,
+        pr_number_mapping,
+        include_original_metadata,
+    )
+
+
+def _create_repository_pull_requests(
+    client: GitHubService,
+    repo_name: str,
+    pull_requests: List[PullRequest],
+    include_original_metadata: bool = True,
+) -> Dict[int, int]:
+    """Create pull requests and return mapping of original to new PR numbers."""
+    pr_number_mapping = {}
+
+    for pr in pull_requests:
+        try:
+            # Prepare PR data for creation
+            if include_original_metadata:
+                from ..github.metadata import add_pr_metadata_footer
+
+                pr_body = add_pr_metadata_footer(pr)
+            else:
+                pr_body = pr.body or ""
+
+            # Note: PR creation has limitations - branches must exist and
+            # original timestamps/merge status cannot be restored
+            print(
+                f"Warning: Creating PR will have current timestamp, "
+                f"not original {pr.created_at}"
+            )
+            print(f"Warning: Ensure branches '{pr.base_ref}' and '{pr.head_ref}' exist")
+
+            created_pr_data = client.create_pull_request(
+                repo_name, pr.title, pr_body, pr.head_ref, pr.base_ref
+            )
+            pr_number_mapping[pr.number] = created_pr_data["number"]
+            print(
+                f"Created PR #{created_pr_data['number']}: "
+                f"{created_pr_data['title']} (was #{pr.number})"
+            )
+
+        except Exception as e:
+            print(f"Warning: Failed to create PR '{pr.title}': {e}")
+            print(f"Skipping PR #{pr.number} and its comments")
+            continue
+
+    return pr_number_mapping
+
+
+def _create_repository_pr_comments(
+    client: GitHubService,
+    repo_name: str,
+    pr_comments: List[PullRequestComment],
+    pr_number_mapping: Dict[int, int],
+    include_original_metadata: bool = True,
+) -> None:
+    """Create PR comments in the repository using PR number mapping."""
+    for comment in pr_comments:
+        try:
+            original_pr_number = _extract_pr_number_from_url(comment.pull_request_url)
+            new_pr_number = pr_number_mapping.get(original_pr_number)
+
+            if new_pr_number is None:
+                print(
+                    f"Warning: Skipping comment for unmapped PR "
+                    f"#{original_pr_number}"
+                )
+                continue
+
+            # Prepare comment body with metadata if needed
+            if include_original_metadata:
+                from ..github.metadata import add_pr_comment_metadata_footer
+
+                comment_body = add_pr_comment_metadata_footer(comment)
+            else:
+                comment_body = comment.body
+
+            client.create_pull_request_comment(repo_name, new_pr_number, comment_body)
+            print(
+                f"Created PR comment for PR #{new_pr_number} "
+                f"(was #{original_pr_number})"
+            )
+        except Exception as e:
+            print(f"Warning: Failed to create PR comment: {e}")
+            continue
+
+
 def _extract_issue_number_from_url(issue_url: str) -> int:
     """Extract issue number from GitHub issue URL."""
     # Example URL: https://api.github.com/repos/owner/repo/issues/123
@@ -343,3 +482,21 @@ def _extract_issue_number_from_url(issue_url: str) -> int:
         raise ValueError(f"Could not find issue number in URL path: {parsed_url.path}")
     except (ValueError, IndexError) as e:
         raise ValueError(f"Invalid issue URL format: {issue_url}") from e
+
+
+def _extract_pr_number_from_url(pr_url: str) -> int:
+    """Extract PR number from GitHub pull request URL."""
+    # Example URL: https://github.com/owner/repo/pull/123
+    try:
+        parsed_url = urlparse(pr_url)
+        path_parts = parsed_url.path.strip("/").split("/")
+
+        # Find 'pull' in path and get the next part
+        if "pull" in path_parts:
+            pull_index = path_parts.index("pull")
+            if pull_index + 1 < len(path_parts):
+                return int(path_parts[pull_index + 1])
+
+        raise ValueError(f"Could not find PR number in URL path: {parsed_url.path}")
+    except (ValueError, IndexError) as e:
+        raise ValueError(f"Invalid PR URL format: {pr_url}") from e

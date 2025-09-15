@@ -7,7 +7,7 @@ issue and comment bodies during restore operations.
 
 from datetime import datetime
 
-from ..models import Issue, Comment
+from ..models import Issue, Comment, PullRequest, PullRequestComment
 
 
 def add_issue_metadata_footer(issue: Issue) -> str:
@@ -78,6 +78,84 @@ def _format_issue_metadata(issue: Issue) -> str:
 
 def _format_comment_metadata(comment: Comment) -> str:
     """Format comment metadata into a readable footer."""
+    author = comment.user.login
+    created_at = _format_datetime(comment.created_at)
+    updated_at = _format_datetime(comment.updated_at)
+
+    metadata_lines = ["---", f"*Originally posted by @{author} on {created_at}*"]
+
+    # Only add update time if different from creation time
+    if comment.updated_at != comment.created_at:
+        metadata_lines.append(f"*Last updated on {updated_at}*")
+
+    return "\n".join(metadata_lines)
+
+
+def add_pr_metadata_footer(pr: PullRequest) -> str:
+    """
+    Add original metadata footer to a pull request body.
+
+    Args:
+        pr: The original pull request with metadata to preserve
+
+    Returns:
+        The PR body with metadata footer appended
+    """
+    original_body = pr.body or ""
+    metadata_footer = _format_pr_metadata(pr)
+
+    if original_body:
+        return f"{original_body}\n\n{metadata_footer}"
+    else:
+        return metadata_footer
+
+
+def add_pr_comment_metadata_footer(comment: PullRequestComment) -> str:
+    """
+    Add original metadata footer to a PR comment body.
+
+    Args:
+        comment: The original PR comment with metadata to preserve
+
+    Returns:
+        The PR comment body with metadata footer appended
+    """
+    original_body = comment.body
+    metadata_footer = _format_pr_comment_metadata(comment)
+
+    return f"{original_body}\n\n{metadata_footer}"
+
+
+def _format_pr_metadata(pr: PullRequest) -> str:
+    """Format PR metadata into a readable footer."""
+    author = pr.user.login
+    created_at = _format_datetime(pr.created_at)
+    updated_at = _format_datetime(pr.updated_at)
+
+    metadata_lines = ["---", f"*Originally created by @{author} on {created_at}*"]
+
+    # Only add update time if different from creation time
+    if pr.updated_at != pr.created_at:
+        metadata_lines.append(f"*Last updated on {updated_at}*")
+
+    # Add closed/merged time if PR was closed
+    if pr.closed_at:
+        closed_at = _format_datetime(pr.closed_at)
+
+        if pr.merged_at:
+            merged_at = _format_datetime(pr.merged_at)
+            metadata_lines.append(f"*Merged on {merged_at}*")
+        else:
+            metadata_lines.append(f"*Closed on {closed_at}*")
+
+    # Add original branch info
+    metadata_lines.append(f"*Original branches: {pr.head_ref} → {pr.base_ref}*")
+
+    return "\n".join(metadata_lines)
+
+
+def _format_pr_comment_metadata(comment: PullRequestComment) -> str:
+    """Format PR comment metadata into a readable footer."""
     author = comment.user.login
     created_at = _format_datetime(comment.created_at)
     updated_at = _format_datetime(comment.updated_at)

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, subissues, and comments. It provides tools to backup and restore GitHub repository issue management data.
+This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, subissues, comments, and pull requests. It provides tools to backup and restore GitHub repository issue management data and pull request workflows.
 
 ## Project Status
 
@@ -15,22 +15,29 @@ This GitHub Data project is in initial development phase. The foundation include
 - Development tooling (pytest, black, flake8, mypy)
 - Base tooling for GitHub API interactions
 
-**Next development phases:**
-- GitHub API client implementation for issues and labels
-- Label backup and restore functionality
-- Issue and subissue backup and restore capabilities
+**Completed features:**
+- Comprehensive GitHub API client with GraphQL and REST support
+- Label backup and restore functionality with conflict resolution
+- Issue backup and restore capabilities with metadata preservation  
 - Comment backup and restore functionality
-- CLI interface for issue management operations
+- Pull request backup and restore capabilities (NEW)
+- Rate limiting and caching for API operations
+- CLI interface for repository data operations
+
+**Future development phases:**
+- Enhanced CLI options for selective PR backup/restore
 - Configuration management for multiple repositories
+- Advanced filtering and selection options
 
 ## Getting Started
 
-This GitHub Data project provides containerized tools for backing up and restoring GitHub repository issue management data:
+This GitHub Data project provides containerized tools for backing up and restoring GitHub repository data:
 
 1. Configure your GitHub access credentials and target repositories
-2. Use the backup tools to save repository labels, issues, subissues, and comments
-3. Use the restore tools to recreate issue management state from saved JSON data
-4. Customize backup/restore operations for specific label and issue requirements
+2. Use the backup tools to save repository labels, issues, comments, and pull requests
+3. Use the restore tools to recreate repository state from saved JSON data  
+4. Customize backup/restore operations for specific data requirements
+5. Handle pull request workflows with branch dependency validation
 
 ## Development Environment
 

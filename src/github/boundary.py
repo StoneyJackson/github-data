@@ -18,12 +18,17 @@ from .graphql_queries import (
     REPOSITORY_LABELS_QUERY,
     REPOSITORY_ISSUES_QUERY,
     REPOSITORY_COMMENTS_QUERY,
+    REPOSITORY_PULL_REQUESTS_QUERY,
+    PULL_REQUEST_COMMENTS_QUERY,
+    REPOSITORY_PR_COMMENTS_QUERY,
     RATE_LIMIT_QUERY,
 )
 from .graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,
+    convert_graphql_pull_requests_to_rest_format,
+    convert_graphql_pr_comments_to_rest_format,
     convert_graphql_rate_limit_to_rest_format,
 )
 
@@ -227,21 +232,115 @@ class GitHubApiBoundary:
         """Get repository object from GitHub API."""
         return self._github.get_repo(repo_name)
 
-    # Utility Methods
+    # Public API - Pull Request Operations
 
-    def _filter_out_pull_requests(
-        self, issues_data: List[Dict[str, Any]]
+    def get_repository_pull_requests(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull requests from repository using GraphQL for performance."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_prs = []
+        cursor = None
+
+        while True:
+            result = self._gql_client.execute(
+                REPOSITORY_PULL_REQUESTS_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            prs_data = result["repository"]["pullRequests"]
+            all_prs.extend(prs_data["nodes"])
+
+            if not prs_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = prs_data["pageInfo"]["endCursor"]
+
+        return convert_graphql_pull_requests_to_rest_format(all_prs, repo_name)
+
+    def get_pull_request_comments(
+        self, repo_name: str, pr_number: int
     ) -> List[Dict[str, Any]]:
-        """Filter out pull requests (backward compatibility)."""
-        return [
-            issue_data
-            for issue_data in issues_data
-            if not self._is_pull_request_data(issue_data)
-        ]
+        """Get comments for specific pull request using GraphQL."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_comments = []
+        cursor = None
 
-    def _is_pull_request_data(self, issue_data: Dict[str, Any]) -> bool:
-        """Check if issue data represents a pull request."""
-        return "pull_request" in issue_data and issue_data["pull_request"] is not None
+        while True:
+            result = self._gql_client.execute(
+                PULL_REQUEST_COMMENTS_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "prNumber": pr_number,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            pr_data = result["repository"]["pullRequest"]
+            if not pr_data:
+                break
+
+            comments_data = pr_data["comments"]
+            for comment in comments_data["nodes"]:
+                comment["pull_request_url"] = pr_data["url"]
+                all_comments.append(comment)
+
+            if not comments_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = comments_data["pageInfo"]["endCursor"]
+
+        return convert_graphql_pr_comments_to_rest_format(all_comments)
+
+    def get_all_pull_request_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all comments from all pull requests using GraphQL for performance."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_comments = []
+        cursor = None
+
+        while True:
+            result = self._gql_client.execute(
+                REPOSITORY_PR_COMMENTS_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            prs_data = result["repository"]["pullRequests"]
+
+            for pr in prs_data["nodes"]:
+                for comment in pr["comments"]["nodes"]:
+                    comment["pull_request_url"] = pr["url"]
+                    all_comments.append(comment)
+
+            if not prs_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = prs_data["pageInfo"]["endCursor"]
+
+        return convert_graphql_pr_comments_to_rest_format(all_comments)
+
+    def create_pull_request(
+        self, repo_name: str, title: str, body: str, head: str, base: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request and return raw JSON data."""
+        repo = self._get_repository(repo_name)
+        created_pr = repo.create_pull(title=title, body=body, head=head, base=base)
+        return self._extract_raw_data(created_pr)
+
+    def create_pull_request_comment(
+        self, repo_name: str, pr_number: int, body: str
+    ) -> Dict[str, Any]:
+        """Create a new comment on a pull request and return raw JSON data."""
+        repo = self._get_repository(repo_name)
+        pr = repo.get_pull(pr_number)
+        created_comment = pr.create_issue_comment(body)
+        return self._extract_raw_data(created_comment)
 
     # Raw Data Extraction Utilities (for REST write operations)
 

@@ -1,6 +1,6 @@
 # GitHub Data
 
-A containerized tool for saving and restoring GitHub repository labels, issues, subissues, and comments to/from JSON files. This tool allows you to backup and restore GitHub repository issue-related data.
+A containerized tool for saving and restoring GitHub repository labels, issues, comments, and pull requests to/from JSON files. This tool allows you to backup and restore comprehensive GitHub repository data including issue management and pull request workflows.
 
 > **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
 
@@ -18,20 +18,21 @@ A containerized tool for saving and restoring GitHub repository labels, issues, 
 ## Overview
 
 The `github-data` container provides two main operations:
-- **Save**: Extract labels, issues, subissues, and comments from a GitHub repository and save them to JSON files
-- **Restore**: Read JSON data files and restore/recreate repository labels, issues, subissues, and comments
+- **Save**: Extract labels, issues, comments, and pull requests from a GitHub repository and save them to JSON files
+- **Restore**: Read JSON data files and restore/recreate repository labels, issues, comments, and pull requests
 
 All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
 
 ## Important Notes
 
-- **Pull Requests**: Pull requests are not currently supported and are automatically excluded from both save and restore operations. Only regular issues are processed.
+- **Pull Request Restoration**: While PRs can be saved and restored, restored PRs will have current timestamps (not original creation/merge times) and require that the original branch references exist in the target repository.
+- **GraphQL API**: The tool uses GitHub's GraphQL API for efficient data retrieval, with automatic fallback to REST API for write operations.
 
 ## Usage
 
 ### Save Data
 
-Save GitHub repository labels, issues, subissues, and comments to JSON files:
+Save GitHub repository labels, issues, comments, and pull requests to JSON files:
 
 ```bash
 docker run --rm \
@@ -44,7 +45,7 @@ docker run --rm \
 
 ### Restore Data
 
-Restore GitHub repository labels, issues, subissues, and comments from JSON files:
+Restore GitHub repository labels, issues, comments, and pull requests from JSON files:
 
 ```bash
 docker run --rm \
@@ -72,7 +73,7 @@ When restoring labels to a repository that already has labels, you can choose ho
 - **`fail-if-existing`** (default): Fail if any labels exist in the target repository
 - **`fail-if-conflict`**: Fail only if labels with the same names exist
 - **`overwrite`**: Update existing labels with restored data, create non-conflicting ones
-- **`skip`**: Skip restoring labels that already exist, create only new ones  
+- **`skip`**: Skip restoring labels that already exist, create only new ones
 - **`delete-all`**: Delete all existing labels before restoring
 
 Example with conflict strategy:
@@ -94,6 +95,10 @@ docker run --rm \
 - `repo` (Full control of private repositories) - for both public and private repositories
 - OR `public_repo` (Access public repositories) - for public repositories only
 
+**Additional scopes for pull requests:**
+- `pull` permissions are included in the `repo` scope
+- For public repos only: may need `read:user` for PR author information
+
 **Optional scopes:**
 - `read:org` (Read org membership) - for organization repositories
 
@@ -103,7 +108,7 @@ The tool automatically handles GitHub API rate limiting with intelligent retry l
 
 - **Automatic Retries**: Operations are automatically retried when rate limits are hit
 - **Exponential Backoff**: Retry delays increase exponentially (1s, 2s, 4s, etc.) up to 60 seconds
-- **Smart Monitoring**: Warns when rate limit is low (< 100 requests remaining)  
+- **Smart Monitoring**: Warns when rate limit is low (< 100 requests remaining)
 - **Maximum 3 Retries**: After 3 failed attempts due to rate limiting, the operation will fail
 
 For large repositories, operations may take longer when approaching rate limits as the tool waits for the rate limit window to reset.
@@ -115,11 +120,13 @@ The container saves/restores data in JSON format with the following structure:
 ```
 /data/
 ├── labels.json         # Repository labels
-├── issues.json         # Issues, subissues, and their metadata
-└── comments.json       # All issue and subissue comments
+├── issues.json         # Issues and their metadata
+├── comments.json       # All issue comments
+├── pull_requests.json  # Pull requests and their metadata
+└── pr_comments.json    # All pull request comments
 ```
 
-Each JSON file contains structured data that can be used to recreate the repository's issue management state.
+Each JSON file contains structured data that can be used to recreate the repository's issue management state and pull request workflows. All data includes original metadata (authors, timestamps, relationships) preserved in the restored content.
 
 ## Contributing
 
@@ -127,7 +134,7 @@ For development setup, testing, coding standards, and contribution guidelines, s
 
 Quick start for developers:
 ```bash
-make install-dev  # Setup development environment  
+make install-dev  # Setup development environment
 make check        # Run quality checks before committing
 ```
 

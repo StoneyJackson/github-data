@@ -74,6 +74,31 @@ class GitHubService:
             operation=lambda: self._boundary.get_all_issue_comments(repo_name),
         )
 
+    def get_repository_pull_requests(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull requests from repository with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pull_requests:{repo_name}",
+            operation=lambda: self._boundary.get_repository_pull_requests(repo_name),
+        )
+
+    def get_pull_request_comments(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pr_comments:{repo_name}:{pr_number}",
+            operation=lambda: self._boundary.get_pull_request_comments(
+                repo_name, pr_number
+            ),
+        )
+
+    def get_all_pull_request_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request comments with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_pr_comments:{repo_name}",
+            operation=lambda: self._boundary.get_all_pull_request_comments(repo_name),
+        )
+
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get current rate limit status."""
         # Rate limit status should not be cached
@@ -147,6 +172,32 @@ class GitHubService:
             self._boundary._github,
         )
         self._invalidate_cache_for_repository(repo_name, "issues")
+        return result
+
+    def create_pull_request(
+        self, repo_name: str, title: str, body: str, head: str, base: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_pull_request(
+                repo_name, title, body, head, base
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "pull_requests")
+        return result
+
+    def create_pull_request_comment(
+        self, repo_name: str, pr_number: int, body: str
+    ) -> Dict[str, Any]:
+        """Create a new PR comment with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_pull_request_comment(
+                repo_name, pr_number, body
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "pr_comments")
         return result
 
     # Cross-cutting Concern Coordination

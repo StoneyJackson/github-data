@@ -1,10 +1,11 @@
 # GitHub Data Project TODO
 
-*Generated from Claude session summaries on 2025-09-08, updated 2025-09-14*
+*Generated from Claude session summaries on 2025-09-08, updated 2025-09-15*
 
 ## Current Sprint (Immediate Priorities)
 
 ### Core Development Tasks
+- [ ] Add CLI options for selective pull request backup/restore
 - [ ] Implement issue subissue relationship handling
 - [ ] Implement data validation and sanitization for restore operations
 - [ ] Add progress reporting for backup/restore operations
@@ -23,7 +24,6 @@
 ### Extended Backup/Restore Features
 - [ ] Save/restore project metadata and configuration
 - [ ] Save/restore git repository
-- [ ] Save/restore PRs
 - [ ] Save/restore milestones
 - [ ] Save/restore releases and tags
 - [ ] Save/restore wiki pages
@@ -67,21 +67,22 @@
 
 ## Completed Features ✅
 
-### Core GitHub API Implementation (2025-09-12)
+### Core GitHub API Implementation (2025-09-12/15)
 ✅ **Complete GitHub API client** - labels, issues, comments with full CRUD operations
 ✅ **Comment-to-issue relationship mapping** - proper restore with issue number mapping
 ✅ **Chronological comment ordering** - maintains conversation flow during restore
-✅ **Pull request filtering** - excludes PRs from issue backup/restore operations
+✅ **Pull request support** - comprehensive backup/restore of PRs and PR comments with metadata preservation
 ✅ **Original metadata preservation** - includes author, timestamps in restored content
 ✅ **Closed issue restoration** - captures and restores closure state and metadata
 
-### Performance & Quality (2025-09-11/12)
+### Performance & Quality (2025-09-11/12/15)
 ✅ **GitHub API rate limiting** - exponential backoff, monitoring, configurable delays
 ✅ **Response caching system** - ETag-based conditional requests, SQLite backend
 ✅ **Cache architecture simplification** - streamlined from session-based to global approach
 ✅ **Clean Code refactoring** - Step-Down Rule, Single Responsibility Principle
-✅ **Full type safety** - MyPy compliance across all 16 source files
-✅ **Comprehensive testing** - 98 tests with 92% coverage including container integration
+✅ **Full type safety** - MyPy compliance across all 18 source files
+✅ **Comprehensive testing** - 104 tests with 72% coverage including container integration
+✅ **GraphQL optimization** - efficient data retrieval for issues, PRs, and comments
 
 ### Infrastructure & Tooling (2025-09-08/11)
 ✅ **Project foundation** - Python/PDM, Docker, DevContainer environment
@@ -94,5 +95,5 @@
 - **Environment**: DevContainer ready with all tools pre-configured
 - **Workflow**: Use `make test-fast` for development, `make check-all` for full validation
 - **Compliance**: All commits require `git commit -s` for DCO, follow Conventional Commits
-- **Scope**: GitHub repository labels, issues, subissues, and comments only
-- **Next milestone**: Issue subissue relationships and enhanced validation
+- **Scope**: GitHub repository labels, issues, comments, and pull requests with comprehensive metadata
+- **Next milestone**: Enhanced CLI options and issue subissue relationships
