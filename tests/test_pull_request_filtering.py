@@ -117,6 +117,7 @@ class TestPullRequestFiltering:
         graphql_issues = []
         for issue in issues_only:
             graphql_issue = {
+                "id": f"MDU6SXNzdWUxMjM0NTY3{issue['number']}=",
                 "number": issue["number"],
                 "title": issue["title"],
                 "body": issue["body"],
@@ -173,6 +174,7 @@ class TestPullRequestFiltering:
                             "comments": {
                                 "nodes": [
                                     {
+                                        "id": "MDEyOklzc3VlQ29tbWVudDEwMDE=",
                                         "body": "Regular comment",
                                         "createdAt": "2023-01-15T10:30:00Z",
                                         "updatedAt": "2023-01-15T10:30:00Z",

@@ -18,11 +18,17 @@ class TestGraphQLConverters:
         """Test converting GraphQL labels to REST format."""
         graphql_labels = [
             {
+                "id": "MDU6TGFiZWwxMjM0NTY3ODk=",
                 "name": "bug",
                 "color": "d73a4a",
                 "description": "Something isn't working",
             },
-            {"name": "enhancement", "color": "a2eeef", "description": "New feature"},
+            {
+                "id": "MDU6TGFiZWwxMjM0NTY3ODA=",
+                "name": "enhancement",
+                "color": "a2eeef",
+                "description": "New feature",
+            },
         ]
 
         result = convert_graphql_labels_to_rest_format(graphql_labels)
@@ -38,6 +44,7 @@ class TestGraphQLConverters:
         """Test converting GraphQL issues to REST format."""
         graphql_issues = [
             {
+                "id": "MDU6SXNzdWUxMjM0NTY3ODk=",
                 "number": 1,
                 "title": "Test Issue",
                 "body": "Test body",
@@ -49,7 +56,12 @@ class TestGraphQLConverters:
                 "author": {"login": "testuser"},
                 "labels": {
                     "nodes": [
-                        {"name": "bug", "color": "d73a4a", "description": "Bug label"}
+                        {
+                            "id": "MDU6TGFiZWwxMjM0NTY3ODk=",
+                            "name": "bug",
+                            "color": "d73a4a",
+                            "description": "Bug label",
+                        }
                     ]
                 },
             }
@@ -70,6 +82,7 @@ class TestGraphQLConverters:
         """Test converting GraphQL comments to REST format."""
         graphql_comments = [
             {
+                "id": "MDEyOklzc3VlQ29tbWVudDEyMw==",
                 "body": "Test comment",
                 "createdAt": "2023-01-15T10:30:00Z",
                 "updatedAt": "2023-01-15T14:20:00Z",
@@ -122,6 +135,7 @@ class TestGraphQLBoundaryIntegration:
                 "labels": {
                     "nodes": [
                         {
+                            "id": "MDU6TGFiZWwxMjM0NTY3ODk=",
                             "name": "bug",
                             "color": "d73a4a",
                             "description": "Something isn't working",
@@ -153,6 +167,7 @@ class TestGraphQLBoundaryIntegration:
                 "issues": {
                     "nodes": [
                         {
+                            "id": "MDU6SXNzdWUxMjM0NTY3ODk=",
                             "number": 1,
                             "title": "Test Issue",
                             "body": "Test body",
