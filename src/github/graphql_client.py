@@ -2,11 +2,11 @@
 GitHub GraphQL client.
 
 Handles all GraphQL operations for GitHub API interactions.
-Provides methods for querying labels, issues, comments, pull requests, 
+Provides methods for querying labels, issues, comments, pull requests,
 sub-issues, and rate limits using GraphQL for better performance.
 """
 
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any
 from .utils.graphql_paginator import GraphQLPaginator
 from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder
 
@@ -37,7 +37,7 @@ from .graphql_converters import (
 class GitHubGraphQLClient:
     """
     GitHub GraphQL client for efficient API operations.
-    
+
     Provides GraphQL-based methods for retrieving repository data
     with better performance than REST API for bulk operations.
     """
