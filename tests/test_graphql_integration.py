@@ -157,14 +157,16 @@ class TestGraphQLBoundaryIntegration:
     @patch("src.github.graphql_client.GraphQLPaginator")
     @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
-    def test_get_repository_issues_graphql(self, mock_github, mock_client, mock_paginator):
+    def test_get_repository_issues_graphql(
+        self, mock_github, mock_client, mock_paginator
+    ):
         """Test getting issues via GraphQL."""
         mock_gql_client = Mock()
         mock_client.return_value = mock_gql_client
-        
+
         mock_paginator_instance = Mock()
         mock_paginator.return_value = mock_paginator_instance
-        
+
         # Mock paginated response
         mock_paginator_instance.paginate_all.return_value = [
             {
@@ -196,14 +198,14 @@ class TestGraphQLBoundaryIntegration:
         """Test repository name parsing."""
         boundary = GitHubApiBoundary("fake-token")
 
-        owner, name = boundary._parse_repo_name("owner/repo")
+        owner, name = boundary._rest_client._parse_repo_name("owner/repo")
         assert owner == "owner"
         assert name == "repo"
 
         with pytest.raises(
             ValueError, match="Repository name must be in 'owner/repo' format"
         ):
-            boundary._parse_repo_name("invalid-repo-name")
+            boundary._rest_client._parse_repo_name("invalid-repo-name")
 
     @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
