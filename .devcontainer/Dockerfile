@@ -54,8 +54,11 @@ USER vscode
 # Install PDM for vscode user using pipx
 RUN pipx install pdm
 
+# Install claude-monitor for vscode user using pipx
+RUN pipx install claude-monitor
+
 # Set up shell aliases and environment for vscode user
-RUN echo 'export PATH="$(npm bin -g):$HOME/.local/bin:$PATH"' >> ~/.bashrc
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 # Switch back to root for any final setup
 USER root
