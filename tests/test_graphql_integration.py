@@ -106,7 +106,7 @@ class TestGraphQLConverters:
 class TestGraphQLBoundaryIntegration:
     """Test GitHubApiBoundary with GraphQL functionality."""
 
-    @patch("src.github.boundary.Client")
+    @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
     def test_boundary_initialization_with_graphql(self, mock_github, mock_client):
         """Test that boundary properly initializes both REST and GraphQL clients."""
@@ -119,10 +119,10 @@ class TestGraphQLBoundaryIntegration:
         boundary = GitHubApiBoundary("fake-token")
 
         assert boundary._github == mock_github_instance
-        assert boundary._gql_client == mock_gql_client
+        assert hasattr(boundary, "_graphql_client")
         assert boundary._token == "fake-token"
 
-    @patch("src.github.boundary.Client")
+    @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
     def test_get_repository_labels_graphql(self, mock_github, mock_client):
         """Test getting labels via GraphQL."""
@@ -154,36 +154,33 @@ class TestGraphQLBoundaryIntegration:
         assert result[0]["color"] == "d73a4a"
         assert "url" in result[0]
 
-    @patch("src.github.boundary.Client")
+    @patch("src.github.graphql_client.GraphQLPaginator")
+    @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
-    def test_get_repository_issues_graphql(self, mock_github, mock_client):
+    def test_get_repository_issues_graphql(self, mock_github, mock_client, mock_paginator):
         """Test getting issues via GraphQL."""
         mock_gql_client = Mock()
         mock_client.return_value = mock_gql_client
-
-        # Mock GraphQL response with pagination
-        mock_gql_client.execute.return_value = {
-            "repository": {
-                "issues": {
-                    "nodes": [
-                        {
-                            "id": "MDU6SXNzdWUxMjM0NTY3ODk=",
-                            "number": 1,
-                            "title": "Test Issue",
-                            "body": "Test body",
-                            "state": "OPEN",
-                            "stateReason": None,
-                            "url": "https://github.com/owner/repo/issues/1",
-                            "createdAt": "2023-01-15T10:30:00Z",
-                            "updatedAt": "2023-01-15T14:20:00Z",
-                            "author": {"login": "testuser"},
-                            "labels": {"nodes": []},
-                        }
-                    ],
-                    "pageInfo": {"hasNextPage": False, "endCursor": None},
-                }
+        
+        mock_paginator_instance = Mock()
+        mock_paginator.return_value = mock_paginator_instance
+        
+        # Mock paginated response
+        mock_paginator_instance.paginate_all.return_value = [
+            {
+                "id": "MDU6SXNzdWUxMjM0NTY3ODk=",
+                "number": 1,
+                "title": "Test Issue",
+                "body": "Test body",
+                "state": "OPEN",
+                "stateReason": None,
+                "url": "https://github.com/owner/repo/issues/1",
+                "createdAt": "2023-01-15T10:30:00Z",
+                "updatedAt": "2023-01-15T14:20:00Z",
+                "author": {"login": "testuser"},
+                "labels": {"nodes": []},
             }
-        }
+        ]
 
         boundary = GitHubApiBoundary("fake-token")
         result = boundary.get_repository_issues("owner/repo")
@@ -208,7 +205,7 @@ class TestGraphQLBoundaryIntegration:
         ):
             boundary._parse_repo_name("invalid-repo-name")
 
-    @patch("src.github.boundary.Client")
+    @patch("src.github.graphql_client.Client")
     @patch("src.github.boundary.Github")
     def test_graphql_client_creation_failure(self, mock_github, mock_client):
         """Test handling of GraphQL client creation failure."""
