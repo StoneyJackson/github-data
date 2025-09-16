@@ -7,6 +7,7 @@ Focused solely on API access - no rate limiting, caching, or retry logic.
 """
 
 from typing import Dict, List, Any, Optional, Union, cast
+from .utils.graphql_paginator import GraphQLPaginator
 from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
@@ -80,26 +81,13 @@ class GitHubApiBoundary:
     def get_repository_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all issues from repository using GraphQL for better performance."""
         owner, name = self._parse_repo_name(repo_name)
-        all_issues = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
-                REPOSITORY_ISSUES_QUERY,
-                variable_values={
-                    "owner": owner,
-                    "name": name,
-                    "first": 100,
-                    "after": cursor,
-                },
-            )
-
-            issues_data = result["repository"]["issues"]
-            all_issues.extend(issues_data["nodes"])
-
-            if not issues_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = issues_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_issues = paginator.paginate_all(
+            query=REPOSITORY_ISSUES_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.issues",
+        )
 
         return convert_graphql_issues_to_rest_format(all_issues, repo_name)
 
@@ -115,30 +103,25 @@ class GitHubApiBoundary:
     def get_all_issue_comments(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all comments from all issues using GraphQL for better performance."""
         owner, name = self._parse_repo_name(repo_name)
-        all_comments = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
-                REPOSITORY_COMMENTS_QUERY,
-                variable_values={
-                    "owner": owner,
-                    "name": name,
-                    "first": 100,
-                    "after": cursor,
-                },
-            )
-
-            issues_data = result["repository"]["issues"]
-
-            for issue in issues_data["nodes"]:
+        def comment_post_processor(
+            issues_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process comments by adding issue URL and flattening."""
+            all_comments = []
+            for issue in issues_nodes:
                 for comment in issue["comments"]["nodes"]:
                     comment["issue_url"] = issue["url"]
                     all_comments.append(comment)
+            return all_comments
 
-            if not issues_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = issues_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_comments = paginator.paginate_all(
+            query=REPOSITORY_COMMENTS_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.issues",
+            post_processor=comment_post_processor,
+        )
 
         return convert_graphql_comments_to_rest_format(all_comments)
 
@@ -239,26 +222,13 @@ class GitHubApiBoundary:
     def get_repository_pull_requests(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all pull requests from repository using GraphQL for performance."""
         owner, name = self._parse_repo_name(repo_name)
-        all_prs = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
-                REPOSITORY_PULL_REQUESTS_QUERY,
-                variable_values={
-                    "owner": owner,
-                    "name": name,
-                    "first": 100,
-                    "after": cursor,
-                },
-            )
-
-            prs_data = result["repository"]["pullRequests"]
-            all_prs.extend(prs_data["nodes"])
-
-            if not prs_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = prs_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_prs = paginator.paginate_all(
+            query=REPOSITORY_PULL_REQUESTS_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.pullRequests",
+        )
 
         return convert_graphql_pull_requests_to_rest_format(all_prs, repo_name)
 
@@ -267,63 +237,65 @@ class GitHubApiBoundary:
     ) -> List[Dict[str, Any]]:
         """Get comments for specific pull request using GraphQL."""
         owner, name = self._parse_repo_name(repo_name)
-        all_comments = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
+        def comment_post_processor(nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+            """Post-process comments to add pull request URL."""
+            pr_data = self._gql_client.execute(
                 PULL_REQUEST_COMMENTS_QUERY,
                 variable_values={
                     "owner": owner,
                     "name": name,
                     "prNumber": pr_number,
-                    "first": 100,
-                    "after": cursor,
+                    "first": 1,  # Only needed to get the PR URL
+                    "after": None,
                 },
-            )
+            )["repository"]["pullRequest"]
 
-            pr_data = result["repository"]["pullRequest"]
             if not pr_data:
-                break
+                return []
 
-            comments_data = pr_data["comments"]
-            for comment in comments_data["nodes"]:
-                comment["pull_request_url"] = pr_data["url"]
-                all_comments.append(comment)
+            pull_request_url = pr_data["url"]
+            for comment in nodes:
+                comment["pull_request_url"] = pull_request_url
 
-            if not comments_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = comments_data["pageInfo"]["endCursor"]
+            return nodes
+
+        paginator = GraphQLPaginator(self._gql_client)
+        all_comments = paginator.paginate_all(
+            query=PULL_REQUEST_COMMENTS_QUERY,
+            variable_values={
+                "owner": owner,
+                "name": name,
+                "prNumber": pr_number,
+            },
+            data_path="repository.pullRequest.comments",
+            post_processor=comment_post_processor,
+        )
 
         return convert_graphql_pr_comments_to_rest_format(all_comments)
 
     def get_all_pull_request_comments(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all comments from all pull requests using GraphQL for performance."""
         owner, name = self._parse_repo_name(repo_name)
-        all_comments = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
-                REPOSITORY_PR_COMMENTS_QUERY,
-                variable_values={
-                    "owner": owner,
-                    "name": name,
-                    "first": 100,
-                    "after": cursor,
-                },
-            )
-
-            prs_data = result["repository"]["pullRequests"]
-
-            for pr in prs_data["nodes"]:
+        def comment_post_processor(
+            prs_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process comments by adding pull request URL and flattening."""
+            all_comments = []
+            for pr in prs_nodes:
                 for comment in pr["comments"]["nodes"]:
                     comment["pull_request_url"] = pr["url"]
                     all_comments.append(comment)
+            return all_comments
 
-            if not prs_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = prs_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_comments = paginator.paginate_all(
+            query=REPOSITORY_PR_COMMENTS_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.pullRequests",
+            post_processor=comment_post_processor,
+        )
 
         return convert_graphql_pr_comments_to_rest_format(all_comments)
 
@@ -349,23 +321,13 @@ class GitHubApiBoundary:
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all sub-issue relationships from repository using GraphQL."""
         owner, name = self._parse_repo_name(repo_name)
-        all_sub_issues = []
-        cursor = None
 
-        while True:
-            result = self._gql_client.execute(
-                REPOSITORY_SUB_ISSUES_QUERY,
-                variable_values={
-                    "owner": owner,
-                    "name": name,
-                    "first": 100,
-                    "after": cursor,
-                },
-            )
-
-            issues_data = result["repository"]["issues"]
-
-            for issue in issues_data["nodes"]:
+        def sub_issues_post_processor(
+            issues_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process sub-issues by extracting relationship data."""
+            all_sub_issues = []
+            for issue in issues_nodes:
                 # Add sub-issues for this parent issue
                 for sub_issue in issue["subIssues"]["nodes"]:
                     all_sub_issues.append(
@@ -377,10 +339,15 @@ class GitHubApiBoundary:
                             "position": sub_issue["position"],
                         }
                     )
+            return all_sub_issues
 
-            if not issues_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = issues_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_sub_issues = paginator.paginate_all(
+            query=REPOSITORY_SUB_ISSUES_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.issues",
+            post_processor=sub_issues_post_processor,
+        )
 
         return all_sub_issues
 
@@ -389,43 +356,52 @@ class GitHubApiBoundary:
     ) -> List[Dict[str, Any]]:
         """Get sub-issues for a specific issue using GraphQL."""
         owner, name = self._parse_repo_name(repo_name)
-        all_sub_issues = []
-        cursor = None
 
-        while True:
+        def sub_issues_post_processor(
+            sub_issues_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process sub-issues with additional metadata."""
+            # First, get the parent issue details to enrich sub-issues
             result = self._gql_client.execute(
                 ISSUE_SUB_ISSUES_QUERY,
                 variable_values={
                     "owner": owner,
                     "name": name,
                     "issueNumber": issue_number,
-                    "first": 100,
-                    "after": cursor,
+                    "first": 1,  # We just need the parent issue details
                 },
             )
 
             issue_data = result["repository"]["issue"]
             if not issue_data:
-                break
+                return []
 
-            sub_issues_data = issue_data["subIssues"]
-            for sub_issue in sub_issues_data["nodes"]:
-                all_sub_issues.append(
-                    {
-                        "sub_issue_id": sub_issue["id"],
-                        "sub_issue_number": sub_issue["number"],
-                        "parent_issue_id": issue_data["id"],
-                        "parent_issue_number": issue_data["number"],
-                        "position": sub_issue["position"],
-                        "title": sub_issue["title"],
-                        "state": sub_issue["state"],
-                        "url": sub_issue["url"],
-                    }
-                )
+            # Enrich each sub-issue with parent issue details
+            return [
+                {
+                    "sub_issue_id": sub_issue["id"],
+                    "sub_issue_number": sub_issue["number"],
+                    "parent_issue_id": issue_data["id"],
+                    "parent_issue_number": issue_data["number"],
+                    "position": sub_issue["position"],
+                    "title": sub_issue["title"],
+                    "state": sub_issue["state"],
+                    "url": sub_issue["url"],
+                }
+                for sub_issue in sub_issues_nodes
+            ]
 
-            if not sub_issues_data["pageInfo"]["hasNextPage"]:
-                break
-            cursor = sub_issues_data["pageInfo"]["endCursor"]
+        paginator = GraphQLPaginator(self._gql_client)
+        all_sub_issues = paginator.paginate_all(
+            query=ISSUE_SUB_ISSUES_QUERY,
+            variable_values={
+                "owner": owner,
+                "name": name,
+                "issueNumber": issue_number,
+            },
+            data_path="repository.issue.subIssues",
+            post_processor=sub_issues_post_processor,
+        )
 
         return all_sub_issues
 

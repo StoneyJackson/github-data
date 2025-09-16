@@ -30,7 +30,7 @@ class GraphQLPaginator:
             Resolved data dictionary
         """
         current = result
-        for key in data_path.split('.'):
+        for key in data_path.split("."):
             current = current[key]
         return current
 
@@ -41,7 +41,7 @@ class GraphQLPaginator:
         data_path: str,
         post_processor: Optional[
             Callable[[List[Dict[str, Any]]], List[Dict[str, Any]]]
-        ] = None
+        ] = None,
     ) -> List[Dict[str, Any]]:
         """
         Execute paginated GraphQL query and return all results.
@@ -61,10 +61,7 @@ class GraphQLPaginator:
         while True:
             # Create a copy of variable values to avoid modifying the original
             pagination_variables = variable_values.copy()
-            pagination_variables.update({
-                "first": self._page_size,
-                "after": cursor
-            })
+            pagination_variables.update({"first": self._page_size, "after": cursor})
 
             # Execute the query with pagination
             result = self._gql_client.execute(
