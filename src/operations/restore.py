@@ -6,13 +6,13 @@ recreates labels, issues, and comments in GitHub repositories.
 """
 
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 from urllib.parse import urlparse
 
 from ..github import create_github_service
 from ..github.service import GitHubService
 from ..github import converters
-from ..models import Label, Issue, Comment, PullRequest, PullRequestComment
+from ..models import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
 from ..storage.json_storage import load_json_data
 
 
@@ -23,12 +23,13 @@ def restore_repository_data(
     label_conflict_strategy: str = "fail-if-existing",
     include_original_metadata: bool = True,
     include_prs: bool = False,
+    include_sub_issues: bool = False,
 ) -> None:
-    """Restore GitHub repository labels, issues, comments and PRs from JSON files."""
+    """Restore labels, issues, comments, PRs and sub-issues from JSON files."""
     client = create_github_service(github_token)
     input_dir = Path(data_path)
 
-    _validate_data_files_exist(input_dir, include_prs)
+    _validate_data_files_exist(input_dir, include_prs, include_sub_issues)
 
     _restore_labels(client, repo_name, input_dir, label_conflict_strategy)
     issue_number_mapping = _restore_issues(
@@ -46,13 +47,22 @@ def restore_repository_data(
             client, repo_name, input_dir, pr_number_mapping, include_original_metadata
         )
 
+    # Two-phase restore: restore all issues, then establish sub-issue relationships
+    if include_sub_issues:
+        _restore_sub_issues(client, repo_name, input_dir, issue_number_mapping)
 
-def _validate_data_files_exist(input_dir: Path, include_prs: bool = False) -> None:
+
+def _validate_data_files_exist(
+    input_dir: Path, include_prs: bool = False, include_sub_issues: bool = False
+) -> None:
     """Validate that required data files exist."""
     required_files = ["labels.json", "issues.json", "comments.json"]
 
     if include_prs:
         required_files.extend(["pull_requests.json", "pr_comments.json"])
+
+    if include_sub_issues:
+        required_files.append("sub_issues.json")
 
     for filename in required_files:
         file_path = input_dir / filename
@@ -136,6 +146,12 @@ def _load_pr_comments_from_file(input_dir: Path) -> List[PullRequestComment]:
     """Load PR comments from pr_comments.json file."""
     pr_comments_file = input_dir / "pr_comments.json"
     return load_json_data(pr_comments_file, PullRequestComment)
+
+
+def _load_sub_issues_from_file(input_dir: Path) -> List[SubIssue]:
+    """Load sub-issues from sub_issues.json file."""
+    sub_issues_file = input_dir / "sub_issues.json"
+    return load_json_data(sub_issues_file, SubIssue)
 
 
 def _restore_comments(
@@ -500,3 +516,143 @@ def _extract_pr_number_from_url(pr_url: str) -> int:
         raise ValueError(f"Could not find PR number in URL path: {parsed_url.path}")
     except (ValueError, IndexError) as e:
         raise ValueError(f"Invalid PR URL format: {pr_url}") from e
+
+
+def _restore_sub_issues(
+    client: GitHubService,
+    repo_name: str,
+    input_dir: Path,
+    issue_number_mapping: Dict[int, int],
+) -> None:
+    """Restore sub-issue relationships using issue number mapping (two-phase)."""
+    sub_issues = _load_sub_issues_from_file(input_dir)
+
+    if not sub_issues:
+        print("No sub-issues to restore")
+        return
+
+    print(f"Restoring {len(sub_issues)} sub-issue relationships...")
+
+    # Group sub-issues by hierarchy depth for proper dependency order
+    sub_issues_by_depth = _organize_sub_issues_by_depth(
+        sub_issues, issue_number_mapping
+    )
+
+    for depth in sorted(sub_issues_by_depth.keys()):
+        depth_sub_issues = sub_issues_by_depth[depth]
+        print(f"Processing depth {depth}: {len(depth_sub_issues)} relationships")
+
+        for sub_issue in depth_sub_issues:
+            try:
+                original_parent_number = sub_issue.parent_issue_number
+                original_sub_issue_number = sub_issue.sub_issue_number
+
+                new_parent_number = issue_number_mapping.get(original_parent_number)
+                new_sub_issue_number = issue_number_mapping.get(
+                    original_sub_issue_number
+                )
+
+                if new_parent_number is None:
+                    print(
+                        f"Warning: Skipping sub-issue - "
+                        f"parent issue #{original_parent_number} not found"
+                    )
+                    continue
+
+                if new_sub_issue_number is None:
+                    print(
+                        f"Warning: Skipping sub-issue - "
+                        f"sub-issue #{original_sub_issue_number} not found"
+                    )
+                    continue
+
+                # Validate hierarchy depth (GitHub limit is 8 levels)
+                if depth > 8:
+                    print(
+                        f"Warning: Sub-issue depth {depth} exceeds "
+                        f"GitHub limit of 8 levels, skipping"
+                    )
+                    continue
+
+                client.add_sub_issue(repo_name, new_parent_number, new_sub_issue_number)
+                print(
+                    f"Added sub-issue #{new_sub_issue_number} to "
+                    f"parent #{new_parent_number} "
+                    f"(was #{original_sub_issue_number} -> #{original_parent_number})"
+                )
+
+            except Exception as e:
+                print(
+                    f"Warning: Failed to restore sub-issue relationship "
+                    f"#{original_sub_issue_number} -> #{original_parent_number}: {e}"
+                )
+                continue
+
+
+def _organize_sub_issues_by_depth(
+    sub_issues: List[SubIssue], issue_number_mapping: Dict[int, int]
+) -> Dict[int, List[SubIssue]]:
+    """Organize sub-issues by hierarchy depth to ensure proper dependency order."""
+    # Build parent-child mapping for depth calculation
+    children_by_parent: Dict[int, List[int]] = {}
+    parents_by_child: Dict[int, int] = {}
+
+    for sub_issue in sub_issues:
+        parent_id = sub_issue.parent_issue_number
+        child_id = sub_issue.sub_issue_number
+
+        # Only include if both issues exist in mapping
+        if parent_id in issue_number_mapping and child_id in issue_number_mapping:
+            if parent_id not in children_by_parent:
+                children_by_parent[parent_id] = []
+            children_by_parent[parent_id].append(child_id)
+            parents_by_child[child_id] = parent_id
+
+    # Calculate depth for each sub-issue
+    depth_by_sub_issue: Dict[int, int] = {}
+
+    def calculate_depth(issue_id: int, visited: Optional[set[int]] = None) -> int:
+        if visited is None:
+            visited = set()
+
+        if issue_id in visited:
+            # Circular dependency detected
+            print(f"Warning: Circular dependency detected involving issue #{issue_id}")
+            return 1
+
+        if issue_id in depth_by_sub_issue:
+            return depth_by_sub_issue[issue_id]
+
+        visited.add(issue_id)
+
+        if issue_id not in parents_by_child:
+            # Root issue (no parent)
+            depth = 1
+        else:
+            parent_id = parents_by_child[issue_id]
+            depth = calculate_depth(parent_id, visited.copy()) + 1
+
+        depth_by_sub_issue[issue_id] = depth
+        return depth
+
+    # Calculate depths for all sub-issues
+    for sub_issue in sub_issues:
+        if (
+            sub_issue.parent_issue_number in issue_number_mapping
+            and sub_issue.sub_issue_number in issue_number_mapping
+        ):
+            calculate_depth(sub_issue.sub_issue_number)
+
+    # Group by depth
+    sub_issues_by_depth: Dict[int, List[SubIssue]] = {}
+    for sub_issue in sub_issues:
+        if (
+            sub_issue.parent_issue_number in issue_number_mapping
+            and sub_issue.sub_issue_number in issue_number_mapping
+        ):
+            depth = depth_by_sub_issue.get(sub_issue.sub_issue_number, 1)
+            if depth not in sub_issues_by_depth:
+                sub_issues_by_depth[depth] = []
+            sub_issues_by_depth[depth].append(sub_issue)
+
+    return sub_issues_by_depth

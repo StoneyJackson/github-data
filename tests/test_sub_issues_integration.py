@@ -1,0 +1,559 @@
+"""Integration tests for Sub-Issues functionality."""
+
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
+
+from src.operations.save import save_repository_data
+from src.operations.restore import restore_repository_data
+
+pytestmark = [pytest.mark.integration]
+
+
+class TestSubIssuesIntegration:
+    """Integration tests for sub-issues save/restore workflows."""
+
+    @pytest.fixture
+    def temp_data_dir(self):
+        """Create temporary directory for test data."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield temp_dir
+
+    @pytest.fixture
+    def sample_sub_issues_data(self):
+        """Sample GitHub API sub-issues data that boundary would return."""
+        return {
+            "issues": [
+                {
+                    "id": 1001,
+                    "number": 1,
+                    "title": "Main Feature Implementation",
+                    "body": "Implement the main feature with sub-tasks",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-10T10:00:00Z",
+                    "updated_at": "2023-01-15T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/1",
+                    "comments": 0,
+                },
+                {
+                    "id": 1002,
+                    "number": 2,
+                    "title": "Sub-task: Database Schema",
+                    "body": "Design and implement database schema",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-11T10:00:00Z",
+                    "updated_at": "2023-01-16T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/2",
+                    "comments": 0,
+                },
+                {
+                    "id": 1003,
+                    "number": 3,
+                    "title": "Sub-task: API Endpoints",
+                    "body": "Implement REST API endpoints",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-12T10:00:00Z",
+                    "updated_at": "2023-01-17T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/3",
+                    "comments": 0,
+                },
+            ],
+            "sub_issues": [
+                {
+                    "sub_issue_id": 1002,
+                    "sub_issue_number": 2,
+                    "parent_issue_id": 1001,
+                    "parent_issue_number": 1,
+                    "position": 1,
+                },
+                {
+                    "sub_issue_id": 1003,
+                    "sub_issue_number": 3,
+                    "parent_issue_id": 1001,
+                    "parent_issue_number": 1,
+                    "position": 2,
+                },
+            ],
+        }
+
+    @pytest.fixture
+    def complex_hierarchy_data(self):
+        """Sample data with complex sub-issue hierarchy."""
+        return {
+            "issues": [
+                {
+                    "id": 2001,
+                    "number": 10,
+                    "title": "Epic: Complete Refactor",
+                    "body": "Major refactoring project",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-10T10:00:00Z",
+                    "updated_at": "2023-01-15T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/10",
+                    "comments": 0,
+                },
+                {
+                    "id": 2002,
+                    "number": 11,
+                    "title": "Feature: User Management",
+                    "body": "Implement user management system",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-11T10:00:00Z",
+                    "updated_at": "2023-01-16T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/11",
+                    "comments": 0,
+                },
+                {
+                    "id": 2003,
+                    "number": 12,
+                    "title": "Task: User Authentication",
+                    "body": "Implement user authentication",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-12T10:00:00Z",
+                    "updated_at": "2023-01-17T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/12",
+                    "comments": 0,
+                },
+                {
+                    "id": 2004,
+                    "number": 13,
+                    "title": "Subtask: Password Hashing",
+                    "body": "Implement secure password hashing",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "david",
+                        "id": 3004,
+                        "avatar_url": "https://github.com/david.png",
+                        "html_url": "https://github.com/david",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-13T10:00:00Z",
+                    "updated_at": "2023-01-18T16:00:00Z",
+                    "closed_at": None,
+                    "html_url": "https://github.com/owner/repo/issues/13",
+                    "comments": 0,
+                },
+            ],
+            "sub_issues": [
+                # Epic -> Feature
+                {
+                    "sub_issue_id": 2002,
+                    "sub_issue_number": 11,
+                    "parent_issue_id": 2001,
+                    "parent_issue_number": 10,
+                    "position": 1,
+                },
+                # Feature -> Task
+                {
+                    "sub_issue_id": 2003,
+                    "sub_issue_number": 12,
+                    "parent_issue_id": 2002,
+                    "parent_issue_number": 11,
+                    "position": 1,
+                },
+                # Task -> Subtask
+                {
+                    "sub_issue_id": 2004,
+                    "sub_issue_number": 13,
+                    "parent_issue_id": 2003,
+                    "parent_issue_number": 12,
+                    "position": 1,
+                },
+            ],
+        }
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_sub_issues_save_creates_json_files(
+        self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
+    ):
+        """Test that save operation creates sub-issues JSON files."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock existing methods
+        mock_boundary.get_repository_labels.return_value = []
+        mock_boundary.get_all_issue_comments.return_value = []
+        mock_boundary.get_repository_pull_requests.return_value = []
+        mock_boundary.get_all_pull_request_comments.return_value = []
+
+        # Mock sub-issues methods
+        mock_boundary.get_repository_issues.return_value = sample_sub_issues_data[
+            "issues"
+        ]
+        mock_boundary.get_repository_sub_issues.return_value = sample_sub_issues_data[
+            "sub_issues"
+        ]
+
+        # Execute save operation
+        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+
+        # Verify sub-issues JSON file was created
+        data_path = Path(temp_data_dir)
+        assert (data_path / "sub_issues.json").exists()
+
+        # Verify sub_issues.json content
+        with open(data_path / "sub_issues.json") as f:
+            sub_issues_data = json.load(f)
+        assert len(sub_issues_data) == 2
+        assert sub_issues_data[0]["parent_issue_number"] == 1
+        assert sub_issues_data[0]["sub_issue_number"] == 2
+        assert sub_issues_data[0]["position"] == 1
+        assert sub_issues_data[1]["parent_issue_number"] == 1
+        assert sub_issues_data[1]["sub_issue_number"] == 3
+        assert sub_issues_data[1]["position"] == 2
+
+        # Verify issues include sub-issues references
+        with open(data_path / "issues.json") as f:
+            issues_data = json.load(f)
+        parent_issue = next(issue for issue in issues_data if issue["number"] == 1)
+        assert "sub_issues" in parent_issue
+        assert len(parent_issue["sub_issues"]) == 2
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_sub_issues_restore_workflow(
+        self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
+    ):
+        """Test complete sub-issues restore workflow."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock restoration methods
+        mock_boundary.get_repository_labels.return_value = []
+        mock_boundary.create_issue.side_effect = [
+            {"number": 101, "title": "Main Feature Implementation"},  # Issue 1 -> 101
+            {"number": 102, "title": "Sub-task: Database Schema"},  # Issue 2 -> 102
+            {"number": 103, "title": "Sub-task: API Endpoints"},  # Issue 3 -> 103
+        ]
+        mock_boundary.add_sub_issue.return_value = {"success": True}
+
+        # Create test data files
+        data_path = Path(temp_data_dir)
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump(sample_sub_issues_data["issues"], f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "sub_issues.json", "w") as f:
+            json.dump(sample_sub_issues_data["sub_issues"], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
+        # Execute restore operation
+        restore_repository_data(
+            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        )
+
+        # Verify issues were created
+        assert mock_boundary.create_issue.call_count == 3
+
+        # Verify sub-issue relationships were created
+        assert mock_boundary.add_sub_issue.call_count == 2
+        # Check that sub-issues were added with correct mapped numbers
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 102)
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 103)
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_complex_hierarchy_restore(
+        self, mock_boundary_class, temp_data_dir, complex_hierarchy_data
+    ):
+        """Test restore of complex multi-level hierarchy."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock restoration methods
+        mock_boundary.get_repository_labels.return_value = []
+        mock_boundary.create_issue.side_effect = [
+            {"number": 201, "title": "Epic: Complete Refactor"},  # Issue 10 -> 201
+            {"number": 202, "title": "Feature: User Management"},  # Issue 11 -> 202
+            {"number": 203, "title": "Task: User Authentication"},  # Issue 12 -> 203
+            {"number": 204, "title": "Subtask: Password Hashing"},  # Issue 13 -> 204
+        ]
+        mock_boundary.add_sub_issue.return_value = {"success": True}
+
+        # Create test data files
+        data_path = Path(temp_data_dir)
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump(complex_hierarchy_data["issues"], f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "sub_issues.json", "w") as f:
+            json.dump(complex_hierarchy_data["sub_issues"], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
+        # Execute restore operation
+        restore_repository_data(
+            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        )
+
+        # Verify all issues were created
+        assert mock_boundary.create_issue.call_count == 4
+
+        # Verify sub-issue relationships were created in correct order
+        assert mock_boundary.add_sub_issue.call_count == 3
+        # Epic -> Feature
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 201, 202)
+        # Feature -> Task
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 202, 203)
+        # Task -> Subtask
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 203, 204)
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_sub_issues_backup_with_existing_data(
+        self, mock_boundary_class, temp_data_dir
+    ):
+        """Test sub-issues backup when repository already has mixed data."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock existing repository data
+        mock_boundary.get_repository_labels.return_value = [
+            {
+                "name": "bug",
+                "color": "d73a4a",
+                "description": "Bug report",
+                "url": "https://api.github.com/repos/owner/repo/labels/bug",
+                "id": 1001,
+            }
+        ]
+        mock_boundary.get_repository_issues.return_value = [
+            {
+                "id": 5001,
+                "number": 50,
+                "title": "Existing Issue",
+                "body": "An existing issue",
+                "state": "OPEN",
+                "user": {
+                    "login": "existing",
+                    "id": 9001,
+                    "avatar_url": "https://github.com/existing.png",
+                    "html_url": "https://github.com/existing",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-01T10:00:00Z",
+                "updated_at": "2023-01-01T16:00:00Z",
+                "closed_at": None,
+                "html_url": "https://github.com/owner/repo/issues/50",
+                "comments": 0,
+            }
+        ]
+        mock_boundary.get_all_issue_comments.return_value = []
+        mock_boundary.get_repository_pull_requests.return_value = []
+        mock_boundary.get_all_pull_request_comments.return_value = []
+        mock_boundary.get_repository_sub_issues.return_value = []
+
+        # Execute save operation
+        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+
+        # Verify all files were created even with empty sub-issues
+        data_path = Path(temp_data_dir)
+        assert (data_path / "labels.json").exists()
+        assert (data_path / "issues.json").exists()
+        assert (data_path / "comments.json").exists()
+        assert (data_path / "sub_issues.json").exists()
+        assert (data_path / "pull_requests.json").exists()
+        assert (data_path / "pr_comments.json").exists()
+
+        # Verify sub_issues.json is empty list
+        with open(data_path / "sub_issues.json") as f:
+            sub_issues_data = json.load(f)
+        assert sub_issues_data == []
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_sub_issues_with_missing_parent_handling(
+        self, mock_boundary_class, temp_data_dir
+    ):
+        """Test handling of sub-issues when parent issue is missing."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock restoration methods - only create one issue
+        mock_boundary.get_repository_labels.return_value = []
+        mock_boundary.create_issue.return_value = {
+            "number": 301,
+            "title": "Orphaned Sub-issue",
+        }  # Only child issue
+        mock_boundary.add_sub_issue.return_value = {"success": True}
+
+        # Create test data with orphaned sub-issue
+        data_path = Path(temp_data_dir)
+        orphaned_issue = {
+            "id": 3002,
+            "number": 2,
+            "title": "Orphaned Sub-issue",
+            "body": "This sub-issue has no parent",
+            "state": "OPEN",
+            "user": {
+                "login": "orphan",
+                "id": 9999,
+                "avatar_url": "https://github.com/orphan.png",
+                "html_url": "https://github.com/orphan",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-11T10:00:00Z",
+            "updated_at": "2023-01-16T16:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/repo/issues/2",
+            "comments": 0,
+        }
+        orphaned_sub_issue = {
+            "sub_issue_id": 3002,
+            "sub_issue_number": 2,
+            "parent_issue_id": 9999,  # Parent doesn't exist
+            "parent_issue_number": 999,
+            "position": 1,
+        }
+
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump([orphaned_issue], f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "sub_issues.json", "w") as f:
+            json.dump([orphaned_sub_issue], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
+        # Execute restore operation
+        restore_repository_data(
+            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        )
+
+        # Verify issue was created but no sub-issue relationship
+        assert mock_boundary.create_issue.call_count == 1
+        assert mock_boundary.add_sub_issue.call_count == 0
+
+    @patch("src.github.service.GitHubApiBoundary")
+    def test_empty_sub_issues_restore(self, mock_boundary_class, temp_data_dir):
+        """Test restore operation when no sub-issues exist."""
+        # Setup mock boundary
+        mock_boundary = Mock()
+        mock_boundary_class.return_value = mock_boundary
+
+        # Mock restoration methods
+        mock_boundary.get_repository_labels.return_value = []
+        mock_boundary.create_issue.return_value = {
+            "number": 401,
+            "title": "Regular Issue",
+        }
+        mock_boundary.add_sub_issue.return_value = {"success": True}
+
+        # Create test data with no sub-issues
+        data_path = Path(temp_data_dir)
+        regular_issue = {
+            "id": 4001,
+            "number": 1,
+            "title": "Regular Issue",
+            "body": "Just a regular issue",
+            "state": "OPEN",
+            "user": {
+                "login": "regular",
+                "id": 4001,
+                "avatar_url": "https://github.com/regular.png",
+                "html_url": "https://github.com/regular",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-10T10:00:00Z",
+            "updated_at": "2023-01-15T16:00:00Z",
+            "closed_at": None,
+            "html_url": "https://github.com/owner/repo/issues/1",
+            "comments": 0,
+        }
+
+        with open(data_path / "labels.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump([regular_issue], f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "sub_issues.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
+        # Execute restore operation
+        restore_repository_data(
+            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        )
+
+        # Verify issue was created but no sub-issue operations
+        assert mock_boundary.create_issue.call_count == 1
+        assert mock_boundary.add_sub_issue.call_count == 0

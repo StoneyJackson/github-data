@@ -77,6 +77,16 @@ class PullRequestComment(BaseModel):
     pull_request_url: str
 
 
+class SubIssue(BaseModel):
+    """GitHub sub-issue relationship."""
+
+    sub_issue_id: Union[int, str]
+    sub_issue_number: int
+    parent_issue_id: Union[int, str]
+    parent_issue_number: int
+    position: int
+
+
 class Issue(BaseModel):
     """GitHub repository issue."""
 
@@ -95,6 +105,7 @@ class Issue(BaseModel):
     state_reason: Optional[str] = None
     html_url: str
     comments_count: int = Field(alias="comments")
+    sub_issues: List["SubIssue"] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
 
@@ -109,3 +120,4 @@ class RepositoryData(BaseModel):
     comments: List[Comment] = Field(default_factory=list)
     pull_requests: List[PullRequest] = Field(default_factory=list)
     pr_comments: List[PullRequestComment] = Field(default_factory=list)
+    sub_issues: List[SubIssue] = Field(default_factory=list)

@@ -6,7 +6,7 @@
 
 ### Core Development Tasks
 - [ ] Add CLI options for selective pull request backup/restore
-- [ ] Implement issue subissue relationship handling
+- [x] Implement issue sub-issue relationship handling (completed 2025-09-16)
 - [ ] Implement data validation and sanitization for restore operations
 - [ ] Add progress reporting for backup/restore operations
 
@@ -67,11 +67,12 @@
 
 ## Completed Features ✅
 
-### Core GitHub API Implementation (2025-09-12/15)
+### Core GitHub API Implementation (2025-09-12/15/16)
 ✅ **Complete GitHub API client** - labels, issues, comments with full CRUD operations
 ✅ **Comment-to-issue relationship mapping** - proper restore with issue number mapping
 ✅ **Chronological comment ordering** - maintains conversation flow during restore
 ✅ **Pull request support** - comprehensive backup/restore of PRs and PR comments with metadata preservation
+✅ **Sub-issues support** - hierarchical issue relationships with two-phase restore (completed 2025-09-16)
 ✅ **Original metadata preservation** - includes author, timestamps in restored content
 ✅ **Closed issue restoration** - captures and restores closure state and metadata
 
@@ -95,5 +96,5 @@
 - **Environment**: DevContainer ready with all tools pre-configured
 - **Workflow**: Use `make test-fast` for development, `make check-all` for full validation
 - **Compliance**: All commits require `git commit -s` for DCO, follow Conventional Commits
-- **Scope**: GitHub repository labels, issues, comments, and pull requests with comprehensive metadata
-- **Next milestone**: Enhanced CLI options and issue subissue relationships
+- **Scope**: GitHub repository labels, issues, comments, sub-issues, and pull requests with comprehensive metadata
+- **Next milestone**: Enhanced CLI options and data validation improvements

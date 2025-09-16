@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, subissues, comments, and pull requests. It provides tools to backup and restore GitHub repository issue management data and pull request workflows.
+This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, sub-issues, comments, and pull requests. It provides tools to backup and restore GitHub repository issue management data, hierarchical sub-issue relationships, and pull request workflows.
 
 ## Project Status
 
@@ -20,12 +20,13 @@ This GitHub Data project is in initial development phase. The foundation include
 - Label backup and restore functionality with conflict resolution
 - Issue backup and restore capabilities with metadata preservation  
 - Comment backup and restore functionality
-- Pull request backup and restore capabilities (NEW)
+- Sub-issues support with hierarchical relationships and two-phase restore (NEW)
+- Pull request backup and restore capabilities
 - Rate limiting and caching for API operations
 - CLI interface for repository data operations
 
 **Future development phases:**
-- Enhanced CLI options for selective PR backup/restore
+- Enhanced CLI options for selective PR and sub-issues backup/restore
 - Configuration management for multiple repositories
 - Advanced filtering and selection options
 
@@ -34,10 +35,10 @@ This GitHub Data project is in initial development phase. The foundation include
 This GitHub Data project provides containerized tools for backing up and restoring GitHub repository data:
 
 1. Configure your GitHub access credentials and target repositories
-2. Use the backup tools to save repository labels, issues, comments, and pull requests
+2. Use the backup tools to save repository labels, issues, comments, sub-issues, and pull requests
 3. Use the restore tools to recreate repository state from saved JSON data  
 4. Customize backup/restore operations for specific data requirements
-5. Handle pull request workflows with branch dependency validation
+5. Handle hierarchical sub-issue relationships and pull request workflows with branch dependency validation
 
 ## Development Environment
 

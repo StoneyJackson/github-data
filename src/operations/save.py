@@ -6,7 +6,7 @@ and comments from GitHub repositories and saves them to JSON files.
 """
 
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 from ..github import create_github_service
 from ..github.service import GitHubService
@@ -18,6 +18,7 @@ from ..models import (
     Comment,
     PullRequest,
     PullRequestComment,
+    SubIssue,
 )
 from ..storage.json_storage import save_json_data
 
@@ -38,9 +39,10 @@ def _collect_repository_data(client: GitHubService, repo_name: str) -> Repositor
     comments = _fetch_all_issue_comments(client, repo_name)
     pull_requests = _fetch_repository_pull_requests(client, repo_name)
     pr_comments = _fetch_all_pr_comments(client, repo_name)
+    sub_issues = _fetch_repository_sub_issues(client, repo_name)
 
     return _create_repository_data(
-        repo_name, labels, issues, comments, pull_requests, pr_comments
+        repo_name, labels, issues, comments, pull_requests, pr_comments, sub_issues
     )
 
 
@@ -51,18 +53,23 @@ def _create_repository_data(
     comments: List[Comment],
     pull_requests: List[PullRequest],
     pr_comments: List[PullRequestComment],
+    sub_issues: List[SubIssue],
 ) -> RepositoryData:
     """Create RepositoryData instance with current timestamp."""
     from datetime import datetime
+
+    # Associate sub-issues with their parent issues
+    issues_with_sub_issues = _associate_sub_issues_with_parents(issues, sub_issues)
 
     return RepositoryData(
         repository_name=repo_name,
         exported_at=datetime.now(),
         labels=labels,
-        issues=issues,
+        issues=issues_with_sub_issues,
         comments=comments,
         pull_requests=pull_requests,
         pr_comments=pr_comments,
+        sub_issues=sub_issues,
     )
 
 
@@ -75,6 +82,7 @@ def _save_data_to_files(repository_data: RepositoryData, output_dir: Path) -> No
     _save_comments_to_file(repository_data.comments, output_dir)
     _save_pull_requests_to_file(repository_data.pull_requests, output_dir)
     _save_pr_comments_to_file(repository_data.pr_comments, output_dir)
+    _save_sub_issues_to_file(repository_data.sub_issues, output_dir)
 
 
 def _fetch_repository_labels(client: GitHubService, repo_name: str) -> List[Label]:
@@ -115,6 +123,46 @@ def _fetch_all_pr_comments(
     ]
 
 
+def _fetch_repository_sub_issues(
+    client: GitHubService, repo_name: str
+) -> List[SubIssue]:
+    """Fetch all sub-issue relationships from the repository."""
+    raw_sub_issues = client.get_repository_sub_issues(repo_name)
+    return [
+        converters.convert_to_sub_issue(sub_issue_dict)
+        for sub_issue_dict in raw_sub_issues
+    ]
+
+
+def _associate_sub_issues_with_parents(
+    issues: List[Issue], sub_issues: List[SubIssue]
+) -> List[Issue]:
+    """Associate sub-issues with their parent issues."""
+    # Create a copy of issues to avoid modifying the original list
+    issues_copy = [issue.model_copy() for issue in issues]
+
+    # Create a mapping from issue number to issue index
+    issue_number_to_index = {issue.number: i for i, issue in enumerate(issues_copy)}
+
+    # Group sub-issues by parent issue number
+    sub_issues_by_parent: Dict[int, List[SubIssue]] = {}
+    for sub_issue in sub_issues:
+        parent_number = sub_issue.parent_issue_number
+        if parent_number not in sub_issues_by_parent:
+            sub_issues_by_parent[parent_number] = []
+        sub_issues_by_parent[parent_number].append(sub_issue)
+
+    # Associate sub-issues with their parent issues
+    for parent_number, child_sub_issues in sub_issues_by_parent.items():
+        if parent_number in issue_number_to_index:
+            parent_index = issue_number_to_index[parent_number]
+            # Sort sub-issues by position
+            sorted_sub_issues = sorted(child_sub_issues, key=lambda si: si.position)
+            issues_copy[parent_index].sub_issues = sorted_sub_issues
+
+    return issues_copy
+
+
 def _save_labels_to_file(labels: List[Label], output_dir: Path) -> None:
     """Save labels to labels.json file."""
     labels_file = output_dir / "labels.json"
@@ -147,3 +195,9 @@ def _save_pr_comments_to_file(
     """Save PR comments to pr_comments.json file."""
     pr_comments_file = output_dir / "pr_comments.json"
     save_json_data(pr_comments, pr_comments_file)
+
+
+def _save_sub_issues_to_file(sub_issues: List[SubIssue], output_dir: Path) -> None:
+    """Save sub-issues to sub_issues.json file."""
+    sub_issues_file = output_dir / "sub_issues.json"
+    save_json_data(sub_issues, sub_issues_file)

@@ -1,6 +1,6 @@
 # GitHub Data
 
-A containerized tool for saving and restoring GitHub repository labels, issues, comments, and pull requests to/from JSON files. This tool allows you to backup and restore comprehensive GitHub repository data including issue management and pull request workflows.
+A containerized tool for saving and restoring GitHub repository labels, issues, comments, sub-issues, and pull requests to/from JSON files. This tool allows you to backup and restore comprehensive GitHub repository data including issue management, hierarchical sub-issue relationships, and pull request workflows.
 
 > **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
 
@@ -18,8 +18,8 @@ A containerized tool for saving and restoring GitHub repository labels, issues, 
 ## Overview
 
 The `github-data` container provides two main operations:
-- **Save**: Extract labels, issues, comments, and pull requests from a GitHub repository and save them to JSON files
-- **Restore**: Read JSON data files and restore/recreate repository labels, issues, comments, and pull requests
+- **Save**: Extract labels, issues, comments, sub-issues, and pull requests from a GitHub repository and save them to JSON files
+- **Restore**: Read JSON data files and restore/recreate repository labels, issues, comments, sub-issue relationships, and pull requests
 
 All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
 
@@ -32,7 +32,7 @@ All configuration is done through environment variables, and data files are acce
 
 ### Save Data
 
-Save GitHub repository labels, issues, comments, and pull requests to JSON files:
+Save GitHub repository labels, issues, comments, sub-issues, and pull requests to JSON files:
 
 ```bash
 docker run --rm \
@@ -45,7 +45,7 @@ docker run --rm \
 
 ### Restore Data
 
-Restore GitHub repository labels, issues, comments, and pull requests from JSON files:
+Restore GitHub repository labels, issues, comments, sub-issues, and pull requests from JSON files:
 
 ```bash
 docker run --rm \
@@ -122,11 +122,12 @@ The container saves/restores data in JSON format with the following structure:
 ├── labels.json         # Repository labels
 ├── issues.json         # Issues and their metadata
 ├── comments.json       # All issue comments
+├── sub_issues.json     # Sub-issue relationships
 ├── pull_requests.json  # Pull requests and their metadata
 └── pr_comments.json    # All pull request comments
 ```
 
-Each JSON file contains structured data that can be used to recreate the repository's issue management state and pull request workflows. All data includes original metadata (authors, timestamps, relationships) preserved in the restored content.
+Each JSON file contains structured data that can be used to recreate the repository's issue management state, hierarchical sub-issue relationships, and pull request workflows. All data includes original metadata (authors, timestamps, relationships) preserved in the restored content.
 
 ## Contributing
 

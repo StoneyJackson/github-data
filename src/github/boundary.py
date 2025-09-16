@@ -6,7 +6,7 @@ This creates a true API boundary that's not coupled to PyGithub types.
 Focused solely on API access - no rate limiting, caching, or retry logic.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union, cast
 from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
@@ -21,6 +21,8 @@ from .graphql_queries import (
     REPOSITORY_PULL_REQUESTS_QUERY,
     PULL_REQUEST_COMMENTS_QUERY,
     REPOSITORY_PR_COMMENTS_QUERY,
+    REPOSITORY_SUB_ISSUES_QUERY,
+    ISSUE_SUB_ISSUES_QUERY,
     RATE_LIMIT_QUERY,
 )
 from .graphql_converters import (
@@ -341,6 +343,189 @@ class GitHubApiBoundary:
         pr = repo.get_pull(pr_number)
         created_comment = pr.create_issue_comment(body)
         return self._extract_raw_data(created_comment)
+
+    # Public API - Sub-Issues Operations (GraphQL)
+
+    def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all sub-issue relationships from repository using GraphQL."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_sub_issues = []
+        cursor = None
+
+        while True:
+            result = self._gql_client.execute(
+                REPOSITORY_SUB_ISSUES_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            issues_data = result["repository"]["issues"]
+
+            for issue in issues_data["nodes"]:
+                # Add sub-issues for this parent issue
+                for sub_issue in issue["subIssues"]["nodes"]:
+                    all_sub_issues.append(
+                        {
+                            "sub_issue_id": sub_issue["id"],
+                            "sub_issue_number": sub_issue["number"],
+                            "parent_issue_id": issue["id"],
+                            "parent_issue_number": issue["number"],
+                            "position": sub_issue["position"],
+                        }
+                    )
+
+            if not issues_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = issues_data["pageInfo"]["endCursor"]
+
+        return all_sub_issues
+
+    def get_issue_sub_issues_graphql(
+        self, repo_name: str, issue_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get sub-issues for a specific issue using GraphQL."""
+        owner, name = self._parse_repo_name(repo_name)
+        all_sub_issues = []
+        cursor = None
+
+        while True:
+            result = self._gql_client.execute(
+                ISSUE_SUB_ISSUES_QUERY,
+                variable_values={
+                    "owner": owner,
+                    "name": name,
+                    "issueNumber": issue_number,
+                    "first": 100,
+                    "after": cursor,
+                },
+            )
+
+            issue_data = result["repository"]["issue"]
+            if not issue_data:
+                break
+
+            sub_issues_data = issue_data["subIssues"]
+            for sub_issue in sub_issues_data["nodes"]:
+                all_sub_issues.append(
+                    {
+                        "sub_issue_id": sub_issue["id"],
+                        "sub_issue_number": sub_issue["number"],
+                        "parent_issue_id": issue_data["id"],
+                        "parent_issue_number": issue_data["number"],
+                        "position": sub_issue["position"],
+                        "title": sub_issue["title"],
+                        "state": sub_issue["state"],
+                        "url": sub_issue["url"],
+                    }
+                )
+
+            if not sub_issues_data["pageInfo"]["hasNextPage"]:
+                break
+            cursor = sub_issues_data["pageInfo"]["endCursor"]
+
+        return all_sub_issues
+
+    # Public API - Sub-Issues Operations (REST)
+
+    def get_issue_sub_issues(
+        self, repo_name: str, issue_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get sub-issues for a specific issue using REST API."""
+        repo = self._get_repository(repo_name)
+        try:
+            # GitHub REST API endpoint for sub-issues
+            # GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues
+            url = f"/repos/{repo_name}/issues/{issue_number}/sub_issues"
+            status, headers, raw_data = repo._requester.requestJson("GET", url)
+            data = cast(Union[List[Dict[str, Any]], str], raw_data)
+            if isinstance(data, list):
+                return data
+            else:
+                return []
+        except Exception:
+            # Sub-issues API might not be available or issue has no sub-issues
+            return []
+
+    def get_issue_parent(
+        self, repo_name: str, issue_number: int
+    ) -> Optional[Dict[str, Any]]:
+        """Get parent issue if this issue is a sub-issue using REST API."""
+        repo = self._get_repository(repo_name)
+        try:
+            # GitHub REST API endpoint for parent issue
+            # GET /repos/{owner}/{repo}/issues/{issue_number}/parent
+            url = f"/repos/{repo_name}/issues/{issue_number}/parent"
+            status, headers, raw_data = repo._requester.requestJson("GET", url)
+            data = cast(Union[Dict[str, Any], str], raw_data)
+            if isinstance(data, dict):
+                return data
+            else:
+                return None
+        except Exception:
+            # Issue is not a sub-issue or API not available
+            return None
+
+    def add_sub_issue(
+        self, repo_name: str, parent_issue_number: int, sub_issue_number: int
+    ) -> Dict[str, Any]:
+        """Add existing issue as sub-issue using REST API."""
+        repo = self._get_repository(repo_name)
+        # GitHub REST API endpoint for adding sub-issue
+        # POST /repos/{owner}/{repo}/issues/{parent_issue_number}/sub_issues
+        url = f"/repos/{repo_name}/issues/{parent_issue_number}/sub_issues"
+        post_parameters = {"sub_issue_number": sub_issue_number}
+        status, headers, raw_data = repo._requester.requestJson(
+            "POST", url, post_parameters
+        )
+        data = cast(Union[Dict[str, Any], str], raw_data)
+        if isinstance(data, dict):
+            return data
+        else:
+            return {}
+
+    def remove_sub_issue(
+        self, repo_name: str, parent_issue_number: int, sub_issue_number: int
+    ) -> None:
+        """Remove sub-issue relationship using REST API."""
+        repo = self._get_repository(repo_name)
+        # GitHub REST API endpoint for removing sub-issue
+        # DELETE /repos/{owner}/{repo}/issues/{parent_issue_number}/
+        # sub_issues/{sub_issue_number}
+        url = (
+            f"/repos/{repo_name}/issues/{parent_issue_number}/"
+            f"sub_issues/{sub_issue_number}"
+        )
+        repo._requester.requestJson("DELETE", url)
+
+    def reprioritize_sub_issue(
+        self,
+        repo_name: str,
+        parent_issue_number: int,
+        sub_issue_number: int,
+        position: int,
+    ) -> Dict[str, Any]:
+        """Change sub-issue order/position using REST API."""
+        repo = self._get_repository(repo_name)
+        # GitHub REST API endpoint for reprioritizing sub-issue
+        # PATCH /repos/{owner}/{repo}/issues/{parent_issue_number}/
+        # sub_issues/{sub_issue_number}
+        url = (
+            f"/repos/{repo_name}/issues/{parent_issue_number}/"
+            f"sub_issues/{sub_issue_number}"
+        )
+        patch_parameters = {"position": position}
+        status, headers, raw_data = repo._requester.requestJson(
+            "PATCH", url, patch_parameters
+        )
+        data = cast(Union[Dict[str, Any], str], raw_data)
+        if isinstance(data, dict):
+            return data
+        else:
+            return {}
 
     # Raw Data Extraction Utilities (for REST write operations)
 

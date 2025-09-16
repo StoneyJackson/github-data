@@ -95,6 +95,7 @@ class TestPullRequestIntegration:
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
+        mock_boundary.get_repository_sub_issues.return_value = []
 
         # Mock new PR methods
         mock_boundary.get_repository_pull_requests.return_value = sample_pr_data[

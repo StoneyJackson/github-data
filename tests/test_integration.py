@@ -19,6 +19,11 @@ def _add_pr_method_mocks(mock_boundary):
     mock_boundary.get_all_pull_request_comments.return_value = []
 
 
+def _add_sub_issues_method_mocks(mock_boundary):
+    """Add sub-issues method mocks to boundary for compatibility."""
+    mock_boundary.get_repository_sub_issues.return_value = []
+
+
 class TestSaveRestoreIntegration:
     """Integration tests for complete save/restore workflows."""
 
@@ -166,6 +171,7 @@ class TestSaveRestoreIntegration:
             "comments"
         ]
         _add_pr_method_mocks(mock_boundary)
+        _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/repo", temp_data_dir)
@@ -414,6 +420,7 @@ class TestSaveRestoreIntegration:
             "comments"
         ]
         _add_pr_method_mocks(save_boundary)
+        _add_sub_issues_method_mocks(save_boundary)
 
         save_repository_data("fake_token", "owner/source_repo", temp_data_dir)
 
@@ -535,6 +542,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
         _add_pr_method_mocks(mock_boundary)
+        _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/empty_repo", temp_data_dir)
@@ -595,6 +603,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
         _add_pr_method_mocks(mock_boundary)
+        _add_sub_issues_method_mocks(mock_boundary)
 
         # Use nested directory that doesn't exist
         nested_path = Path(temp_data_dir) / "backup" / "github-data"
@@ -927,6 +936,7 @@ class TestErrorHandlingIntegration:
             "comments"
         ]
         _add_pr_method_mocks(mock_boundary)
+        _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         save_repository_data("fake_token", "owner/repo", temp_data_dir)

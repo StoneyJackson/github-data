@@ -99,6 +99,34 @@ class GitHubService:
             operation=lambda: self._boundary.get_all_pull_request_comments(repo_name),
         )
 
+    def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get sub-issue relationships from repository with caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"sub_issues:{repo_name}",
+            operation=lambda: self._boundary.get_repository_sub_issues(repo_name),
+        )
+
+    def get_issue_sub_issues(
+        self, repo_name: str, issue_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get sub-issues for specific issue with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"issue_sub_issues:{repo_name}:{issue_number}",
+            operation=lambda: self._boundary.get_issue_sub_issues_graphql(
+                repo_name, issue_number
+            ),
+        )
+
+    def get_issue_parent(
+        self, repo_name: str, issue_number: int
+    ) -> Optional[Dict[str, Any]]:
+        """Get parent issue if this issue is a sub-issue with caching."""
+        # Note: This method returns a single item, not a list like other methods
+        return self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.get_issue_parent(repo_name, issue_number),
+            self._boundary._github,
+        )
+
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get current rate limit status."""
         # Rate limit status should not be cached
@@ -198,6 +226,48 @@ class GitHubService:
             self._boundary._github,
         )
         self._invalidate_cache_for_repository(repo_name, "pr_comments")
+        return result
+
+    def add_sub_issue(
+        self, repo_name: str, parent_issue_number: int, sub_issue_number: int
+    ) -> Dict[str, Any]:
+        """Add existing issue as sub-issue with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.add_sub_issue(
+                repo_name, parent_issue_number, sub_issue_number
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "sub_issues")
+        return result
+
+    def remove_sub_issue(
+        self, repo_name: str, parent_issue_number: int, sub_issue_number: int
+    ) -> None:
+        """Remove sub-issue relationship with rate limiting."""
+        self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.remove_sub_issue(
+                repo_name, parent_issue_number, sub_issue_number
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "sub_issues")
+
+    def reprioritize_sub_issue(
+        self,
+        repo_name: str,
+        parent_issue_number: int,
+        sub_issue_number: int,
+        position: int,
+    ) -> Dict[str, Any]:
+        """Change sub-issue order/position with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.reprioritize_sub_issue(
+                repo_name, parent_issue_number, sub_issue_number, position
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "sub_issues")
         return result
 
     # Cross-cutting Concern Coordination

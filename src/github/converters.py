@@ -7,7 +7,15 @@ Converts raw JSON data from GitHub API to our domain models.
 from typing import Dict, Any
 from datetime import datetime
 
-from ..models import Label, Issue, Comment, GitHubUser, PullRequest, PullRequestComment
+from ..models import (
+    Label,
+    Issue,
+    Comment,
+    GitHubUser,
+    PullRequest,
+    PullRequestComment,
+    SubIssue,
+)
 
 
 def convert_to_label(raw_data: Dict[str, Any]) -> Label:
@@ -112,6 +120,17 @@ def convert_to_user(raw_data: Dict[str, Any]) -> GitHubUser:
         id=raw_data["id"],
         avatar_url=raw_data["avatar_url"],
         html_url=raw_data["html_url"],
+    )
+
+
+def convert_to_sub_issue(raw_data: Dict[str, Any]) -> SubIssue:
+    """Convert raw GitHub API sub-issue data to SubIssue model."""
+    return SubIssue(
+        sub_issue_id=raw_data["sub_issue_id"],
+        sub_issue_number=raw_data["sub_issue_number"],
+        parent_issue_id=raw_data["parent_issue_id"],
+        parent_issue_number=raw_data["parent_issue_number"],
+        position=raw_data["position"],
     )
 
 
