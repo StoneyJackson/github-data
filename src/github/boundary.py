@@ -8,6 +8,7 @@ Focused solely on API access - no rate limiting, caching, or retry logic.
 
 from typing import Dict, List, Any, Optional, Union, cast
 from .utils.graphql_paginator import GraphQLPaginator
+from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder
 from github import Github, Auth
 from github.Repository import Repository
 from github.PaginatedList import PaginatedList
@@ -110,9 +111,10 @@ class GitHubApiBoundary:
             """Post-process comments by adding issue URL and flattening."""
             all_comments = []
             for issue in issues_nodes:
-                for comment in issue["comments"]["nodes"]:
-                    comment["issue_url"] = issue["url"]
-                    all_comments.append(comment)
+                comments = CommentEnricher.enrich_issue_comments(
+                    issue["comments"]["nodes"], issue["url"]
+                )
+                all_comments.extend(comments)
             return all_comments
 
         paginator = GraphQLPaginator(self._gql_client)
@@ -255,10 +257,7 @@ class GitHubApiBoundary:
                 return []
 
             pull_request_url = pr_data["url"]
-            for comment in nodes:
-                comment["pull_request_url"] = pull_request_url
-
-            return nodes
+            return CommentEnricher.enrich_pr_comments(nodes, pull_request_url)
 
         paginator = GraphQLPaginator(self._gql_client)
         all_comments = paginator.paginate_all(
@@ -284,9 +283,10 @@ class GitHubApiBoundary:
             """Post-process comments by adding pull request URL and flattening."""
             all_comments = []
             for pr in prs_nodes:
-                for comment in pr["comments"]["nodes"]:
-                    comment["pull_request_url"] = pr["url"]
-                    all_comments.append(comment)
+                comments = CommentEnricher.enrich_pr_comments(
+                    pr["comments"]["nodes"], pr["url"]
+                )
+                all_comments.extend(comments)
             return all_comments
 
         paginator = GraphQLPaginator(self._gql_client)
@@ -326,20 +326,9 @@ class GitHubApiBoundary:
             issues_nodes: List[Dict[str, Any]],
         ) -> List[Dict[str, Any]]:
             """Post-process sub-issues by extracting relationship data."""
-            all_sub_issues = []
-            for issue in issues_nodes:
-                # Add sub-issues for this parent issue
-                for sub_issue in issue["subIssues"]["nodes"]:
-                    all_sub_issues.append(
-                        {
-                            "sub_issue_id": sub_issue["id"],
-                            "sub_issue_number": sub_issue["number"],
-                            "parent_issue_id": issue["id"],
-                            "parent_issue_number": issue["number"],
-                            "position": sub_issue["position"],
-                        }
-                    )
-            return all_sub_issues
+            return SubIssueRelationshipBuilder.build_repository_relationships(
+                issues_nodes
+            )
 
         paginator = GraphQLPaginator(self._gql_client)
         all_sub_issues = paginator.paginate_all(
@@ -377,19 +366,9 @@ class GitHubApiBoundary:
                 return []
 
             # Enrich each sub-issue with parent issue details
-            return [
-                {
-                    "sub_issue_id": sub_issue["id"],
-                    "sub_issue_number": sub_issue["number"],
-                    "parent_issue_id": issue_data["id"],
-                    "parent_issue_number": issue_data["number"],
-                    "position": sub_issue["position"],
-                    "title": sub_issue["title"],
-                    "state": sub_issue["state"],
-                    "url": sub_issue["url"],
-                }
-                for sub_issue in sub_issues_nodes
-            ]
+            return SubIssueRelationshipBuilder.build_issue_relationships(
+                sub_issues_nodes, issue_data
+            )
 
         paginator = GraphQLPaginator(self._gql_client)
         all_sub_issues = paginator.paginate_all(

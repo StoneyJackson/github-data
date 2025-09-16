@@ -170,7 +170,6 @@ cython_debug/
 # Project specific
 data/
 *.json
-.plans/
 
 # Manual testing data and configuration
 manual-test-data/
