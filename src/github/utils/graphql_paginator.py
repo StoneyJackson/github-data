@@ -18,7 +18,7 @@ class GraphQLPaginator:
 
     def _resolve_data_path(
         self, result: Dict[str, Any], data_path: str
-    ) -> Dict[str, Any]:
+    ) -> Optional[Dict[str, Any]]:
         """
         Resolve data path from nested dictionary.
 
@@ -27,11 +27,13 @@ class GraphQLPaginator:
             data_path: Dot-notation path to data
 
         Returns:
-            Resolved data dictionary
+            Resolved data dictionary, or None if path resolves to null
         """
         current = result
         for key in data_path.split("."):
             current = current[key]
+            if current is None:
+                return None
         return current
 
     def paginate_all(
@@ -70,6 +72,10 @@ class GraphQLPaginator:
 
             # Resolve the data path
             data = self._resolve_data_path(result, data_path)
+
+            # Handle null data gracefully
+            if data is None:
+                break
 
             # Optional post-processing
             page_items = data["nodes"]
