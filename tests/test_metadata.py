@@ -189,8 +189,9 @@ class TestMetadataIntegration:
 
     def test_restore_creates_issues_and_comments_successfully(self, tmp_path):
         """Test that restore operations work with our new metadata functionality."""
-        from unittest.mock import patch, MagicMock
-        from src.operations.restore import restore_repository_data
+        from unittest.mock import MagicMock
+        from src.operations.restore import restore_repository_data_with_services
+        from src.storage import create_storage_service
         import json
 
         # Create test data directory
@@ -246,31 +247,30 @@ class TestMetadataIntegration:
         with open(data_dir / "comments.json", "w") as f:
             json.dump(comments_data, f)
 
-        # Mock the GitHubService to capture what gets sent to API
-        with patch(
-            "src.operations.restore.create_github_service"
-        ) as mock_create_service:
-            mock_client = mock_create_service.return_value
-            mock_client.get_repository_labels.return_value = []
+        # Create a mock GitHubService to capture what gets sent to API
+        mock_client = MagicMock()
+        mock_client.get_repository_labels.return_value = []
 
-            # Set up return values for issue creation
-            mock_issue = MagicMock()
-            mock_issue.number = 10
-            mock_issue.title = "Test issue with metadata"
-            mock_client.create_issue.return_value = mock_issue
+        # Set up return values for issue creation
+        mock_client.create_issue.return_value = {
+            "number": 10,
+            "title": "Test issue with metadata",
+        }
 
-            # Set up return values for comment creation
-            mock_comment = MagicMock()
-            mock_client.create_issue_comment.return_value = mock_comment
+        # Set up return values for comment creation
+        mock_client.create_issue_comment.return_value = MagicMock()
 
-            # Run restore with metadata enabled (default)
-            restore_repository_data("fake_token", "owner/repo", str(data_dir))
+        # Run restore with metadata enabled (default)
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            mock_client, storage_service, "owner/repo", str(data_dir)
+        )
 
-            # Verify issue was created
-            assert mock_client.create_issue.call_count == 1
+        # Verify issue was created
+        assert mock_client.create_issue.call_count == 1
 
-            # Verify comment was created
-            assert mock_client.create_issue_comment.call_count == 1
+        # Verify comment was created
+        assert mock_client.create_issue_comment.call_count == 1
 
     def test_metadata_functionality_works_end_to_end(self):
         """Test that our metadata functions produce the expected output."""

@@ -7,7 +7,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.operations.save import save_repository_data
+from src.operations.save import save_repository_data_with_services
+from src.github import create_github_service
+from src.storage import create_storage_service
 
 pytestmark = [pytest.mark.integration]
 
@@ -106,7 +108,11 @@ class TestPullRequestIntegration:
         ]
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify PR JSON files were created
         data_path = Path(temp_data_dir)

@@ -10,7 +10,9 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from src.operations.restore import restore_repository_data
+from src.operations.restore import restore_repository_data_with_services
+from src.github import create_github_service
+from src.storage import create_storage_service
 from src.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,
@@ -200,8 +202,14 @@ class TestConflictStrategyIntegration:
 
         # Should fail because repository has existing labels
         with pytest.raises(RuntimeError, match="Repository has 1 existing labels"):
-            restore_repository_data(
-                "token", "owner/repo", temp_data_dir, "fail-if-existing"
+            github_service = create_github_service("token")
+            storage_service = create_storage_service("json")
+            restore_repository_data_with_services(
+                github_service,
+                storage_service,
+                "owner/repo",
+                temp_data_dir,
+                "fail-if-existing",
             )
 
     def test_fail_if_existing_strategy_with_empty_repository(
@@ -223,8 +231,14 @@ class TestConflictStrategyIntegration:
         }
 
         # Should succeed because repository is empty
-        restore_repository_data(
-            "token", "owner/repo", temp_data_dir, "fail-if-existing"
+        github_service = create_github_service("token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            "fail-if-existing",
         )
 
         # Verify labels were created
@@ -252,8 +266,14 @@ class TestConflictStrategyIntegration:
 
         # Should fail because 'bug' label conflicts
         with pytest.raises(RuntimeError, match="Label name conflicts detected: bug"):
-            restore_repository_data(
-                "token", "owner/repo", temp_data_dir, "fail-if-conflict"
+            github_service = create_github_service("token")
+            storage_service = create_storage_service("json")
+            restore_repository_data_with_services(
+                github_service,
+                storage_service,
+                "owner/repo",
+                temp_data_dir,
+                "fail-if-conflict",
             )
 
     def test_fail_if_conflict_strategy_without_conflicts(
@@ -283,8 +303,14 @@ class TestConflictStrategyIntegration:
         }
 
         # Should succeed because no conflicts
-        restore_repository_data(
-            "token", "owner/repo", temp_data_dir, "fail-if-conflict"
+        github_service = create_github_service("token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            "fail-if-conflict",
         )
 
         # Verify labels were created
@@ -323,7 +349,11 @@ class TestConflictStrategyIntegration:
             "url": "http://example.com/test",
         }
 
-        restore_repository_data("token", "owner/repo", temp_data_dir, "delete-all")
+        github_service = create_github_service("token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir, "delete-all"
+        )
 
         # Verify existing labels were deleted
         assert mock_boundary.delete_label.call_count == 2
@@ -359,7 +389,11 @@ class TestConflictStrategyIntegration:
             "url": "http://example.com/test",
         }
 
-        restore_repository_data("token", "owner/repo", temp_data_dir, "skip")
+        github_service = create_github_service("token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir, "skip"
+        )
 
         # Verify only non-conflicting label was created (enhancement, not bug)
         assert mock_boundary.create_label.call_count == 1
@@ -402,7 +436,11 @@ class TestConflictStrategyIntegration:
             "url": "http://example.com/bug",
         }
 
-        restore_repository_data("token", "owner/repo", temp_data_dir, "overwrite")
+        github_service = create_github_service("token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir, "overwrite"
+        )
 
         # Verify conflicting label was updated
         assert mock_boundary.update_label.call_count == 1

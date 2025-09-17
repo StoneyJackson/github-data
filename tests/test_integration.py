@@ -7,8 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.operations.save import save_repository_data
-from src.operations.restore import restore_repository_data
+from src.operations.save import save_repository_data_with_services
+from src.github import create_github_service
+from src.storage import create_storage_service
+from src.operations.restore import restore_repository_data_with_services
 
 pytestmark = [pytest.mark.integration]
 
@@ -174,7 +176,11 @@ class TestSaveRestoreIntegration:
         _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify JSON files were created
         data_path = Path(temp_data_dir)
@@ -346,8 +352,11 @@ class TestSaveRestoreIntegration:
         ]
 
         # Execute restore operation
-        restore_repository_data(
-            "fake_token",
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
@@ -422,7 +431,11 @@ class TestSaveRestoreIntegration:
         _add_pr_method_mocks(save_boundary)
         _add_sub_issues_method_mocks(save_boundary)
 
-        save_repository_data("fake_token", "owner/source_repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/source_repo", temp_data_dir
+        )
 
         # Phase 2: Restore operation with fresh mock
         restore_boundary = Mock()
@@ -477,8 +490,11 @@ class TestSaveRestoreIntegration:
             "issue_url": "https://api.github.com/repos/owner/target_repo/issues/999",
         }
 
-        restore_repository_data(
-            "fake_token",
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
@@ -545,7 +561,11 @@ class TestSaveRestoreIntegration:
         _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/empty_repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/empty_repo", temp_data_dir
+        )
 
         # Verify JSON files are created even with empty data
         data_path = Path(temp_data_dir)
@@ -578,7 +598,11 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_labels.return_value = []
 
         # Execute restore operation
-        restore_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify no creation methods were called for empty data
         assert mock_boundary.create_label.call_count == 0
@@ -587,7 +611,11 @@ class TestSaveRestoreIntegration:
     def test_restore_fails_when_json_files_missing(self, temp_data_dir):
         """Test restore fails gracefully when required files are missing."""
         with pytest.raises(FileNotFoundError) as exc_info:
-            restore_repository_data("fake_token", "owner/repo", temp_data_dir)
+            github_service = create_github_service("fake_token")
+            storage_service = create_storage_service("json")
+            restore_repository_data_with_services(
+                github_service, storage_service, "owner/repo", temp_data_dir
+            )
 
         assert "labels.json" in str(exc_info.value)
 
@@ -609,7 +637,11 @@ class TestSaveRestoreIntegration:
         nested_path = Path(temp_data_dir) / "backup" / "github-data"
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", str(nested_path))
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", str(nested_path)
+        )
 
         # Verify directory was created
         assert nested_path.exists()
@@ -768,8 +800,11 @@ class TestSaveRestoreIntegration:
         }
 
         # Execute restore
-        restore_repository_data(
-            "fake_token",
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
@@ -864,7 +899,11 @@ class TestErrorHandlingIntegration:
 
         # Execute restore operation - should fail fast on second error
         with pytest.raises(RuntimeError, match="Failed to create label 'feature'"):
-            restore_repository_data("fake_token", "owner/repo", temp_data_dir)
+            github_service = create_github_service("fake_token")
+            storage_service = create_storage_service("json")
+            restore_repository_data_with_services(
+                github_service, storage_service, "owner/repo", temp_data_dir
+            )
 
         # Verify first label succeeded, second failed and stopped execution
         assert mock_boundary.create_label.call_count == 2
@@ -882,7 +921,11 @@ class TestErrorHandlingIntegration:
 
         # Restore should fail with JSON decode error
         with pytest.raises(json.JSONDecodeError):
-            restore_repository_data("fake_token", "owner/repo", temp_data_dir)
+            github_service = create_github_service("fake_token")
+            storage_service = create_storage_service("json")
+            restore_repository_data_with_services(
+                github_service, storage_service, "owner/repo", temp_data_dir
+            )
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_data_type_conversion_and_validation(
@@ -939,7 +982,11 @@ class TestErrorHandlingIntegration:
         _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify data was saved correctly
         data_path = Path(temp_data_dir)
@@ -966,7 +1013,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issues are restored with their state and metadata."""
-        from src.operations.restore import restore_repository_data
+        from src.operations.restore import restore_repository_data_with_services
         from src.models import Issue, GitHubUser
         from datetime import datetime
         import json
@@ -1075,10 +1122,13 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
 
         # Test restoration
-        restore_repository_data(
-            github_token="fake-token",
-            repo_name="owner/repo",
-            data_path=str(data_path),
+        github_service = create_github_service("fake-token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            str(data_path),
             include_original_metadata=True,
         )
 
@@ -1110,7 +1160,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issue restoration with minimal closure metadata."""
-        from src.operations.restore import restore_repository_data
+        from src.operations.restore import restore_repository_data_with_services
         from src.models import Issue, GitHubUser
         from datetime import datetime
         import json
@@ -1187,10 +1237,13 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
 
         # Test restoration
-        restore_repository_data(
-            github_token="fake-token",
-            repo_name="owner/repo",
-            data_path=str(data_path),
+        github_service = create_github_service("fake-token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            str(data_path),
             include_original_metadata=True,
         )
 

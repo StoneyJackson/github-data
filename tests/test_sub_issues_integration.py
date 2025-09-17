@@ -7,8 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.operations.save import save_repository_data
-from src.operations.restore import restore_repository_data
+from src.operations.save import save_repository_data_with_services
+from src.github import create_github_service
+from src.storage import create_storage_service
+from src.operations.restore import restore_repository_data_with_services
 
 pytestmark = [pytest.mark.integration]
 
@@ -244,7 +246,11 @@ class TestSubIssuesIntegration:
         ]
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify sub-issues JSON file was created
         data_path = Path(temp_data_dir)
@@ -302,8 +308,14 @@ class TestSubIssuesIntegration:
             json.dump([], f)
 
         # Execute restore operation
-        restore_repository_data(
-            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            include_sub_issues=True,
         )
 
         # Verify issues were created
@@ -350,8 +362,14 @@ class TestSubIssuesIntegration:
             json.dump([], f)
 
         # Execute restore operation
-        restore_repository_data(
-            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            include_sub_issues=True,
         )
 
         # Verify all issues were created
@@ -413,7 +431,11 @@ class TestSubIssuesIntegration:
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation
-        save_repository_data("fake_token", "owner/repo", temp_data_dir)
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        save_repository_data_with_services(
+            github_service, storage_service, "owner/repo", temp_data_dir
+        )
 
         # Verify all files were created even with empty sub-issues
         data_path = Path(temp_data_dir)
@@ -490,8 +512,14 @@ class TestSubIssuesIntegration:
             json.dump([], f)
 
         # Execute restore operation
-        restore_repository_data(
-            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            include_sub_issues=True,
         )
 
         # Verify issue was created but no sub-issue relationship
@@ -550,8 +578,14 @@ class TestSubIssuesIntegration:
             json.dump([], f)
 
         # Execute restore operation
-        restore_repository_data(
-            "fake_token", "owner/repo", temp_data_dir, include_sub_issues=True
+        github_service = create_github_service("fake_token")
+        storage_service = create_storage_service("json")
+        restore_repository_data_with_services(
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            include_sub_issues=True,
         )
 
         # Verify issue was created but no sub-issue operations

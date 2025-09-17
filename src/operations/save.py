@@ -8,7 +8,6 @@ and comments from GitHub repositories and saves them to JSON files.
 from pathlib import Path
 from typing import List, Dict
 
-from ..github import create_github_service
 from ..github.protocols import RepositoryService
 from ..github import converters
 from ..models import (
@@ -21,7 +20,6 @@ from ..models import (
     SubIssue,
 )
 from ..storage.protocols import StorageService
-from ..storage import create_storage_service
 
 
 def save_repository_data_with_services(
@@ -35,20 +33,6 @@ def save_repository_data_with_services(
 
     repository_data = _collect_repository_data(github_service, repo_name)
     _save_data_to_files(repository_data, output_dir, storage_service)
-
-
-def save_repository_data(github_token: str, repo_name: str, data_path: str) -> None:
-    """
-    Save GitHub repository labels, issues, and comments to JSON files.
-
-    Legacy function - deprecated, use save_repository_data_with_services
-    for dependency injection.
-    """
-    github_service = create_github_service(github_token)
-    storage_service = create_storage_service("json")
-    save_repository_data_with_services(
-        github_service, storage_service, repo_name, data_path
-    )
 
 
 def _collect_repository_data(

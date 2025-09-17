@@ -9,12 +9,10 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from urllib.parse import urlparse
 
-from ..github import create_github_service
 from ..github.protocols import RepositoryService
 from ..github import converters
 from ..models import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
 from ..storage.protocols import StorageService
-from ..storage import create_storage_service
 
 
 def restore_repository_data_with_services(
@@ -69,35 +67,6 @@ def restore_repository_data_with_services(
         _restore_sub_issues(
             github_service, storage_service, repo_name, input_dir, issue_number_mapping
         )
-
-
-def restore_repository_data(
-    github_token: str,
-    repo_name: str,
-    data_path: str,
-    label_conflict_strategy: str = "fail-if-existing",
-    include_original_metadata: bool = True,
-    include_prs: bool = False,
-    include_sub_issues: bool = False,
-) -> None:
-    """
-    Restore labels, issues, comments, PRs and sub-issues from JSON files.
-
-    Legacy function - deprecated, use restore_repository_data_with_services
-    for dependency injection.
-    """
-    github_service = create_github_service(github_token)
-    storage_service = create_storage_service("json")
-    restore_repository_data_with_services(
-        github_service,
-        storage_service,
-        repo_name,
-        data_path,
-        label_conflict_strategy,
-        include_original_metadata,
-        include_prs,
-        include_sub_issues,
-    )
 
 
 def _validate_data_files_exist(
