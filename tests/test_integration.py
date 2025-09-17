@@ -503,7 +503,8 @@ class TestSaveRestoreIntegration:
         # Verify data integrity by checking that saved data matches restored data
 
         # Check that same number of items were saved and restored
-        assert save_boundary.get_repository_labels.call_count == 1
+        # Note: Labels API is called twice - once for validation, once for collection
+        assert save_boundary.get_repository_labels.call_count == 2
         assert restore_boundary.create_label.call_count == 2
 
         assert save_boundary.get_repository_issues.call_count == 1

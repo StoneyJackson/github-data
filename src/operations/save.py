@@ -6,7 +6,7 @@ and comments from GitHub repositories and saves them to JSON files.
 """
 
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Any
 
 from ..github.protocols import RepositoryService
 from ..github import converters
@@ -29,10 +29,78 @@ def save_repository_data_with_services(
     data_path: str,
 ) -> None:
     """Save GitHub repository data using injected services."""
-    output_dir = Path(data_path)
+    # Create use case instances
+    save_use_case = _create_save_repository_use_case(github_service, storage_service)
 
-    repository_data = _collect_repository_data(github_service, repo_name)
-    _save_data_to_files(repository_data, output_dir, storage_service)
+    # Execute with new use case
+    from ..use_cases.requests import SaveRepositoryRequest
+
+    request = SaveRepositoryRequest(repository_name=repo_name, output_path=data_path)
+
+    results = save_use_case.execute(request)
+
+    # Handle errors (maintain existing behavior)
+    failed_operations = [r for r in results if not r.success]
+    if failed_operations:
+        error_messages = [r.error_message for r in failed_operations if r.error_message]
+        raise Exception(f"Save operation failed: {'; '.join(error_messages)}")
+
+
+def _create_save_repository_use_case(
+    github_service: RepositoryService, storage_service: StorageService
+) -> Any:
+    """Factory function to create configured SaveRepositoryUseCase."""
+    from ..use_cases.collection.collect_labels import CollectLabelsUseCase
+    from ..use_cases.collection.collect_issues import CollectIssuesUseCase
+    from ..use_cases.collection.collect_comments import CollectCommentsUseCase
+    from ..use_cases.collection.collect_pull_requests import CollectPullRequestsUseCase
+    from ..use_cases.collection.collect_pr_comments import CollectPRCommentsUseCase
+    from ..use_cases.collection.collect_sub_issues import CollectSubIssuesUseCase
+    from ..use_cases.persistence.save_labels import SaveLabelsUseCase
+    from ..use_cases.persistence.save_issues import SaveIssuesUseCase
+    from ..use_cases.persistence.save_comments import SaveCommentsUseCase
+    from ..use_cases.persistence.save_pull_requests import SavePullRequestsUseCase
+    from ..use_cases.persistence.save_pr_comments import SavePRCommentsUseCase
+    from ..use_cases.persistence.save_sub_issues import SaveSubIssuesUseCase
+    from ..use_cases.processing.validate_repository_access import (
+        ValidateRepositoryAccessUseCase,
+    )
+    from ..use_cases.processing.associate_sub_issues import AssociateSubIssuesUseCase
+    from ..use_cases.orchestration.save_repository import SaveRepositoryUseCase
+
+    # Create all use case instances with proper dependency injection
+    validate_access = ValidateRepositoryAccessUseCase(github_service)
+    collect_labels = CollectLabelsUseCase(github_service)
+    collect_issues = CollectIssuesUseCase(github_service)
+    collect_comments = CollectCommentsUseCase(github_service)
+    collect_pull_requests = CollectPullRequestsUseCase(github_service)
+    collect_pr_comments = CollectPRCommentsUseCase(github_service)
+    collect_sub_issues = CollectSubIssuesUseCase(github_service)
+    associate_sub_issues = AssociateSubIssuesUseCase()
+    save_labels = SaveLabelsUseCase(storage_service)
+    save_issues = SaveIssuesUseCase(storage_service)
+    save_comments = SaveCommentsUseCase(storage_service)
+    save_pull_requests = SavePullRequestsUseCase(storage_service)
+    save_pr_comments = SavePRCommentsUseCase(storage_service)
+    save_sub_issues = SaveSubIssuesUseCase(storage_service)
+
+    # Return configured orchestrator
+    return SaveRepositoryUseCase(
+        validate_access=validate_access,
+        collect_labels=collect_labels,
+        collect_issues=collect_issues,
+        collect_comments=collect_comments,
+        collect_pull_requests=collect_pull_requests,
+        collect_pr_comments=collect_pr_comments,
+        collect_sub_issues=collect_sub_issues,
+        associate_sub_issues=associate_sub_issues,
+        save_labels=save_labels,
+        save_issues=save_issues,
+        save_comments=save_comments,
+        save_pull_requests=save_pull_requests,
+        save_pr_comments=save_pr_comments,
+        save_sub_issues=save_sub_issues,
+    )
 
 
 def _collect_repository_data(
