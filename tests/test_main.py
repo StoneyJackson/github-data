@@ -34,12 +34,20 @@ class TestGetEnvVar:
 class TestMain:
     """Test cases for main function."""
 
-    @patch("src.operations.save.save_repository_data")
+    @patch("src.operations.save.save_repository_data_with_services")
+    @patch("src.github.create_github_service")
+    @patch("src.storage.create_storage_service")
     @patch("src.main._get_required_env_var")
     @patch("src.main._get_env_var")
     @patch("builtins.print")
     def test_main_save_operation(
-        self, mock_print, mock_get_env_var, mock_get_required_env_var, mock_save
+        self,
+        mock_print,
+        mock_get_env_var,
+        mock_get_required_env_var,
+        mock_create_storage,
+        mock_create_github,
+        mock_save,
     ):
         """Test main function with save operation."""
         mock_get_required_env_var.side_effect = lambda name: {
@@ -62,12 +70,20 @@ class TestMain:
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
 
-    @patch("src.operations.restore.restore_repository_data")
+    @patch("src.operations.restore.restore_repository_data_with_services")
+    @patch("src.github.create_github_service")
+    @patch("src.storage.create_storage_service")
     @patch("src.main._get_required_env_var")
     @patch("src.main._get_env_var")
     @patch("builtins.print")
     def test_main_restore_operation(
-        self, mock_print, mock_get_env_var, mock_get_required_env_var, mock_restore
+        self,
+        mock_print,
+        mock_get_env_var,
+        mock_get_required_env_var,
+        mock_create_storage,
+        mock_create_github,
+        mock_restore,
     ):
         """Test main function with restore operation."""
         mock_get_required_env_var.side_effect = lambda name: {

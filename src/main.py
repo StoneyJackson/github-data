@@ -41,18 +41,33 @@ def _execute_operation(config: "Configuration") -> None:
 def _perform_save_operation(config: "Configuration") -> None:
     """Perform the save operation to backup GitHub data."""
     print("Saving GitHub data...")
-    from .operations.save import save_repository_data
+    from .operations.save import save_repository_data_with_services
+    from .github import create_github_service
+    from .storage import create_storage_service
 
-    save_repository_data(config.github_token, config.github_repo, config.data_path)
+    # Create services using dependency injection
+    github_service = create_github_service(config.github_token)
+    storage_service = create_storage_service("json")
+
+    save_repository_data_with_services(
+        github_service, storage_service, config.github_repo, config.data_path
+    )
 
 
 def _perform_restore_operation(config: "Configuration") -> None:
     """Perform the restore operation to restore GitHub data."""
     print("Restoring GitHub data...")
-    from .operations.restore import restore_repository_data
+    from .operations.restore import restore_repository_data_with_services
+    from .github import create_github_service
+    from .storage import create_storage_service
 
-    restore_repository_data(
-        config.github_token,
+    # Create services using dependency injection
+    github_service = create_github_service(config.github_token)
+    storage_service = create_storage_service("json")
+
+    restore_repository_data_with_services(
+        github_service,
+        storage_service,
         config.github_repo,
         config.data_path,
         config.label_conflict_strategy,

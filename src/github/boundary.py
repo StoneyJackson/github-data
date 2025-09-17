@@ -7,13 +7,14 @@ Focused solely on API access - no rate limiting, caching, or retry logic.
 """
 
 from typing import Dict, List, Any, Optional
+from .protocols import GitHubApiBoundary as GitHubApiBoundaryProtocol
 from .graphql_client import GitHubGraphQLClient
 from .restapi_client import GitHubRestApiClient
 from github import Github, Auth
 from github.Repository import Repository
 
 
-class GitHubApiBoundary:
+class GitHubApiBoundary(GitHubApiBoundaryProtocol):
     """
     Ultra-thin boundary around PyGithub that returns raw JSON data.
 

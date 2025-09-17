@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Dict
 
 from ..github import create_github_service
-from ..github.service import GitHubService
+from ..github.protocols import RepositoryService
 from ..github import converters
 from ..models import (
     RepositoryData,
@@ -20,26 +20,47 @@ from ..models import (
     PullRequestComment,
     SubIssue,
 )
-from ..storage.json_storage import save_json_data
+from ..storage.protocols import StorageService
+from ..storage import create_storage_service
+
+
+def save_repository_data_with_services(
+    github_service: RepositoryService,
+    storage_service: StorageService,
+    repo_name: str,
+    data_path: str,
+) -> None:
+    """Save GitHub repository data using injected services."""
+    output_dir = Path(data_path)
+
+    repository_data = _collect_repository_data(github_service, repo_name)
+    _save_data_to_files(repository_data, output_dir, storage_service)
 
 
 def save_repository_data(github_token: str, repo_name: str, data_path: str) -> None:
-    """Save GitHub repository labels, issues, and comments to JSON files."""
-    client = create_github_service(github_token)
-    output_dir = Path(data_path)
+    """
+    Save GitHub repository labels, issues, and comments to JSON files.
 
-    repository_data = _collect_repository_data(client, repo_name)
-    _save_data_to_files(repository_data, output_dir)
+    Legacy function - deprecated, use save_repository_data_with_services
+    for dependency injection.
+    """
+    github_service = create_github_service(github_token)
+    storage_service = create_storage_service("json")
+    save_repository_data_with_services(
+        github_service, storage_service, repo_name, data_path
+    )
 
 
-def _collect_repository_data(client: GitHubService, repo_name: str) -> RepositoryData:
+def _collect_repository_data(
+    github_service: RepositoryService, repo_name: str
+) -> RepositoryData:
     """Collect all repository data from GitHub API."""
-    labels = _fetch_repository_labels(client, repo_name)
-    issues = _fetch_repository_issues(client, repo_name)
-    comments = _fetch_all_issue_comments(client, repo_name)
-    pull_requests = _fetch_repository_pull_requests(client, repo_name)
-    pr_comments = _fetch_all_pr_comments(client, repo_name)
-    sub_issues = _fetch_repository_sub_issues(client, repo_name)
+    labels = _fetch_repository_labels(github_service, repo_name)
+    issues = _fetch_repository_issues(github_service, repo_name)
+    comments = _fetch_all_issue_comments(github_service, repo_name)
+    pull_requests = _fetch_repository_pull_requests(github_service, repo_name)
+    pr_comments = _fetch_all_pr_comments(github_service, repo_name)
+    sub_issues = _fetch_repository_sub_issues(github_service, repo_name)
 
     return _create_repository_data(
         repo_name, labels, issues, comments, pull_requests, pr_comments, sub_issues
@@ -73,61 +94,71 @@ def _create_repository_data(
     )
 
 
-def _save_data_to_files(repository_data: RepositoryData, output_dir: Path) -> None:
+def _save_data_to_files(
+    repository_data: RepositoryData, output_dir: Path, storage_service: StorageService
+) -> None:
     """Save repository data to separate JSON files."""
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    _save_labels_to_file(repository_data.labels, output_dir)
-    _save_issues_to_file(repository_data.issues, output_dir)
-    _save_comments_to_file(repository_data.comments, output_dir)
-    _save_pull_requests_to_file(repository_data.pull_requests, output_dir)
-    _save_pr_comments_to_file(repository_data.pr_comments, output_dir)
-    _save_sub_issues_to_file(repository_data.sub_issues, output_dir)
+    _save_labels_to_file(repository_data.labels, output_dir, storage_service)
+    _save_issues_to_file(repository_data.issues, output_dir, storage_service)
+    _save_comments_to_file(repository_data.comments, output_dir, storage_service)
+    _save_pull_requests_to_file(
+        repository_data.pull_requests, output_dir, storage_service
+    )
+    _save_pr_comments_to_file(repository_data.pr_comments, output_dir, storage_service)
+    _save_sub_issues_to_file(repository_data.sub_issues, output_dir, storage_service)
 
 
-def _fetch_repository_labels(client: GitHubService, repo_name: str) -> List[Label]:
+def _fetch_repository_labels(
+    github_service: RepositoryService, repo_name: str
+) -> List[Label]:
     """Fetch all labels from the repository."""
-    raw_labels = client.get_repository_labels(repo_name)
+    raw_labels = github_service.get_repository_labels(repo_name)
     return [converters.convert_to_label(label_dict) for label_dict in raw_labels]
 
 
-def _fetch_repository_issues(client: GitHubService, repo_name: str) -> List[Issue]:
+def _fetch_repository_issues(
+    github_service: RepositoryService, repo_name: str
+) -> List[Issue]:
     """Fetch all issues from the repository."""
-    raw_issues = client.get_repository_issues(repo_name)
+    raw_issues = github_service.get_repository_issues(repo_name)
     return [converters.convert_to_issue(issue_dict) for issue_dict in raw_issues]
 
 
-def _fetch_all_issue_comments(client: GitHubService, repo_name: str) -> List[Comment]:
+def _fetch_all_issue_comments(
+    github_service: RepositoryService, repo_name: str
+) -> List[Comment]:
     """Fetch all comments from all issues in the repository."""
-    raw_comments = client.get_all_issue_comments(repo_name)
+    raw_comments = github_service.get_all_issue_comments(repo_name)
     return [
         converters.convert_to_comment(comment_dict) for comment_dict in raw_comments
     ]
 
 
 def _fetch_repository_pull_requests(
-    client: GitHubService, repo_name: str
+    github_service: RepositoryService, repo_name: str
 ) -> List[PullRequest]:
     """Fetch all pull requests from the repository."""
-    raw_prs = client.get_repository_pull_requests(repo_name)
+    raw_prs = github_service.get_repository_pull_requests(repo_name)
     return [converters.convert_to_pull_request(pr_dict) for pr_dict in raw_prs]
 
 
 def _fetch_all_pr_comments(
-    client: GitHubService, repo_name: str
+    github_service: RepositoryService, repo_name: str
 ) -> List[PullRequestComment]:
     """Fetch all comments from all pull requests in the repository."""
-    raw_comments = client.get_all_pull_request_comments(repo_name)
+    raw_comments = github_service.get_all_pull_request_comments(repo_name)
     return [
         converters.convert_to_pr_comment(comment_dict) for comment_dict in raw_comments
     ]
 
 
 def _fetch_repository_sub_issues(
-    client: GitHubService, repo_name: str
+    github_service: RepositoryService, repo_name: str
 ) -> List[SubIssue]:
     """Fetch all sub-issue relationships from the repository."""
-    raw_sub_issues = client.get_repository_sub_issues(repo_name)
+    raw_sub_issues = github_service.get_repository_sub_issues(repo_name)
     return [
         converters.convert_to_sub_issue(sub_issue_dict)
         for sub_issue_dict in raw_sub_issues
@@ -163,41 +194,51 @@ def _associate_sub_issues_with_parents(
     return issues_copy
 
 
-def _save_labels_to_file(labels: List[Label], output_dir: Path) -> None:
+def _save_labels_to_file(
+    labels: List[Label], output_dir: Path, storage_service: StorageService
+) -> None:
     """Save labels to labels.json file."""
     labels_file = output_dir / "labels.json"
-    save_json_data(labels, labels_file)
+    storage_service.save_data(labels, labels_file)
 
 
-def _save_issues_to_file(issues: List[Issue], output_dir: Path) -> None:
+def _save_issues_to_file(
+    issues: List[Issue], output_dir: Path, storage_service: StorageService
+) -> None:
     """Save issues to issues.json file."""
     issues_file = output_dir / "issues.json"
-    save_json_data(issues, issues_file)
+    storage_service.save_data(issues, issues_file)
 
 
-def _save_comments_to_file(comments: List[Comment], output_dir: Path) -> None:
+def _save_comments_to_file(
+    comments: List[Comment], output_dir: Path, storage_service: StorageService
+) -> None:
     """Save comments to comments.json file."""
     comments_file = output_dir / "comments.json"
-    save_json_data(comments, comments_file)
+    storage_service.save_data(comments, comments_file)
 
 
 def _save_pull_requests_to_file(
-    pull_requests: List[PullRequest], output_dir: Path
+    pull_requests: List[PullRequest], output_dir: Path, storage_service: StorageService
 ) -> None:
     """Save pull requests to pull_requests.json file."""
     prs_file = output_dir / "pull_requests.json"
-    save_json_data(pull_requests, prs_file)
+    storage_service.save_data(pull_requests, prs_file)
 
 
 def _save_pr_comments_to_file(
-    pr_comments: List[PullRequestComment], output_dir: Path
+    pr_comments: List[PullRequestComment],
+    output_dir: Path,
+    storage_service: StorageService,
 ) -> None:
     """Save PR comments to pr_comments.json file."""
     pr_comments_file = output_dir / "pr_comments.json"
-    save_json_data(pr_comments, pr_comments_file)
+    storage_service.save_data(pr_comments, pr_comments_file)
 
 
-def _save_sub_issues_to_file(sub_issues: List[SubIssue], output_dir: Path) -> None:
+def _save_sub_issues_to_file(
+    sub_issues: List[SubIssue], output_dir: Path, storage_service: StorageService
+) -> None:
     """Save sub-issues to sub_issues.json file."""
     sub_issues_file = output_dir / "sub_issues.json"
-    save_json_data(sub_issues, sub_issues_file)
+    storage_service.save_data(sub_issues, sub_issues_file)

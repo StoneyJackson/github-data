@@ -7,6 +7,7 @@ Maintains clean separation from the ultra-thin boundary layer.
 
 import logging
 from typing import Dict, List, Any, Optional, Callable
+from .protocols import RepositoryService
 from .boundary import GitHubApiBoundary
 from .rate_limiter import RateLimitHandler
 from .cache import setup_global_cache, clear_cache, CacheConfig
@@ -14,7 +15,7 @@ from .cache import setup_global_cache, clear_cache, CacheConfig
 logger = logging.getLogger(__name__)
 
 
-class GitHubService:
+class GitHubService(RepositoryService):
     """
     Service layer for GitHub API operations.
 
