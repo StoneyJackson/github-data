@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 from ..github.protocols import RepositoryService
 from ..github import converters
-from ..models import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
+from ..entities import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
 from ..storage.protocols import StorageService
 
 

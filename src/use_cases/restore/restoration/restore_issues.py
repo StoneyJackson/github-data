@@ -4,7 +4,7 @@ from typing import Optional
 from ...requests import RestoreIssuesRequest, RestoreIssuesResponse
 from ... import UseCase
 from ....github.protocols import RepositoryService
-from ....models import Issue
+from ....entities import Issue
 
 
 class RestoreIssuesUseCase(UseCase[RestoreIssuesRequest, RestoreIssuesResponse]):

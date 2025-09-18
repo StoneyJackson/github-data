@@ -8,7 +8,7 @@ with mock services.
 from tests.mocks.mock_github_service import MockGitHubService
 from tests.mocks.mock_storage_service import MockStorageService
 from src.operations.save import save_repository_data_with_services
-from src.models import Label
+from src.entities import Label
 
 
 class TestDependencyInjection:

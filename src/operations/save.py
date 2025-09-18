@@ -10,7 +10,7 @@ from typing import List, Dict, Any
 
 from ..github.protocols import RepositoryService
 from ..github import converters
-from ..models import (
+from ..entities import (
     RepositoryData,
     Label,
     Issue,

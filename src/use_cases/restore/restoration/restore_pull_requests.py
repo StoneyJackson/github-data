@@ -3,7 +3,7 @@ import time
 from ...requests import RestorePullRequestsRequest, OperationResult
 from ... import UseCase
 from ....github.protocols import RepositoryService
-from ....models import PullRequest
+from ....entities import PullRequest
 
 
 class RestorePullRequestsUseCase(UseCase[RestorePullRequestsRequest, OperationResult]):

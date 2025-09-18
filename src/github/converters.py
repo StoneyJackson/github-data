@@ -7,7 +7,7 @@ Converts raw JSON data from GitHub API to our domain models.
 from typing import Dict, Any
 from datetime import datetime
 
-from ..models import (
+from ..entities import (
     Label,
     Issue,
     Comment,

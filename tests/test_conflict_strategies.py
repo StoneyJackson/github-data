@@ -18,7 +18,7 @@ from src.conflict_strategies import (
     parse_conflict_strategy,
     detect_label_conflicts,
 )
-from src.models import Label
+from src.entities import Label
 
 
 class TestConflictStrategyParsing:

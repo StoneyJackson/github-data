@@ -7,7 +7,7 @@ issue and comment bodies during restore operations.
 
 from datetime import datetime
 
-from ..models import Issue, Comment, PullRequest, PullRequestComment
+from ..entities import Issue, Comment, PullRequest, PullRequestComment
 
 
 def add_issue_metadata_footer(issue: Issue) -> str:

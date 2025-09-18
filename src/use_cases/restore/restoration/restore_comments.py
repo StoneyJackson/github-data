@@ -3,7 +3,7 @@ import time
 from ...requests import RestoreCommentsRequest, OperationResult
 from ... import UseCase
 from ....github.protocols import RepositoryService
-from ....models import Comment
+from ....entities import Comment
 
 
 class RestoreCommentsUseCase(UseCase[RestoreCommentsRequest, OperationResult]):

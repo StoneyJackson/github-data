@@ -13,7 +13,7 @@ from src.github.metadata import (
     add_comment_metadata_footer,
     _format_datetime,
 )
-from src.models import Issue, Comment, GitHubUser
+from src.entities import Issue, Comment, GitHubUser
 
 
 class TestMetadataFormatting:
@@ -275,7 +275,7 @@ class TestMetadataIntegration:
     def test_metadata_functionality_works_end_to_end(self):
         """Test that our metadata functions produce the expected output."""
         from datetime import datetime
-        from src.models import Issue, Comment, GitHubUser
+        from src.entities import Issue, Comment, GitHubUser
         from src.github.metadata import (
             add_issue_metadata_footer,
             add_comment_metadata_footer,

@@ -4,7 +4,7 @@ from pathlib import Path
 from ...requests import LoadIssuesRequest, LoadIssuesResponse
 from ... import UseCase
 from ....storage.protocols import StorageService
-from ....models import Issue
+from ....entities import Issue
 
 
 class LoadIssuesUseCase(UseCase[LoadIssuesRequest, LoadIssuesResponse]):

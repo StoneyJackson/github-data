@@ -18,7 +18,7 @@ This GitHub Data project is in initial development phase. The foundation include
 **Completed features:**
 - Comprehensive GitHub API client with GraphQL and REST support
 - Label backup and restore functionality with conflict resolution
-- Issue backup and restore capabilities with metadata preservation  
+- Issue backup and restore capabilities with metadata preservation
 - Comment backup and restore functionality
 - Sub-issues support with hierarchical relationships and two-phase restore (NEW)
 - Pull request backup and restore capabilities
@@ -36,7 +36,7 @@ This GitHub Data project provides containerized tools for backing up and restori
 
 1. Configure your GitHub access credentials and target repositories
 2. Use the backup tools to save repository labels, issues, comments, sub-issues, and pull requests
-3. Use the restore tools to recreate repository state from saved JSON data  
+3. Use the restore tools to recreate repository state from saved JSON data
 4. Customize backup/restore operations for specific data requirements
 5. Handle hierarchical sub-issue relationships and pull request workflows with branch dependency validation
 
@@ -80,7 +80,7 @@ All development uses PDM for package management:
 This project uses a comprehensive multi-layered testing approach:
 
 - **Unit Tests**: Fast, isolated component tests
-- **Integration Tests**: Component interaction and workflow tests  
+- **Integration Tests**: Component interaction and workflow tests
 - **Container Integration Tests**: Full Docker workflow validation
 
 For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
@@ -129,8 +129,9 @@ This repository follows the [Conventional Commits](https://www.conventionalcommi
 
 Always end Claude Code sessions by asking: "Save session"
 
-- Save summaries to `docs/claude-sessions/YYYY-MM-DD-HH-MM-topic.md`
+- Save sessions, reports, and plans to `docs/planning/YYYY-MM-DD-HH-MM-topic.md`
 - Use 24-hour format for timestamps (e.g., `2025-09-08-14-30-feature-implementation.md`)
+- Use the current date and time for timestamps
 - Include all prompts and their resulting actions
 - Include key decisions, commands learned, and outcomes
 - Document any new tools, scripts, or processes introduced

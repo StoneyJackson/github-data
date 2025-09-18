@@ -1,6 +1,6 @@
 from ...requests import LabelConflictDetectionRequest, LabelConflictDetectionResponse
 from ... import UseCase
-from ....models import Label
+from ....entities import Label
 
 
 class DetectLabelConflictsUseCase(

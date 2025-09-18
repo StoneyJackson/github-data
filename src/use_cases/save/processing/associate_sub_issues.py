@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from ...requests import AssociateSubIssuesRequest, AssociateSubIssuesResponse
 from ... import UseCase
-from ....models import SubIssue
+from ....entities import SubIssue
 
 
 class AssociateSubIssuesUseCase(

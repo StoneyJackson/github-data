@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from ..models import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
+from ..entities import Label, Issue, Comment, PullRequest, PullRequestComment, SubIssue
 
 
 @dataclass

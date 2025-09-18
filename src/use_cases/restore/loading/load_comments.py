@@ -4,7 +4,7 @@ from pathlib import Path
 from ...requests import LoadCommentsRequest, LoadCommentsResponse
 from ... import UseCase
 from ....storage.protocols import StorageService
-from ....models import Comment
+from ....entities import Comment
 
 
 class LoadCommentsUseCase(UseCase[LoadCommentsRequest, LoadCommentsResponse]):

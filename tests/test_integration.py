@@ -1025,7 +1025,7 @@ class TestErrorHandlingIntegration:
     ):
         """Test closed issues are restored with their state and metadata."""
         from src.operations.restore import restore_repository_data_with_services
-        from src.models import Issue, GitHubUser
+        from src.entities import Issue, GitHubUser
         from datetime import datetime
         import json
 
@@ -1172,7 +1172,7 @@ class TestErrorHandlingIntegration:
     ):
         """Test closed issue restoration with minimal closure metadata."""
         from src.operations.restore import restore_repository_data_with_services
-        from src.models import Issue, GitHubUser
+        from src.entities import Issue, GitHubUser
         from datetime import datetime
         import json
 

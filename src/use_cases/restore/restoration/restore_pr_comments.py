@@ -3,7 +3,7 @@ import time
 from ...requests import RestorePRCommentsRequest, OperationResult
 from ... import UseCase
 from ....github.protocols import RepositoryService
-from ....models import PullRequestComment
+from ....entities import PullRequestComment
 
 
 class RestorePRCommentsUseCase(UseCase[RestorePRCommentsRequest, OperationResult]):

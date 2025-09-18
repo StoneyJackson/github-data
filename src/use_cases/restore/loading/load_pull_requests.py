@@ -4,7 +4,7 @@ from pathlib import Path
 from ...requests import LoadPullRequestsRequest, LoadPullRequestsResponse
 from ... import UseCase
 from ....storage.protocols import StorageService
-from ....models import PullRequest
+from ....entities import PullRequest
 
 
 class LoadPullRequestsUseCase(

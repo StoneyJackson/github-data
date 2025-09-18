@@ -20,7 +20,7 @@ from ...requests import (
     ValidateRepositoryAccessRequest,
     AssociateSubIssuesRequest,
 )
-from ....models import Issue
+from ....entities import Issue
 from ... import UseCase
 from ..collection.collect_labels import CollectLabelsUseCase
 from ..collection.collect_issues import CollectIssuesUseCase

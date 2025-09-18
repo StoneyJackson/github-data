@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from ...requests import SubIssueHierarchyRequest, SubIssueHierarchyResponse
 from ... import UseCase
-from ....models import SubIssue
+from ....entities import SubIssue
 
 
 class OrganizeByDepthUseCase(

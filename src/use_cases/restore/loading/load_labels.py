@@ -4,7 +4,7 @@ from pathlib import Path
 from ...requests import LoadLabelsRequest, LoadLabelsResponse
 from ... import UseCase
 from ....storage.protocols import StorageService
-from ....models import Label
+from ....entities import Label
 
 
 class LoadLabelsUseCase(UseCase[LoadLabelsRequest, LoadLabelsResponse]):
