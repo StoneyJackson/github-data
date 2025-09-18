@@ -1,5 +1,5 @@
 """Issue entity package."""
 
-from .models import Issue, SubIssue
+from .models import Issue
 
-__all__ = ["Issue", "SubIssue"]
+__all__ = ["Issue"]

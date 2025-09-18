@@ -30,20 +30,3 @@ class PullRequest(BaseModel):
     comments_count: int = Field(alias="comments")
 
     model_config = ConfigDict(populate_by_name=True)
-
-
-class PullRequestComment(BaseModel):
-    """GitHub pull request comment."""
-
-    id: Union[int, str]
-    body: str
-    user: GitHubUser
-    created_at: datetime
-    updated_at: datetime
-    html_url: str
-    pull_request_url: str
-
-    @property
-    def pull_request_number(self) -> int:
-        """Extract pull request number from pull_request_url."""
-        return int(self.pull_request_url.split("/")[-1])

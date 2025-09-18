@@ -8,8 +8,10 @@ backward compatibility with the original models.py structure.
 from .users import GitHubUser
 from .labels import Label
 from .comments import Comment
-from .issues import Issue, SubIssue
-from .pull_requests import PullRequest, PullRequestComment
+from .issues import Issue
+from .sub_issues import SubIssue
+from .pull_requests import PullRequest
+from .pr_comments import PullRequestComment
 from .repository import RepositoryData
 
 __all__ = [

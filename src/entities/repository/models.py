@@ -5,9 +5,11 @@ from typing import List
 from pydantic import BaseModel, Field
 
 from ..labels.models import Label
-from ..issues.models import Issue, SubIssue
+from ..issues.models import Issue
+from ..sub_issues.models import SubIssue
 from ..comments.models import Comment
-from ..pull_requests.models import PullRequest, PullRequestComment
+from ..pull_requests.models import PullRequest
+from ..pr_comments.models import PullRequestComment
 
 
 class RepositoryData(BaseModel):
