@@ -10,7 +10,9 @@ from typing import List, Dict, Optional, TYPE_CHECKING
 from urllib.parse import urlparse
 
 if TYPE_CHECKING:
-    from ..use_cases.restore.orchestration.restore_repository import RestoreRepositoryUseCase
+    from ..use_cases.restore.orchestration.restore_repository import (
+        RestoreRepositoryUseCase,
+    )
 
 from ..github.protocols import RepositoryService
 from ..github import converters
@@ -60,7 +62,9 @@ def _create_restore_repository_use_case(
     github_service: RepositoryService, storage_service: StorageService
 ) -> "RestoreRepositoryUseCase":
     """Factory function to create configured RestoreRepositoryUseCase."""
-    from ..use_cases.restore.validation.validate_restore_data import ValidateRestoreDataUseCase
+    from ..use_cases.restore.validation.validate_restore_data import (
+        ValidateRestoreDataUseCase,
+    )
     from ..use_cases.shared.processing.validate_repository_access import (
         ValidateRepositoryAccessUseCase,
     )
@@ -84,12 +88,18 @@ def _create_restore_repository_use_case(
     from ..use_cases.restore.conflict_resolution.overwrite_strategy import (
         OverwriteStrategyUseCase,
     )
-    from ..use_cases.restore.conflict_resolution.skip_strategy import SkipStrategyUseCase
+    from ..use_cases.restore.conflict_resolution.skip_strategy import (
+        SkipStrategyUseCase,
+    )
     from ..use_cases.restore.restoration.restore_labels import RestoreLabelsUseCase
     from ..use_cases.restore.restoration.restore_issues import RestoreIssuesUseCase
     from ..use_cases.restore.restoration.restore_comments import RestoreCommentsUseCase
-    from ..use_cases.restore.restoration.restore_pull_requests import RestorePullRequestsUseCase
-    from ..use_cases.restore.restoration.restore_sub_issues import RestoreSubIssuesUseCase
+    from ..use_cases.restore.restoration.restore_pull_requests import (
+        RestorePullRequestsUseCase,
+    )
+    from ..use_cases.restore.restoration.restore_sub_issues import (
+        RestoreSubIssuesUseCase,
+    )
     from ..use_cases.restore.sub_issue_management.validate_sub_issue_data import (
         ValidateSubIssueDataUseCase,
     )

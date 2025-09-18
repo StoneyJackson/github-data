@@ -53,7 +53,9 @@ def _create_save_repository_use_case(
     from ..use_cases.save.collection.collect_labels import CollectLabelsUseCase
     from ..use_cases.save.collection.collect_issues import CollectIssuesUseCase
     from ..use_cases.save.collection.collect_comments import CollectCommentsUseCase
-    from ..use_cases.save.collection.collect_pull_requests import CollectPullRequestsUseCase
+    from ..use_cases.save.collection.collect_pull_requests import (
+        CollectPullRequestsUseCase,
+    )
     from ..use_cases.save.collection.collect_pr_comments import CollectPRCommentsUseCase
     from ..use_cases.save.collection.collect_sub_issues import CollectSubIssuesUseCase
     from ..use_cases.save.persistence.save_labels import SaveLabelsUseCase
@@ -65,7 +67,9 @@ def _create_save_repository_use_case(
     from ..use_cases.shared.processing.validate_repository_access import (
         ValidateRepositoryAccessUseCase,
     )
-    from ..use_cases.save.processing.associate_sub_issues import AssociateSubIssuesUseCase
+    from ..use_cases.save.processing.associate_sub_issues import (
+        AssociateSubIssuesUseCase,
+    )
     from ..use_cases.save.orchestration.save_repository import SaveRepositoryUseCase
 
     # Create all use case instances with proper dependency injection

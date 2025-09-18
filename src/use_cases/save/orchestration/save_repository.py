@@ -34,7 +34,9 @@ from ..persistence.save_comments import SaveCommentsUseCase
 from ..persistence.save_pull_requests import SavePullRequestsUseCase
 from ..persistence.save_pr_comments import SavePRCommentsUseCase
 from ..persistence.save_sub_issues import SaveSubIssuesUseCase
-from ...shared.processing.validate_repository_access import ValidateRepositoryAccessUseCase
+from ...shared.processing.validate_repository_access import (
+    ValidateRepositoryAccessUseCase,
+)
 from ..processing.associate_sub_issues import AssociateSubIssuesUseCase
 
 

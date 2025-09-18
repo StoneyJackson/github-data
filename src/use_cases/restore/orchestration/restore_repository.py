@@ -7,7 +7,9 @@ from ...requests import (
 )
 from ... import UseCase
 from ..validation.validate_restore_data import ValidateRestoreDataUseCase
-from ...shared.processing.validate_repository_access import ValidateRepositoryAccessUseCase
+from ...shared.processing.validate_repository_access import (
+    ValidateRepositoryAccessUseCase,
+)
 from ..jobs import JobOrchestrator
 from ..jobs.restore_labels_job import RestoreLabelsJob
 from ..jobs.restore_issues_job import RestoreIssuesJob
