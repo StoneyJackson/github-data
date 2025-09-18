@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Union
 from pydantic import BaseModel
 
-from ..base.models import GitHubUser
+from ..users.models import GitHubUser
 
 
 class Comment(BaseModel):

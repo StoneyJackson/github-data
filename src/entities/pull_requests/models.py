@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Union, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
-from ..base.models import GitHubUser
+from ..users.models import GitHubUser
 from ..labels.models import Label
 
 

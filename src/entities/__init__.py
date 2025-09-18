@@ -5,7 +5,7 @@ backward compatibility with the original models.py structure.
 """
 
 # Import all models to maintain backward compatibility
-from .base import GitHubUser
+from .users import GitHubUser
 from .labels import Label
 from .comments import Comment
 from .issues import Issue, SubIssue

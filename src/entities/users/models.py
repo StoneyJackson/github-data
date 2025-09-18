@@ -1,4 +1,4 @@
-"""Base models shared across entities."""
+"""User entity models."""
 
 from typing import Union
 from pydantic import BaseModel

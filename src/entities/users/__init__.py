@@ -1,4 +1,4 @@
-"""Base entity models."""
+"""User entity models."""
 
 from .models import GitHubUser
 

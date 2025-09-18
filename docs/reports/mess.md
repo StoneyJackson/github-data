@@ -1,41 +1,38 @@
+What would it take to reorganize src/ as follows.
 
----
+* Organize by the entities that we save and restore. That way all the code
+    related to an entity is co-located.
+* Common code is pulled out into frameworks, services, and libraries which
+    are put under utils.
+* Operations (orchestrators) are placed into their own package.
 
-Reorganize code based on operations as follows:
+Goals
 
-- Move all code relevant to the save operation under src/operatons/save/
-- Move all code relevant to the restore operation under src/operations/restore/
-- Move any shared code to src/operations/
-
----
-
-Save and restore have separate, but very similar, job orchestration frameworks.
-Extract a single common framework into src/jobs/
-
----
+* Make it easier to add new entities (e.g., "milestones").
+* Bust up large files (e.g., queries files).
 
 
 ```
 data/
     issues/
-        issue.py - Model
+        issue - model
         save/
-            job.py
+            job
             graphql/
-                graphql_queries.py
-                graphql_converters.py
+                queries
+                converters
         restore/
             job.py
             restapi/
-                restapi_queries.py
-                restapi_converters.py
+                queries
+                converters
     sub_issues/
-        sub_issue.py - Model
+        sub_issue - model
         save/
-            job.py
+            job
             graphql/
-                queries.py
-                converters.py
+                queries
+                converters
         restore/
             job.py
             restapi/
@@ -45,12 +42,15 @@ data/
         ...
     labels/
         ...
+operations/
+    save    - orchistrator
+    restore - orchistrator
 utils/
     jobs/
     storage/
-github/
-    caching
-    rate_limiting
-    ...
+    github/
+        caching
+        rate_limiting
+        ...
 main
 ```
