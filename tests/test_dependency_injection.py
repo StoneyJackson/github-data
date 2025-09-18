@@ -37,8 +37,8 @@ class TestDependencyInjection:
 
         # Assert - verify save calls were made to storage service
         assert (
-            len(storage_service.save_calls) == 6
-        )  # labels, issues, comments, PRs, PR comments, sub-issues
+            len(storage_service.save_calls) == 7
+        )  # labels, issues, comments, PRs, PR comments, sub-issues, updated issues with associations
 
         # Verify all expected file types were saved
         expected_files = [

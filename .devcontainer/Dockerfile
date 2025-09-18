@@ -57,6 +57,9 @@ RUN pipx install pdm
 # Install claude-monitor for vscode user using pipx
 RUN pipx install claude-monitor
 
+# Install radon for vscode user using pipx
+RUN pipx install radon
+
 # Set up shell aliases and environment for vscode user
 RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
