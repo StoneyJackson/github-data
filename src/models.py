@@ -1,135 +1,42 @@
 """
 Data models for GitHub entities.
 
+DEPRECATED: This module re-exports models from the entities package.
+New code should import directly from src.entities or specific entity packages.
+
 These Pydantic models provide type-safe representations of GitHub data
 that will be serialized to/from JSON files.
 """
 
-from datetime import datetime
-from typing import List, Optional, Union
-from pydantic import BaseModel, Field, ConfigDict
+import warnings
 
+# Re-export all models for backward compatibility
+from .entities import (
+    GitHubUser,
+    Label,
+    Comment,
+    Issue,
+    SubIssue,
+    PullRequest,
+    PullRequestComment,
+    RepositoryData,
+)
 
-class GitHubUser(BaseModel):
-    """GitHub user information."""
+# Issue deprecation warning for direct imports
+warnings.warn(
+    "Importing from src.models is deprecated. "
+    "Use 'from src.entities import ModelName' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-    login: str
-    id: Union[int, str]
-    avatar_url: str
-    html_url: str
-
-
-class Label(BaseModel):
-    """GitHub repository label."""
-
-    name: str
-    color: str
-    description: Optional[str] = None
-    url: str
-    id: Union[int, str]
-
-
-class Comment(BaseModel):
-    """GitHub issue comment."""
-
-    id: Union[int, str]
-    body: str
-    user: GitHubUser
-    created_at: datetime
-    updated_at: datetime
-    html_url: str
-    issue_url: str
-
-    @property
-    def issue_number(self) -> int:
-        """Extract issue number from issue_url."""
-        # issue_url format: "https://api.github.com/repos/owner/repo/issues/123"
-        return int(self.issue_url.split("/")[-1])
-
-
-class PullRequest(BaseModel):
-    """GitHub repository pull request."""
-
-    id: Union[int, str]
-    number: int
-    title: str
-    body: Optional[str] = None
-    state: str  # OPEN, CLOSED, MERGED
-    user: GitHubUser  # author
-    assignees: List[GitHubUser] = Field(default_factory=list)
-    labels: List[Label] = Field(default_factory=list)
-    created_at: datetime
-    updated_at: datetime
-    closed_at: Optional[datetime] = None
-    merged_at: Optional[datetime] = None
-    merge_commit_sha: Optional[str] = None
-    base_ref: str  # base branch
-    head_ref: str  # head branch
-    html_url: str
-    comments_count: int = Field(alias="comments")
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class PullRequestComment(BaseModel):
-    """GitHub pull request comment."""
-
-    id: Union[int, str]
-    body: str
-    user: GitHubUser
-    created_at: datetime
-    updated_at: datetime
-    html_url: str
-    pull_request_url: str
-
-    @property
-    def pull_request_number(self) -> int:
-        """Extract pull request number from pull_request_url."""
-        # pull_request_url format: "https://api.github.com/repos/owner/repo/pulls/123"
-        return int(self.pull_request_url.split("/")[-1])
-
-
-class SubIssue(BaseModel):
-    """GitHub sub-issue relationship."""
-
-    sub_issue_id: Union[int, str]
-    sub_issue_number: int
-    parent_issue_id: Union[int, str]
-    parent_issue_number: int
-    position: int
-
-
-class Issue(BaseModel):
-    """GitHub repository issue."""
-
-    id: Union[int, str]
-    number: int
-    title: str
-    body: Optional[str] = None
-    state: str
-    user: GitHubUser
-    assignees: List[GitHubUser] = Field(default_factory=list)
-    labels: List[Label] = Field(default_factory=list)
-    created_at: datetime
-    updated_at: datetime
-    closed_at: Optional[datetime] = None
-    closed_by: Optional[GitHubUser] = None
-    state_reason: Optional[str] = None
-    html_url: str
-    comments_count: int = Field(alias="comments")
-    sub_issues: List["SubIssue"] = Field(default_factory=list)
-
-    model_config = ConfigDict(populate_by_name=True)
-
-
-class RepositoryData(BaseModel):
-    """Complete repository data for backup/restore."""
-
-    repository_name: str
-    exported_at: datetime
-    labels: List[Label] = Field(default_factory=list)
-    issues: List[Issue] = Field(default_factory=list)
-    comments: List[Comment] = Field(default_factory=list)
-    pull_requests: List[PullRequest] = Field(default_factory=list)
-    pr_comments: List[PullRequestComment] = Field(default_factory=list)
-    sub_issues: List[SubIssue] = Field(default_factory=list)
+__all__ = [
+    "GitHubUser",
+    "Label",
+    "Comment",
+    "Issue",
+    "SubIssue",
+    "PullRequest",
+    "PullRequestComment",
+    "RepositoryData",
+]
