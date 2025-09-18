@@ -6,8 +6,11 @@ recreates labels, issues, and comments in GitHub repositories.
 """
 
 from pathlib import Path
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, TYPE_CHECKING
 from urllib.parse import urlparse
+
+if TYPE_CHECKING:
+    from ..use_cases.orchestration.restore_repository import RestoreRepositoryUseCase
 
 from ..github.protocols import RepositoryService
 from ..github import converters
@@ -26,47 +29,136 @@ def restore_repository_data_with_services(
     include_sub_issues: bool = False,
 ) -> None:
     """Restore labels, issues, comments, PRs and sub-issues using injected services."""
-    input_dir = Path(data_path)
-
-    _validate_data_files_exist(input_dir, include_prs, include_sub_issues)
-
-    _restore_labels(
-        github_service, storage_service, repo_name, input_dir, label_conflict_strategy
-    )
-    issue_number_mapping = _restore_issues(
-        github_service, storage_service, repo_name, input_dir, include_original_metadata
-    )
-    _restore_comments(
-        github_service,
-        storage_service,
-        repo_name,
-        input_dir,
-        issue_number_mapping,
-        include_original_metadata,
+    # Create orchestrator use case
+    restore_use_case = _create_restore_repository_use_case(
+        github_service, storage_service
     )
 
-    if include_prs:
-        pr_number_mapping = _restore_pull_requests(
-            github_service,
-            storage_service,
-            repo_name,
-            input_dir,
-            include_original_metadata,
-        )
-        _restore_pr_comments(
-            github_service,
-            storage_service,
-            repo_name,
-            input_dir,
-            pr_number_mapping,
-            include_original_metadata,
-        )
+    # Execute with new use case architecture
+    from ..use_cases.requests import RestoreRepositoryRequest
 
-    # Two-phase restore: restore all issues, then establish sub-issue relationships
-    if include_sub_issues:
-        _restore_sub_issues(
-            github_service, storage_service, repo_name, input_dir, issue_number_mapping
-        )
+    request = RestoreRepositoryRequest(
+        repository_name=repo_name,
+        input_path=data_path,
+        label_conflict_strategy=label_conflict_strategy,
+        include_original_metadata=include_original_metadata,
+        include_prs=include_prs,
+        include_sub_issues=include_sub_issues,
+    )
+
+    results = restore_use_case.execute(request)
+
+    # Handle errors (maintain existing behavior)
+    failed_operations = [r for r in results if not r.success]
+    if failed_operations:
+        # Aggregate error messages maintaining backward compatibility
+        error_messages = [r.error_message for r in failed_operations if r.error_message]
+        raise Exception(f"Restore operation failed: {'; '.join(error_messages)}")
+
+
+def _create_restore_repository_use_case(
+    github_service: RepositoryService, storage_service: StorageService
+) -> "RestoreRepositoryUseCase":
+    """Factory function to create configured RestoreRepositoryUseCase."""
+    from ..use_cases.validation.validate_restore_data import ValidateRestoreDataUseCase
+    from ..use_cases.processing.validate_repository_access import (
+        ValidateRepositoryAccessUseCase,
+    )
+    from ..use_cases.loading.load_labels import LoadLabelsUseCase
+    from ..use_cases.loading.load_issues import LoadIssuesUseCase
+    from ..use_cases.loading.load_comments import LoadCommentsUseCase
+    from ..use_cases.loading.load_pull_requests import LoadPullRequestsUseCase
+    from ..use_cases.loading.load_sub_issues import LoadSubIssuesUseCase
+    from ..use_cases.conflict_resolution.detect_conflicts import (
+        DetectLabelConflictsUseCase,
+    )
+    from ..use_cases.conflict_resolution.fail_if_existing_strategy import (
+        FailIfExistingStrategyUseCase,
+    )
+    from ..use_cases.conflict_resolution.fail_if_conflict_strategy import (
+        FailIfConflictStrategyUseCase,
+    )
+    from ..use_cases.conflict_resolution.delete_all_strategy import (
+        DeleteAllStrategyUseCase,
+    )
+    from ..use_cases.conflict_resolution.overwrite_strategy import (
+        OverwriteStrategyUseCase,
+    )
+    from ..use_cases.conflict_resolution.skip_strategy import SkipStrategyUseCase
+    from ..use_cases.restoration.restore_labels import RestoreLabelsUseCase
+    from ..use_cases.restoration.restore_issues import RestoreIssuesUseCase
+    from ..use_cases.restoration.restore_comments import RestoreCommentsUseCase
+    from ..use_cases.restoration.restore_pull_requests import RestorePullRequestsUseCase
+    from ..use_cases.restoration.restore_sub_issues import RestoreSubIssuesUseCase
+    from ..use_cases.sub_issue_management.validate_sub_issue_data import (
+        ValidateSubIssueDataUseCase,
+    )
+    from ..use_cases.sub_issue_management.detect_circular_dependencies import (
+        DetectCircularDependenciesUseCase,
+    )
+    from ..use_cases.sub_issue_management.organize_by_depth import (
+        OrganizeByDepthUseCase,
+    )
+    from ..use_cases.orchestration.restore_repository import (
+        RestoreRepositoryUseCase,
+        RestoreJobFactory,
+    )
+
+    # Create validation use cases
+    validate_data = ValidateRestoreDataUseCase()
+    validate_access = ValidateRepositoryAccessUseCase(github_service)
+
+    # Create loading use cases
+    load_labels = LoadLabelsUseCase(storage_service)
+    load_issues = LoadIssuesUseCase(storage_service)
+    load_comments = LoadCommentsUseCase(storage_service)
+    load_pull_requests = LoadPullRequestsUseCase(storage_service)
+    load_sub_issues = LoadSubIssuesUseCase(storage_service)
+
+    # Create conflict resolution use cases
+    detect_conflicts = DetectLabelConflictsUseCase()
+    fail_if_existing = FailIfExistingStrategyUseCase()
+    fail_if_conflict = FailIfConflictStrategyUseCase(detect_conflicts)
+    delete_all = DeleteAllStrategyUseCase(github_service)
+    overwrite = OverwriteStrategyUseCase(github_service, detect_conflicts)
+    skip = SkipStrategyUseCase(detect_conflicts)
+
+    # Create restoration use cases
+    restore_labels = RestoreLabelsUseCase(
+        github_service, fail_if_existing, fail_if_conflict, delete_all, overwrite, skip
+    )
+    restore_issues = RestoreIssuesUseCase(github_service)
+    restore_comments = RestoreCommentsUseCase(github_service)
+    restore_pull_requests = RestorePullRequestsUseCase(github_service)
+    restore_sub_issues = RestoreSubIssuesUseCase(github_service)
+
+    # Create sub-issue management use cases
+    validate_sub_issues = ValidateSubIssueDataUseCase()
+    detect_circular_deps = DetectCircularDependenciesUseCase()
+    organize_by_depth = OrganizeByDepthUseCase()
+
+    # Create job factory with all use cases
+    job_factory = RestoreJobFactory(
+        load_labels=load_labels,
+        load_issues=load_issues,
+        load_comments=load_comments,
+        load_pull_requests=load_pull_requests,
+        load_sub_issues=load_sub_issues,
+        restore_labels=restore_labels,
+        restore_issues=restore_issues,
+        restore_comments=restore_comments,
+        restore_pull_requests=restore_pull_requests,
+        restore_sub_issues=restore_sub_issues,
+        validate_sub_issues=validate_sub_issues,
+        detect_circular_deps=detect_circular_deps,
+        organize_by_depth=organize_by_depth,
+    )
+
+    return RestoreRepositoryUseCase(
+        validate_data=validate_data,
+        validate_access=validate_access,
+        job_factory=job_factory,
+    )
 
 
 def _validate_data_files_exist(

@@ -40,6 +40,12 @@ class Comment(BaseModel):
     html_url: str
     issue_url: str
 
+    @property
+    def issue_number(self) -> int:
+        """Extract issue number from issue_url."""
+        # issue_url format: "https://api.github.com/repos/owner/repo/issues/123"
+        return int(self.issue_url.split("/")[-1])
+
 
 class PullRequest(BaseModel):
     """GitHub repository pull request."""
@@ -75,6 +81,12 @@ class PullRequestComment(BaseModel):
     updated_at: datetime
     html_url: str
     pull_request_url: str
+
+    @property
+    def pull_request_number(self) -> int:
+        """Extract pull request number from pull_request_url."""
+        # pull_request_url format: "https://api.github.com/repos/owner/repo/pulls/123"
+        return int(self.pull_request_url.split("/")[-1])
 
 
 class SubIssue(BaseModel):

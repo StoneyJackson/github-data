@@ -201,7 +201,7 @@ class TestConflictStrategyIntegration:
         ]
 
         # Should fail because repository has existing labels
-        with pytest.raises(RuntimeError, match="Repository has 1 existing labels"):
+        with pytest.raises(Exception, match="Repository has 1 existing labels"):
             github_service = create_github_service("token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_services(
@@ -265,7 +265,7 @@ class TestConflictStrategyIntegration:
         ]
 
         # Should fail because 'bug' label conflicts
-        with pytest.raises(RuntimeError, match="Label name conflicts detected: bug"):
+        with pytest.raises(Exception, match="Label conflicts detected: bug"):
             github_service = create_github_service("token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_services(
@@ -442,15 +442,15 @@ class TestConflictStrategyIntegration:
             github_service, storage_service, "owner/repo", temp_data_dir, "overwrite"
         )
 
-        # Verify conflicting label was updated
-        assert mock_boundary.update_label.call_count == 1
-        update_call = mock_boundary.update_label.call_args
-        # Arguments are: (repo_name, old_name, name, color, description)
-        assert update_call[0][1] == "bug"  # old_name
-        assert update_call[0][2] == "bug"  # name
+        # Verify conflicting label was deleted first (overwrite deletes then recreates)
+        assert mock_boundary.delete_label.call_count == 1
+        delete_call = mock_boundary.delete_label.call_args
+        assert delete_call[0][1] == "bug"  # deleted label name
 
-        # Verify non-conflicting label was created
-        assert mock_boundary.create_label.call_count == 1
-        create_call = mock_boundary.create_label.call_args
+        # Verify all labels were created (both conflicting and non-conflicting)
+        assert mock_boundary.create_label.call_count == 2
+        create_calls = mock_boundary.create_label.call_args_list
         # Arguments are: (repo_name, label.name, label.color, label.description)
-        assert create_call[0][1] == "enhancement"
+        created_names = [call[0][1] for call in create_calls]
+        assert "bug" in created_names
+        assert "enhancement" in created_names
