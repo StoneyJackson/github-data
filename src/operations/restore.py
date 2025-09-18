@@ -10,7 +10,7 @@ from typing import List, Dict, Optional, TYPE_CHECKING
 from urllib.parse import urlparse
 
 if TYPE_CHECKING:
-    from ..use_cases.orchestration.restore_repository import RestoreRepositoryUseCase
+    from ..use_cases.restore.orchestration.restore_repository import RestoreRepositoryUseCase
 
 from ..github.protocols import RepositoryService
 from ..github import converters
@@ -60,46 +60,46 @@ def _create_restore_repository_use_case(
     github_service: RepositoryService, storage_service: StorageService
 ) -> "RestoreRepositoryUseCase":
     """Factory function to create configured RestoreRepositoryUseCase."""
-    from ..use_cases.validation.validate_restore_data import ValidateRestoreDataUseCase
-    from ..use_cases.processing.validate_repository_access import (
+    from ..use_cases.restore.validation.validate_restore_data import ValidateRestoreDataUseCase
+    from ..use_cases.shared.processing.validate_repository_access import (
         ValidateRepositoryAccessUseCase,
     )
-    from ..use_cases.loading.load_labels import LoadLabelsUseCase
-    from ..use_cases.loading.load_issues import LoadIssuesUseCase
-    from ..use_cases.loading.load_comments import LoadCommentsUseCase
-    from ..use_cases.loading.load_pull_requests import LoadPullRequestsUseCase
-    from ..use_cases.loading.load_sub_issues import LoadSubIssuesUseCase
-    from ..use_cases.conflict_resolution.detect_conflicts import (
+    from ..use_cases.restore.loading.load_labels import LoadLabelsUseCase
+    from ..use_cases.restore.loading.load_issues import LoadIssuesUseCase
+    from ..use_cases.restore.loading.load_comments import LoadCommentsUseCase
+    from ..use_cases.restore.loading.load_pull_requests import LoadPullRequestsUseCase
+    from ..use_cases.restore.loading.load_sub_issues import LoadSubIssuesUseCase
+    from ..use_cases.restore.conflict_resolution.detect_conflicts import (
         DetectLabelConflictsUseCase,
     )
-    from ..use_cases.conflict_resolution.fail_if_existing_strategy import (
+    from ..use_cases.restore.conflict_resolution.fail_if_existing_strategy import (
         FailIfExistingStrategyUseCase,
     )
-    from ..use_cases.conflict_resolution.fail_if_conflict_strategy import (
+    from ..use_cases.restore.conflict_resolution.fail_if_conflict_strategy import (
         FailIfConflictStrategyUseCase,
     )
-    from ..use_cases.conflict_resolution.delete_all_strategy import (
+    from ..use_cases.restore.conflict_resolution.delete_all_strategy import (
         DeleteAllStrategyUseCase,
     )
-    from ..use_cases.conflict_resolution.overwrite_strategy import (
+    from ..use_cases.restore.conflict_resolution.overwrite_strategy import (
         OverwriteStrategyUseCase,
     )
-    from ..use_cases.conflict_resolution.skip_strategy import SkipStrategyUseCase
-    from ..use_cases.restoration.restore_labels import RestoreLabelsUseCase
-    from ..use_cases.restoration.restore_issues import RestoreIssuesUseCase
-    from ..use_cases.restoration.restore_comments import RestoreCommentsUseCase
-    from ..use_cases.restoration.restore_pull_requests import RestorePullRequestsUseCase
-    from ..use_cases.restoration.restore_sub_issues import RestoreSubIssuesUseCase
-    from ..use_cases.sub_issue_management.validate_sub_issue_data import (
+    from ..use_cases.restore.conflict_resolution.skip_strategy import SkipStrategyUseCase
+    from ..use_cases.restore.restoration.restore_labels import RestoreLabelsUseCase
+    from ..use_cases.restore.restoration.restore_issues import RestoreIssuesUseCase
+    from ..use_cases.restore.restoration.restore_comments import RestoreCommentsUseCase
+    from ..use_cases.restore.restoration.restore_pull_requests import RestorePullRequestsUseCase
+    from ..use_cases.restore.restoration.restore_sub_issues import RestoreSubIssuesUseCase
+    from ..use_cases.restore.sub_issue_management.validate_sub_issue_data import (
         ValidateSubIssueDataUseCase,
     )
-    from ..use_cases.sub_issue_management.detect_circular_dependencies import (
+    from ..use_cases.restore.sub_issue_management.detect_circular_dependencies import (
         DetectCircularDependenciesUseCase,
     )
-    from ..use_cases.sub_issue_management.organize_by_depth import (
+    from ..use_cases.restore.sub_issue_management.organize_by_depth import (
         OrganizeByDepthUseCase,
     )
-    from ..use_cases.orchestration.restore_repository import (
+    from ..use_cases.restore.orchestration.restore_repository import (
         RestoreRepositoryUseCase,
         RestoreJobFactory,
     )

@@ -50,23 +50,23 @@ def _create_save_repository_use_case(
     github_service: RepositoryService, storage_service: StorageService
 ) -> Any:
     """Factory function to create configured SaveRepositoryUseCase."""
-    from ..use_cases.collection.collect_labels import CollectLabelsUseCase
-    from ..use_cases.collection.collect_issues import CollectIssuesUseCase
-    from ..use_cases.collection.collect_comments import CollectCommentsUseCase
-    from ..use_cases.collection.collect_pull_requests import CollectPullRequestsUseCase
-    from ..use_cases.collection.collect_pr_comments import CollectPRCommentsUseCase
-    from ..use_cases.collection.collect_sub_issues import CollectSubIssuesUseCase
-    from ..use_cases.persistence.save_labels import SaveLabelsUseCase
-    from ..use_cases.persistence.save_issues import SaveIssuesUseCase
-    from ..use_cases.persistence.save_comments import SaveCommentsUseCase
-    from ..use_cases.persistence.save_pull_requests import SavePullRequestsUseCase
-    from ..use_cases.persistence.save_pr_comments import SavePRCommentsUseCase
-    from ..use_cases.persistence.save_sub_issues import SaveSubIssuesUseCase
-    from ..use_cases.processing.validate_repository_access import (
+    from ..use_cases.save.collection.collect_labels import CollectLabelsUseCase
+    from ..use_cases.save.collection.collect_issues import CollectIssuesUseCase
+    from ..use_cases.save.collection.collect_comments import CollectCommentsUseCase
+    from ..use_cases.save.collection.collect_pull_requests import CollectPullRequestsUseCase
+    from ..use_cases.save.collection.collect_pr_comments import CollectPRCommentsUseCase
+    from ..use_cases.save.collection.collect_sub_issues import CollectSubIssuesUseCase
+    from ..use_cases.save.persistence.save_labels import SaveLabelsUseCase
+    from ..use_cases.save.persistence.save_issues import SaveIssuesUseCase
+    from ..use_cases.save.persistence.save_comments import SaveCommentsUseCase
+    from ..use_cases.save.persistence.save_pull_requests import SavePullRequestsUseCase
+    from ..use_cases.save.persistence.save_pr_comments import SavePRCommentsUseCase
+    from ..use_cases.save.persistence.save_sub_issues import SaveSubIssuesUseCase
+    from ..use_cases.shared.processing.validate_repository_access import (
         ValidateRepositoryAccessUseCase,
     )
-    from ..use_cases.processing.associate_sub_issues import AssociateSubIssuesUseCase
-    from ..use_cases.orchestration.save_repository import SaveRepositoryUseCase
+    from ..use_cases.save.processing.associate_sub_issues import AssociateSubIssuesUseCase
+    from ..use_cases.save.orchestration.save_repository import SaveRepositoryUseCase
 
     # Create all use case instances with proper dependency injection
     validate_access = ValidateRepositoryAccessUseCase(github_service)
