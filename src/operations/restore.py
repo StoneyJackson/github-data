@@ -59,9 +59,7 @@ def restore_repository_data_with_strategy_pattern(
         pr_comment_conflict_strategy = create_pr_comment_conflict_strategy()
 
         orchestrator.register_strategy(
-            PullRequestsRestoreStrategy(
-                pr_conflict_strategy, include_original_metadata
-            )
+            PullRequestsRestoreStrategy(pr_conflict_strategy, include_original_metadata)
         )
         orchestrator.register_strategy(
             PullRequestCommentsRestoreStrategy(
@@ -90,4 +88,3 @@ def restore_repository_data_with_strategy_pattern(
     if failed_operations:
         error_messages = [r["error"] for r in failed_operations if r.get("error")]
         raise Exception(f"Restore operation failed: {'; '.join(error_messages)}")
-

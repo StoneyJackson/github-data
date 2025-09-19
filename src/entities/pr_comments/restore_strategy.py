@@ -95,14 +95,13 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
         """Resolve conflicts and return entities to create."""
         # For PR comments, we typically don't have conflicts since
         # they're created new
-        return self._conflict_strategy.resolve_conflicts(
-            [], entities_to_restore
-        )
+        return self._conflict_strategy.resolve_conflicts([], entities_to_restore)
 
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
         """Prepare comment body with optional metadata."""
         if self._include_original_metadata:
             from ...github.metadata import add_pr_comment_metadata_footer
+
             return add_pr_comment_metadata_footer(comment)
         return comment.body
 

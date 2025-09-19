@@ -1,1 +1,0 @@
-# Label conflict resolution strategies

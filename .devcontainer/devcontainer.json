@@ -9,7 +9,8 @@
     "vscode": {
       "extensions": [
         "ms-vscode.makefile-tools",
-        "donjayamanne.python-extension-pack"
+        "donjayamanne.python-extension-pack",
+        "ritwickdey.LiveServer"
       ]
     }
   }

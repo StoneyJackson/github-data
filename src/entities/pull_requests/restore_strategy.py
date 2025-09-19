@@ -88,9 +88,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
 
         # Handle closed/merged state
         if original_state in ["closed", "merged"]:
-            self._handle_pr_state(
-                github_service, repo_name, pr_number, original_state
-            )
+            self._handle_pr_state(github_service, repo_name, pr_number, original_state)
 
     def resolve_conflicts(
         self,
@@ -102,14 +100,13 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         # For pull requests, we typically don't have conflicts since
         # they're created new. But we can still apply the conflict
         # strategy for consistency
-        return self._conflict_strategy.resolve_conflicts(
-            [], entities_to_restore
-        )
+        return self._conflict_strategy.resolve_conflicts([], entities_to_restore)
 
     def _prepare_pr_body(self, pr: PullRequest) -> str:
         """Prepare pull request body with optional metadata."""
         if self._include_original_metadata:
             from ...github.metadata import add_pr_metadata_footer
+
             return add_pr_metadata_footer(pr)
         return pr.body or ""
 
@@ -125,14 +122,10 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             if original_state == "closed":
                 # Note: close_pull_request method not available in
                 # RepositoryService protocol
-                print(
-                    f"Warning: Cannot restore closed state for PR #{pr_number}"
-                )
+                print(f"Warning: Cannot restore closed state for PR #{pr_number}")
             elif original_state == "merged":
                 # Note: Cannot actually merge PRs via API after creation
-                print(
-                    f"Warning: Cannot restore merged state for PR #{pr_number}"
-                )
+                print(f"Warning: Cannot restore merged state for PR #{pr_number}")
         except Exception as e:
             print(f"Warning: Failed to set PR #{pr_number} state: {e}")
 

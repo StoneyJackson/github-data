@@ -61,7 +61,9 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
             )
             return {"name": entity_data["name"]}  # Return identifier
         except Exception as e:
-            raise RuntimeError(f"Failed to create label '{entity_data['name']}': {e}") from e
+            raise RuntimeError(
+                f"Failed to create label '{entity_data['name']}': {e}"
+            ) from e
 
     def post_create_actions(
         self,
@@ -82,11 +84,12 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
     ) -> List[Label]:
         """Resolve conflicts and return entities to create."""
         # Set repo name for strategies that need it
-        if hasattr(self._conflict_strategy, 'set_repo_name'):
+        if hasattr(self._conflict_strategy, "set_repo_name"):
             self._conflict_strategy.set_repo_name(repo_name)
-        
+
         # Get existing labels
         from ...github import converters
+
         raw_existing = github_service.get_repository_labels(repo_name)
         existing_labels = [
             converters.convert_to_label(label_dict) for label_dict in raw_existing
@@ -122,9 +125,7 @@ class FailIfConflictStrategy(RestoreConflictStrategy):
     ) -> List[Label]:
         conflicts = detect_label_conflicts(existing_entities, entities_to_restore)
         if conflicts:
-            raise RuntimeError(
-                f"Label conflicts detected: {', '.join(conflicts)}"
-            )
+            raise RuntimeError(f"Label conflicts detected: {', '.join(conflicts)}")
         return entities_to_restore
 
 
@@ -145,7 +146,9 @@ class DeleteAllConflictStrategy(RestoreConflictStrategy):
         if existing_entities:
             for label in existing_entities:
                 try:
-                    self._github_service.delete_label(self._repo_name or "placeholder_repo", label.name)
+                    self._github_service.delete_label(
+                        self._repo_name or "placeholder_repo", label.name
+                    )
                     print(f"Deleted label: {label.name}")
                 except Exception as e:
                     raise RuntimeError(
@@ -188,7 +191,7 @@ class OverwriteConflictStrategy(RestoreConflictStrategy):
                     # Delete existing label first, then recreate
                     github_service.delete_label(repo_name, label.name)
                     print(f"Deleted label: {label.name}")
-                
+
                 # Create the label (both for new and recreated)
                 github_service.create_label(
                     repo_name, label.name, label.color, label.description or ""
