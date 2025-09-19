@@ -34,7 +34,7 @@ class TestGetEnvVar:
 class TestMain:
     """Test cases for main function."""
 
-    @patch("src.operations.save.save_repository_data_with_services")
+    @patch("src.operations.save.save_repository_data_with_strategy_pattern")
     @patch("src.github.create_github_service")
     @patch("src.storage.create_storage_service")
     @patch("src.main._get_required_env_var")

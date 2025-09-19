@@ -7,7 +7,7 @@ with mock services.
 
 from tests.mocks.mock_github_service import MockGitHubService
 from tests.mocks.mock_storage_service import MockStorageService
-from src.operations.save import save_repository_data_with_services
+from src.operations.save import save_repository_data_with_strategy_pattern
 from src.entities import Label
 
 
@@ -31,15 +31,14 @@ class TestDependencyInjection:
         }
 
         # Act
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "test/repo", str(tmp_path)
         )
 
         # Assert - verify save calls were made to storage service
         assert (
-            len(storage_service.save_calls) == 7
-        )  # labels, issues, comments, PRs, PR comments, sub-issues,
-        # updated issues with associations
+            len(storage_service.save_calls) == 6
+        )  # labels, issues, comments, PRs, PR comments, sub-issues
 
         # Verify all expected file types were saved
         expected_files = [

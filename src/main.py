@@ -41,7 +41,7 @@ def _execute_operation(config: "Configuration") -> None:
 def _perform_save_operation(config: "Configuration") -> None:
     """Perform the save operation to backup GitHub data."""
     print("Saving GitHub data...")
-    from .operations.save import save_repository_data_with_services
+    from .operations.save import save_repository_data_with_strategy_pattern
     from .github import create_github_service
     from .storage import create_storage_service
 
@@ -49,7 +49,7 @@ def _perform_save_operation(config: "Configuration") -> None:
     github_service = create_github_service(config.github_token)
     storage_service = create_storage_service("json")
 
-    save_repository_data_with_services(
+    save_repository_data_with_strategy_pattern(
         github_service, storage_service, config.github_repo, config.data_path
     )
 

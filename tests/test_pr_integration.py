@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.operations.save import save_repository_data_with_services
+from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 
@@ -110,7 +110,7 @@ class TestPullRequestIntegration:
         # Execute save operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir
         )
 

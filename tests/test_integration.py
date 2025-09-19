@@ -7,10 +7,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.operations.save import save_repository_data_with_services
+from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
-from operations.restore.restore import restore_repository_data_with_strategy_pattern
+from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
 pytestmark = [pytest.mark.integration]
 
@@ -312,7 +312,7 @@ class TestSaveRestoreIntegration:
         # Execute save operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir
         )
 
@@ -769,7 +769,7 @@ class TestSaveRestoreIntegration:
 
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/source_repo", temp_data_dir
         )
 
@@ -882,8 +882,8 @@ class TestSaveRestoreIntegration:
         # Verify data integrity by checking that saved data matches restored data
 
         # Check that same number of items were saved and restored
-        # Note: Labels API is called twice - once for validation, once for collection
-        assert save_boundary.get_repository_labels.call_count == 2
+        # Note: Labels API is called once for collection
+        assert save_boundary.get_repository_labels.call_count == 1
         assert restore_boundary.create_label.call_count == 2
 
         assert save_boundary.get_repository_issues.call_count == 1
@@ -950,7 +950,7 @@ class TestSaveRestoreIntegration:
         # Execute save operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/empty_repo", temp_data_dir
         )
 
@@ -1046,7 +1046,7 @@ class TestSaveRestoreIntegration:
         # Execute save operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", str(nested_path)
         )
 
@@ -1424,7 +1424,7 @@ class TestErrorHandlingIntegration:
         # Execute save operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        save_repository_data_with_services(
+        save_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir
         )
 
@@ -1453,7 +1453,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issues are restored with their state and metadata."""
-        from operations.restore.restore import (
+        from src.operations.restore.restore import (
             restore_repository_data_with_strategy_pattern,
         )
         from src.entities import Issue, GitHubUser
@@ -1609,7 +1609,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issue restoration with minimal closure metadata."""
-        from operations.restore.restore import (
+        from src.operations.restore.restore import (
             restore_repository_data_with_strategy_pattern,
         )
         from src.entities import Issue, GitHubUser

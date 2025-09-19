@@ -190,7 +190,7 @@ class TestMetadataIntegration:
     def test_restore_creates_issues_and_comments_successfully(self, tmp_path):
         """Test that restore operations work with our new metadata functionality."""
         from unittest.mock import MagicMock
-        from operations.restore.restore import (
+        from src.operations.restore.restore import (
             restore_repository_data_with_strategy_pattern,
         )
         from src.storage import create_storage_service
