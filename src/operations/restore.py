@@ -171,6 +171,68 @@ def _create_restore_repository_use_case(
     )
 
 
+def restore_repository_data_with_strategy_pattern(
+    github_service: RepositoryService,
+    storage_service: StorageService,
+    repo_name: str,
+    data_path: str,
+    label_conflict_strategy: str = "fail-if-existing",
+    include_original_metadata: bool = True,
+    include_prs: bool = False,
+    include_sub_issues: bool = False,
+) -> None:
+    """Restore using strategy pattern approach."""
+
+    # Create orchestrator
+    from ..strategies.restore_orchestrator import StrategyBasedRestoreOrchestrator
+
+    orchestrator = StrategyBasedRestoreOrchestrator(github_service, storage_service)
+
+    # Register strategies
+    from ..strategies.labels_restore_strategy import (
+        LabelsRestoreStrategy,
+        create_conflict_strategy,
+    )
+    from ..strategies.issues_restore_strategy import IssuesRestoreStrategy
+    from ..strategies.comments_restore_strategy import CommentsRestoreStrategy
+
+    # Create conflict resolution strategy
+    conflict_strategy = create_conflict_strategy(
+        label_conflict_strategy, github_service
+    )
+
+    # Register entity strategies
+    orchestrator.register_strategy(LabelsRestoreStrategy(conflict_strategy))
+    orchestrator.register_strategy(IssuesRestoreStrategy(include_original_metadata))
+    orchestrator.register_strategy(CommentsRestoreStrategy(include_original_metadata))
+
+    # TODO: Add PR and sub-issue strategies if requested
+    if include_prs:
+        print("Warning: PR restore strategy not yet implemented in strategy pattern")
+
+    if include_sub_issues:
+        print(
+            "Warning: Sub-issue restore strategy not yet "
+            "implemented in strategy pattern"
+        )
+
+    # Determine entities to restore
+    requested_entities = ["labels", "issues", "comments"]
+    if include_prs:
+        requested_entities.extend(["pull_requests"])
+    if include_sub_issues:
+        requested_entities.append("sub_issues")
+
+    # Execute restoration
+    results = orchestrator.execute_restore(repo_name, data_path, requested_entities)
+
+    # Handle errors (maintain backward compatibility)
+    failed_operations = [r for r in results if not r["success"]]
+    if failed_operations:
+        error_messages = [r["error"] for r in failed_operations if r.get("error")]
+        raise Exception(f"Restore operation failed: {'; '.join(error_messages)}")
+
+
 def _validate_data_files_exist(
     input_dir: Path, include_prs: bool = False, include_sub_issues: bool = False
 ) -> None:
