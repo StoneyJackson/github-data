@@ -3,12 +3,12 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from .restore_strategy import RestoreEntityStrategy
-from ..entities import Issue
+from ...strategies.restore_strategy import RestoreEntityStrategy
+from .models import Issue
 
 if TYPE_CHECKING:
-    from ..storage.protocols import StorageService
-    from ..github.protocols import RepositoryService
+    from ...storage.protocols import StorageService
+    from ...github.protocols import RepositoryService
 
 
 class IssuesRestoreStrategy(RestoreEntityStrategy):

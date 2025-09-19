@@ -189,12 +189,12 @@ def restore_repository_data_with_strategy_pattern(
     orchestrator = StrategyBasedRestoreOrchestrator(github_service, storage_service)
 
     # Register strategies
-    from ..strategies.labels_restore_strategy import (
+    from ..entities.labels.restore_strategy import (
         LabelsRestoreStrategy,
         create_conflict_strategy,
     )
-    from ..strategies.issues_restore_strategy import IssuesRestoreStrategy
-    from ..strategies.comments_restore_strategy import CommentsRestoreStrategy
+    from ..entities.issues.restore_strategy import IssuesRestoreStrategy
+    from ..entities.comments.restore_strategy import CommentsRestoreStrategy
 
     # Create conflict resolution strategy
     conflict_strategy = create_conflict_strategy(

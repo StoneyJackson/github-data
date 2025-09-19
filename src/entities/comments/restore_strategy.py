@@ -4,12 +4,12 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 from urllib.parse import urlparse
 
-from .restore_strategy import RestoreEntityStrategy
-from ..entities import Comment
+from ...strategies.restore_strategy import RestoreEntityStrategy
+from .models import Comment
 
 if TYPE_CHECKING:
-    from ..storage.protocols import StorageService
-    from ..github.protocols import RepositoryService
+    from ...storage.protocols import StorageService
+    from ...github.protocols import RepositoryService
 
 
 class CommentsRestoreStrategy(RestoreEntityStrategy):

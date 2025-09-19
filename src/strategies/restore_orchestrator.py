@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any, TYPE_CHECKING
 from .restore_strategy import RestoreEntityStrategy
-from .labels_restore_strategy import OverwriteConflictStrategy
+from ..entities.labels.restore_strategy import OverwriteConflictStrategy
 
 if TYPE_CHECKING:
     from ..storage.protocols import StorageService

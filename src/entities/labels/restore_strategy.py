@@ -3,18 +3,18 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from .restore_strategy import RestoreEntityStrategy, RestoreConflictStrategy
-from ..entities import Label
-from ..conflict_strategies import (
+from ...strategies.restore_strategy import RestoreEntityStrategy, RestoreConflictStrategy
+from .models import Label
+from ...conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,
     detect_label_conflicts,
 )
-from ..github import converters
+from ...github import converters
 
 if TYPE_CHECKING:
-    from ..storage.protocols import StorageService
-    from ..github.protocols import RepositoryService
+    from ...storage.protocols import StorageService
+    from ...github.protocols import RepositoryService
 
 
 class LabelsRestoreStrategy(RestoreEntityStrategy):
