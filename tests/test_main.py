@@ -70,7 +70,7 @@ class TestMain:
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
 
-    @patch("src.operations.restore.restore_repository_data_with_services")
+    @patch("src.operations.restore.restore_repository_data_with_strategy_pattern")
     @patch("src.github.create_github_service")
     @patch("src.storage.create_storage_service")
     @patch("src.main._get_required_env_var")

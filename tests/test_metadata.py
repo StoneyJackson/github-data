@@ -190,7 +190,7 @@ class TestMetadataIntegration:
     def test_restore_creates_issues_and_comments_successfully(self, tmp_path):
         """Test that restore operations work with our new metadata functionality."""
         from unittest.mock import MagicMock
-        from src.operations.restore import restore_repository_data_with_services
+        from src.operations.restore import restore_repository_data_with_strategy_pattern
         from src.storage import create_storage_service
         import json
 
@@ -262,7 +262,7 @@ class TestMetadataIntegration:
 
         # Run restore with metadata enabled (default)
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             mock_client, storage_service, "owner/repo", str(data_dir)
         )
 

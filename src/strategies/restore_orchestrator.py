@@ -1,5 +1,6 @@
 """Strategy-based restore orchestrator."""
 
+import json
 from typing import List, Dict, Any, TYPE_CHECKING
 from .restore_strategy import RestoreEntityStrategy
 from ..entities.labels.restore_strategy import OverwriteConflictStrategy
@@ -139,6 +140,9 @@ class StrategyBasedRestoreOrchestrator:
                 "entities_created": created_count,
             }
 
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            # Re-raise specific exceptions for backwards compatibility
+            raise
         except Exception as e:
             return {
                 "entity_name": entity_name,

@@ -10,7 +10,7 @@ import pytest
 from src.operations.save import save_repository_data_with_services
 from src.github import create_github_service
 from src.storage import create_storage_service
-from src.operations.restore import restore_repository_data_with_services
+from src.operations.restore import restore_repository_data_with_strategy_pattern
 
 pytestmark = [pytest.mark.integration]
 
@@ -354,7 +354,7 @@ class TestSaveRestoreIntegration:
         # Execute restore operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/target_repo",
@@ -492,7 +492,7 @@ class TestSaveRestoreIntegration:
 
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/target_repo",
@@ -601,7 +601,7 @@ class TestSaveRestoreIntegration:
         # Execute restore operation
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir
         )
 
@@ -614,7 +614,7 @@ class TestSaveRestoreIntegration:
         with pytest.raises(FileNotFoundError) as exc_info:
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
-            restore_repository_data_with_services(
+            restore_repository_data_with_strategy_pattern(
                 github_service, storage_service, "owner/repo", temp_data_dir
             )
 
@@ -803,7 +803,7 @@ class TestSaveRestoreIntegration:
         # Execute restore
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/target_repo",
@@ -902,7 +902,7 @@ class TestErrorHandlingIntegration:
         with pytest.raises(Exception, match="Failed to create label 'feature'"):
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
-            restore_repository_data_with_services(
+            restore_repository_data_with_strategy_pattern(
                 github_service, storage_service, "owner/repo", temp_data_dir
             )
 
@@ -934,7 +934,7 @@ class TestErrorHandlingIntegration:
         with pytest.raises(json.JSONDecodeError):
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
-            restore_repository_data_with_services(
+            restore_repository_data_with_strategy_pattern(
                 github_service, storage_service, "owner/repo", temp_data_dir
             )
 
@@ -1024,7 +1024,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issues are restored with their state and metadata."""
-        from src.operations.restore import restore_repository_data_with_services
+        from src.operations.restore import restore_repository_data_with_strategy_pattern
         from src.entities import Issue, GitHubUser
         from datetime import datetime
         import json
@@ -1135,7 +1135,7 @@ class TestErrorHandlingIntegration:
         # Test restoration
         github_service = create_github_service("fake-token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/repo",
@@ -1171,7 +1171,7 @@ class TestErrorHandlingIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test closed issue restoration with minimal closure metadata."""
-        from src.operations.restore import restore_repository_data_with_services
+        from src.operations.restore import restore_repository_data_with_strategy_pattern
         from src.entities import Issue, GitHubUser
         from datetime import datetime
         import json
@@ -1250,7 +1250,7 @@ class TestErrorHandlingIntegration:
         # Test restoration
         github_service = create_github_service("fake-token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/repo",

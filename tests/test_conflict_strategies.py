@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from src.operations.restore import restore_repository_data_with_services
+from src.operations.restore import restore_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.conflict_strategies import (
@@ -204,7 +204,7 @@ class TestConflictStrategyIntegration:
         with pytest.raises(Exception, match="Repository has 1 existing labels"):
             github_service = create_github_service("token")
             storage_service = create_storage_service("json")
-            restore_repository_data_with_services(
+            restore_repository_data_with_strategy_pattern(
                 github_service,
                 storage_service,
                 "owner/repo",
@@ -233,7 +233,7 @@ class TestConflictStrategyIntegration:
         # Should succeed because repository is empty
         github_service = create_github_service("token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/repo",
@@ -268,7 +268,7 @@ class TestConflictStrategyIntegration:
         with pytest.raises(Exception, match="Label conflicts detected: bug"):
             github_service = create_github_service("token")
             storage_service = create_storage_service("json")
-            restore_repository_data_with_services(
+            restore_repository_data_with_strategy_pattern(
                 github_service,
                 storage_service,
                 "owner/repo",
@@ -305,7 +305,7 @@ class TestConflictStrategyIntegration:
         # Should succeed because no conflicts
         github_service = create_github_service("token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service,
             storage_service,
             "owner/repo",
@@ -351,7 +351,7 @@ class TestConflictStrategyIntegration:
 
         github_service = create_github_service("token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir, "delete-all"
         )
 
@@ -391,7 +391,7 @@ class TestConflictStrategyIntegration:
 
         github_service = create_github_service("token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir, "skip"
         )
 
@@ -438,7 +438,7 @@ class TestConflictStrategyIntegration:
 
         github_service = create_github_service("token")
         storage_service = create_storage_service("json")
-        restore_repository_data_with_services(
+        restore_repository_data_with_strategy_pattern(
             github_service, storage_service, "owner/repo", temp_data_dir, "overwrite"
         )
 
