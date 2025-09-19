@@ -140,7 +140,7 @@ class StrategyBasedRestoreOrchestrator:
                 "entities_created": created_count,
             }
 
-        except (FileNotFoundError, json.JSONDecodeError) as e:
+        except (FileNotFoundError, json.JSONDecodeError):
             # Re-raise specific exceptions for backwards compatibility
             raise
         except Exception as e:

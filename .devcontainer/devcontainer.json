@@ -10,7 +10,8 @@
       "extensions": [
         "ms-vscode.makefile-tools",
         "donjayamanne.python-extension-pack",
-        "ritwickdey.LiveServer"
+        "ritwickdey.LiveServer",
+        "Anthropic.claude-code"
       ]
     }
   }

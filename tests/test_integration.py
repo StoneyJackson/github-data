@@ -15,10 +15,18 @@ from src.operations.restore import restore_repository_data_with_strategy_pattern
 pytestmark = [pytest.mark.integration]
 
 
-def _add_pr_method_mocks(mock_boundary):
+def _add_pr_method_mocks(mock_boundary, sample_data=None):
     """Add PR method mocks to boundary for compatibility with new PR support."""
-    mock_boundary.get_repository_pull_requests.return_value = []
-    mock_boundary.get_all_pull_request_comments.return_value = []
+    if sample_data:
+        mock_boundary.get_repository_pull_requests.return_value = sample_data.get(
+            "pull_requests", []
+        )
+        mock_boundary.get_all_pull_request_comments.return_value = sample_data.get(
+            "pr_comments", []
+        )
+    else:
+        mock_boundary.get_repository_pull_requests.return_value = []
+        mock_boundary.get_all_pull_request_comments.return_value = []
 
 
 def _add_sub_issues_method_mocks(mock_boundary):
@@ -157,6 +165,132 @@ class TestSaveRestoreIntegration:
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
                 },
             ],
+            "pull_requests": [
+                {
+                    "id": 5001,
+                    "number": 3,
+                    "title": "Implement API rate limiting",
+                    "body": "This PR adds rate limiting to prevent API abuse",
+                    "state": "MERGED",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
+                    "assignees": [
+                        {
+                            "login": "bob",
+                            "id": 3002,
+                            "avatar_url": "https://github.com/bob.png",
+                            "html_url": "https://github.com/bob",
+                        }
+                    ],
+                    "labels": [
+                        {
+                            "name": "enhancement",
+                            "color": "a2eeef",
+                            "description": "New feature or request",
+                            "url": (
+                                "https://api.github.com/repos/owner/repo/"
+                                "labels/enhancement"
+                            ),
+                            "id": 1002,
+                        }
+                    ],
+                    "created_at": "2023-01-16T10:00:00Z",
+                    "updated_at": "2023-01-18T15:30:00Z",
+                    "closed_at": "2023-01-18T15:30:00Z",
+                    "merged_at": "2023-01-18T15:30:00Z",
+                    "merge_commit_sha": "abc123def456",
+                    "base_ref": "main",
+                    "head_ref": "feature/rate-limiting",
+                    "html_url": "https://github.com/owner/repo/pull/3",
+                    "comments": 1,
+                },
+                {
+                    "id": 5002,
+                    "number": 4,
+                    "title": "Fix security vulnerability",
+                    "body": "Address XSS vulnerability in user input",
+                    "state": "OPEN",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
+                    "assignees": [],
+                    "labels": [
+                        {
+                            "name": "bug",
+                            "color": "d73a4a",
+                            "description": "Something isn't working",
+                            "url": "https://api.github.com/repos/owner/repo/labels/bug",
+                            "id": 1001,
+                        }
+                    ],
+                    "created_at": "2023-01-17T14:00:00Z",
+                    "updated_at": "2023-01-17T16:45:00Z",
+                    "closed_at": None,
+                    "merged_at": None,
+                    "merge_commit_sha": None,
+                    "base_ref": "main",
+                    "head_ref": "fix/xss-vulnerability",
+                    "html_url": "https://github.com/owner/repo/pull/4",
+                    "comments": 2,
+                },
+            ],
+            "pr_comments": [
+                {
+                    "id": 6001,
+                    "body": "Great work on the rate limiting implementation!",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
+                    "created_at": "2023-01-18T14:00:00Z",
+                    "updated_at": "2023-01-18T14:00:00Z",
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/3#issuecomment-6001"
+                    ),
+                    "pull_request_url": "https://github.com/owner/repo/pull/3",
+                },
+                {
+                    "id": 6002,
+                    "body": "Need to add more tests for edge cases",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
+                    "created_at": "2023-01-17T15:30:00Z",
+                    "updated_at": "2023-01-17T15:30:00Z",
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/4#issuecomment-6002"
+                    ),
+                    "pull_request_url": "https://github.com/owner/repo/pull/4",
+                },
+                {
+                    "id": 6003,
+                    "body": "Updated the implementation to handle edge cases",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
+                    "created_at": "2023-01-17T16:45:00Z",
+                    "updated_at": "2023-01-17T16:45:00Z",
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/4#issuecomment-6003"
+                    ),
+                    "pull_request_url": "https://github.com/owner/repo/pull/4",
+                },
+            ],
         }
 
     @patch("src.github.service.GitHubApiBoundary")
@@ -172,7 +306,7 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
-        _add_pr_method_mocks(mock_boundary)
+        _add_pr_method_mocks(mock_boundary, sample_github_data)
         _add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
@@ -187,6 +321,8 @@ class TestSaveRestoreIntegration:
         assert (data_path / "labels.json").exists()
         assert (data_path / "issues.json").exists()
         assert (data_path / "comments.json").exists()
+        assert (data_path / "pull_requests.json").exists()
+        assert (data_path / "pr_comments.json").exists()
 
         # Verify labels.json content and structure
         with open(data_path / "labels.json") as f:
@@ -231,6 +367,49 @@ class TestSaveRestoreIntegration:
         assert comments_data[1]["body"] == "Fixed in PR #3"
         assert comments_data[1]["user"]["login"] == "alice"
 
+        # Verify pull_requests.json content and structure
+        with open(data_path / "pull_requests.json") as f:
+            prs_data = json.load(f)
+        assert len(prs_data) == 2
+
+        # Check first PR (merged)
+        pr1 = prs_data[0]
+        assert pr1["title"] == "Implement API rate limiting"
+        assert pr1["state"] == "MERGED"
+        assert pr1["base_ref"] == "main"
+        assert pr1["head_ref"] == "feature/rate-limiting"
+        assert pr1["user"]["login"] == "alice"
+        assert pr1["merged_at"] is not None
+        assert len(pr1["assignees"]) == 1
+        assert pr1["assignees"][0]["login"] == "bob"
+
+        # Check second PR (open)
+        pr2 = prs_data[1]
+        assert pr2["title"] == "Fix security vulnerability"
+        assert pr2["state"] == "OPEN"
+        assert pr2["base_ref"] == "main"
+        assert pr2["head_ref"] == "fix/xss-vulnerability"
+        assert pr2["user"]["login"] == "charlie"
+        assert pr2["merged_at"] is None
+        assert len(pr2["assignees"]) == 0
+
+        # Verify pr_comments.json content and structure
+        with open(data_path / "pr_comments.json") as f:
+            pr_comments_data = json.load(f)
+        assert len(pr_comments_data) == 3
+        assert (
+            pr_comments_data[0]["body"]
+            == "Great work on the rate limiting implementation!"
+        )
+        assert pr_comments_data[0]["user"]["login"] == "bob"
+        assert pr_comments_data[1]["body"] == "Need to add more tests for edge cases"
+        assert pr_comments_data[1]["user"]["login"] == "alice"
+        assert (
+            pr_comments_data[2]["body"]
+            == "Updated the implementation to handle edge cases"
+        )
+        assert pr_comments_data[2]["user"]["login"] == "charlie"
+
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_recreates_data_from_json_files(
         self, mock_boundary_class, temp_data_dir, sample_github_data
@@ -245,6 +424,10 @@ class TestSaveRestoreIntegration:
             json.dump(sample_github_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
             json.dump(sample_github_data["comments"], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump(sample_github_data["pull_requests"], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump(sample_github_data["pr_comments"], f)
 
         # Setup mock boundary for creation operations
         mock_boundary = Mock()
@@ -350,6 +533,111 @@ class TestSaveRestoreIntegration:
                 "issue_url": "https://api.github.com/repos/owner/target_repo/issues/11",
             },
         ]
+        mock_boundary.create_pull_request.side_effect = [
+            {
+                "id": 8001,
+                "number": 20,
+                "title": "Implement API rate limiting",
+                "body": "This PR adds rate limiting to prevent API abuse",
+                "state": "open",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-20T10:00:00Z",
+                "updated_at": "2023-01-20T10:00:00Z",
+                "closed_at": None,
+                "merged_at": None,
+                "merge_commit_sha": None,
+                "base_ref": "main",
+                "head_ref": "feature/rate-limiting",
+                "html_url": "https://github.com/owner/target_repo/pull/20",
+                "comments": 0,
+            },
+            {
+                "id": 8002,
+                "number": 21,
+                "title": "Fix security vulnerability",
+                "body": "Address XSS vulnerability in user input",
+                "state": "open",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-20T11:00:00Z",
+                "updated_at": "2023-01-20T11:00:00Z",
+                "closed_at": None,
+                "merged_at": None,
+                "merge_commit_sha": None,
+                "base_ref": "main",
+                "head_ref": "fix/xss-vulnerability",
+                "html_url": "https://github.com/owner/target_repo/pull/21",
+                "comments": 0,
+            },
+        ]
+        mock_boundary.create_pull_request_comment.side_effect = [
+            {
+                "id": 9001,
+                "body": "Great work on the rate limiting implementation!",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "created_at": "2023-01-20T12:00:00Z",
+                "updated_at": "2023-01-20T12:00:00Z",
+                "html_url": (
+                    "https://github.com/owner/target_repo/pull/20#issuecomment-9001"
+                ),
+                "pull_request_url": "https://github.com/owner/target_repo/pull/20",
+            },
+            {
+                "id": 9002,
+                "body": "Need to add more tests for edge cases",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "created_at": "2023-01-20T12:30:00Z",
+                "updated_at": "2023-01-20T12:30:00Z",
+                "html_url": (
+                    "https://github.com/owner/target_repo/pull/21#issuecomment-9002"
+                ),
+                "pull_request_url": "https://github.com/owner/target_repo/pull/21",
+            },
+            {
+                "id": 9003,
+                "body": "Updated the implementation to handle edge cases",
+                "user": {
+                    "login": "testuser",
+                    "id": 1,
+                    "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                    "url": "https://api.github.com/users/testuser",
+                    "html_url": "https://github.com/testuser",
+                },
+                "created_at": "2023-01-20T13:00:00Z",
+                "updated_at": "2023-01-20T13:00:00Z",
+                "html_url": (
+                    "https://github.com/owner/target_repo/pull/21#issuecomment-9003"
+                ),
+                "pull_request_url": "https://github.com/owner/target_repo/pull/21",
+            },
+        ]
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -360,12 +648,15 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
+            include_prs=True,
         )
 
         # Verify boundary methods were called correctly
         assert mock_boundary.create_label.call_count == 2
         assert mock_boundary.create_issue.call_count == 2
         assert mock_boundary.create_issue_comment.call_count == 2
+        assert mock_boundary.create_pull_request.call_count == 2
+        assert mock_boundary.create_pull_request_comment.call_count == 3
 
         # Verify label creation calls
         label_calls = mock_boundary.create_label.call_args_list
@@ -414,6 +705,51 @@ class TestSaveRestoreIntegration:
         assert second_comment_call[1] == 11  # issue_number - Mapped from issue #2
         assert second_comment_call[2] == "Fixed in PR #3"  # body
 
+        # Verify pull request creation calls
+        pr_calls = mock_boundary.create_pull_request.call_args_list
+
+        # First PR call - check positional arguments
+        first_pr_call = pr_calls[0][0]  # positional arguments
+        assert first_pr_call[1] == "Implement API rate limiting"  # title
+        assert (
+            first_pr_call[2] == "This PR adds rate limiting to prevent API abuse"
+        )  # body
+        assert first_pr_call[3] == "feature/rate-limiting"  # head
+        assert first_pr_call[4] == "main"  # base
+
+        # Second PR call
+        second_pr_call = pr_calls[1][0]  # positional arguments
+        assert second_pr_call[1] == "Fix security vulnerability"  # title
+        assert second_pr_call[2] == "Address XSS vulnerability in user input"  # body
+        assert second_pr_call[3] == "fix/xss-vulnerability"  # head
+        assert second_pr_call[4] == "main"  # base
+
+        # Verify PR comment creation calls
+        pr_comment_calls = mock_boundary.create_pull_request_comment.call_args_list
+
+        # First PR comment call (mapped to PR #20)
+        first_pr_comment_call = pr_comment_calls[0][0]  # positional arguments
+        assert first_pr_comment_call[1] == 20  # pr_number - Mapped from original PR #3
+        assert (
+            first_pr_comment_call[2]
+            == "Great work on the rate limiting implementation!"
+        )  # body
+
+        # Second PR comment call (mapped to PR #21)
+        second_pr_comment_call = pr_comment_calls[1][0]  # positional arguments
+        assert second_pr_comment_call[1] == 21  # pr_number - Mapped from original PR #4
+        assert (
+            second_pr_comment_call[2] == "Need to add more tests for edge cases"
+        )  # body
+
+        # Third PR comment call (mapped to PR #21)
+        third_pr_comment_call = pr_comment_calls[2][0]  # positional arguments
+        assert third_pr_comment_call[1] == 21  # pr_number - Mapped from original PR #4
+        assert (
+            third_pr_comment_call[2]
+            == "Updated the implementation to handle edge cases"
+        )  # body
+
     @patch("src.github.service.GitHubApiBoundary")
     def test_complete_save_restore_cycle_preserves_data_integrity(
         self, mock_boundary_class, temp_data_dir, sample_github_data
@@ -428,7 +764,7 @@ class TestSaveRestoreIntegration:
         save_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
-        _add_pr_method_mocks(save_boundary)
+        _add_pr_method_mocks(save_boundary, sample_github_data)
         _add_sub_issues_method_mocks(save_boundary)
 
         github_service = create_github_service("fake_token")
@@ -489,6 +825,48 @@ class TestSaveRestoreIntegration:
             ),
             "issue_url": "https://api.github.com/repos/owner/target_repo/issues/999",
         }
+        restore_boundary.create_pull_request.return_value = {
+            "id": 777,
+            "number": 777,
+            "title": "test PR",
+            "body": "test PR body",
+            "state": "open",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                "url": "https://api.github.com/users/testuser",
+                "html_url": "https://github.com/testuser",
+            },
+            "assignees": [],
+            "labels": [],
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
+            "closed_at": None,
+            "merged_at": None,
+            "merge_commit_sha": None,
+            "base_ref": "main",
+            "head_ref": "test-branch",
+            "html_url": "https://github.com/owner/target_repo/pull/777",
+            "comments": 0,
+        }
+        restore_boundary.create_pull_request_comment.return_value = {
+            "id": 666,
+            "body": "test PR comment",
+            "user": {
+                "login": "testuser",
+                "id": 1,
+                "avatar_url": "https://github.com/images/error/testuser_happy.gif",
+                "url": "https://api.github.com/users/testuser",
+                "html_url": "https://github.com/testuser",
+            },
+            "created_at": "2023-01-01T00:00:00Z",
+            "updated_at": "2023-01-01T00:00:00Z",
+            "html_url": (
+                "https://github.com/owner/target_repo/pull/777#issuecomment-666"
+            ),
+            "pull_request_url": "https://github.com/owner/target_repo/pull/777",
+        }
 
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
@@ -498,6 +876,7 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
+            include_prs=True,
         )
 
         # Verify data integrity by checking that saved data matches restored data
@@ -513,11 +892,18 @@ class TestSaveRestoreIntegration:
         assert save_boundary.get_all_issue_comments.call_count == 1
         assert restore_boundary.create_issue_comment.call_count == 2
 
+        # Verify PR operations
+        assert save_boundary.get_repository_pull_requests.call_count == 1
+        assert restore_boundary.create_pull_request.call_count == 2
+
+        assert save_boundary.get_all_pull_request_comments.call_count == 1
+        assert restore_boundary.create_pull_request_comment.call_count == 3
+
         # Verify that all original label data was preserved in restore calls
         restore_label_calls = restore_boundary.create_label.call_args_list
         original_labels = sample_github_data["labels"]
 
-        for i, (original, call) in enumerate(zip(original_labels, restore_label_calls)):
+        for original, call in zip(original_labels, restore_label_calls):
             restored_args = call[
                 0
             ]  # positional arguments: (repo_name, name, color, description)
@@ -533,7 +919,7 @@ class TestSaveRestoreIntegration:
         restore_issue_calls = restore_boundary.create_issue.call_args_list
         original_issues = sample_github_data["issues"]
 
-        for i, (original, call) in enumerate(zip(original_issues, restore_issue_calls)):
+        for original, call in zip(original_issues, restore_issue_calls):
             restored_args = call[
                 0
             ]  # positional arguments: (repo_name, title, body, labels)
@@ -581,13 +967,23 @@ class TestSaveRestoreIntegration:
             assert json.load(f) == []
         with open(data_path / "comments.json") as f:
             assert json.load(f) == []
+        with open(data_path / "pull_requests.json") as f:
+            assert json.load(f) == []
+        with open(data_path / "pr_comments.json") as f:
+            assert json.load(f) == []
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_empty_json_files(self, mock_boundary_class, temp_data_dir):
         """Test restore operation with empty JSON files."""
         # Create empty JSON files
         data_path = Path(temp_data_dir)
-        for filename in ["labels.json", "issues.json", "comments.json"]:
+        for filename in [
+            "labels.json",
+            "issues.json",
+            "comments.json",
+            "pull_requests.json",
+            "pr_comments.json",
+        ]:
             with open(data_path / filename, "w") as f:
                 json.dump([], f)
 
@@ -602,12 +998,18 @@ class TestSaveRestoreIntegration:
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
         restore_repository_data_with_strategy_pattern(
-            github_service, storage_service, "owner/repo", temp_data_dir
+            github_service,
+            storage_service,
+            "owner/repo",
+            temp_data_dir,
+            include_prs=True,
         )
 
         # Verify no creation methods were called for empty data
         assert mock_boundary.create_label.call_count == 0
         assert mock_boundary.create_issue.call_count == 0
+        assert mock_boundary.create_pull_request.call_count == 0
+        assert mock_boundary.create_pull_request_comment.call_count == 0
 
     def test_restore_fails_when_json_files_missing(self, temp_data_dir):
         """Test restore fails gracefully when required files are missing."""
@@ -615,7 +1017,11 @@ class TestSaveRestoreIntegration:
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_strategy_pattern(
-                github_service, storage_service, "owner/repo", temp_data_dir
+                github_service,
+                storage_service,
+                "owner/repo",
+                temp_data_dir,
+                include_prs=True,
             )
 
         assert "labels.json" in str(exc_info.value)
@@ -652,6 +1058,8 @@ class TestSaveRestoreIntegration:
         assert (nested_path / "labels.json").exists()
         assert (nested_path / "issues.json").exists()
         assert (nested_path / "comments.json").exists()
+        assert (nested_path / "pull_requests.json").exists()
+        assert (nested_path / "pr_comments.json").exists()
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_comments_restored_in_chronological_order(
@@ -748,6 +1156,10 @@ class TestSaveRestoreIntegration:
             json.dump(issues_data, f)
         with open(data_path / "comments.json", "w") as f:
             json.dump(comments_data, f)  # Comments in reverse chronological order
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary
         mock_boundary = Mock()
@@ -809,6 +1221,7 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
+            include_prs=True,
         )
 
         # Verify comments were called in chronological order (earliest first)
@@ -878,6 +1291,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock to simulate GitHub API failures
         mock_boundary = Mock()
@@ -903,7 +1320,11 @@ class TestErrorHandlingIntegration:
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_strategy_pattern(
-                github_service, storage_service, "owner/repo", temp_data_dir
+                github_service,
+                storage_service,
+                "owner/repo",
+                temp_data_dir,
+                include_prs=True,
             )
 
         # Verify first label succeeded, second failed and stopped execution
@@ -922,6 +1343,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for repository access validation
         mock_boundary = Mock()
@@ -935,7 +1360,11 @@ class TestErrorHandlingIntegration:
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_strategy_pattern(
-                github_service, storage_service, "owner/repo", temp_data_dir
+                github_service,
+                storage_service,
+                "owner/repo",
+                temp_data_dir,
+                include_prs=True,
             )
 
     @patch("src.github.service.GitHubApiBoundary")
@@ -1132,6 +1561,12 @@ class TestErrorHandlingIntegration:
         with open(data_path / "comments.json", "w") as f:
             json.dump([], f)
 
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
         # Test restoration
         github_service = create_github_service("fake-token")
         storage_service = create_storage_service("json")
@@ -1141,6 +1576,7 @@ class TestErrorHandlingIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
+            include_prs=True,
         )
 
         # Verify boundary methods were called
@@ -1247,6 +1683,12 @@ class TestErrorHandlingIntegration:
         with open(data_path / "comments.json", "w") as f:
             json.dump([], f)
 
+        with open(data_path / "pull_requests.json", "w") as f:
+            json.dump([], f)
+
+        with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+
         # Test restoration
         github_service = create_github_service("fake-token")
         storage_service = create_storage_service("json")
@@ -1256,6 +1698,7 @@ class TestErrorHandlingIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
+            include_prs=True,
         )
 
         # Verify boundary methods were called
