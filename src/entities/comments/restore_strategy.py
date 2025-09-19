@@ -49,7 +49,7 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
 
         # Prepare comment body
         if self._include_original_metadata:
-            from ..github.metadata import add_comment_metadata_footer
+            from ...github.metadata import add_comment_metadata_footer
 
             comment_body = add_comment_metadata_footer(comment)
         else:

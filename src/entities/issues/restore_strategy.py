@@ -34,7 +34,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     ) -> Optional[Dict[str, Any]]:
         # Prepare issue body with metadata if needed
         if self._include_original_metadata:
-            from ..github.metadata import add_issue_metadata_footer
+            from ...github.metadata import add_issue_metadata_footer
 
             issue_body = add_issue_metadata_footer(issue)
         else:

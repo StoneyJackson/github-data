@@ -206,9 +206,30 @@ def restore_repository_data_with_strategy_pattern(
     orchestrator.register_strategy(IssuesRestoreStrategy(include_original_metadata))
     orchestrator.register_strategy(CommentsRestoreStrategy(include_original_metadata))
 
-    # TODO: Add PR and sub-issue strategies if requested
+    # Add PR and PR comment strategies if requested
     if include_prs:
-        print("Warning: PR restore strategy not yet implemented in strategy pattern")
+        from ..entities.pull_requests.restore_strategy import (
+            PullRequestsRestoreStrategy,
+            create_conflict_strategy as create_pr_conflict_strategy,
+        )
+        from ..entities.pr_comments.restore_strategy import (
+            PullRequestCommentsRestoreStrategy,
+            create_conflict_strategy as create_pr_comment_conflict_strategy,
+        )
+
+        pr_conflict_strategy = create_pr_conflict_strategy()
+        pr_comment_conflict_strategy = create_pr_comment_conflict_strategy()
+
+        orchestrator.register_strategy(
+            PullRequestsRestoreStrategy(
+                pr_conflict_strategy, include_original_metadata
+            )
+        )
+        orchestrator.register_strategy(
+            PullRequestCommentsRestoreStrategy(
+                pr_comment_conflict_strategy, include_original_metadata
+            )
+        )
 
     if include_sub_issues:
         print(
@@ -219,7 +240,7 @@ def restore_repository_data_with_strategy_pattern(
     # Determine entities to restore
     requested_entities = ["labels", "issues", "comments"]
     if include_prs:
-        requested_entities.extend(["pull_requests"])
+        requested_entities.extend(["pull_requests", "pr_comments"])
     if include_sub_issues:
         requested_entities.append("sub_issues")
 
