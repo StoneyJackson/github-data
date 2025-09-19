@@ -231,11 +231,11 @@ def restore_repository_data_with_strategy_pattern(
             )
         )
 
+    # Add sub-issues strategy if requested
     if include_sub_issues:
-        print(
-            "Warning: Sub-issue restore strategy not yet "
-            "implemented in strategy pattern"
-        )
+        from ..entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
+
+        orchestrator.register_strategy(SubIssuesRestoreStrategy())
 
     # Determine entities to restore
     requested_entities = ["labels", "issues", "comments"]
