@@ -25,7 +25,6 @@ dependencies = [
     "requests>=2.31.0",
     "requests-cache>=1.1.0",
     "pydantic>=2.5.2",
-    "python-dotenv>=1.0.0",
     "gql[requests]>=4.0.0",
 ]
 
