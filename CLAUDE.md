@@ -52,6 +52,36 @@ This repository uses DevContainer for consistent development environments:
   - Claude Code CLI (`@anthropic-ai/claude-code`)
   - Docker CLI and Docker Compose
 
+## Claude Code Agents
+
+This repository is configured to use Claude Code agents for specialized development tasks. Agents provide autonomous, multi-step task execution for complex operations.
+
+### Available Agents
+
+The following specialized agents are available for this project:
+
+- **general-purpose**: Multi-step research, code search, and complex task execution
+- **backup-restore-workflow**: GitHub repository backup/restore operations, data migration, and containerized workflows
+- **testing-quality**: Testing strategies, code quality, TDD practices, and development tooling
+- **github-api-specialist**: GitHub API operations, GraphQL/REST integration, rate limiting, and API client development
+
+### Agent Configuration
+
+Agent configuration is stored in `.claude/` directory:
+- Agent settings and preferences
+- Task-specific configurations
+- Workflow automation rules
+
+### Using Agents
+
+Agents are automatically invoked by Claude Code when working on tasks that match their specialization:
+- Complex multi-step implementations
+- GitHub API integrations and workflows
+- Testing and quality assurance tasks
+- Backup and restore operations
+
+For manual agent invocation or configuration changes, refer to the Claude Code documentation.
+
 ## Package Management
 
 This project uses [PDM](https://pdm.fming.dev/) for modern Python dependency management:
@@ -77,41 +107,7 @@ All development uses PDM for package management:
 
 ## Testing
 
-This project uses a comprehensive multi-layered testing approach:
-
-- **Unit Tests**: Fast, isolated component tests
-- **Integration Tests**: Component interaction and workflow tests
-- **Container Integration Tests**: Full Docker workflow validation
-
-For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
-
-### Quick Testing Commands
-
-```bash
-make test-fast                    # Fast feedback (excludes slow container tests)
-make test-container               # Full Docker workflow tests (requires Docker)
-make test-with-test-coverage      # Analyze test file coverage
-make test-fast-with-test-coverage # Fast tests with test file coverage
-make check                        # All quality checks (fast)
-make check-all                    # All quality checks including container tests
-```
-
-### Coverage Configuration
-
-The project uses pytest-cov with branch coverage enabled by default:
-
-- **Source Coverage**: Default test commands measure coverage of `src/` files only
-- **Test Coverage**: Special commands (`*-with-test-coverage`) measure coverage of test files
-- **Branch Coverage**: Enabled for all test scenarios to catch untested code paths
-- **Reports**: Terminal output with missing lines + HTML reports in `htmlcov/`
-
-## Scripts and Tools
-
-The `scripts/` directory contains useful developer and maintainer commands:
-
-- **`scripts/reuse`** - Wrapper for the REUSE license compliance tool using Docker container
-
-Usage: `./scripts/reuse [command]` (e.g., `./scripts/reuse lint`)
+This project uses a comprehensive multi-layered testing approach with unit tests, integration tests, and container integration tests. For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
 ## Code Quality and Standards
 
