@@ -55,7 +55,10 @@ class TestMain:
             "GITHUB_TOKEN": "token123",
             "GITHUB_REPO": "owner/repo",
         }.get(name)
-        mock_get_env_var.return_value = "/data"
+        mock_get_env_var.side_effect = lambda name, required=True: {
+            "DATA_PATH": "/data",
+            "LABEL_CONFLICT_STRATEGY": None,
+        }.get(name)
 
         main()
 
@@ -91,7 +94,10 @@ class TestMain:
             "GITHUB_TOKEN": "token123",
             "GITHUB_REPO": "owner/repo",
         }.get(name)
-        mock_get_env_var.return_value = "/data"
+        mock_get_env_var.side_effect = lambda name, required=True: {
+            "DATA_PATH": "/data",
+            "LABEL_CONFLICT_STRATEGY": None,
+        }.get(name)
 
         main()
 

@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from ...strategies.restore_strategy import (
+from ...operations.restore.strategy import (
     RestoreEntityStrategy,
     RestoreConflictStrategy,
 )

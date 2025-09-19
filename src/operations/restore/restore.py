@@ -5,8 +5,8 @@ Implements the restore functionality that reads JSON files and
 recreates labels, issues, and comments in GitHub repositories.
 """
 
-from ..github.protocols import RepositoryService
-from ..storage.protocols import StorageService
+from src.github.protocols import RepositoryService
+from src.storage.protocols import StorageService
 
 
 def restore_repository_data_with_strategy_pattern(
@@ -22,17 +22,17 @@ def restore_repository_data_with_strategy_pattern(
     """Restore using strategy pattern approach."""
 
     # Create orchestrator
-    from ..strategies.restore_orchestrator import StrategyBasedRestoreOrchestrator
+    from .orchestrator import StrategyBasedRestoreOrchestrator
 
     orchestrator = StrategyBasedRestoreOrchestrator(github_service, storage_service)
 
     # Register strategies
-    from ..entities.labels.restore_strategy import (
+    from src.entities.labels.restore_strategy import (
         LabelsRestoreStrategy,
         create_conflict_strategy,
     )
-    from ..entities.issues.restore_strategy import IssuesRestoreStrategy
-    from ..entities.comments.restore_strategy import CommentsRestoreStrategy
+    from src.entities.issues.restore_strategy import IssuesRestoreStrategy
+    from src.entities.comments.restore_strategy import CommentsRestoreStrategy
 
     # Create conflict resolution strategy
     conflict_strategy = create_conflict_strategy(
@@ -46,11 +46,11 @@ def restore_repository_data_with_strategy_pattern(
 
     # Add PR and PR comment strategies if requested
     if include_prs:
-        from ..entities.pull_requests.restore_strategy import (
+        from src.entities.pull_requests.restore_strategy import (
             PullRequestsRestoreStrategy,
             create_conflict_strategy as create_pr_conflict_strategy,
         )
-        from ..entities.pr_comments.restore_strategy import (
+        from src.entities.pr_comments.restore_strategy import (
             PullRequestCommentsRestoreStrategy,
             create_conflict_strategy as create_pr_comment_conflict_strategy,
         )
@@ -69,7 +69,7 @@ def restore_repository_data_with_strategy_pattern(
 
     # Add sub-issues strategy if requested
     if include_sub_issues:
-        from ..entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
+        from src.entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
 
         orchestrator.register_strategy(SubIssuesRestoreStrategy())
 

@@ -8,9 +8,9 @@ and comments from GitHub repositories and saves them to JSON files.
 from pathlib import Path
 from typing import List, Dict, Any
 
-from ..github.protocols import RepositoryService
-from ..github import converters
-from ..entities import (
+from src.github.protocols import RepositoryService
+from src.github import converters
+from src.entities import (
     RepositoryData,
     Label,
     Issue,
@@ -19,7 +19,7 @@ from ..entities import (
     PullRequestComment,
     SubIssue,
 )
-from ..storage.protocols import StorageService
+from src.storage.protocols import StorageService
 
 
 def save_repository_data_with_services(
@@ -33,7 +33,7 @@ def save_repository_data_with_services(
     save_use_case = _create_save_repository_use_case(github_service, storage_service)
 
     # Execute with new use case
-    from ..use_cases.requests import SaveRepositoryRequest
+    from src.use_cases.requests import SaveRepositoryRequest
 
     request = SaveRepositoryRequest(repository_name=repo_name, output_path=data_path)
 
@@ -50,27 +50,31 @@ def _create_save_repository_use_case(
     github_service: RepositoryService, storage_service: StorageService
 ) -> Any:
     """Factory function to create configured SaveRepositoryUseCase."""
-    from ..use_cases.save.collection.collect_labels import CollectLabelsUseCase
-    from ..use_cases.save.collection.collect_issues import CollectIssuesUseCase
-    from ..use_cases.save.collection.collect_comments import CollectCommentsUseCase
-    from ..use_cases.save.collection.collect_pull_requests import (
+    from src.use_cases.save.collection.collect_labels import CollectLabelsUseCase
+    from src.use_cases.save.collection.collect_issues import CollectIssuesUseCase
+    from src.use_cases.save.collection.collect_comments import CollectCommentsUseCase
+    from src.use_cases.save.collection.collect_pull_requests import (
         CollectPullRequestsUseCase,
     )
-    from ..use_cases.save.collection.collect_pr_comments import CollectPRCommentsUseCase
-    from ..use_cases.save.collection.collect_sub_issues import CollectSubIssuesUseCase
-    from ..use_cases.save.persistence.save_labels import SaveLabelsUseCase
-    from ..use_cases.save.persistence.save_issues import SaveIssuesUseCase
-    from ..use_cases.save.persistence.save_comments import SaveCommentsUseCase
-    from ..use_cases.save.persistence.save_pull_requests import SavePullRequestsUseCase
-    from ..use_cases.save.persistence.save_pr_comments import SavePRCommentsUseCase
-    from ..use_cases.save.persistence.save_sub_issues import SaveSubIssuesUseCase
-    from ..use_cases.shared.processing.validate_repository_access import (
+    from src.use_cases.save.collection.collect_pr_comments import (
+        CollectPRCommentsUseCase,
+    )
+    from src.use_cases.save.collection.collect_sub_issues import CollectSubIssuesUseCase
+    from src.use_cases.save.persistence.save_labels import SaveLabelsUseCase
+    from src.use_cases.save.persistence.save_issues import SaveIssuesUseCase
+    from src.use_cases.save.persistence.save_comments import SaveCommentsUseCase
+    from src.use_cases.save.persistence.save_pull_requests import (
+        SavePullRequestsUseCase,
+    )
+    from src.use_cases.save.persistence.save_pr_comments import SavePRCommentsUseCase
+    from src.use_cases.save.persistence.save_sub_issues import SaveSubIssuesUseCase
+    from src.use_cases.shared.processing.validate_repository_access import (
         ValidateRepositoryAccessUseCase,
     )
-    from ..use_cases.save.processing.associate_sub_issues import (
+    from src.use_cases.save.processing.associate_sub_issues import (
         AssociateSubIssuesUseCase,
     )
-    from ..use_cases.save.orchestration.save_repository import SaveRepositoryUseCase
+    from src.use_cases.save.orchestration.save_repository import SaveRepositoryUseCase
 
     # Create all use case instances with proper dependency injection
     validate_access = ValidateRepositoryAccessUseCase(github_service)

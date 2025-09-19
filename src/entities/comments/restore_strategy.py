@@ -4,7 +4,7 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 from urllib.parse import urlparse
 
-from ...strategies.restore_strategy import RestoreEntityStrategy
+from ...operations.restore.strategy import RestoreEntityStrategy
 from .models import Comment
 
 if TYPE_CHECKING:

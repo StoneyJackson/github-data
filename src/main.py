@@ -57,7 +57,9 @@ def _perform_save_operation(config: "Configuration") -> None:
 def _perform_restore_operation(config: "Configuration") -> None:
     """Perform the restore operation to restore GitHub data."""
     print("Restoring GitHub data...")
-    from .operations.restore import restore_repository_data_with_strategy_pattern
+    from .operations.restore.restore import (
+        restore_repository_data_with_strategy_pattern,
+    )
     from .github import create_github_service
     from .storage import create_storage_service
 

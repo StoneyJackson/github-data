@@ -3,7 +3,7 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from ...strategies.restore_strategy import RestoreEntityStrategy
+from ...operations.restore.strategy import RestoreEntityStrategy
 from .models import SubIssue
 
 if TYPE_CHECKING:

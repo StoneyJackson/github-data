@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..storage.protocols import StorageService
-    from ..github.protocols import RepositoryService
+    from ...storage.protocols import StorageService
+    from ...github.protocols import RepositoryService
 
 
 class RestoreEntityStrategy(ABC):
