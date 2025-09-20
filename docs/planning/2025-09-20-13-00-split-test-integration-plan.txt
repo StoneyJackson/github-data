@@ -1,0 +1,262 @@
+ Detailed Implementation Plan: Splitting
+  test_integration.py
+
+  Based on the test review document and analysis of
+  test_integration.py (1,726 lines), here's a comprehensive
+  implementation plan to restructure the integration tests
+  into focused, maintainable files.
+
+  Current Structure Analysis
+
+  test_integration.py contains two main test classes:
+  - TestSaveRestoreIntegration (13 test methods) - Core
+  save/restore workflows
+  - TestErrorHandlingIntegration (4 test methods) - Error
+  handling scenarios
+
+  Key Issues Identified:
+  - Monolithic 1,726-line file covering multiple concerns
+  - Duplicate fixtures (temp_data_dir, sample_github_data)
+  - Helper functions mixed with tests (_add_pr_method_mocks,
+   _add_sub_issues_method_mocks)
+  - No clear separation of concerns
+
+  Implementation Plan
+
+  Phase 1: Create Shared Test Infrastructure
+
+  1.1 Create tests/shared/ Directory Structure
+
+  tests/shared/
+  ├── __init__.py
+  ├── fixtures.py      # Common fixtures (temp_data_dir,
+  etc.)
+  ├── builders.py      # Test data builders
+  ├── mocks.py         # Mock setup utilities
+  └── helpers.py       # Common test utilities
+
+  1.2 Consolidate Common Fixtures (tests/shared/fixtures.py)
+
+  - Move temp_data_dir fixture (currently duplicated in 6
+  files)
+  - Create centralized sample_github_data fixture with
+  builder pattern
+  - Add service creation fixtures (github_service_mock,
+  storage_service_mock)
+
+  1.3 Create Mock Utilities (tests/shared/mocks.py)
+
+  - Extract _add_pr_method_mocks() and
+  _add_sub_issues_method_mocks()
+  - Create MockBoundaryFactory class for consistent mock
+  setup
+  - Standardize GitHub API mock patterns
+
+  Phase 2: Split test_integration.py by Functionality
+
+  2.1 Core Save/Restore Tests
+  (tests/integration/test_save_restore_workflows.py)
+
+  Test Methods to Move:
+  - test_save_creates_json_files_with_correct_structure() -
+  JSON file creation
+  - test_restore_recreates_data_from_json_files() - Data
+  restoration
+  - test_complete_save_restore_cycle_preserves_data_integrit
+  y() - End-to-end cycle
+  - test_save_handles_empty_repository() - Empty repository
+  handling
+  - test_restore_handles_empty_json_files() - Empty file
+  handling
+
+  Focus: Primary save/restore workflow validation
+
+  2.2 Label Management Tests
+  (tests/integration/test_labels_integration.py)
+
+  Extract label-specific test logic from:
+  - Label creation verification in
+  test_restore_recreates_data_from_json_files()
+  - Label data integrity checks in test_complete_save_restor
+  e_cycle_preserves_data_integrity()
+  - Label handling in empty repository tests
+
+  New Tests to Add:
+  - Label conflict resolution scenarios
+  - Label color and description validation
+  - Bulk label operations
+
+  2.3 Issues and Comments Tests
+  (tests/integration/test_issues_integration.py)
+
+  Test Methods to Move:
+  - test_comments_restored_in_chronological_order() -
+  Comment ordering
+  - test_closed_issue_restoration_with_metadata() - Closed
+  issue handling
+  - test_closed_issue_restoration_minimal_metadata() -
+  Minimal metadata handling
+
+  Extract issue-specific logic from:
+  - Issue creation verification across multiple tests
+  - Comment ordering and association logic
+  - Issue state management (open/closed)
+
+  2.4 Error Handling Tests
+  (tests/integration/test_error_handling_integration.py)
+
+  Test Methods to Move (from TestErrorHandlingIntegration):
+  - test_restore_handles_github_api_failures_gracefully() -
+  API failure handling
+  - test_restore_handles_malformed_json_files() - Malformed
+  data handling
+  - test_data_type_conversion_and_validation() - Data
+  validation
+  - test_restore_fails_when_json_files_missing() - Missing
+  file handling
+
+  2.5 Directory and File Management Tests
+  (tests/integration/test_file_operations.py)
+
+  Test Methods to Move:
+  - test_save_creates_output_directory_if_missing() -
+  Directory creation
+  - File structure validation logic
+  - JSON file format verification
+
+  Phase 3: Create Test Data Builders
+
+  3.1 GitHub Data Builder (tests/shared/builders.py)
+
+  class GitHubDataBuilder:
+      def with_labels(self, count=2):
+          # Build label data with customizable count
+
+      def with_issues(self, count=3, include_closed=False):
+          # Build issue data with state options
+
+      def with_comments(self, issue_count=2,
+  comments_per_issue=1):
+          # Build comment data linked to issues
+
+      def with_pull_requests(self, count=2):
+          # Build PR data
+
+      def build(self):
+          # Return complete data structure
+
+  3.2 Mock Factory Pattern (tests/shared/mocks.py)
+
+  class MockBoundaryFactory:
+      @staticmethod
+      def create_with_data(data_type, **kwargs):
+          # Create configured mock boundary
+
+      @staticmethod
+      def add_pr_support(mock_boundary, data=None):
+          # Add PR method mocks (replace
+  _add_pr_method_mocks)
+
+      @staticmethod
+      def add_sub_issues_support(mock_boundary):
+          # Add sub-issues mocks (replace
+  _add_sub_issues_method_mocks)
+
+  Phase 4: Update Test Configuration
+
+  4.1 Enhanced conftest.py
+
+  - Import shared fixtures automatically
+  - Add test markers for different test types
+  - Configure test data cleanup
+
+  4.2 Update pytest.ini
+
+  [tool:pytest]
+  markers =
+      unit: Unit tests
+      integration: Integration tests
+      container: Container tests
+      slow: Slow running tests
+      labels: Label-related tests
+      issues: Issue-related tests
+      comments: Comment-related tests
+      errors: Error handling tests
+
+  Implementation Steps
+
+  Step 1: Create Shared Infrastructure
+
+  1. Create tests/shared/ directory and files
+  2. Move common fixtures to tests/shared/fixtures.py
+  3. Extract mock utilities to tests/shared/mocks.py
+  4. Create data builders in tests/shared/builders.py
+
+  Step 2: Create New Test Files
+
+  1. Create target test files with proper structure
+  2. Copy and refactor test methods to appropriate files
+  3. Update imports and fixture usage
+  4. Ensure each file focuses on single concern
+
+  Step 3: Update Original File
+
+  1. Remove moved test methods from test_integration.py
+  2. Keep any tests that truly span multiple concerns
+  3. Update imports and references
+
+  Step 4: Validation
+
+  1. Run all tests to ensure nothing is broken
+  2. Verify test discovery works correctly
+  3. Check that pytest markers work as expected
+  4. Validate performance improvements
+
+  Expected File Structure After Split
+
+  tests/
+  ├── shared/
+  │   ├── __init__.py
+  │   ├── fixtures.py          # Common fixtures
+  │   ├── builders.py          # Test data builders
+  │   ├── mocks.py            # Mock utilities
+  │   └── helpers.py          # Test utilities
+  ├── integration/
+  │   ├── test_save_restore_workflows.py      # Core
+  workflows (350 lines)
+  │   ├── test_labels_integration.py          # Label
+  operations (300 lines)
+  │   ├── test_issues_integration.py          # Issues &
+  comments (400 lines)
+  │   ├── test_error_handling_integration.py  # Error
+  scenarios (350 lines)
+  │   └── test_file_operations.py            # File
+  management (200 lines)
+  └── conftest.py             # Enhanced configuration
+
+  Benefits
+
+  1. Maintainability: Focused files are easier to navigate
+  and modify
+  2. Performance: Faster test discovery and execution
+  3. Developer Experience: Clear separation of concerns
+  4. Code Reuse: Shared infrastructure eliminates
+  duplication
+  5. Test Organization: Logical grouping improves
+  understanding
+
+  Risk Mitigation
+
+  1. Import Issues: Comprehensive testing of all import
+  paths
+  2. Test Dependencies: Careful analysis of test
+  interdependencies
+  3. Fixture Conflicts: Proper namespace management for
+  shared fixtures
+  4. Performance Regression: Benchmark before/after test
+  execution times
+
+  This plan transforms the monolithic test_integration.py
+  into a well-organized, maintainable test suite while
+  preserving all existing test functionality and improving
+  developer productivity.
