@@ -3,15 +3,15 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from ...operations.restore.strategy import (
+from ..strategy import (
     RestoreEntityStrategy,
     RestoreConflictStrategy,
 )
-from .models import PullRequestComment
+from src.entities.pr_comments.models import PullRequestComment
 
 if TYPE_CHECKING:
-    from ...storage.protocols import StorageService
-    from ...github.protocols import RepositoryService
+    from src.storage.protocols import StorageService
+    from src.github.protocols import RepositoryService
 
 
 class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
@@ -100,7 +100,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
         """Prepare comment body with optional metadata."""
         if self._include_original_metadata:
-            from ...github.metadata import add_pr_comment_metadata_footer
+            from src.github.metadata import add_pr_comment_metadata_footer
 
             return add_pr_comment_metadata_footer(comment)
         return comment.body

@@ -3,7 +3,7 @@
 import json
 from typing import List, Dict, Any, TYPE_CHECKING
 from .strategy import RestoreEntityStrategy
-from src.entities.labels.restore_strategy import OverwriteConflictStrategy
+from src.operations.restore.strategies.labels_strategy import OverwriteConflictStrategy
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService

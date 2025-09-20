@@ -3,20 +3,20 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from ...operations.restore.strategy import (
+from ..strategy import (
     RestoreEntityStrategy,
     RestoreConflictStrategy,
 )
-from .models import Label
-from ...conflict_strategies import (
+from src.entities.labels.models import Label
+from src.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,
     detect_label_conflicts,
 )
 
 if TYPE_CHECKING:
-    from ...storage.protocols import StorageService
-    from ...github.protocols import RepositoryService
+    from src.storage.protocols import StorageService
+    from src.github.protocols import RepositoryService
 
 
 class LabelsRestoreStrategy(RestoreEntityStrategy):
@@ -88,7 +88,7 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
             self._conflict_strategy.set_repo_name(repo_name)
 
         # Get existing labels
-        from ...github import converters
+        from src.github import converters
 
         raw_existing = github_service.get_repository_labels(repo_name)
         existing_labels = [

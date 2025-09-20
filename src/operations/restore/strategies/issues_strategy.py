@@ -3,12 +3,12 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from ...operations.restore.strategy import RestoreEntityStrategy
-from .models import Issue
+from ..strategy import RestoreEntityStrategy
+from src.entities.issues.models import Issue
 
 if TYPE_CHECKING:
-    from ...storage.protocols import StorageService
-    from ...github.protocols import RepositoryService
+    from src.storage.protocols import StorageService
+    from src.github.protocols import RepositoryService
 
 
 class IssuesRestoreStrategy(RestoreEntityStrategy):
@@ -34,7 +34,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     ) -> Optional[Dict[str, Any]]:
         # Prepare issue body with metadata if needed
         if self._include_original_metadata:
-            from ...github.metadata import add_issue_metadata_footer
+            from src.github.metadata import add_issue_metadata_footer
 
             issue_body = add_issue_metadata_footer(issue)
         else:

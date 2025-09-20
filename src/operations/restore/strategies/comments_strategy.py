@@ -4,12 +4,12 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 from urllib.parse import urlparse
 
-from ...operations.restore.strategy import RestoreEntityStrategy
-from .models import Comment
+from ..strategy import RestoreEntityStrategy
+from src.entities.comments.models import Comment
 
 if TYPE_CHECKING:
-    from ...storage.protocols import StorageService
-    from ...github.protocols import RepositoryService
+    from src.storage.protocols import StorageService
+    from src.github.protocols import RepositoryService
 
 
 class CommentsRestoreStrategy(RestoreEntityStrategy):
@@ -49,7 +49,7 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
 
         # Prepare comment body
         if self._include_original_metadata:
-            from ...github.metadata import add_comment_metadata_footer
+            from src.github.metadata import add_comment_metadata_footer
 
             comment_body = add_comment_metadata_footer(comment)
         else:
