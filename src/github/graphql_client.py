@@ -13,7 +13,7 @@ from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder
 # Required GraphQL imports
 from gql import Client
 from gql.transport.requests import RequestsHTTPTransport
-from .graphql_queries import (
+from .queries import (
     REPOSITORY_LABELS_QUERY,
     REPOSITORY_ISSUES_QUERY,
     REPOSITORY_COMMENTS_QUERY,
