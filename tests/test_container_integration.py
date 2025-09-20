@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import pytest
+from tests.shared import temp_data_dir
 
 pytestmark = [
     pytest.mark.container,
@@ -179,8 +180,8 @@ class TestDockerRun:
         DockerTestHelper.cleanup_images()
 
     @pytest.fixture
-    def temp_data_dir(self):
-        """Create temporary directory for container data."""
+    def docker_temp_dir(self):
+        """Create temporary directory for Docker container data with permission cleanup."""
         temp_dir = tempfile.mkdtemp()
         try:
             yield temp_dir
@@ -209,7 +210,7 @@ class TestDockerRun:
                     warnings.warn(f"Could not clean up temp directory: {temp_dir}")
 
     def test_container_runs_with_environment_variables(
-        self, docker_image, temp_data_dir
+        self, docker_image, docker_temp_dir
     ):
         """Test that container accepts and uses environment variables."""
         environment = {
@@ -218,7 +219,7 @@ class TestDockerRun:
             "OPERATION": "save",
             "DATA_PATH": "/data",
         }
-        volumes = {temp_data_dir: "/data"}
+        volumes = {docker_temp_dir: "/data"}
 
         result = DockerTestHelper.run_container(
             docker_image, environment=environment, volumes=volumes
@@ -236,7 +237,7 @@ class TestDockerRun:
             "GITHUB_REPO": "owner/repo",
             "DATA_PATH": "/data",
         }
-        volumes = {temp_data_dir: "/data"}
+        volumes = {docker_temp_dir: "/data"}
 
         # Run container that creates a test file
         cmd = [
@@ -262,7 +263,7 @@ class TestDockerRun:
     ):
         """Test container behavior with missing required environment variables."""
         # Run without required environment variables
-        volumes = {temp_data_dir: "/data"}
+        volumes = {docker_temp_dir: "/data"}
 
         result = DockerTestHelper.run_container(
             docker_image, environment={}, volumes=volumes
@@ -365,7 +366,7 @@ class TestDockerWorkflow:
         test_subdir.mkdir(parents=True, exist_ok=True)
 
         environment = {"DATA_PATH": "/data"}
-        volumes = {temp_data_dir: "/data"}
+        volumes = {docker_temp_dir: "/data"}
 
         # Test writing to subdirectory
         cmd = [
@@ -454,7 +455,7 @@ class TestDockerWorkflow:
     def test_container_exit_codes_and_error_handling(self, docker_image, temp_data_dir):
         """Test container returns appropriate exit codes for different
         scenarios."""
-        volumes = {temp_data_dir: "/data"}
+        volumes = {docker_temp_dir: "/data"}
 
         # Test successful operation (with fake token, will fail auth but
         # code should handle it)

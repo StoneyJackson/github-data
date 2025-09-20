@@ -11,37 +11,20 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
+from tests.shared import (
+    temp_data_dir,
+    sample_github_data,
+    add_pr_method_mocks,
+    add_sub_issues_method_mocks
+)
 
 pytestmark = [pytest.mark.integration]
 
 
-def _add_pr_method_mocks(mock_boundary, sample_data=None):
-    """Add PR method mocks to boundary for compatibility with new PR support."""
-    if sample_data:
-        mock_boundary.get_repository_pull_requests.return_value = sample_data.get(
-            "pull_requests", []
-        )
-        mock_boundary.get_all_pull_request_comments.return_value = sample_data.get(
-            "pr_comments", []
-        )
-    else:
-        mock_boundary.get_repository_pull_requests.return_value = []
-        mock_boundary.get_all_pull_request_comments.return_value = []
-
-
-def _add_sub_issues_method_mocks(mock_boundary):
-    """Add sub-issues method mocks to boundary for compatibility."""
-    mock_boundary.get_repository_sub_issues.return_value = []
 
 
 class TestSaveRestoreIntegration:
     """Integration tests for complete save/restore workflows."""
-
-    @pytest.fixture
-    def temp_data_dir(self):
-        """Create temporary directory for test data."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            yield temp_dir
 
     @pytest.fixture
     def sample_github_data(self):
@@ -306,8 +289,8 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
-        _add_pr_method_mocks(mock_boundary, sample_github_data)
-        _add_sub_issues_method_mocks(mock_boundary)
+        add_pr_method_mocks(mock_boundary, sample_github_data)
+        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -764,8 +747,8 @@ class TestSaveRestoreIntegration:
         save_boundary.get_all_issue_comments.return_value = sample_github_data[
             "comments"
         ]
-        _add_pr_method_mocks(save_boundary, sample_github_data)
-        _add_sub_issues_method_mocks(save_boundary)
+        add_pr_method_mocks(save_boundary, sample_github_data)
+        add_sub_issues_method_mocks(save_boundary)
 
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
@@ -944,8 +927,8 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
-        _add_pr_method_mocks(mock_boundary)
-        _add_sub_issues_method_mocks(mock_boundary)
+        add_pr_method_mocks(mock_boundary)
+        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -1037,8 +1020,8 @@ class TestSaveRestoreIntegration:
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
-        _add_pr_method_mocks(mock_boundary)
-        _add_sub_issues_method_mocks(mock_boundary)
+        add_pr_method_mocks(mock_boundary)
+        add_sub_issues_method_mocks(mock_boundary)
 
         # Use nested directory that doesn't exist
         nested_path = Path(temp_data_dir) / "backup" / "github-data"
@@ -1254,12 +1237,6 @@ class TestSaveRestoreIntegration:
 class TestErrorHandlingIntegration:
     """Integration tests for error scenarios and edge cases."""
 
-    @pytest.fixture
-    def temp_data_dir(self):
-        """Create temporary directory for test data."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            yield temp_dir
-
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_github_api_failures_gracefully(
         self, mock_boundary_class, temp_data_dir
@@ -1418,8 +1395,8 @@ class TestErrorHandlingIntegration:
         mock_boundary.get_all_issue_comments.return_value = complex_github_data[
             "comments"
         ]
-        _add_pr_method_mocks(mock_boundary)
-        _add_sub_issues_method_mocks(mock_boundary)
+        add_pr_method_mocks(mock_boundary)
+        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")

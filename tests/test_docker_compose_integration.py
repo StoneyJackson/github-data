@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 
 import pytest
+from tests.shared import temp_data_dir
 
 pytestmark = [
     pytest.mark.container,
@@ -181,8 +182,8 @@ class TestDockerComposeExecution:
     """Tests for Docker Compose service execution."""
 
     @pytest.fixture
-    def temp_data_dir(self):
-        """Create temporary directory for container data."""
+    def compose_temp_dir(self):
+        """Create temporary directory for Docker Compose container data."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create test-data subdirectory as expected by compose
             test_data_dir = Path(temp_dir) / "test-data"
@@ -198,16 +199,16 @@ class TestDockerComposeExecution:
         result = DockerComposeTestHelper.run_compose_command("build", timeout=300)
         assert result.returncode == 0, f"Compose build failed: {result.stderr}"
 
-    def test_test_service_runs_successfully(self, temp_data_dir, monkeypatch):
+    def test_test_service_runs_successfully(self, compose_temp_dir, monkeypatch):
         """Test that the test service runs and completes successfully."""
         import subprocess
 
         # Change to temp directory to avoid affecting real data directory
-        monkeypatch.chdir(temp_data_dir)
+        monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
         compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
-        compose_dest = Path(temp_data_dir) / "docker-compose.test.yml"
+        compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
@@ -235,14 +236,14 @@ class TestDockerComposeExecution:
         # Check if service completed successfully
         assert "Docker Compose test completed successfully" in result.stdout
 
-    def test_health_check_service_works(self, temp_data_dir, monkeypatch):
+    def test_health_check_service_works(self, compose_temp_dir, monkeypatch):
         """Test that health check service works correctly."""
         # Change to temp directory
-        monkeypatch.chdir(temp_data_dir)
+        monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
         compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
-        compose_dest = Path(temp_data_dir) / "docker-compose.test.yml"
+        compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
@@ -290,20 +291,20 @@ class TestDockerComposeExecution:
         assert "depends_on" in config_output
         assert "github-data-save" in config_output
 
-    def test_volume_mounts_work_in_compose(self, temp_data_dir, monkeypatch):
+    def test_volume_mounts_work_in_compose(self, compose_temp_dir, monkeypatch):
         """Test that volume mounts work correctly in compose services."""
         # Change to temp directory
-        monkeypatch.chdir(temp_data_dir)
+        monkeypatch.chdir(compose_temp_dir)
 
         # Create data directories
-        data_dir = Path(temp_data_dir) / "data"
-        test_data_dir = Path(temp_data_dir) / "test-data"
+        data_dir = Path(compose_temp_dir) / "data"
+        test_data_dir = Path(compose_temp_dir) / "test-data"
         data_dir.mkdir(exist_ok=True)
         test_data_dir.mkdir(exist_ok=True)
 
         # Copy compose file to temp directory and fix build context
         compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
-        compose_dest = Path(temp_data_dir) / "docker-compose.test.yml"
+        compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(

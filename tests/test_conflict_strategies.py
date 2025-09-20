@@ -19,6 +19,7 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
+from tests.shared import temp_data_dir
 
 
 class TestConflictStrategyParsing:
@@ -144,10 +145,6 @@ class TestConflictDetection:
 class TestConflictStrategyIntegration:
     """Integration tests for conflict strategies with restore operation."""
 
-    @pytest.fixture
-    def temp_data_dir(self, tmp_path):
-        """Create temporary directory for test data."""
-        return str(tmp_path)
 
     @pytest.fixture
     def sample_labels_data(self):
