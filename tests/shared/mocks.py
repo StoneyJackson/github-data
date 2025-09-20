@@ -24,17 +24,17 @@ def add_sub_issues_method_mocks(mock_boundary):
 
 class MockBoundaryFactory:
     """Factory for creating configured mock boundaries."""
-    
+
     @staticmethod
     def create_with_data(data_type="full", **kwargs):
         """Create configured mock boundary with test data.
-        
+
         Args:
             data_type: Type of data configuration ("full", "empty", "labels_only", etc.)
             **kwargs: Additional configuration options
         """
         mock_boundary = Mock()
-        
+
         if data_type == "empty":
             mock_boundary.get_repository_labels.return_value = []
             mock_boundary.get_repository_issues.return_value = []
@@ -43,43 +43,51 @@ class MockBoundaryFactory:
             add_sub_issues_method_mocks(mock_boundary)
         elif data_type == "labels_only":
             sample_data = kwargs.get("sample_data", {})
-            mock_boundary.get_repository_labels.return_value = sample_data.get("labels", [])
+            mock_boundary.get_repository_labels.return_value = sample_data.get(
+                "labels", []
+            )
             mock_boundary.get_repository_issues.return_value = []
             mock_boundary.get_all_issue_comments.return_value = []
             add_pr_method_mocks(mock_boundary)
             add_sub_issues_method_mocks(mock_boundary)
         elif data_type == "full":
             sample_data = kwargs.get("sample_data", {})
-            mock_boundary.get_repository_labels.return_value = sample_data.get("labels", [])
-            mock_boundary.get_repository_issues.return_value = sample_data.get("issues", [])
-            mock_boundary.get_all_issue_comments.return_value = sample_data.get("comments", [])
+            mock_boundary.get_repository_labels.return_value = sample_data.get(
+                "labels", []
+            )
+            mock_boundary.get_repository_issues.return_value = sample_data.get(
+                "issues", []
+            )
+            mock_boundary.get_all_issue_comments.return_value = sample_data.get(
+                "comments", []
+            )
             add_pr_method_mocks(mock_boundary, sample_data)
             add_sub_issues_method_mocks(mock_boundary)
-        
+
         return mock_boundary
-    
+
     @staticmethod
     def add_pr_support(mock_boundary, data=None):
         """Add PR method mocks to existing boundary."""
         add_pr_method_mocks(mock_boundary, data)
-    
+
     @staticmethod
     def add_sub_issues_support(mock_boundary):
         """Add sub-issues mocks to existing boundary."""
         add_sub_issues_method_mocks(mock_boundary)
-    
+
     @staticmethod
     def create_for_restore(success_responses=True):
         """Create mock boundary configured for restore operations.
-        
+
         Args:
             success_responses: If True, configure successful API responses
         """
         mock_boundary = Mock()
-        
+
         # Mock get_repository_labels for conflict detection (default: empty repository)
         mock_boundary.get_repository_labels.return_value = []
-        
+
         if success_responses:
             # Configure successful creation responses
             mock_boundary.create_label.return_value = {
@@ -89,7 +97,7 @@ class MockBoundaryFactory:
                 "description": "test",
                 "url": "https://api.github.com/repos/owner/repo/labels/test",
             }
-            
+
             mock_boundary.create_issue.return_value = {
                 "number": 999,
                 "title": "test",
@@ -111,7 +119,7 @@ class MockBoundaryFactory:
                 "html_url": "https://github.com/owner/repo/issues/999",
                 "comments": 0,
             }
-            
+
             mock_boundary.create_issue_comment.return_value = {
                 "id": 888,
                 "body": "test comment",
@@ -127,7 +135,7 @@ class MockBoundaryFactory:
                 "html_url": "https://github.com/owner/repo/issues/999#issuecomment-888",
                 "issue_url": "https://api.github.com/repos/owner/repo/issues/999",
             }
-            
+
             mock_boundary.create_pull_request.return_value = {
                 "id": 777,
                 "number": 777,
@@ -153,7 +161,7 @@ class MockBoundaryFactory:
                 "html_url": "https://github.com/owner/repo/pull/777",
                 "comments": 0,
             }
-            
+
             mock_boundary.create_pull_request_comment.return_value = {
                 "id": 666,
                 "body": "test PR comment",
@@ -169,5 +177,5 @@ class MockBoundaryFactory:
                 "html_url": "https://github.com/owner/repo/pull/777#issuecomment-666",
                 "pull_request_url": "https://github.com/owner/repo/pull/777",
             }
-        
+
         return mock_boundary

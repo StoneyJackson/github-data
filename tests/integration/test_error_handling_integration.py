@@ -11,7 +11,6 @@ from src.storage import create_storage_service
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.fixtures import temp_data_dir
 from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
 from tests.shared.builders import GitHubDataBuilder
 
@@ -260,7 +259,7 @@ class TestErrorHandlingIntegration:
         # Verify unicode content was processed correctly
         issue_calls = mock_boundary.create_issue.call_args_list
         assert len(issue_calls) == 1
-        
+
         # Check that unicode characters are preserved in the issue title
         issue_call_args = issue_calls[0][0]
         assert "测试 🚀" in issue_call_args[1]  # title is 2nd positional arg
@@ -277,13 +276,14 @@ class TestErrorHandlingIntegration:
         """Test handling of large datasets without performance issues."""
         # Create test data with many items
         builder = GitHubDataBuilder()
-        test_data = (builder
-                    .with_labels(10)
-                    .with_issues(50, include_closed=True)
-                    .with_comments(25, 3)  # 25 issues with 3 comments each = 75 comments
-                    .with_pull_requests(20)
-                    .with_pr_comments(15, 2)  # 15 PRs with 2 comments each = 30 PR comments
-                    .build())
+        test_data = (
+            builder.with_labels(10)
+            .with_issues(50, include_closed=True)
+            .with_comments(25, 3)  # 25 issues with 3 comments each = 75 comments
+            .with_pull_requests(20)
+            .with_pr_comments(15, 2)  # 15 PRs with 2 comments each = 30 PR comments
+            .build()
+        )
 
         # Write test data to files
         data_path = Path(temp_data_dir)
@@ -381,7 +381,7 @@ class TestErrorHandlingIntegration:
                     "description": None,  # Null value
                     "url": "https://api.github.com/repos/owner/repo/labels/null",
                     "id": 1002,
-                }
+                },
             ],
             "issues": [
                 {
@@ -433,6 +433,7 @@ class TestErrorHandlingIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
+            include_original_metadata=False,
             include_prs=True,
         )
 
@@ -442,14 +443,14 @@ class TestErrorHandlingIntegration:
 
         # Check that empty/null descriptions were handled
         label_calls = mock_boundary.create_label.call_args_list
-        
+
         # First label - empty description
         first_label_args = label_calls[0][0]
         assert first_label_args[3] == ""  # description is 4th positional arg
-        
-        # Second label - null description
+
+        # Second label - null description converted to empty string
         second_label_args = label_calls[1][0]
-        assert second_label_args[3] is None  # description is 4th positional arg
+        assert second_label_args[3] == ""  # None converted to empty string
 
         # Check that null body was converted to empty string
         issue_calls = mock_boundary.create_issue.call_args_list

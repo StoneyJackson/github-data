@@ -11,7 +11,6 @@ from src.storage import create_storage_service
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.fixtures import temp_data_dir
 from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
 from tests.shared.builders import GitHubDataBuilder
 
@@ -105,17 +104,17 @@ class TestLabelsIntegration:
         # Second label with emoji
         second_call_args = label_calls[1][0]
         assert second_call_args[1] == "bug 🐛"  # name
-        assert "🔧" in first_call_args[3]  # description with emoji
+        assert "🔧" in second_call_args[3]  # description with emoji
 
         # Third label with empty description
         third_call_args = label_calls[2][0]
         assert third_call_args[1] == "help-wanted"  # name
         assert third_call_args[3] == ""  # empty description
 
-        # Fourth label with null description
+        # Fourth label with null description converted to empty string
         fourth_call_args = label_calls[3][0]
         assert fourth_call_args[1] == "wontfix"  # name
-        assert fourth_call_args[3] is None  # null description
+        assert fourth_call_args[3] == ""  # null description converted to empty string
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_label_conflict_resolution(self, mock_boundary_class, temp_data_dir):
@@ -178,6 +177,7 @@ class TestLabelsIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
+            label_conflict_strategy="skip",
             include_prs=True,
         )
 
@@ -256,15 +256,15 @@ class TestLabelsIntegration:
 
         # Check color values were preserved as-is
         label_calls = mock_boundary.create_label.call_args_list
-        
+
         # First label - 6-digit color
         first_call_args = label_calls[0][0]
         assert first_call_args[2] == "ff0000"
-        
+
         # Second label - 3-digit color
         second_call_args = label_calls[1][0]
         assert second_call_args[2] == "f00"
-        
+
         # Third label - uppercase color
         third_call_args = label_calls[2][0]
         assert third_call_args[2] == "FF00FF"
@@ -274,20 +274,7 @@ class TestLabelsIntegration:
         """Test bulk label operations with many labels."""
         # Create test data with many labels
         builder = GitHubDataBuilder()
-        test_data = builder.with_labels(50).build()  # 50 labels (more than default)
-
-        # Add custom labels to reach 50
-        additional_labels = []
-        for i in range(47):  # Builder gives us 3 by default, add 47 more
-            additional_labels.append({
-                "name": f"label-{i+4}",
-                "color": f"{i+4:06x}"[:6],  # Generate hex colors
-                "description": f"Description for label {i+4}",
-                "url": f"https://api.github.com/repos/owner/repo/labels/label-{i+4}",
-                "id": 1000 + i + 4,
-            })
-        
-        test_data["labels"].extend(additional_labels)
+        test_data = builder.with_labels(50).build()  # Exactly 50 labels
 
         # Write test data to files
         data_path = Path(temp_data_dir)
@@ -358,14 +345,17 @@ class TestLabelsIntegration:
 
         assert len(saved_labels) == 1
         saved_label = saved_labels[0]
-        
+
         # Verify core attributes
         assert saved_label["name"] == "comprehensive-label"
         assert saved_label["color"] == "336699"
         assert saved_label["description"] == "A label with all attributes preserved"
-        assert saved_label["url"] == "https://api.github.com/repos/owner/repo/labels/comprehensive"
+        assert (
+            saved_label["url"]
+            == "https://api.github.com/repos/owner/repo/labels/comprehensive"
+        )
         assert saved_label["id"] == 12345678
-        
+
         # Verify additional attributes if present
         if "node_id" in saved_label:
             assert saved_label["node_id"] == "MDU6TGFiZWwxMjM0NTY3OA=="
@@ -437,8 +427,10 @@ class TestLabelsIntegration:
 
         # Check that case was preserved in label names
         label_calls = mock_boundary.create_label.call_args_list
-        
-        created_names = [call[0][1] for call in label_calls]  # name is 2nd positional arg
+
+        created_names = [
+            call[0][1] for call in label_calls
+        ]  # name is 2nd positional arg
         assert "Bug" in created_names
         assert "bug" in created_names
         assert "BUG" in created_names

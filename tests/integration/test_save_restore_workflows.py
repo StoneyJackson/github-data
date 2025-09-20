@@ -11,7 +11,6 @@ from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.fixtures import temp_data_dir, sample_github_data
 from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
 
 pytestmark = [pytest.mark.integration]
@@ -177,7 +176,9 @@ class TestSaveRestoreWorkflows:
                 "id": 5002,
                 "color": "a2eeef",
                 "description": "New feature or request",
-                "url": "https://api.github.com/repos/owner/target_repo/labels/enhancement",
+                "url": (
+                    "https://api.github.com/repos/owner/target_repo/labels/enhancement"
+                ),
             },
         ]
         mock_boundary.create_issue.side_effect = [

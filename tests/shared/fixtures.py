@@ -221,9 +221,7 @@ def sample_github_data():
                 },
                 "created_at": "2023-01-18T14:00:00Z",
                 "updated_at": "2023-01-18T14:00:00Z",
-                "html_url": (
-                    "https://github.com/owner/repo/pull/3#issuecomment-6001"
-                ),
+                "html_url": ("https://github.com/owner/repo/pull/3#issuecomment-6001"),
                 "pull_request_url": "https://github.com/owner/repo/pull/3",
             },
             {
@@ -237,9 +235,7 @@ def sample_github_data():
                 },
                 "created_at": "2023-01-17T15:30:00Z",
                 "updated_at": "2023-01-17T15:30:00Z",
-                "html_url": (
-                    "https://github.com/owner/repo/pull/4#issuecomment-6002"
-                ),
+                "html_url": ("https://github.com/owner/repo/pull/4#issuecomment-6002"),
                 "pull_request_url": "https://github.com/owner/repo/pull/4",
             },
             {
@@ -253,9 +249,7 @@ def sample_github_data():
                 },
                 "created_at": "2023-01-17T16:45:00Z",
                 "updated_at": "2023-01-17T16:45:00Z",
-                "html_url": (
-                    "https://github.com/owner/repo/pull/4#issuecomment-6003"
-                ),
+                "html_url": ("https://github.com/owner/repo/pull/4#issuecomment-6003"),
                 "pull_request_url": "https://github.com/owner/repo/pull/4",
             },
         ],
@@ -267,7 +261,7 @@ def github_service_mock():
     """Mock GitHub service for testing."""
     from unittest.mock import Mock
     from src.github import create_github_service
-    
+
     service = create_github_service("fake_token")
     service.boundary = Mock()
     return service
@@ -277,5 +271,5 @@ def github_service_mock():
 def storage_service_mock():
     """Mock storage service for testing."""
     from src.storage import create_storage_service
-    
+
     return create_storage_service("json")

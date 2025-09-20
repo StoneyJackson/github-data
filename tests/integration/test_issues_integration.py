@@ -10,7 +10,6 @@ from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.fixtures import temp_data_dir
 from tests.shared.builders import GitHubDataBuilder
 
 pytestmark = [pytest.mark.integration, pytest.mark.issues]
@@ -484,7 +483,7 @@ class TestIssuesIntegration:
         """Test issues with multiple assignees and labels are handled correctly."""
         # Create test data with complex issue relationships
         builder = GitHubDataBuilder()
-        
+
         # Add custom issue with multiple assignees and labels
         custom_issue = {
             "id": 2001,
@@ -510,7 +509,7 @@ class TestIssuesIntegration:
                     "id": 3003,
                     "avatar_url": "https://github.com/assignee2.png",
                     "html_url": "https://github.com/assignee2",
-                }
+                },
             ],
             "labels": [
                 {
@@ -524,9 +523,11 @@ class TestIssuesIntegration:
                     "name": "priority-high",
                     "color": "ff0000",
                     "description": "High priority",
-                    "url": "https://api.github.com/repos/owner/repo/labels/priority-high",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/labels/priority-high"
+                    ),
                     "id": 1003,
-                }
+                },
             ],
             "created_at": "2023-01-15T10:00:00Z",
             "updated_at": "2023-01-15T10:00:00Z",
@@ -534,11 +535,12 @@ class TestIssuesIntegration:
             "html_url": "https://github.com/owner/repo/issues/1",
             "comments": 0,
         }
-        
-        test_data = (builder
-                    .with_labels(3)  # Add standard labels
-                    .with_issues(1, custom_issues=[custom_issue])
-                    .build())
+
+        test_data = (
+            builder.with_labels(3)  # Add standard labels
+            .with_issues(1, custom_issues=[custom_issue])
+            .build()
+        )
 
         # Write test data to files
         data_path = Path(temp_data_dir)
@@ -573,4 +575,6 @@ class TestIssuesIntegration:
         # Check that labels were extracted correctly from the complex issue
         issue_call_args = issue_calls[0][0]  # positional arguments
         expected_labels = ["bug", "priority-high"]
-        assert sorted(issue_call_args[3]) == sorted(expected_labels)  # labels is 4th arg
+        assert sorted(issue_call_args[3]) == sorted(
+            expected_labels
+        )  # labels is 4th arg
