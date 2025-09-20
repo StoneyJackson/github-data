@@ -731,3 +731,310 @@ def storage_service_for_temp_dir(temp_data_dir):
     from src.storage import create_storage_service
 
     return create_storage_service("json", base_path=temp_data_dir)
+
+
+# Enhanced Boundary Mock Fixtures
+
+
+@pytest.fixture
+def boundary_with_repository_data(sample_github_data):
+    """Boundary mock configured with full repository data responses."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Configure with realistic repository responses
+    boundary.get_repository_labels.return_value = sample_github_data["labels"]
+    boundary.get_repository_issues.return_value = sample_github_data["issues"]
+    boundary.get_all_issue_comments.return_value = sample_github_data["comments"]
+    boundary.get_repository_pull_requests.return_value = sample_github_data["pull_requests"]
+    boundary.get_all_pull_request_comments.return_value = sample_github_data["pr_comments"]
+    boundary.get_repository_sub_issues.return_value = sample_github_data.get("sub_issues", [])
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_empty_repository():
+    """Boundary mock simulating empty repository responses."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Configure with empty responses for all endpoints
+    boundary.get_repository_labels.return_value = []
+    boundary.get_repository_issues.return_value = []
+    boundary.get_all_issue_comments.return_value = []
+    boundary.get_repository_pull_requests.return_value = []
+    boundary.get_all_pull_request_comments.return_value = []
+    boundary.get_repository_sub_issues.return_value = []
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_large_dataset():
+    """Boundary mock simulating large dataset with pagination."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Generate large datasets for pagination testing
+    large_issues = [
+        {
+            "id": 2000 + i,
+            "number": i + 1,
+            "title": f"Issue {i + 1}",
+            "body": f"Description for issue {i + 1}",
+            "state": "open" if i % 3 != 0 else "closed",
+            "labels": [{"name": "bug" if i % 2 == 0 else "enhancement"}],
+            "user": {"login": "testuser", "id": 1},
+            "assignees": [],
+            "created_at": f"2024-01-{(i % 28) + 1:02d}T00:00:00Z",
+            "updated_at": f"2024-01-{(i % 28) + 1:02d}T00:00:00Z",
+            "closed_at": None,
+            "html_url": f"https://github.com/owner/repo/issues/{i + 1}",
+            "comments": 0,
+        }
+        for i in range(250)  # Large dataset requiring pagination
+    ]
+    
+    boundary.get_repository_issues.return_value = large_issues
+    boundary.get_repository_labels.return_value = [
+        {"name": "bug", "color": "d73a4a", "id": 1001},
+        {"name": "enhancement", "color": "a2eeef", "id": 1002}
+    ]
+    boundary.get_all_issue_comments.return_value = []
+    boundary.get_repository_pull_requests.return_value = []
+    boundary.get_all_pull_request_comments.return_value = []
+    boundary.get_repository_sub_issues.return_value = []
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_pr_workflow_data(sample_pr_data):
+    """Boundary mock configured for pull request workflow testing."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Configure PR-specific responses
+    boundary.get_repository_pull_requests.return_value = sample_pr_data["pull_requests"]
+    boundary.get_all_pull_request_comments.return_value = sample_pr_data["pr_comments"]
+    
+    # Add PR branch information
+    def get_pr_commits(pr_number):
+        return [
+            {
+                "sha": f"abc123{pr_number}",
+                "message": f"Commit for PR #{pr_number}",
+                "author": {"login": "developer"}
+            }
+        ]
+    
+    boundary.get_pull_request_commits.side_effect = get_pr_commits
+    
+    # Empty responses for non-PR data
+    boundary.get_repository_labels.return_value = []
+    boundary.get_repository_issues.return_value = []
+    boundary.get_all_issue_comments.return_value = []
+    boundary.get_repository_sub_issues.return_value = []
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_sub_issues_hierarchy(sample_sub_issues_data, complex_hierarchy_data):
+    """Boundary mock configured for hierarchical sub-issue testing."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Combine sample and complex hierarchy data
+    all_issues = sample_sub_issues_data["issues"] + complex_hierarchy_data["issues"]
+    all_sub_issues = sample_sub_issues_data["sub_issues"] + complex_hierarchy_data["sub_issues"]
+    
+    boundary.get_repository_issues.return_value = all_issues
+    boundary.get_repository_sub_issues.return_value = all_sub_issues
+    
+    # Empty responses for other endpoints
+    boundary.get_repository_labels.return_value = []
+    boundary.get_all_issue_comments.return_value = []
+    boundary.get_repository_pull_requests.return_value = []
+    boundary.get_all_pull_request_comments.return_value = []
+    
+    return boundary
+
+
+# Error Simulation Fixtures
+
+
+@pytest.fixture
+def boundary_with_api_errors():
+    """Boundary mock that simulates various GitHub API errors."""
+    from requests.exceptions import ConnectionError, Timeout
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Configure different types of errors for different endpoints
+    boundary.get_repository_labels.side_effect = ConnectionError("Network error")
+    boundary.get_repository_issues.side_effect = Timeout("Request timeout")
+    boundary.get_all_issue_comments.side_effect = Exception("API Error")
+    boundary.get_repository_pull_requests.side_effect = Exception("Rate limit exceeded")
+    boundary.get_all_pull_request_comments.return_value = []
+    boundary.get_repository_sub_issues.return_value = []
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_partial_failures():
+    """Boundary mock that simulates partial API failures."""
+    from requests.exceptions import ConnectionError, Timeout
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # Some endpoints work, others fail
+    boundary.get_repository_labels.return_value = [{"name": "bug", "color": "d73a4a", "id": 1001}]
+    boundary.get_repository_issues.side_effect = ConnectionError("Network error")
+    boundary.get_all_issue_comments.return_value = []
+    boundary.get_repository_pull_requests.return_value = []
+    boundary.get_all_pull_request_comments.side_effect = Timeout("Request timeout")
+    boundary.get_repository_sub_issues.return_value = []
+    
+    return boundary
+
+
+@pytest.fixture
+def boundary_with_rate_limiting():
+    """Boundary mock that simulates rate limiting scenarios."""
+    from unittest.mock import Mock
+    
+    boundary = Mock()
+    
+    # First call succeeds, subsequent calls hit rate limit
+    def rate_limited_response():
+        if not hasattr(rate_limited_response, 'call_count'):
+            rate_limited_response.call_count = 0
+        rate_limited_response.call_count += 1
+        
+        if rate_limited_response.call_count == 1:
+            return []
+        else:
+            raise Exception("Rate limit exceeded, retry after 60 seconds")
+    
+    boundary.get_repository_labels.side_effect = rate_limited_response
+    boundary.get_repository_issues.side_effect = rate_limited_response
+    boundary.get_all_issue_comments.side_effect = rate_limited_response
+    boundary.get_repository_pull_requests.side_effect = rate_limited_response
+    boundary.get_all_pull_request_comments.side_effect = rate_limited_response
+    boundary.get_repository_sub_issues.side_effect = rate_limited_response
+    
+    return boundary
+
+
+# Workflow-Specific Service Configurations
+
+
+@pytest.fixture
+def backup_workflow_services(boundary_with_repository_data, temp_data_dir):
+    """Pre-configured services for backup workflow testing."""
+    from src.github.service import GitHubService
+    from src.github.rate_limiter import RateLimitHandler
+    from src.storage import create_storage_service
+    
+    # Configure GitHub service with realistic rate limiting
+    rate_limiter = RateLimitHandler(max_retries=3, base_delay=0.1)
+    github_service = GitHubService(boundary_with_repository_data, rate_limiter)
+    
+    # Configure storage service for temp directory
+    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    
+    return {
+        "github": github_service,
+        "storage": storage_service,
+        "temp_dir": temp_data_dir
+    }
+
+
+@pytest.fixture
+def restore_workflow_services(boundary_with_empty_repository, temp_data_dir, sample_github_data):
+    """Pre-configured services for restore workflow testing."""
+    from src.github.service import GitHubService
+    from src.github.rate_limiter import RateLimitHandler
+    from src.storage import create_storage_service
+    import json
+    import os
+    
+    # Configure GitHub service for restore operations
+    rate_limiter = RateLimitHandler(max_retries=3, base_delay=0.1)
+    github_service = GitHubService(boundary_with_empty_repository, rate_limiter)
+    
+    # Configure storage service and pre-populate with sample data
+    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    
+    # Write sample data files for restore testing
+    data_files = {
+        "labels.json": sample_github_data["labels"],
+        "issues.json": sample_github_data["issues"],
+        "comments.json": sample_github_data["comments"],
+        "pull_requests.json": sample_github_data["pull_requests"],
+        "pr_comments.json": sample_github_data["pr_comments"]
+    }
+    
+    for filename, data in data_files.items():
+        file_path = os.path.join(temp_data_dir, filename)
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    return {
+        "github": github_service,
+        "storage": storage_service,
+        "temp_dir": temp_data_dir,
+        "data_files": list(data_files.keys())
+    }
+
+
+@pytest.fixture
+def sync_workflow_services(boundary_with_repository_data, temp_data_dir):
+    """Pre-configured services for sync workflow testing."""
+    from src.github.service import GitHubService
+    from src.github.rate_limiter import RateLimitHandler
+    from src.storage import create_storage_service
+    
+    # Configure GitHub service with aggressive rate limiting for sync scenarios
+    rate_limiter = RateLimitHandler(max_retries=5, base_delay=0.05)
+    github_service = GitHubService(boundary_with_repository_data, rate_limiter)
+    
+    # Configure storage service
+    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    
+    return {
+        "github": github_service,
+        "storage": storage_service,
+        "temp_dir": temp_data_dir
+    }
+
+
+@pytest.fixture
+def error_handling_workflow_services(boundary_with_partial_failures, temp_data_dir):
+    """Pre-configured services for error handling workflow testing."""
+    from src.github.service import GitHubService
+    from src.github.rate_limiter import RateLimitHandler
+    from src.storage import create_storage_service
+    
+    # Configure GitHub service with minimal retry for fast error testing
+    rate_limiter = RateLimitHandler(max_retries=1, base_delay=0.01)
+    github_service = GitHubService(boundary_with_partial_failures, rate_limiter)
+    
+    # Configure storage service
+    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    
+    return {
+        "github": github_service,
+        "storage": storage_service,
+        "temp_dir": temp_data_dir
+    }
