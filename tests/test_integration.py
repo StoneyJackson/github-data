@@ -1,7 +1,6 @@
 """Integration tests for GitHub Data save/restore workflows."""
 
 import json
-import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -12,15 +11,11 @@ from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 from tests.shared import (
-    temp_data_dir,
-    sample_github_data,
     add_pr_method_mocks,
-    add_sub_issues_method_mocks
+    add_sub_issues_method_mocks,
 )
 
 pytestmark = [pytest.mark.integration]
-
-
 
 
 class TestSaveRestoreIntegration:

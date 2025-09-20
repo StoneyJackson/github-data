@@ -1,7 +1,6 @@
 """Integration tests for Sub-Issues functionality."""
 
 import json
-import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -11,7 +10,6 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
-from tests.shared import temp_data_dir, sample_sub_issues_data, complex_hierarchy_data
 
 pytestmark = [pytest.mark.integration]
 
@@ -136,10 +134,11 @@ class TestSubIssuesIntegration:
         # Mock restoration methods
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_issue.side_effect = [
-            {"number": 201, "title": "Epic: Complete Refactor"},  # Issue 10 -> 201
-            {"number": 202, "title": "Feature: User Management"},  # Issue 11 -> 202
-            {"number": 203, "title": "Task: User Authentication"},  # Issue 12 -> 203
-            {"number": 204, "title": "Subtask: Password Hashing"},  # Issue 13 -> 204
+            {"number": 201, "title": "Grandparent Issue"},  # Issue 1 -> 201
+            {"number": 202, "title": "Parent Issue A"},  # Issue 2 -> 202
+            {"number": 203, "title": "Parent Issue B"},  # Issue 3 -> 203
+            {"number": 204, "title": "Child Issue A1"},  # Issue 4 -> 204
+            {"number": 205, "title": "Child Issue B1"},  # Issue 5 -> 205
         ]
         mock_boundary.add_sub_issue.return_value = {"success": True}
 
@@ -170,16 +169,18 @@ class TestSubIssuesIntegration:
         )
 
         # Verify all issues were created
-        assert mock_boundary.create_issue.call_count == 4
+        assert mock_boundary.create_issue.call_count == 5
 
         # Verify sub-issue relationships were created in correct order
-        assert mock_boundary.add_sub_issue.call_count == 3
-        # Epic -> Feature
+        assert mock_boundary.add_sub_issue.call_count == 4
+        # Grandparent -> Parent A
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 201, 202)
-        # Feature -> Task
-        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 202, 203)
-        # Task -> Subtask
-        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 203, 204)
+        # Grandparent -> Parent B
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 201, 203)
+        # Parent A -> Child A1
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 202, 204)
+        # Parent B -> Child B1
+        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 203, 205)
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_backup_with_existing_data(

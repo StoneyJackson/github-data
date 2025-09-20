@@ -19,7 +19,6 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
-from tests.shared import temp_data_dir
 
 
 class TestConflictStrategyParsing:
@@ -144,7 +143,6 @@ class TestConflictDetection:
 @patch("src.github.service.GitHubApiBoundary")
 class TestConflictStrategyIntegration:
     """Integration tests for conflict strategies with restore operation."""
-
 
     @pytest.fixture
     def sample_labels_data(self):

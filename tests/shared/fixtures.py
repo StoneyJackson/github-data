@@ -279,6 +279,7 @@ def storage_service_mock():
 def mock_boundary_class():
     """Mock GitHubApiBoundary class for patching."""
     from unittest.mock import patch
+
     with patch("src.github.service.GitHubApiBoundary") as mock:
         yield mock
 
@@ -287,8 +288,9 @@ def mock_boundary_class():
 def mock_boundary():
     """Configured mock boundary instance with all required methods."""
     from unittest.mock import Mock
+
     boundary = Mock()
-    
+
     # Configure all boundary methods with default empty responses
     boundary.get_repository_labels.return_value = []
     boundary.get_repository_issues.return_value = []
@@ -296,7 +298,7 @@ def mock_boundary():
     boundary.get_repository_pull_requests.return_value = []
     boundary.get_all_pull_request_comments.return_value = []
     boundary.get_repository_sub_issues.return_value = []
-    
+
     return boundary
 
 
@@ -305,7 +307,7 @@ def github_service_with_mock(mock_boundary):
     """GitHub service with mocked boundary for testing."""
     from src.github.rate_limiter import RateLimitHandler
     from src.github.service import GitHubService
-    
+
     rate_limiter = RateLimitHandler(max_retries=2, base_delay=0.1)
     return GitHubService(mock_boundary, rate_limiter)
 
@@ -319,7 +321,7 @@ def empty_repository_data():
         "comments": [],
         "pull_requests": [],
         "pr_comments": [],
-        "sub_issues": []
+        "sub_issues": [],
     }
 
 
@@ -387,24 +389,28 @@ def sample_sub_issues_data():
                 "closed_at": "2023-01-18T15:30:00Z",
                 "html_url": "https://github.com/owner/repo/issues/3",
                 "comments": 0,
-            }
+            },
         ],
         "sub_issues": [
             {
+                "sub_issue_id": 3002,
+                "sub_issue_number": 2,
                 "parent_issue_id": 3001,
-                "child_issue_id": 3002,
-                "relationship_type": "sub_issue"
+                "parent_issue_number": 1,
+                "position": 1,
             },
             {
+                "sub_issue_id": 3003,
+                "sub_issue_number": 3,
                 "parent_issue_id": 3001,
-                "child_issue_id": 3003,
-                "relationship_type": "sub_issue"
-            }
+                "parent_issue_number": 1,
+                "position": 2,
+            },
         ],
         "comments": [],
         "labels": [],
         "pull_requests": [],
-        "pr_comments": []
+        "pr_comments": [],
     }
 
 
@@ -512,36 +518,44 @@ def complex_hierarchy_data():
                 "closed_at": "2023-01-20T16:30:00Z",
                 "html_url": "https://github.com/owner/repo/issues/5",
                 "comments": 0,
-            }
+            },
         ],
         "sub_issues": [
             # Grandparent -> Parent relationships
             {
+                "sub_issue_id": 4002,
+                "sub_issue_number": 2,
                 "parent_issue_id": 4001,
-                "child_issue_id": 4002,
-                "relationship_type": "sub_issue"
+                "parent_issue_number": 1,
+                "position": 1,
             },
             {
+                "sub_issue_id": 4003,
+                "sub_issue_number": 3,
                 "parent_issue_id": 4001,
-                "child_issue_id": 4003,
-                "relationship_type": "sub_issue"
+                "parent_issue_number": 1,
+                "position": 2,
             },
             # Parent -> Child relationships
             {
+                "sub_issue_id": 4004,
+                "sub_issue_number": 4,
                 "parent_issue_id": 4002,
-                "child_issue_id": 4004,
-                "relationship_type": "sub_issue"
+                "parent_issue_number": 2,
+                "position": 1,
             },
             {
+                "sub_issue_id": 4005,
+                "sub_issue_number": 5,
                 "parent_issue_id": 4003,
-                "child_issue_id": 4005,
-                "relationship_type": "sub_issue"
-            }
+                "parent_issue_number": 3,
+                "position": 1,
+            },
         ],
         "comments": [],
         "labels": [],
         "pull_requests": [],
-        "pr_comments": []
+        "pr_comments": [],
     }
 
 
@@ -597,7 +611,7 @@ def sample_pr_data():
                 "head_ref": "fix/validation-bug",
                 "html_url": "https://github.com/owner/repo/pull/2",
                 "comments": 2,
-            }
+            },
         ],
         "pr_comments": [
             {
@@ -641,12 +655,12 @@ def sample_pr_data():
                 "updated_at": "2023-01-18T16:00:00Z",
                 "html_url": "https://github.com/owner/repo/pull/2#issuecomment-6003",
                 "pull_request_url": "https://github.com/owner/repo/pull/2",
-            }
+            },
         ],
         "labels": [],
         "issues": [],
         "comments": [],
-        "sub_issues": []
+        "sub_issues": [],
     }
 
 
@@ -681,14 +695,17 @@ def sample_labels_data():
                 "color": "7057ff",
                 "description": "Good for newcomers",
                 "id": 1004,
-                "url": "https://api.github.com/repos/owner/repo/labels/good%20first%20issue",
-            }
+                "url": (
+                    "https://api.github.com/repos/owner/repo/labels/"
+                    "good%20first%20issue"
+                ),
+            },
         ],
         "issues": [],
         "comments": [],
         "pull_requests": [],
         "pr_comments": [],
-        "sub_issues": []
+        "sub_issues": [],
     }
 
 
@@ -696,6 +713,7 @@ def sample_labels_data():
 def boundary_factory():
     """Factory for creating configured boundary mocks."""
     from tests.shared.mocks import MockBoundaryFactory
+
     return MockBoundaryFactory
 
 
@@ -703,6 +721,7 @@ def boundary_factory():
 def boundary_with_data(sample_github_data):
     """Boundary mock pre-configured with comprehensive sample data."""
     from tests.shared.mocks import MockBoundaryFactory
+
     return MockBoundaryFactory.create_with_data("full", sample_data=sample_github_data)
 
 
@@ -710,4 +729,5 @@ def boundary_with_data(sample_github_data):
 def storage_service_for_temp_dir(temp_data_dir):
     """Storage service configured for temporary directory."""
     from src.storage import create_storage_service
+
     return create_storage_service("json", base_path=temp_data_dir)

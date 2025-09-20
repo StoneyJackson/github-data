@@ -7,7 +7,6 @@ import time
 from pathlib import Path
 
 import pytest
-from tests.shared import temp_data_dir
 
 pytestmark = [
     pytest.mark.container,
