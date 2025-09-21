@@ -244,6 +244,23 @@ python scripts/test-categories.py
 ```
 tests/
 ├── __init__.py                          # Test package initialization
+├── conftest.py                          # Global test configuration
+├── shared/                              # Shared test infrastructure
+│   ├── __init__.py                     # Comprehensive fixture exports
+│   ├── fixtures.py                     # Core and enhanced fixtures
+│   ├── enhanced_fixtures.py            # Advanced testing patterns
+│   ├── mocks.py                        # Mock utilities and factories
+│   ├── builders.py                     # Data builder patterns
+│   └── helpers.py                      # Test helper utilities
+├── integration/                         # Integration tests directory
+│   ├── __init__.py                     # Integration test package
+│   ├── test_*.py                       # Integration test files
+├── mocks/                              # Mock implementations
+│   ├── __init__.py                     # Mock package
+│   ├── mock_github_service.py          # GitHub service mocks
+│   └── mock_storage_service.py         # Storage service mocks
+├── github/                             # GitHub-specific tests
+│   └── utils/                          # GitHub utility tests
 ├── test_main.py                         # Main module unit tests
 ├── test_json_storage.py                 # Storage layer unit tests
 ├── test_integration.py                  # Application integration tests
