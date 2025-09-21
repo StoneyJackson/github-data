@@ -107,7 +107,59 @@ All development uses PDM for package management:
 
 ## Testing
 
-This project uses a comprehensive multi-layered testing approach with unit tests, integration tests, and container integration tests. For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
+This project uses a comprehensive multi-layered testing approach with enhanced fixtures, performance markers, and extensive test organization:
+
+### Test Categories and Markers
+
+The project uses **pytest markers** for sophisticated test organization and selective execution:
+
+#### Core Test Types
+- **Unit Tests** (`@pytest.mark.unit`): Fast, isolated component tests (< 1s each)
+- **Integration Tests** (`@pytest.mark.integration`): Component interaction tests (1-10s each)  
+- **Container Tests** (`@pytest.mark.container`): Full Docker workflow tests (30s+ each)
+
+#### Enhanced Test Organization
+- **Performance Markers**: `fast`, `medium`, `slow`, `performance` for execution time targeting
+- **Feature Markers**: `labels`, `issues`, `comments`, `backup_workflow`, `restore_workflow`
+- **Fixture Categories**: `enhanced_fixtures`, `data_builders`, `error_simulation`, `workflow_services`
+- **Scenario Markers**: `empty_repository`, `large_dataset`, `rate_limiting`, `api_errors`
+
+### Essential Commands
+
+**Development cycle commands:**
+- `make test-fast` - All tests except container tests (recommended for development)
+- `make test-unit` - Unit tests only (fastest feedback)
+- `make test-integration` - Integration tests excluding container tests
+- `make test-container` - Container integration tests only (requires Docker)
+- `make test` - All tests with source code coverage
+
+**Coverage analysis commands:**
+- `make test-with-test-coverage` - Coverage analysis of test files themselves
+- `make test-fast-with-test-coverage` - Fast tests with test file coverage
+
+**Quality assurance commands:**
+- `make check` - All quality checks excluding container tests (fast)
+- `make check-all` - Complete quality validation including container tests
+
+### Shared Fixture System
+
+The project includes a comprehensive shared fixture system in `tests/shared/`:
+- **Core Fixtures**: Basic infrastructure (temp directories, sample data)
+- **Enhanced Boundary Mocks**: Realistic GitHub API response simulation
+- **Workflow Service Fixtures**: Pre-configured service compositions for end-to-end testing
+- **Data Builder Patterns**: Dynamic test data generation for custom scenarios
+- **Error Simulation**: Comprehensive error handling and resilience testing
+
+### TDD Workflow
+
+Follow Test-Driven Development practices:
+1. **Write failing tests first** using appropriate markers and fixtures
+2. **Implement minimal code** to pass tests
+3. **Run `make test-fast`** for quick validation
+4. **Run `make check`** before committing
+5. **Use container tests** for final integration validation
+
+For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
 ## Code Quality and Standards
 
