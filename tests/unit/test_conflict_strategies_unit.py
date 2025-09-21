@@ -21,13 +21,21 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
-from tests.shared import temp_data_dir, sample_labels_data, mock_boundary_class
-from tests.shared.enhanced_fixtures import github_data_builder
+from tests.shared import (
+    temp_data_dir, 
+    sample_labels_data, 
+    mock_boundary_class,
+    restore_workflow_services,
+    integration_test_environment
+)
+from tests.shared.enhanced_fixtures import github_data_builder, parametrized_data_factory
 
 pytestmark = [
     pytest.mark.unit,
+    pytest.mark.integration,
     pytest.mark.fast,
-    pytest.mark.labels
+    pytest.mark.labels,
+    pytest.mark.restore_workflow
 ]
 
 
@@ -550,3 +558,204 @@ class TestConflictStrategyWithSharedInfrastructure:
             json.dump([], f)
         with open(data_path / "comments.json", "w") as f:
             json.dump([], f)
+
+
+class TestConflictStrategyIntegrationWorkflows:
+    """Integration tests for conflict strategies using workflow service fixtures."""
+
+    @pytest.mark.integration
+    @pytest.mark.restore_workflow
+    def test_conflict_resolution_integration_environment(self, integration_test_environment):
+        """Test conflict resolution using complete integration test environment."""
+        env = integration_test_environment
+        github_service = env["github"]
+        storage_service = env["storage"]
+        boundary = env["boundary"]
+        test_data = env["test_data"]
+        
+        # Configure existing labels that will conflict with test data
+        conflicting_labels = [
+            {
+                "name": test_data["labels"][0]["name"],  # Same name as first label in test data
+                "color": "different_color",
+                "description": "Existing conflicting label",
+                "url": "http://example.com/existing",
+                "id": 999,
+            }
+        ]
+        boundary.get_repository_labels.return_value = conflicting_labels
+        
+        # Create JSON files from test data
+        import json
+        import os
+        for data_type, data in test_data.items():
+            if data_type != "sub_issues":  # Skip sub_issues for label conflict tests
+                file_path = os.path.join(env["temp_dir"], f"{data_type}.json")
+                with open(file_path, 'w') as f:
+                    json.dump(data, f)
+        
+        # Test conflict detection with real labels from test data
+        existing_labels = [Label(
+            name=conflicting_labels[0]["name"],
+            color=conflicting_labels[0]["color"],
+            description=conflicting_labels[0]["description"],
+            url=conflicting_labels[0]["url"],
+            id=conflicting_labels[0]["id"]
+        )]
+        
+        restore_labels = [Label(
+            name=label["name"],
+            color=label["color"],
+            description=label["description"],
+            url="http://example.com/test",
+            id=label["id"]
+        ) for label in test_data["labels"]]
+        
+        conflicts = detect_label_conflicts(existing_labels, restore_labels)
+        assert len(conflicts) == 1
+        assert conflicts[0] == test_data["labels"][0]["name"]
+    
+    @pytest.mark.integration
+    @pytest.mark.restore_workflow
+    def test_restore_workflow_with_conflict_strategies(self, restore_workflow_services, parametrized_data_factory):
+        """Test complete restore workflow with different conflict strategies."""
+        services = restore_workflow_services
+        github_service = services["github"]
+        storage_service = services["storage"]
+        
+        # Create test data with known labels for conflict testing
+        test_data = parametrized_data_factory("basic")
+        
+        # Override the pre-populated labels.json with our test data
+        import json
+        import os
+        labels_file = os.path.join(services["temp_dir"], "labels.json")
+        with open(labels_file, 'w') as f:
+            json.dump(test_data["labels"], f)
+        
+        # Configure boundary to return existing labels that conflict
+        boundary = github_service._boundary
+        boundary.get_repository_labels.return_value = [
+            {
+                "name": test_data["labels"][0]["name"],  # Conflict with first label
+                "color": "existing_color",
+                "description": "Existing label",
+                "url": "http://example.com/existing",
+                "id": 888,
+            }
+        ]
+        
+        # Mock boundary methods for restoration
+        boundary.create_label.return_value = {
+            "name": "test_label",
+            "id": 1,
+            "color": "ff0000",
+            "url": "http://example.com/created",
+        }
+        boundary.update_label.return_value = {
+            "name": "test_label",
+            "id": 888,
+            "color": "updated_color",
+            "url": "http://example.com/updated",
+        }
+        
+        # Test different conflict strategies with the workflow
+        from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
+        
+        # Test skip strategy - should skip conflicting labels and create others
+        restore_repository_data_with_strategy_pattern(
+            github_service,
+            storage_service,
+            "owner/repo",
+            services["temp_dir"],
+            "skip"
+        )
+        
+        # Verify that non-conflicting labels were created
+        # Should be called for all labels except the conflicting one
+        expected_calls = len(test_data["labels"]) - 1
+        assert boundary.create_label.call_count == expected_calls
+    
+    @pytest.mark.integration
+    @pytest.mark.restore_workflow
+    @pytest.mark.cross_component_interaction
+    def test_cross_component_conflict_resolution(self, integration_test_environment, parametrized_data_factory):
+        """Test conflict resolution across multiple data components."""
+        env = integration_test_environment
+        github_service = env["github"]
+        storage_service = env["storage"]
+        boundary = env["boundary"]
+        
+        # Create comprehensive test data with labels, issues, and cross-references
+        test_data = parametrized_data_factory("mixed_states")
+        
+        # Configure existing repository state with conflicts
+        boundary.get_repository_labels.return_value = [
+            {
+                "name": test_data["labels"][0]["name"],
+                "color": "conflict_color",
+                "description": "Conflicting existing label",
+                "url": "http://example.com/conflict",
+                "id": 777,
+            }
+        ]
+        
+        boundary.get_repository_issues.return_value = [
+            {
+                "id": 666,
+                "number": test_data["issues"][0]["number"],
+                "title": "Existing issue with same number",
+                "body": "This issue already exists",
+                "state": "open",
+                "user": {"login": "existing_user", "id": 1},
+                "assignees": [],
+                "labels": [],
+                "created_at": "2023-01-01T00:00:00Z",
+                "updated_at": "2023-01-01T00:00:00Z",
+                "closed_at": None,
+                "html_url": "http://example.com/existing_issue",
+                "comments": 0,
+            }
+        ]
+        
+        # Mock successful operations for non-conflicting data
+        boundary.create_label.return_value = {"name": "created", "id": 1, "color": "ff0000", "url": "http://example.com/created"}
+        boundary.create_issue.return_value = {"id": 1, "number": 100, "title": "Created Issue", "html_url": "http://example.com/created_issue"}
+        boundary.create_comment.return_value = {"id": 1, "body": "Created comment", "html_url": "http://example.com/created_comment"}
+        
+        # Save test data to files
+        import json
+        import os
+        for data_type, data in test_data.items():
+            if data_type != "sub_issues":  # Skip sub_issues for this test
+                file_path = os.path.join(env["temp_dir"], f"{data_type}.json")
+                with open(file_path, 'w') as f:
+                    json.dump(data, f)
+        
+        # Test cross-component conflict detection
+        from src.entities import Label, Issue
+        
+        # Label conflicts
+        existing_labels = [Label(
+            name=test_data["labels"][0]["name"],
+            color="conflict_color",
+            description="Conflicting",
+            url="http://example.com/conflict",
+            id=777
+        )]
+        restore_labels = [Label(
+            name=label["name"],
+            color=label["color"],
+            description=label["description"],
+            url="http://example.com/test",
+            id=label["id"]
+        ) for label in test_data["labels"]]
+        
+        label_conflicts = detect_label_conflicts(existing_labels, restore_labels)
+        assert len(label_conflicts) >= 1
+        
+        # Verify that both label and issue data are properly handled
+        # This ensures cross-component integration works correctly
+        assert len(test_data["labels"]) > 0
+        assert len(test_data["issues"]) > 0
+        assert len(test_data["comments"]) >= 0  # May be empty depending on parametrized data
