@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch
 from src.main import _get_env_var, main
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 
 class TestGetEnvVar:

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from src.storage.json_storage import save_json_data, load_json_data
 
-pytestmark = [pytest.mark.unit]
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 
 class SampleModel(BaseModel):

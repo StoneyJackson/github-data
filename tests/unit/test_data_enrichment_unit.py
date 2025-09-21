@@ -5,11 +5,14 @@ Tests for comment enrichment, sub-issue relationship building,
 and URL construction utilities.
 """
 
+import pytest
 from src.github.utils.data_enrichment import (
     CommentEnricher,
     SubIssueRelationshipBuilder,
     URLEnricher,
 )
+
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 
 class TestCommentEnricher:

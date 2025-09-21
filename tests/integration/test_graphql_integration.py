@@ -10,6 +10,8 @@ from src.github.graphql_converters import (
     convert_graphql_comments_to_rest_format,
 )
 
+pytestmark = [pytest.mark.integration, pytest.mark.medium]
+
 
 class TestGraphQLConverters:
     """Test GraphQL to REST format converters."""

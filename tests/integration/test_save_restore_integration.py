@@ -15,7 +15,7 @@ from tests.shared import (
     add_sub_issues_method_mocks,
 )
 
-pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
 
 class TestSaveRestoreIntegration:

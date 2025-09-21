@@ -13,6 +13,8 @@ from unittest.mock import Mock, patch
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
+
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 from src.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,

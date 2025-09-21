@@ -10,7 +10,7 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 
-pytestmark = [pytest.mark.integration]
+pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
 
 class TestPullRequestIntegration:

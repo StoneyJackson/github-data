@@ -8,6 +8,8 @@ from src.github.boundary import GitHubApiBoundary
 from src.github.rate_limiter import RateLimitHandler
 from src.github.service import GitHubService
 
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
+
 
 class TestRateLimitHandler:
     """Test rate limit handler functionality."""

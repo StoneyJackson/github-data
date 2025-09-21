@@ -5,10 +5,13 @@ Verifies that the new dependency injection architecture works correctly
 with mock services.
 """
 
+import pytest
 from tests.mocks.mock_github_service import MockGitHubService
 from tests.mocks.mock_storage_service import MockStorageService
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.entities import Label
+
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 
 class TestDependencyInjection:

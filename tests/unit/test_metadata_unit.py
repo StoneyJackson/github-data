@@ -13,6 +13,8 @@ from src.github.metadata import (
     add_comment_metadata_footer,
     _format_datetime,
 )
+
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 from src.entities import Issue, Comment, GitHubUser
 
 

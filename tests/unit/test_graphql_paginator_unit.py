@@ -1,7 +1,10 @@
+import pytest
 from unittest.mock import Mock
 from gql import Client
 
 from src.github.utils.graphql_paginator import GraphQLPaginator
+
+pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 
 def test_single_page_pagination():
