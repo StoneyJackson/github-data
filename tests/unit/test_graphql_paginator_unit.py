@@ -1,10 +1,12 @@
 import pytest
+import time
 from unittest.mock import Mock
 from gql import Client
+from gql.transport.exceptions import TransportError
 
 from src.github.utils.graphql_paginator import GraphQLPaginator
 
-pytestmark = [pytest.mark.unit, pytest.mark.fast]
+pytestmark = [pytest.mark.unit, pytest.mark.fast, pytest.mark.github_api]
 
 
 def test_single_page_pagination():
@@ -286,3 +288,88 @@ def test_large_multi_page_pagination():
     expected_ids = [str(i) for i in range(1, 11)]
     actual_ids = [item["id"] for item in results]
     assert actual_ids == expected_ids
+
+
+@pytest.mark.github_api
+@pytest.mark.error_simulation  
+class TestGraphQLPaginatorErrorHandling:
+    """Test GraphQL paginator error handling and resilience."""
+
+    def test_transport_error_during_pagination(self):
+        """Test handling of transport errors during pagination."""
+        mock_client = Mock(spec=Client)
+        mock_query = Mock()
+        
+        # Simulate transport error
+        mock_client.execute.side_effect = TransportError("Network timeout")
+        
+        paginator = GraphQLPaginator(mock_client)
+        
+        with pytest.raises(TransportError, match="Network timeout"):
+            paginator.paginate_all(
+                query=mock_query,
+                variable_values={"owner": "test", "name": "repo"},
+                data_path="repository.issues",
+            )
+
+    def test_malformed_response_structure(self):
+        """Test handling of malformed GraphQL responses."""
+        mock_client = Mock(spec=Client)
+        mock_query = Mock()
+        
+        # Response missing expected structure
+        malformed_response = {
+            "repository": {
+                "issues": {
+                    "nodes": [{"id": "1"}],
+                    # Missing pageInfo
+                }
+            }
+        }
+        mock_client.execute.return_value = malformed_response
+        
+        paginator = GraphQLPaginator(mock_client)
+        
+        with pytest.raises((KeyError, AttributeError)):
+            paginator.paginate_all(
+                query=mock_query,
+                variable_values={"owner": "test", "name": "repo"},
+                data_path="repository.issues",
+            )
+
+
+@pytest.mark.github_api
+@pytest.mark.performance
+class TestGraphQLPaginatorPerformance:
+    """Test GraphQL paginator performance and timing."""
+    
+    def test_single_page_performance(self):
+        """Test performance of single page pagination."""
+        mock_client = Mock(spec=Client)
+        mock_query = Mock()
+        
+        # Simulate response time
+        def mock_execute(*args, **kwargs):
+            time.sleep(0.01)  # Simulate 10ms response time
+            return {
+                "repository": {
+                    "issues": {
+                        "nodes": [{"id": str(i)} for i in range(100)],
+                        "pageInfo": {"hasNextPage": False, "endCursor": None},
+                    }
+                }
+            }
+        
+        mock_client.execute.side_effect = mock_execute
+        paginator = GraphQLPaginator(mock_client)
+        
+        start_time = time.time()
+        results = paginator.paginate_all(
+            query=mock_query,
+            variable_values={"owner": "test", "name": "repo"},
+            data_path="repository.issues",
+        )
+        execution_time = time.time() - start_time
+        
+        assert len(results) == 100
+        assert execution_time < 0.5, f"Single page took {execution_time:.3f}s, expected < 0.5s"
