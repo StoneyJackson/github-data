@@ -42,7 +42,8 @@ def performance_monitoring_services(boundary_with_large_dataset, temp_data_dir):
     # Configure services
     rate_limiter = RateLimitHandler(max_retries=2, base_delay=0.1)
     github_service = GitHubService(timing_boundary, rate_limiter)
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     return {
         "github": github_service,
@@ -64,11 +65,11 @@ def rate_limiting_test_services(boundary_with_rate_limiting, temp_data_dir):
         max_retries=2,
         base_delay=0.01,  # Fast retry for testing
         max_delay=0.05,   # Short max delay for testing
-        backoff_factor=1.5
+        jitter=False       # Disable jitter for predictable testing
     )
     
     github_service = GitHubService(boundary_with_rate_limiting, rate_limiter)
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
     
     return {
         "github": github_service,
@@ -312,7 +313,8 @@ def integration_test_environment(temp_data_dir, parametrized_data_factory):
     # Setup services
     rate_limiter = RateLimitHandler(max_retries=2, base_delay=0.1)
     github_service = GitHubService(boundary, rate_limiter)
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     # Create expected file structure
     expected_files = ["labels.json", "issues.json", "comments.json", 
@@ -365,7 +367,8 @@ def validation_test_environment(temp_data_dir, github_data_builder):
     # Setup services
     rate_limiter = RateLimitHandler(max_retries=1, base_delay=0.01)
     github_service = GitHubService(boundary, rate_limiter)
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     return {
         "github": github_service,

@@ -729,8 +729,11 @@ def boundary_with_data(sample_github_data):
 def storage_service_for_temp_dir(temp_data_dir):
     """Storage service configured for temporary directory."""
     from src.storage import create_storage_service
-
-    return create_storage_service("json", base_path=temp_data_dir)
+    
+    # Create storage service and set base path for testing
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir  # Set internal path for testing
+    return storage_service
 
 
 # Enhanced Boundary Mock Fixtures
@@ -951,7 +954,8 @@ def backup_workflow_services(boundary_with_repository_data, temp_data_dir):
     github_service = GitHubService(boundary_with_repository_data, rate_limiter)
     
     # Configure storage service for temp directory
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     return {
         "github": github_service,
@@ -974,7 +978,8 @@ def restore_workflow_services(boundary_with_empty_repository, temp_data_dir, sam
     github_service = GitHubService(boundary_with_empty_repository, rate_limiter)
     
     # Configure storage service and pre-populate with sample data
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     # Write sample data files for restore testing
     data_files = {
@@ -1010,7 +1015,8 @@ def sync_workflow_services(boundary_with_repository_data, temp_data_dir):
     github_service = GitHubService(boundary_with_repository_data, rate_limiter)
     
     # Configure storage service
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     return {
         "github": github_service,
@@ -1031,7 +1037,8 @@ def error_handling_workflow_services(boundary_with_partial_failures, temp_data_d
     github_service = GitHubService(boundary_with_partial_failures, rate_limiter)
     
     # Configure storage service
-    storage_service = create_storage_service("json", base_path=temp_data_dir)
+    storage_service = create_storage_service("json")
+    storage_service._base_path = temp_data_dir
     
     return {
         "github": github_service,

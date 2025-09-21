@@ -10,6 +10,13 @@ from tests.mocks.mock_github_service import MockGitHubService
 from tests.mocks.mock_storage_service import MockStorageService
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.entities import Label
+from tests.shared import (
+    backup_workflow_services,
+    restore_workflow_services,
+    MockBoundaryFactory,
+    github_service_with_mock,
+    storage_service_for_temp_dir
+)
 
 pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
@@ -17,47 +24,42 @@ pytestmark = [pytest.mark.unit, pytest.mark.fast]
 class TestDependencyInjection:
     """Test dependency injection implementation."""
 
-    def test_save_operations_use_dependency_injection(self, tmp_path):
+    def test_save_operations_use_dependency_injection(
+        self, backup_workflow_services
+    ):
         """Test that save operations properly use injected services."""
         # Arrange
-        github_service = MockGitHubService()
-        storage_service = MockStorageService()
-
-        # Add some mock data that will actually be retrieved
-        github_service.mock_data = {
-            "labels": [],
-            "issues": [],
-            "comments": [],
-            "pull_requests": [],
-            "pr_comments": [],
-            "sub_issues": [],
-        }
+        services = backup_workflow_services
+        github_service = services["github"]
+        storage_service = services["storage"]
+        temp_dir = services["temp_dir"]
 
         # Act
         save_repository_data_with_strategy_pattern(
-            github_service, storage_service, "test/repo", str(tmp_path)
+            github_service, storage_service, "test/repo", temp_dir
         )
 
-        # Assert - verify save calls were made to storage service
-        assert (
-            len(storage_service.save_calls) == 6
-        )  # labels, issues, comments, PRs, PR comments, sub-issues
-
-        # Verify all expected file types were saved
+        # Assert - verify the services were called appropriately
+        # The boundary will be called to get data
+        github_service._boundary.get_repository_labels.assert_called_once_with("test/repo")
+        github_service._boundary.get_repository_issues.assert_called_once_with("test/repo")
+        github_service._boundary.get_all_issue_comments.assert_called_once_with("test/repo")
+        github_service._boundary.get_repository_pull_requests.assert_called_once_with("test/repo")
+        github_service._boundary.get_all_pull_request_comments.assert_called_once_with("test/repo")
+        github_service._boundary.get_repository_sub_issues.assert_called_once_with("test/repo")
+        
+        # Verify files were created in the temp directory
+        import os
         expected_files = [
             "labels.json",
-            "issues.json",
+            "issues.json", 
             "comments.json",
             "pull_requests.json",
             "pr_comments.json",
             "sub_issues.json",
         ]
         for filename in expected_files:
-            assert storage_service.was_data_saved(tmp_path / filename)
-
-        # Verify all data counts are 0 (empty mock data)
-        for filename in expected_files:
-            assert storage_service.get_saved_data_count(tmp_path / filename) == 0
+            assert os.path.exists(os.path.join(temp_dir, filename))
 
     def test_mock_github_service_functionality(self):
         """Test mock GitHub service implements protocol correctly."""
@@ -95,10 +97,12 @@ class TestDependencyInjection:
         assert len(github_service.created_labels) == 1
         assert created_label["name"] == "test"
 
-    def test_mock_storage_service_functionality(self, tmp_path):
-        """Test mock storage service implements protocol correctly."""
+    def test_mock_storage_service_functionality(
+        self, storage_service_for_temp_dir
+    ):
+        """Test storage service implements protocol correctly with real service."""
         # Arrange
-        storage_service = MockStorageService()
+        storage_service = storage_service_for_temp_dir
         test_labels = [
             Label(
                 name="bug",
@@ -117,43 +121,21 @@ class TestDependencyInjection:
         ]
 
         # Act - save data
-        labels_file = tmp_path / "test_labels.json"
+        import os
+        from pathlib import Path
+        labels_file = Path(storage_service._base_path) / "test_labels.json"
         storage_service.save_data(test_labels, labels_file)
-
-        # Add mock data for loading
-        storage_service.add_mock_data(
-            labels_file,
-            [
-                {
-                    "name": "bug",
-                    "color": "d73a4a",
-                    "description": "Bug report",
-                    "url": "https://api.github.com/test",
-                    "id": 1,
-                },
-                {
-                    "name": "feature",
-                    "color": "a2eeef",
-                    "description": "New feature",
-                    "url": "https://api.github.com/test",
-                    "id": 2,
-                },
-            ],
-        )
 
         # Act - load data
         loaded_labels = storage_service.load_data(labels_file, Label)
 
         # Assert
-        assert len(storage_service.save_calls) == 1
-        assert len(storage_service.load_calls) == 1
         assert len(loaded_labels) == 2
         assert loaded_labels[0].name == "bug"
         assert loaded_labels[1].name == "feature"
-
-        # Test tracking
-        assert storage_service.was_data_saved(labels_file)
-        assert storage_service.get_saved_data_count(labels_file) == 2
+        
+        # Verify file exists
+        assert os.path.exists(labels_file)
 
     def test_protocols_are_implemented(self):
         """Test that services properly implement their protocols."""
@@ -173,3 +155,48 @@ class TestDependencyInjection:
         assert hasattr(github_service, "create_label")
         assert hasattr(storage_service, "save_data")
         assert hasattr(storage_service, "load_data")
+
+    def test_enhanced_boundary_mock_factory_integration(
+        self, github_service_with_mock
+    ):
+        """Test integration with enhanced boundary mock patterns."""
+        # Arrange - use pre-configured service with mock boundary
+        github_service = github_service_with_mock
+        
+        # The mock boundary is already configured with empty responses
+        # Test that we can override it for specific test scenarios
+        github_service._boundary.get_repository_labels.return_value = [
+            {"name": "test-label", "color": "ffffff", "id": 999}
+        ]
+        
+        # Act
+        labels = github_service.get_repository_labels("test/repo")
+        
+        # Assert
+        assert len(labels) == 1
+        assert labels[0]["name"] == "test-label"
+        github_service._boundary.get_repository_labels.assert_called_once_with("test/repo")
+    
+    def test_workflow_services_integration(self, restore_workflow_services):
+        """Test integration with workflow-specific service configurations."""
+        # Arrange
+        services = restore_workflow_services
+        github_service = services["github"]
+        storage_service = services["storage"]
+        temp_dir = services["temp_dir"]
+        
+        # Act - test that restore workflow services are pre-configured
+        # The restore services should have pre-populated data files
+        import os
+        from pathlib import Path
+        assert "data_files" in services
+        
+        for filename in services["data_files"]:
+            file_path = Path(temp_dir) / filename
+            assert file_path.exists()
+            
+            # Verify we can load the pre-populated data
+            if filename == "labels.json":
+                from src.entities import Label
+                labels = storage_service.load_data(file_path, Label)
+                assert len(labels) > 0

@@ -7,6 +7,7 @@ from github.GithubException import RateLimitExceededException, GithubException
 from src.github.boundary import GitHubApiBoundary
 from src.github.rate_limiter import RateLimitHandler
 from src.github.service import GitHubService
+from tests.shared import rate_limiting_test_services, boundary_with_rate_limiting
 
 pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
@@ -135,55 +136,53 @@ class TestRateLimitHandler:
 class TestServiceLayerRateLimiting:
     """Test rate limiting in the service layer."""
 
-    @pytest.fixture
-    def mock_boundary(self):
-        """Create mock boundary."""
-        boundary = Mock(spec=GitHubApiBoundary)
-        boundary._github = Mock()
-        return boundary
-
-    @pytest.fixture
-    def github_service(self, mock_boundary):
-        """Create GitHub service with mocked boundary."""
-        rate_limiter = RateLimitHandler(max_retries=2, base_delay=0.1)
-        return GitHubService(mock_boundary, rate_limiter)
-
     def test_service_uses_rate_limiting_for_data_operations(
-        self, github_service, mock_boundary
+        self, rate_limiting_test_services
     ):
         """Test that service layer applies rate limiting to data operations."""
-        mock_boundary.get_repository_labels.return_value = [{"name": "bug"}]
-
+        services = rate_limiting_test_services
+        github_service = services["github"]
+        
+        # Configure boundary to return data on first call
+        github_service._boundary.get_repository_labels.side_effect = [
+            [{"name": "bug"}]  # First call succeeds
+        ]
+        
         # Mock rate limit status
         mock_rate_limit = Mock()
         mock_rate_limit.core.remaining = 1000
-        mock_boundary._github.get_rate_limit.return_value = mock_rate_limit
-
+        github_service._boundary._github = Mock()
+        github_service._boundary._github.get_rate_limit.return_value = mock_rate_limit
+        
         result = github_service.get_repository_labels("test/repo")
-
+        
         assert result == [{"name": "bug"}]
-        mock_boundary.get_repository_labels.assert_called_once_with("test/repo")
+        github_service._boundary.get_repository_labels.assert_called_once_with("test/repo")
 
     def test_service_rate_limiting_with_retry(
-        self, github_service, mock_boundary, caplog
+        self, rate_limiting_test_services, caplog
     ):
         """Test service layer retry logic works."""
-        # First call raises rate limit, second succeeds
-        mock_boundary.get_repository_labels.side_effect = [
+        services = rate_limiting_test_services
+        github_service = services["github"]
+        
+        # Override the rate limiting boundary to test specific retry behavior
+        github_service._boundary.get_repository_labels.side_effect = [
             RateLimitExceededException(403, {"message": "Rate limit exceeded"}),
             [{"name": "bug"}],
         ]
-
+        
         # Mock rate limit status for successful call
         mock_rate_limit = Mock()
         mock_rate_limit.core.remaining = 1000
-        mock_boundary._github.get_rate_limit.return_value = mock_rate_limit
-
+        github_service._boundary._github = Mock()
+        github_service._boundary._github.get_rate_limit.return_value = mock_rate_limit
+        
         with patch("time.sleep"):  # Speed up test
             result = github_service.get_repository_labels("test/repo")
-
+        
         assert result == [{"name": "bug"}]
-        assert mock_boundary.get_repository_labels.call_count == 2
+        assert github_service._boundary.get_repository_labels.call_count == 2
         assert "GitHub API rate limit exceeded. Retrying" in caplog.text
 
 
