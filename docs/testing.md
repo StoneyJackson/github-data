@@ -789,6 +789,26 @@ def test_with_mocked_github(mock_boundary_class):
    - Update marker usage patterns
    - Improve test selection strategies
 
+## Testing Scripts and Tools
+
+### Development Testing Scripts
+
+The project includes specialized scripts for enhanced testing workflows:
+
+- **[scripts/test-development.py](scripts/test-development.md)**: Development workflow automation script
+  - Fast development testing cycles
+  - Enhanced fixture validation 
+  - Performance analysis and reporting
+  - Fixture usage metrics
+
+- **[scripts/manual-testing/](scripts/manual-testing.md)**: Manual container testing tools
+  - Real repository testing against GitHub API
+  - Container integration validation
+  - Batch testing across multiple repositories
+  - Manual data verification workflows
+
+These scripts complement the standard testing commands and provide specialized workflows for development and validation scenarios.
+
 ## Troubleshooting
 
 ### Common Issues
