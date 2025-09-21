@@ -21,7 +21,8 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
-from tests.shared import temp_data_dir, sample_labels_data
+from tests.shared import temp_data_dir, sample_labels_data, mock_boundary_class
+from tests.shared.enhanced_fixtures import github_data_builder
 
 pytestmark = [
     pytest.mark.unit,
@@ -150,29 +151,8 @@ class TestConflictDetection:
         assert detect_label_conflicts([], existing) == []
 
 
-@patch("src.github.service.GitHubApiBoundary")
 class TestConflictStrategyIntegration:
     """Integration tests for conflict strategies with restore operation."""
-
-    @pytest.fixture
-    def sample_labels_data(self):
-        """Sample label data for testing."""
-        return [
-            {
-                "name": "bug",
-                "color": "d73a4a",
-                "description": "Something isn't working",
-                "id": 1001,
-                "url": "https://api.github.com/repos/owner/repo/labels/bug",
-            },
-            {
-                "name": "enhancement",
-                "color": "a2eeef",
-                "description": "New feature or request",
-                "id": 1002,
-                "url": "https://api.github.com/repos/owner/repo/labels/enhancement",
-            },
-        ]
 
     def _create_test_files(self, data_dir, labels_data):
         """Helper to create test JSON files."""
@@ -189,7 +169,9 @@ class TestConflictStrategyIntegration:
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test fail-if-existing strategy fails when any labels exist."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -221,7 +203,9 @@ class TestConflictStrategyIntegration:
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test fail-if-existing strategy succeeds with empty repository."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -246,14 +230,16 @@ class TestConflictStrategyIntegration:
             "fail-if-existing",
         )
 
-        # Verify labels were created
-        assert mock_boundary.create_label.call_count == 2
+        # Verify labels were created (4 labels from shared fixture)
+        assert mock_boundary.create_label.call_count == 4
 
     def test_fail_if_conflict_strategy_with_conflicts(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test fail-if-conflict strategy fails when conflicts exist."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -285,7 +271,9 @@ class TestConflictStrategyIntegration:
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test fail-if-conflict strategy succeeds without conflicts."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -318,14 +306,16 @@ class TestConflictStrategyIntegration:
             "fail-if-conflict",
         )
 
-        # Verify labels were created
-        assert mock_boundary.create_label.call_count == 2
+        # Verify labels were created (4 labels from shared fixture)
+        assert mock_boundary.create_label.call_count == 4
 
     def test_delete_all_strategy(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test delete-all strategy deletes existing labels then creates new ones."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -365,14 +355,16 @@ class TestConflictStrategyIntegration:
         mock_boundary.delete_label.assert_any_call("owner/repo", "old1")
         mock_boundary.delete_label.assert_any_call("owner/repo", "old2")
 
-        # Verify new labels were created
-        assert mock_boundary.create_label.call_count == 2
+        # Verify new labels were created (4 labels from shared fixture)
+        assert mock_boundary.create_label.call_count == 4
 
     def test_skip_strategy(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test skip strategy skips conflicting labels and creates others."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -400,20 +392,24 @@ class TestConflictStrategyIntegration:
             github_service, storage_service, "owner/repo", temp_data_dir, "skip"
         )
 
-        # Verify only non-conflicting label was created (enhancement, not bug)
-        assert mock_boundary.create_label.call_count == 1
-        mock_boundary.create_label.assert_called_once()
-
-        # Get the actual call arguments to verify it was 'enhancement'
-        call_args = mock_boundary.create_label.call_args
-        # Arguments are: (repo_name, label.name, label.color, label.description)
-        assert call_args[0][1] == "enhancement"
+        # Verify only non-conflicting labels were created (3 out of 4, excluding bug)
+        assert mock_boundary.create_label.call_count == 3
+        
+        # Get the actual call arguments to verify that 'bug' was skipped
+        call_args_list = mock_boundary.create_label.call_args_list
+        created_names = [call[0][1] for call in call_args_list]
+        assert "enhancement" in created_names
+        assert "documentation" in created_names
+        assert "good first issue" in created_names
+        assert "bug" not in created_names
 
     def test_overwrite_strategy(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
         """Test overwrite strategy updates existing and creates new labels."""
-        self._create_test_files(temp_data_dir, sample_labels_data)
+        # Extract just the labels from the shared fixture data structure
+        labels_only = sample_labels_data["labels"]
+        self._create_test_files(temp_data_dir, labels_only)
 
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
@@ -453,9 +449,104 @@ class TestConflictStrategyIntegration:
         assert delete_call[0][1] == "bug"  # deleted label name
 
         # Verify all labels were created (both conflicting and non-conflicting)
-        assert mock_boundary.create_label.call_count == 2
+        assert mock_boundary.create_label.call_count == 4
         create_calls = mock_boundary.create_label.call_args_list
         # Arguments are: (repo_name, label.name, label.color, label.description)
         created_names = [call[0][1] for call in create_calls]
         assert "bug" in created_names
         assert "enhancement" in created_names
+        assert "documentation" in created_names
+        assert "good first issue" in created_names
+
+
+class TestConflictStrategyWithSharedInfrastructure:
+    """Test conflict strategies using enhanced shared infrastructure."""
+
+    def test_conflict_resolution_with_mock_boundary_factory(self, temp_data_dir):
+        """Test conflict resolution using MockBoundaryFactory for cleaner setup."""
+        from tests.shared.mocks import MockBoundaryFactory
+        
+        # Use factory to create configured boundary mock for restore operations
+        factory = MockBoundaryFactory()
+        mock_boundary = factory.create_for_restore()
+        
+        # Configure existing labels that will conflict
+        mock_boundary.get_repository_labels.return_value = [
+            {
+                "name": "bug",
+                "color": "ff0000",
+                "description": "Existing bug label",
+                "url": "http://example.com/bug",
+                "id": 999,
+            }
+        ]
+        
+        # Create test files using shared sample data
+        test_labels = [
+            {
+                "name": "bug",
+                "color": "d73a4a",
+                "description": "Something isn't working",
+                "id": 1001,
+                "url": "https://api.github.com/repos/owner/repo/labels/bug",
+            },
+            {
+                "name": "enhancement",
+                "color": "a2eeef",
+                "description": "New feature or request",
+                "id": 1002,
+                "url": "https://api.github.com/repos/owner/repo/labels/enhancement",
+            },
+        ]
+        
+        self._create_test_files(temp_data_dir, test_labels)
+        
+        # Test conflict detection
+        existing_labels = [Label(
+            name="bug", color="ff0000", description="Existing", 
+            url="http://example.com/bug", id=999
+        )]
+        restore_labels = [Label(
+            name="bug", color="d73a4a", description="New", 
+            url="http://example.com/bug2", id=1001
+        )]
+        
+        conflicts = detect_label_conflicts(existing_labels, restore_labels)
+        assert conflicts == ["bug"]
+
+    def test_conflict_strategies_with_parametrized_data(self, temp_data_dir, github_data_builder):
+        """Test conflict strategies using parametrized data factory."""
+        # Create test data using builder pattern
+        test_data = github_data_builder.with_labels(3, prefix="test").build()
+        
+        # Create empty data files for other types
+        data_path = Path(temp_data_dir)
+        with open(data_path / "labels.json", "w") as f:
+            json.dump(test_data["labels"], f)
+        for filename in ["issues.json", "comments.json"]:
+            with open(data_path / filename, "w") as f:
+                json.dump([], f)
+        
+        # Test that we can detect conflicts using generated data
+        existing = [Label(
+            name="test-1", color="different", description="Existing", 
+            url="http://example.com/test-1", id=999
+        )]
+        restore_labels = [Label(
+            name=label["name"], color=label["color"], 
+            description=label["description"], url="http://example.com/test", id=label["id"]
+        ) for label in test_data["labels"]]
+        
+        conflicts = detect_label_conflicts(existing, restore_labels)
+        assert "test-1" in conflicts
+
+    def _create_test_files(self, data_dir, labels_data):
+        """Helper to create test JSON files."""
+        data_path = Path(data_dir)
+
+        with open(data_path / "labels.json", "w") as f:
+            json.dump(labels_data, f)
+        with open(data_path / "issues.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "comments.json", "w") as f:
+            json.dump([], f)
