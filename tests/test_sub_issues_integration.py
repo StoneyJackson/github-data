@@ -10,13 +10,25 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
+from tests.shared import (
+    temp_data_dir,
+    sample_sub_issues_data,
+    complex_hierarchy_data,
+    github_service_with_mock
+)
 
-pytestmark = [pytest.mark.integration]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.medium,
+    pytest.mark.sub_issues
+]
 
 
 class TestSubIssuesIntegration:
     """Integration tests for sub-issues save/restore workflows."""
 
+    @pytest.mark.backup_workflow
+    @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_save_creates_json_files(
         self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
@@ -69,6 +81,8 @@ class TestSubIssuesIntegration:
         assert "sub_issues" in parent_issue
         assert len(parent_issue["sub_issues"]) == 2
 
+    @pytest.mark.restore_workflow
+    @pytest.mark.storage
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_restore_workflow(
         self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
@@ -122,6 +136,9 @@ class TestSubIssuesIntegration:
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 102)
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 103)
 
+    @pytest.mark.restore_workflow
+    @pytest.mark.complex_hierarchy
+    @pytest.mark.storage
     @patch("src.github.service.GitHubApiBoundary")
     def test_complex_hierarchy_restore(
         self, mock_boundary_class, temp_data_dir, complex_hierarchy_data
@@ -182,6 +199,9 @@ class TestSubIssuesIntegration:
         # Parent B -> Child B1
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 203, 205)
 
+    @pytest.mark.backup_workflow
+    @pytest.mark.mixed_states
+    @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_backup_with_existing_data(
         self, mock_boundary_class, temp_data_dir

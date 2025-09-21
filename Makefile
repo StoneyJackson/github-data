@@ -40,6 +40,41 @@ test-with-test-coverage:
 test-fast-with-test-coverage:
 	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container"
 
+# Test commands with markers
+.PHONY: test-fast test-unit test-integration test-container test-by-feature
+
+test-fast-only:  ## Run fast tests only (< 1 second)
+	pdm run python -m pytest -m fast
+
+test-unit-only:  ## Run unit tests only
+	pdm run python -m pytest -m unit
+
+test-integration-only:  ## Run integration tests only (excluding container tests)
+	pdm run python -m pytest -m "integration and not container"
+
+test-container-only:  ## Run container tests only
+	pdm run python -m pytest -m container
+
+test-by-feature:  ## Run tests for specific feature (usage: make test-by-feature FEATURE=labels)
+	pdm run python -m pytest -m $(FEATURE)
+
+# Combined test workflows
+test-dev:  ## Development test workflow (fast + integration, no container)
+	pdm run python -m pytest -m "fast or (integration and not container)"
+
+test-ci:  ## CI test workflow (all tests with coverage)
+	pdm run python -m pytest --cov=src --cov-report=term-missing --cov-report=html
+
+# Test discovery and information
+test-list-markers:  ## List all available test markers
+	pdm run python -m pytest --markers
+
+test-collect-only:  ## Show test collection without running tests
+	pdm run python -m pytest --collect-only
+
+test-by-markers:  ## Run tests by custom marker expression (usage: make test-by-markers MARKERS="fast and labels")
+	pdm run python -m pytest -m "$(MARKERS)"
+
 # Run linting
 lint:
 	pdm run flake8 src tests

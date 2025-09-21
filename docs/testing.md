@@ -136,6 +136,42 @@ make check
 make check-all
 ```
 
+### Enhanced Marker-Based Commands
+
+```bash
+# Performance-based test execution
+make test-fast-only           # Fast tests only (< 1 second)
+make test-unit-only           # Unit tests only
+make test-integration-only    # Integration tests (excluding containers)
+make test-container-only      # Container tests only
+
+# Feature-specific test execution
+make test-by-feature FEATURE=labels        # Label management tests
+make test-by-feature FEATURE=sub_issues    # Sub-issues workflow tests
+make test-by-feature FEATURE=pull_requests # Pull request tests
+make test-by-feature FEATURE=issues        # Issue management tests
+make test-by-feature FEATURE=comments      # Comment management tests
+
+# Workflow-specific test execution
+make test-by-markers MARKERS="backup_workflow"      # Backup workflow tests
+make test-by-markers MARKERS="restore_workflow"     # Restore workflow tests
+make test-by-markers MARKERS="github_api"           # GitHub API interaction tests
+make test-by-markers MARKERS="storage"              # Storage and persistence tests
+
+# Combined marker execution
+make test-by-markers MARKERS="fast and labels"      # Fast label tests
+make test-by-markers MARKERS="integration and github_api"  # API integration tests
+make test-by-markers MARKERS="unit and storage"     # Unit storage tests
+
+# Development workflow commands
+make test-dev                 # Development workflow (fast + integration, no containers)
+make test-ci                  # CI workflow (all tests with coverage)
+
+# Test discovery and information
+make test-list-markers        # List all available test markers
+make test-collect-only        # Show test collection without running tests
+```
+
 ### Direct Pytest Commands
 
 ```bash
@@ -178,6 +214,29 @@ For advanced container testing options:
 ./scripts/test-containers --help
 ```
 
+### Test Categories Script
+
+For advanced marker-based test execution:
+
+```bash
+# Run categorized tests with the test-categories script
+python scripts/test-categories.py --fast           # Fast tests only
+python scripts/test-categories.py --unit           # Unit tests only
+python scripts/test-categories.py --integration    # Integration tests only
+python scripts/test-categories.py --container      # Container tests only
+
+# Feature-specific execution
+python scripts/test-categories.py --feature labels      # Label tests
+python scripts/test-categories.py --feature sub_issues  # Sub-issues tests
+
+# With coverage reporting
+python scripts/test-categories.py --unit --coverage     # Unit tests with coverage
+python scripts/test-categories.py --fast --coverage     # Fast tests with coverage
+
+# Default: runs all test categories in sequence
+python scripts/test-categories.py
+```
+
 ## Test Organization
 
 ### Directory Structure
@@ -198,60 +257,106 @@ tests/
 - `Test*`: Test classes must start with `Test`
 - `test_*`: Test methods must start with `test_`
 
-### Pytest Markers Usage
+### Comprehensive Marker System
 
-The project uses an extensive marker system for test organization and selection:
+The project uses an extensive marker system for test organization and selective execution. Markers are automatically applied based on file patterns and can be manually added for specific scenarios.
 
-#### Marker Categories
+#### Performance Markers
 
-**Test Type Markers:**
-- `@pytest.mark.unit`: Unit tests (isolated, fast)
-- `@pytest.mark.integration`: Integration tests (service interactions)
-- `@pytest.mark.container`: Container-based tests (Docker required)
+- `@pytest.mark.fast` - Tests completing in < 1 second (suitable for TDD cycles)
+- `@pytest.mark.medium` - Tests completing in 1-10 seconds (integration tests)
+- `@pytest.mark.slow` - Tests completing in > 10 seconds (container/end-to-end tests)
 
-**Performance Markers:**
-- `@pytest.mark.fast`: < 100ms execution time
-- `@pytest.mark.medium`: 100ms - 1s execution time
-- `@pytest.mark.slow`: > 1s execution time
-- `@pytest.mark.performance`: Performance benchmarking tests
+#### Test Type Markers
 
-**Fixture Category Markers:**
-- `@pytest.mark.enhanced_fixtures`: Tests using enhanced fixture patterns
-- `@pytest.mark.data_builders`: Tests using dynamic data builders
-- `@pytest.mark.error_simulation`: Tests using error simulation fixtures
-- `@pytest.mark.workflow_services`: Tests using workflow service fixtures
+- `@pytest.mark.unit` - Isolated component tests with mocked dependencies
+- `@pytest.mark.integration` - Tests verifying component interactions
+- `@pytest.mark.container` - Full Docker workflow tests
 
-**Scenario Markers:**
-- `@pytest.mark.empty_repository`: Empty repository scenarios
-- `@pytest.mark.large_dataset`: Large dataset scenarios
-- `@pytest.mark.rate_limiting`: Rate limiting scenarios
-- `@pytest.mark.api_errors`: API error scenarios
+#### Feature Area Markers
 
-**Feature-Specific Markers:**
-- `@pytest.mark.labels`: Label-related functionality
-- `@pytest.mark.backup_workflow`: Backup workflow tests
-- `@pytest.mark.restore_workflow`: Restore workflow tests
+- `@pytest.mark.labels` - Label management functionality
+- `@pytest.mark.issues` - Issue management functionality
+- `@pytest.mark.comments` - Comment management functionality
+- `@pytest.mark.sub_issues` - Sub-issues workflow functionality
+- `@pytest.mark.pull_requests` - Pull request workflow functionality
+
+#### Infrastructure Markers
+
+- `@pytest.mark.github_api` - GitHub API interaction tests (real or mocked)
+- `@pytest.mark.storage` - Data storage and persistence tests
+- `@pytest.mark.backup_workflow` - Backup operation workflows
+- `@pytest.mark.restore_workflow` - Restore operation workflows
+
+#### Special Scenario Markers
+
+- `@pytest.mark.empty_repository` - Empty repository scenario tests
+- `@pytest.mark.large_dataset` - Large dataset scenario tests
+- `@pytest.mark.rate_limiting` - Rate limiting behavior tests
+- `@pytest.mark.error_simulation` - Error condition simulation tests
+
+#### Enhanced Fixture Category Markers
+
+- `@pytest.mark.enhanced_fixtures` - Tests using enhanced fixture patterns
+- `@pytest.mark.data_builders` - Tests using dynamic data builder fixtures
+- `@pytest.mark.workflow_services` - Tests using workflow service fixtures
+- `@pytest.mark.performance_fixtures` - Tests using performance monitoring fixtures
+
+#### Additional Markers
+
+- `@pytest.mark.performance` - Performance testing and benchmarking
+- `@pytest.mark.memory_intensive` - Tests with high memory usage
+- `@pytest.mark.simple_data` - Tests with simple data structures
+- `@pytest.mark.complex_hierarchy` - Tests with complex hierarchical data
+- `@pytest.mark.temporal_data` - Tests with time-sensitive data patterns
+- `@pytest.mark.mixed_states` - Tests with mixed state data (open/closed, etc.)
+
+#### Automatic Marker Assignment
+
+The test system automatically applies markers based on patterns:
+
+- **Container tests**: Auto-marked with `container` and `slow`
+- **Integration tests**: Auto-marked with `integration` and `medium`
+- **Other tests**: Auto-marked with `unit` and `fast`
+- **Feature areas**: Auto-marked based on filename patterns (e.g., "sub_issues" → `sub_issues`)
+- **GitHub API tests**: Auto-marked based on code analysis
 
 #### Test Selection Examples
 
 ```bash
-# Fast development cycle - exclude slow tests
-pytest -m "not slow and not container"
+# Fast development cycle - TDD workflow
+pdm run pytest -m fast
 
 # Feature-focused development
-pytest -m "labels" tests/integration/
+pdm run pytest -m labels                    # All label-related tests
+pdm run pytest -m sub_issues               # All sub-issues tests
+pdm run pytest -m "labels and unit"        # Unit tests for labels only
 
-# Performance testing
-pytest -m "performance" --verbose
+# Performance-based selection
+pdm run pytest -m "fast and not container" # Fast tests excluding containers
+pdm run pytest -m "medium and integration" # Medium-speed integration tests
+pdm run pytest -m slow                     # All slow tests
 
-# Error handling validation
-pytest -m "error_simulation or api_errors"
+# Infrastructure testing
+pdm run pytest -m github_api               # GitHub API interaction tests
+pdm run pytest -m storage                  # Storage and persistence tests
+pdm run pytest -m "backup_workflow or restore_workflow"  # Workflow tests
 
-# Tests using enhanced fixtures
-pytest -m "enhanced_fixtures"
+# Scenario-based testing
+pdm run pytest -m empty_repository         # Empty repository scenarios
+pdm run pytest -m large_dataset           # Large dataset scenarios
+pdm run pytest -m error_simulation        # Error handling tests
+pdm run pytest -m rate_limiting           # Rate limiting tests
 
-# Workflow tests excluding slow ones
-pytest -m "workflow_services and not slow"
+# Complex combinations
+pdm run pytest -m "integration and github_api and not container"  # API integration tests
+pdm run pytest -m "unit and (labels or issues)"  # Unit tests for labels or issues
+pdm run pytest -m "fast and storage"             # Fast storage tests
+
+# Development workflows
+pdm run pytest -m "fast or (integration and not container)"  # Development cycle
+pdm run pytest -m "not slow"                                 # Exclude slow tests
+pdm run pytest -m "enhanced_fixtures"                        # Enhanced fixture tests
 ```
 
 Each test file should declare its markers at the top:
@@ -398,13 +503,9 @@ class TestContainerBehavior:
         # Test implementation
 ```
 
-### Test Fixtures
+### Comprehensive Shared Fixture System
 
-The project includes comprehensive shared fixtures for enhanced testing capabilities:
-
-### Shared Fixture System
-
-The project implements a comprehensive shared fixture system organized in `tests/shared/`:
+The project implements a sophisticated shared fixture system organized in `tests/shared/` that provides enhanced testing capabilities and follows established patterns for different test scenarios.
 
 ```
 tests/shared/
@@ -415,25 +516,34 @@ tests/shared/
 └── builders.py               # Data builder patterns
 ```
 
-#### Core Fixtures
+#### Core Infrastructure Fixtures
 
 ```python
 from tests.shared import (
     temp_data_dir,               # Basic temp directory
     sample_github_data,          # Comprehensive sample data
+    github_service_mock,         # Basic GitHub service mock
+    storage_service_mock,        # Storage service mock
     github_service_with_mock,    # Service with mocked boundary
-    boundary_with_repository_data, # Enhanced boundary mock
-    github_data_builder,         # Dynamic data builder
-    backup_workflow_services     # Pre-configured workflow services
 )
 ```
 
 **Basic Infrastructure Fixtures:**
 - `temp_data_dir`: Clean temporary directory for each test (< 10ms setup)
 - `sample_github_data`: Comprehensive GitHub API sample data (session-scoped, ~50ms setup)
-- `github_service_with_mock`: GitHub service with basic mocked boundary (< 20ms setup)
+- `github_service_mock`: Basic GitHub service mock (< 20ms setup)
+- `storage_service_mock`: Storage service mock
+- `github_service_with_mock`: GitHub service with mocked boundary
 
-#### Enhanced Boundary Mocks
+#### Enhanced Mock Fixtures
+
+```python
+from tests.shared import (
+    mock_boundary_class,         # Mock GitHubApiBoundary class for patching
+    mock_boundary,              # Configured mock boundary instance
+    boundary_with_repository_data, # Enhanced boundary mock
+)
+```
 
 **Scenario-Specific Fixtures:**
 - `boundary_with_repository_data`: Full repository data responses using realistic sample data
@@ -441,6 +551,18 @@ from tests.shared import (
 - `boundary_with_empty_repository`: Empty repository simulation for edge case testing
 - `boundary_with_api_errors`: Simulate various GitHub API errors (ConnectionError, Timeout, etc.)
 - `boundary_with_rate_limiting`: Simulate rate limiting scenarios
+
+#### Specialized Data Fixtures
+
+```python
+from tests.shared import (
+    empty_repository_data,       # Empty repository scenario data
+    sample_sub_issues_data,      # Sub-issues hierarchical data
+    sample_pr_data,             # Pull request workflow data
+    sample_labels_data,         # Label management data
+    complex_hierarchy_data,      # Complex sub-issue hierarchy data
+)
+```
 
 #### Workflow Service Fixtures
 
@@ -469,6 +591,131 @@ def test_custom_hierarchy(github_data_builder):
     
     assert len(data["sub_issues"]) > 0
 ```
+
+### Fixture Usage Patterns
+
+#### Pattern 1: Basic Unit Test
+
+```python
+import pytest
+from tests.shared import temp_data_dir, sample_labels_data
+
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.labels
+def test_label_validation(sample_labels_data):
+    """Test label validation logic."""
+    # Use sample_labels_data for test input
+    pass
+```
+
+#### Pattern 2: Service Integration Test
+
+```python
+import pytest
+from tests.shared import github_service_with_mock, temp_data_dir
+
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.github_api
+def test_service_integration(github_service_with_mock, temp_data_dir):
+    """Test service integration with mocked boundary."""
+    # Use pre-configured service and temp directory
+    pass
+```
+
+#### Pattern 3: Storage Workflow Test
+
+```python
+import pytest
+from tests.shared import temp_data_dir, storage_service_mock, sample_github_data
+
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.storage
+def test_storage_workflow(temp_data_dir, storage_service_mock, sample_github_data):
+    """Test complete storage workflow."""
+    # Use all three fixtures for comprehensive testing
+    pass
+```
+
+#### Pattern 4: Complex Scenario Test
+
+```python
+import pytest
+from tests.shared import (
+    temp_data_dir,
+    complex_hierarchy_data,
+    github_service_with_mock
+)
+
+@pytest.mark.integration
+@pytest.mark.slow
+@pytest.mark.sub_issues
+@pytest.mark.large_dataset
+def test_complex_hierarchy_workflow(
+    temp_data_dir, 
+    complex_hierarchy_data, 
+    github_service_with_mock
+):
+    """Test complex sub-issues hierarchy workflow."""
+    # Use specialized data and services for complex scenarios
+    pass
+```
+
+#### Fixture Selection Guidelines
+
+| Test Complexity | Recommended Fixture Category | Setup Time | Best Use Case |
+|------------------|------------------------------|------------|---------------|
+| Simple | Core fixtures | < 20ms | Standard testing |
+| Medium | Enhanced boundary mocks | < 50ms | Realistic scenarios |
+| Complex | Data builders + error simulation | 50-200ms | Custom scenarios |
+| End-to-end | Workflow service fixtures | < 100ms | Complete workflows |
+
+#### Fixture Best Practices
+
+1. **Start with minimal fixtures** - Use only what you need
+2. **Prefer shared fixtures** - Avoid creating test-specific fixtures
+3. **Combine appropriately** - Use multiple fixtures for complex scenarios
+4. **Follow naming conventions** - Use descriptive fixture parameter names
+
+#### Import Organization
+
+```python
+# Preferred import style
+from tests.shared import (
+    temp_data_dir,
+    sample_github_data,
+    github_service_with_mock,
+    storage_service_mock
+)
+
+# Avoid importing individual modules
+# from tests.shared.fixtures import temp_data_dir  # Not preferred
+```
+
+#### Fixture Scope Awareness
+
+- Most fixtures use `function` scope for test isolation
+- Use `session` or `module` scope fixtures sparingly
+- Be aware of fixture cleanup behavior
+
+#### Common Patterns by Test Type
+
+**Unit Tests:**
+- Use data fixtures (`sample_*_data`)
+- Minimal service mocking
+- Focus on single component behavior
+
+**Integration Tests:**
+- Use service fixtures (`*_service_mock`)
+- Combine data and service fixtures
+- Test component interactions
+
+**Container Tests:**
+- Use `temp_data_dir` for file operations
+- Combine with service fixtures for end-to-end workflows
+- Include cleanup verification
 
 ## Test Configuration
 
@@ -534,6 +781,71 @@ make check-all      # Complete checks (includes container tests)
 2. **Integration**: Non-container integration tests
 3. **Container**: Full Docker workflow tests
 4. **Quality Gates**: Coverage and performance validation
+
+## Test Development Workflow
+
+### Recommended Development Cycle
+
+#### 1. TDD Cycle (Fast Feedback)
+```bash
+# Fast tests for immediate feedback during development
+make test-fast-only           # < 1 second tests only
+make test-unit-only          # Unit tests for quick validation
+```
+
+#### 2. Feature Development
+```bash
+# Feature-specific testing during development
+make test-by-feature FEATURE=labels        # Label feature development
+make test-by-feature FEATURE=sub_issues    # Sub-issues feature development
+```
+
+#### 3. Integration Validation
+```bash
+# Integration testing before commit
+make test-integration-only    # Integration tests excluding containers
+make test-dev                # Fast + integration (no containers)
+```
+
+#### 4. Full Validation
+```bash
+# Complete validation before merge
+make test-ci                 # All tests with coverage
+make check-all               # Full quality validation
+```
+
+### Marker-Based Development Patterns
+
+#### TDD Workflow
+```bash
+# 1. Write failing test
+# 2. Run fast tests to see failure
+make test-fast-only
+
+# 3. Implement minimal code
+# 4. Run fast tests to see pass
+make test-fast-only
+
+# 5. Refactor
+# 6. Run integration tests
+make test-integration-only
+```
+
+#### Feature Development Workflow
+```bash
+# Focus on specific feature area
+make test-by-markers MARKERS="labels and unit"      # Unit tests for labels
+make test-by-markers MARKERS="labels and fast"      # Fast label tests
+make test-by-markers MARKERS="labels"               # All label tests
+```
+
+#### Bug Fix Workflow
+```bash
+# Reproduce with specific scenario markers
+make test-by-markers MARKERS="error_simulation"     # Error scenarios
+make test-by-markers MARKERS="large_dataset"        # Large data scenarios
+make test-by-markers MARKERS="rate_limiting"        # Rate limiting scenarios
+```
 
 ## Debugging Tests
 

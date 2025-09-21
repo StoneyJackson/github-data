@@ -19,6 +19,13 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
+from tests.shared import temp_data_dir, sample_labels_data
+
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.fast,
+    pytest.mark.labels
+]
 
 
 class TestConflictStrategyParsing:
@@ -59,6 +66,7 @@ class TestConflictStrategyParsing:
 class TestConflictDetection:
     """Test label conflict detection logic."""
 
+    @pytest.mark.storage
     def test_detect_conflicts_with_matching_names(self):
         """Test conflict detection when labels have matching names."""
         existing = [
