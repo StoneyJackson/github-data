@@ -4,10 +4,9 @@ import pytest
 import requests_cache
 import os
 import time
-from pathlib import Path
 
 # Import shared fixtures for global availability
-pytest_plugins = ["tests.shared.fixtures"]
+pytest_plugins = ["tests.shared.fixtures", "tests.shared.enhanced_fixtures"]
 
 # Global test metrics collection
 _test_metrics = {
@@ -20,91 +19,78 @@ _test_metrics = {
 
 def pytest_configure(config):
     """Configure pytest with custom markers and settings."""
-    
+
     # Performance markers
     config.addinivalue_line(
-        "markers", 
-        "fast: marks tests as fast (< 1 second) - suitable for TDD cycles"
+        "markers", "fast: marks tests as fast (< 1 second) - suitable for TDD cycles"
     )
     config.addinivalue_line(
-        "markers", 
-        "medium: marks tests as medium speed (1-10 seconds) - integration tests"
+        "markers",
+        "medium: marks tests as medium speed (1-10 seconds) - integration tests",
     )
     config.addinivalue_line(
-        "markers", 
-        "slow: marks tests as slow (> 10 seconds) - container/end-to-end tests"
+        "markers",
+        "slow: marks tests as slow (> 10 seconds) - container/end-to-end tests",
     )
-    
+
     # Test type markers
     config.addinivalue_line(
-        "markers", 
-        "unit: marks tests as unit tests - isolated component testing"
+        "markers", "unit: marks tests as unit tests - isolated component testing"
     )
     config.addinivalue_line(
-        "markers", 
-        "integration: marks tests as integration tests - component interactions"
+        "markers",
+        "integration: marks tests as integration tests - component interactions",
     )
     config.addinivalue_line(
-        "markers", 
-        "container: marks tests as container tests - full Docker workflows"
+        "markers", "container: marks tests as container tests - full Docker workflows"
     )
-    
+
     # Feature area markers
     config.addinivalue_line(
-        "markers", 
-        "labels: marks tests related to label management functionality"
+        "markers", "labels: marks tests related to label management functionality"
     )
     config.addinivalue_line(
-        "markers", 
-        "issues: marks tests related to issue management functionality"
+        "markers", "issues: marks tests related to issue management functionality"
     )
     config.addinivalue_line(
-        "markers", 
-        "comments: marks tests related to comment management functionality"
+        "markers", "comments: marks tests related to comment management functionality"
     )
     config.addinivalue_line(
-        "markers", 
-        "sub_issues: marks tests related to sub-issues workflow functionality"
+        "markers",
+        "sub_issues: marks tests related to sub-issues workflow functionality",
     )
     config.addinivalue_line(
-        "markers", 
-        "pull_requests: marks tests related to pull request workflow functionality"
+        "markers",
+        "pull_requests: marks tests related to pull request workflow functionality",
     )
-    
+
     # Infrastructure markers
     config.addinivalue_line(
-        "markers", 
-        "github_api: marks tests that interact with GitHub API (real or mocked)"
+        "markers",
+        "github_api: marks tests that interact with GitHub API (real or mocked)",
     )
     config.addinivalue_line(
-        "markers", 
-        "storage: marks tests related to data storage and persistence"
+        "markers", "storage: marks tests related to data storage and persistence"
     )
     config.addinivalue_line(
-        "markers", 
-        "backup_workflow: marks tests for backup operation workflows"
+        "markers", "backup_workflow: marks tests for backup operation workflows"
     )
     config.addinivalue_line(
-        "markers", 
-        "restore_workflow: marks tests for restore operation workflows"
+        "markers", "restore_workflow: marks tests for restore operation workflows"
     )
-    
+
     # Special scenario markers
     config.addinivalue_line(
-        "markers", 
-        "empty_repository: marks tests using empty repository scenarios"
+        "markers", "empty_repository: marks tests using empty repository scenarios"
     )
     config.addinivalue_line(
-        "markers", 
-        "large_dataset: marks tests using large dataset scenarios"
+        "markers", "large_dataset: marks tests using large dataset scenarios"
     )
     config.addinivalue_line(
-        "markers", 
-        "rate_limiting: marks tests that verify rate limiting behavior"
+        "markers", "rate_limiting: marks tests that verify rate limiting behavior"
     )
     config.addinivalue_line(
-        "markers", 
-        "error_simulation: marks tests that simulate error conditions"
+        "markers", "error_simulation: marks tests that simulate error conditions"
     )
 
     # Enhanced fixture category markers (existing)
@@ -136,11 +122,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "mixed_states: Tests with mixed state data (open/closed, etc.)"
     )
-    
+
     # Additional compatibility markers
-    config.addinivalue_line(
-        "markers", "errors: Error handling tests (legacy marker)"
-    )
+    config.addinivalue_line("markers", "errors: Error handling tests (legacy marker)")
     config.addinivalue_line(
         "markers", "docker: Docker-related tests (legacy marker, use container instead)"
     )
@@ -148,23 +132,23 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     """Modify test collection to add automatic markers based on test patterns."""
-    
+
     for item in items:
         # Auto-mark container tests
         if "container" in item.nodeid or "docker" in item.nodeid:
             item.add_marker(pytest.mark.container)
             item.add_marker(pytest.mark.slow)
-        
+
         # Auto-mark integration tests
         elif "integration" in item.nodeid:
             item.add_marker(pytest.mark.integration)
             item.add_marker(pytest.mark.medium)
-        
+
         # Auto-mark unit tests (default for non-integration/container)
         else:
             item.add_marker(pytest.mark.unit)
             item.add_marker(pytest.mark.fast)
-        
+
         # Auto-mark by feature area based on filename
         if "sub_issues" in item.nodeid:
             item.add_marker(pytest.mark.sub_issues)
@@ -178,10 +162,10 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.issues)
         elif "comment" in item.nodeid:
             item.add_marker(pytest.mark.comments)
-        
+
         # Auto-mark GitHub API tests
-        if hasattr(item, 'function') and item.function:
-            if 'github' in str(item.function.__code__.co_names).lower():
+        if hasattr(item, "function") and item.function:
+            if "github" in str(item.function.__code__.co_names).lower():
                 item.add_marker(pytest.mark.github_api)
 
 
@@ -191,11 +175,12 @@ def pytest_runtest_setup(item):
     if item.config.getoption("--fast", default=False):
         if item.get_closest_marker("slow"):
             pytest.skip("Skipping slow test in fast mode")
-    
+
     # Skip container tests if Docker not available
     if item.get_closest_marker("container"):
         try:
             import docker
+
             client = docker.from_env()
             client.ping()
         except Exception:
@@ -235,25 +220,22 @@ def pytest_addoption(parser):
         "--fast",
         action="store_true",
         default=False,
-        help="Run only fast tests (skip slow and container tests)"
+        help="Run only fast tests (skip slow and container tests)",
     )
     parser.addoption(
-        "--unit-only",
-        action="store_true", 
-        default=False,
-        help="Run only unit tests"
+        "--unit-only", action="store_true", default=False, help="Run only unit tests"
     )
     parser.addoption(
         "--integration-only",
         action="store_true",
-        default=False, 
-        help="Run only integration tests"
+        default=False,
+        help="Run only integration tests",
     )
     parser.addoption(
         "--container-only",
         action="store_true",
         default=False,
-        help="Run only container tests"
+        help="Run only container tests",
     )
 
 

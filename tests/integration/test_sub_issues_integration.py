@@ -10,18 +10,8 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
-from tests.shared import (
-    temp_data_dir,
-    sample_sub_issues_data,
-    complex_hierarchy_data,
-    github_service_with_mock
-)
 
-pytestmark = [
-    pytest.mark.integration,
-    pytest.mark.medium,
-    pytest.mark.sub_issues
-]
+pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.sub_issues]
 
 
 class TestSubIssuesIntegration:

@@ -13,10 +13,16 @@ from src.github.metadata import (
     add_comment_metadata_footer,
     _format_datetime,
 )
-from tests.shared.enhanced_fixtures import github_data_builder, parametrized_data_factory
-
-pytestmark = [pytest.mark.unit, pytest.mark.fast]
 from src.entities import Issue, Comment, GitHubUser
+
+# Enhanced fixtures are auto-injected by pytest via conftest.py
+
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.fast,
+    pytest.mark.issues,
+    pytest.mark.comments,
+]
 
 
 class TestMetadataFormatting:
@@ -342,14 +348,14 @@ class TestMetadataFormattingWithDataBuilder:
     def test_metadata_formatting_scenarios(self, parametrized_data_factory):
         """Test metadata formatting across different data scenarios."""
         scenarios = ["basic", "mixed_states", "empty"]
-        
+
         for scenario in scenarios:
             test_data = parametrized_data_factory(scenario)
-            
+
             # Only test if we have issues to work with
             if not test_data["issues"]:
                 continue
-                
+
             # Create entities from test data
             issue_data = test_data["issues"][0]
             user = GitHubUser(
@@ -358,7 +364,7 @@ class TestMetadataFormattingWithDataBuilder:
                 avatar_url=f"https://github.com/{issue_data['user']['login']}.png",
                 html_url=f"https://github.com/{issue_data['user']['login']}",
             )
-            
+
             issue = Issue(
                 id=issue_data["id"],
                 number=issue_data["number"],
@@ -366,15 +372,19 @@ class TestMetadataFormattingWithDataBuilder:
                 body=issue_data["body"],
                 state=issue_data["state"],
                 user=user,
-                created_at=datetime.fromisoformat(issue_data["created_at"].replace("Z", "+00:00")),
-                updated_at=datetime.fromisoformat(issue_data["updated_at"].replace("Z", "+00:00")),
+                created_at=datetime.fromisoformat(
+                    issue_data["created_at"].replace("Z", "+00:00")
+                ),
+                updated_at=datetime.fromisoformat(
+                    issue_data["updated_at"].replace("Z", "+00:00")
+                ),
                 html_url=issue_data["html_url"],
                 comments_count=issue_data["comments"],
             )
-            
+
             # Test metadata formatting
             result = add_issue_metadata_footer(issue)
-            
+
             # Verify metadata is added correctly
             assert issue_data["body"] in result if issue_data["body"] else True
             assert f"*Originally created by @{issue_data['user']['login']}" in result
@@ -383,7 +393,7 @@ class TestMetadataFormattingWithDataBuilder:
     def test_comment_formatting_with_builder_data(self, github_data_builder):
         """Test comment metadata formatting with builder-generated data."""
         test_data = github_data_builder.with_issues(2).with_comments().build()
-        
+
         # Use generated comment data
         comment_data = test_data["comments"][0]
         user = GitHubUser(
@@ -392,20 +402,24 @@ class TestMetadataFormattingWithDataBuilder:
             avatar_url=f"https://github.com/{comment_data['user']['login']}.png",
             html_url=f"https://github.com/{comment_data['user']['login']}",
         )
-        
+
         comment = Comment(
             id=comment_data["id"],
             body=comment_data["body"],
             user=user,
-            created_at=datetime.fromisoformat(comment_data["created_at"].replace("Z", "+00:00")),
-            updated_at=datetime.fromisoformat(comment_data["updated_at"].replace("Z", "+00:00")),
+            created_at=datetime.fromisoformat(
+                comment_data["created_at"].replace("Z", "+00:00")
+            ),
+            updated_at=datetime.fromisoformat(
+                comment_data["updated_at"].replace("Z", "+00:00")
+            ),
             html_url=comment_data["html_url"],
             issue_url=comment_data["issue_url"],
         )
-        
+
         # Test metadata formatting
         result = add_comment_metadata_footer(comment)
-        
+
         # Verify metadata is added correctly
         assert comment_data["body"] in result
         assert f"*Originally posted by @{comment_data['user']['login']}" in result
@@ -414,7 +428,7 @@ class TestMetadataFormattingWithDataBuilder:
     def test_issue_states_with_builder(self, github_data_builder):
         """Test metadata formatting for different issue states using builder."""
         test_data = github_data_builder.with_issues(3, state="mixed").build()
-        
+
         for issue_data in test_data["issues"]:
             user = GitHubUser(
                 login=issue_data["user"]["login"],
@@ -422,7 +436,7 @@ class TestMetadataFormattingWithDataBuilder:
                 avatar_url=f"https://github.com/{issue_data['user']['login']}.png",
                 html_url=f"https://github.com/{issue_data['user']['login']}",
             )
-            
+
             issue = Issue(
                 id=issue_data["id"],
                 number=issue_data["number"],
@@ -430,18 +444,22 @@ class TestMetadataFormattingWithDataBuilder:
                 body=issue_data["body"],
                 state=issue_data["state"],
                 user=user,
-                created_at=datetime.fromisoformat(issue_data["created_at"].replace("Z", "+00:00")),
-                updated_at=datetime.fromisoformat(issue_data["updated_at"].replace("Z", "+00:00")),
+                created_at=datetime.fromisoformat(
+                    issue_data["created_at"].replace("Z", "+00:00")
+                ),
+                updated_at=datetime.fromisoformat(
+                    issue_data["updated_at"].replace("Z", "+00:00")
+                ),
                 html_url=issue_data["html_url"],
                 comments_count=issue_data["comments"],
             )
-            
+
             # Test metadata formatting
             result = add_issue_metadata_footer(issue)
-            
+
             # Verify metadata is appropriate for issue state
             assert f"*Originally created by @{issue_data['user']['login']}" in result
             if issue_data["state"] == "closed" and issue_data.get("closed_at"):
-                # Note: builder doesn't set closed_at for mixed states, 
+                # Note: builder doesn't set closed_at for mixed states,
                 # so we test what we can verify
                 pass

@@ -10,11 +10,12 @@ Tests in this package should:
 - Be marked with appropriate container markers
 - Expect longer execution times (30+ seconds)
 """
+
 import pytest
 
 pytestmark = [
     pytest.mark.container,
     pytest.mark.integration,
     pytest.mark.docker,
-    pytest.mark.slow
+    pytest.mark.slow,
 ]

@@ -68,6 +68,15 @@ from .enhanced_fixtures import (
     validation_test_environment,
 )
 
+# Test helper utilities - for standardized test patterns
+from .helpers import (
+    TestDataHelper,
+    MockHelper,
+    TestMarkerHelper,
+    AssertionHelper,
+    FixtureHelper,
+)
+
 # Builder patterns - for dynamic test data (if available)
 try:
     from .builders import GitHubDataBuilder
@@ -123,6 +132,12 @@ __all__ = [
     # Integration fixtures
     "integration_test_environment",
     "validation_test_environment",
+    # Test helper utilities
+    "TestDataHelper",
+    "MockHelper",
+    "TestMarkerHelper",
+    "AssertionHelper",
+    "FixtureHelper",
     # Builders (if available)
     "GitHubDataBuilder",
 ]

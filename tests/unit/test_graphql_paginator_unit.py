@@ -291,7 +291,7 @@ def test_large_multi_page_pagination():
 
 
 @pytest.mark.github_api
-@pytest.mark.error_simulation  
+@pytest.mark.error_simulation
 class TestGraphQLPaginatorErrorHandling:
     """Test GraphQL paginator error handling and resilience."""
 
@@ -299,12 +299,12 @@ class TestGraphQLPaginatorErrorHandling:
         """Test handling of transport errors during pagination."""
         mock_client = Mock(spec=Client)
         mock_query = Mock()
-        
+
         # Simulate transport error
         mock_client.execute.side_effect = TransportError("Network timeout")
-        
+
         paginator = GraphQLPaginator(mock_client)
-        
+
         with pytest.raises(TransportError, match="Network timeout"):
             paginator.paginate_all(
                 query=mock_query,
@@ -316,7 +316,7 @@ class TestGraphQLPaginatorErrorHandling:
         """Test handling of malformed GraphQL responses."""
         mock_client = Mock(spec=Client)
         mock_query = Mock()
-        
+
         # Response missing expected structure
         malformed_response = {
             "repository": {
@@ -327,9 +327,9 @@ class TestGraphQLPaginatorErrorHandling:
             }
         }
         mock_client.execute.return_value = malformed_response
-        
+
         paginator = GraphQLPaginator(mock_client)
-        
+
         with pytest.raises((KeyError, AttributeError)):
             paginator.paginate_all(
                 query=mock_query,
@@ -342,12 +342,12 @@ class TestGraphQLPaginatorErrorHandling:
 @pytest.mark.performance
 class TestGraphQLPaginatorPerformance:
     """Test GraphQL paginator performance and timing."""
-    
+
     def test_single_page_performance(self):
         """Test performance of single page pagination."""
         mock_client = Mock(spec=Client)
         mock_query = Mock()
-        
+
         # Simulate response time
         def mock_execute(*args, **kwargs):
             time.sleep(0.01)  # Simulate 10ms response time
@@ -359,10 +359,10 @@ class TestGraphQLPaginatorPerformance:
                     }
                 }
             }
-        
+
         mock_client.execute.side_effect = mock_execute
         paginator = GraphQLPaginator(mock_client)
-        
+
         start_time = time.time()
         results = paginator.paginate_all(
             query=mock_query,
@@ -370,6 +370,8 @@ class TestGraphQLPaginatorPerformance:
             data_path="repository.issues",
         )
         execution_time = time.time() - start_time
-        
+
         assert len(results) == 100
-        assert execution_time < 0.5, f"Single page took {execution_time:.3f}s, expected < 0.5s"
+        assert (
+            execution_time < 0.5
+        ), f"Single page took {execution_time:.3f}s, expected < 0.5s"

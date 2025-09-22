@@ -12,7 +12,13 @@ from src.github.utils.data_enrichment import (
     URLEnricher,
 )
 
-pytestmark = [pytest.mark.unit, pytest.mark.fast]
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.fast,
+    pytest.mark.comments,
+    pytest.mark.sub_issues,
+    pytest.mark.pull_requests,
+]
 
 
 class TestCommentEnricher:
@@ -450,37 +456,42 @@ class TestDataEnrichmentWorkflowIntegration:
 
     @pytest.mark.integration
     @pytest.mark.backup_workflow
-    def test_comment_enrichment_in_backup_workflow(self, backup_workflow_services, parametrized_data_factory):
+    def test_comment_enrichment_in_backup_workflow(
+        self, backup_workflow_services, parametrized_data_factory
+    ):
         """Test comment enrichment within complete backup workflow."""
         services = backup_workflow_services
         github_service = services["github"]
-        storage_service = services["storage"]
-        
+
         # Create test data with comments and issues
         test_data = parametrized_data_factory("basic")
-        
+
         # Configure boundary to return test data with comments
         boundary = github_service._boundary
         boundary.get_repository_issues.return_value = test_data["issues"]
         boundary.get_all_issue_comments.return_value = test_data["comments"]
-        
+
         # Test comment enrichment during backup process
         issues = boundary.get_repository_issues("owner/repo")
         comments = boundary.get_all_issue_comments("owner/repo")
-        
+
         # Enrich comments with issue URLs
         enriched_comments = []
         for comment in comments:
             # Find matching issue for this comment
             matching_issue = next(
-                (issue for issue in issues if issue["number"] == comment["issue_number"]),
-                None
+                (
+                    issue
+                    for issue in issues
+                    if issue["number"] == comment["issue_number"]
+                ),
+                None,
             )
             if matching_issue:
                 issue_url = matching_issue["html_url"]
                 enriched = CommentEnricher.enrich_issue_comments([comment], issue_url)
                 enriched_comments.extend(enriched)
-        
+
         # Verify enrichment preserved original data and added URLs
         assert len(enriched_comments) == len(test_data["comments"])
         for enriched_comment in enriched_comments:
@@ -488,18 +499,21 @@ class TestDataEnrichmentWorkflowIntegration:
             assert "id" in enriched_comment
             assert "body" in enriched_comment
             assert enriched_comment["issue_url"].startswith("https://github.com/")
-    
+
     @pytest.mark.integration
     @pytest.mark.restore_workflow
-    def test_sub_issue_relationships_in_restore_workflow(self, restore_workflow_services, github_data_builder):
+    def test_sub_issue_relationships_in_restore_workflow(
+        self, restore_workflow_services, github_data_builder
+    ):
         """Test sub-issue relationship building during restore workflow."""
         services = restore_workflow_services
         github_service = services["github"]
-        storage_service = services["storage"]
-        
+
         # Create test data with sub-issue hierarchies
-        test_data = github_data_builder.with_issues(8).with_sub_issue_hierarchy(3, 2).build()
-        
+        test_data = (
+            github_data_builder.with_issues(8).with_sub_issue_hierarchy(3, 2).build()
+        )
+
         # Configure boundary for restore operations
         boundary = github_service._boundary
         boundary.get_repository_labels.return_value = []
@@ -508,44 +522,56 @@ class TestDataEnrichmentWorkflowIntegration:
             "id": 1,
             "number": 1,
             "title": "Created Issue",
-            "html_url": "https://github.com/owner/repo/issues/1"
+            "html_url": "https://github.com/owner/repo/issues/1",
         }
-        
+
         # Test sub-issue relationship building
         issues_nodes = []
         for issue in test_data["issues"]:
-            # Convert sub-issues data to the format expected by SubIssueRelationshipBuilder
+            # Convert sub-issues data to the format expected by
+            # SubIssueRelationshipBuilder
             sub_issues_for_issue = [
-                sub for sub in test_data["sub_issues"]
+                sub
+                for sub in test_data["sub_issues"]
                 if sub["parent_issue_id"] == issue["id"]
             ]
-            
+
             sub_issues_nodes = []
             for sub_rel in sub_issues_for_issue:
                 # Find the sub-issue data
                 sub_issue = next(
-                    (iss for iss in test_data["issues"] if iss["id"] == sub_rel["sub_issue_id"]),
-                    None
+                    (
+                        iss
+                        for iss in test_data["issues"]
+                        if iss["id"] == sub_rel["sub_issue_id"]
+                    ),
+                    None,
                 )
                 if sub_issue:
-                    sub_issues_nodes.append({
-                        "id": sub_issue["id"],
-                        "number": sub_issue["number"],
-                        "position": sub_rel["position"],
-                        "title": sub_issue["title"],
-                        "state": sub_issue["state"],
-                        "url": sub_issue["html_url"]
-                    })
-            
-            issues_nodes.append({
-                "id": issue["id"],
-                "number": issue["number"],
-                "subIssues": {"nodes": sub_issues_nodes}
-            })
-        
+                    sub_issues_nodes.append(
+                        {
+                            "id": sub_issue["id"],
+                            "number": sub_issue["number"],
+                            "position": sub_rel["position"],
+                            "title": sub_issue["title"],
+                            "state": sub_issue["state"],
+                            "url": sub_issue["html_url"],
+                        }
+                    )
+
+            issues_nodes.append(
+                {
+                    "id": issue["id"],
+                    "number": issue["number"],
+                    "subIssues": {"nodes": sub_issues_nodes},
+                }
+            )
+
         # Build relationships using the enrichment utility
-        relationships = SubIssueRelationshipBuilder.build_repository_relationships(issues_nodes)
-        
+        relationships = SubIssueRelationshipBuilder.build_repository_relationships(
+            issues_nodes
+        )
+
         # Verify relationships match expected structure
         assert len(relationships) == len(test_data["sub_issues"])
         for rel in relationships:
@@ -554,38 +580,44 @@ class TestDataEnrichmentWorkflowIntegration:
             assert "position" in rel
             assert "sub_issue_number" in rel
             assert "parent_issue_number" in rel
-    
+
     @pytest.mark.integration
     @pytest.mark.cross_component_interaction
-    def test_url_enrichment_cross_component_consistency(self, integration_test_environment):
+    def test_url_enrichment_cross_component_consistency(
+        self, integration_test_environment
+    ):
         """Test URL enrichment consistency across multiple data types."""
         env = integration_test_environment
         test_data = env["test_data"]
-        
+
         repo_name = "owner/repo"
-        
+
         # Test URL enrichment for different resource types using test data
         url_mappings = {
             "labels": ("labels", lambda item: item["name"]),
             "issues": ("issues", lambda item: str(item["number"])),
-            "pull_requests": ("pulls", lambda item: str(item["number"]))
+            "pull_requests": ("pulls", lambda item: str(item["number"])),
         }
-        
+
         enriched_urls = {}
         for data_type, (resource_type, id_extractor) in url_mappings.items():
             if test_data[data_type]:  # Only test if we have data of this type
                 sample_item = test_data[data_type][0]
                 resource_id = id_extractor(sample_item)
-                
-                api_url = URLEnricher.build_api_url(repo_name, resource_type, resource_id)
-                github_url = URLEnricher.build_github_url(repo_name, resource_type, resource_id)
-                
+
+                api_url = URLEnricher.build_api_url(
+                    repo_name, resource_type, resource_id
+                )
+                github_url = URLEnricher.build_github_url(
+                    repo_name, resource_type, resource_id
+                )
+
                 enriched_urls[data_type] = {
                     "api_url": api_url,
                     "github_url": github_url,
-                    "resource_id": resource_id
+                    "resource_id": resource_id,
                 }
-        
+
         # Verify URL patterns are consistent across resource types
         for data_type, urls in enriched_urls.items():
             assert urls["api_url"].startswith("https://api.github.com/repos/")
@@ -594,54 +626,56 @@ class TestDataEnrichmentWorkflowIntegration:
             assert repo_name in urls["github_url"]
             assert urls["resource_id"] in urls["api_url"]
             assert urls["resource_id"] in urls["github_url"]
-    
+
     @pytest.mark.integration
     @pytest.mark.performance
-    def test_data_enrichment_performance_monitoring(self, performance_monitoring_services, github_data_builder):
+    def test_data_enrichment_performance_monitoring(
+        self, performance_monitoring_services, github_data_builder
+    ):
         """Test data enrichment utilities with performance monitoring."""
-        services = performance_monitoring_services
-        timing_boundary = services["timing_boundary"]
-        
         # Create large dataset for performance testing
         test_data = github_data_builder.with_issues(100).with_comments(1).build()
-        
+
         # Test comment enrichment performance
         comments = test_data["comments"]
         issue_url_base = "https://github.com/owner/repo/issues"
-        
+
         import time
+
         start_time = time.time()
-        
+
         enriched_comments = []
         for comment in comments:
             issue_url = f"{issue_url_base}/{comment['issue_number']}"
             enriched = CommentEnricher.enrich_issue_comments([comment], issue_url)
             enriched_comments.extend(enriched)
-        
+
         enrichment_time = time.time() - start_time
-        
+
         # Verify performance characteristics
         assert len(enriched_comments) == len(comments)
         assert enrichment_time < 1.0  # Should complete in under 1 second for 100 items
-        
+
         # Test URL enrichment performance
         start_time = time.time()
-        
+
         api_urls = []
         github_urls = []
         for i in range(100):
             api_url = URLEnricher.build_api_url("owner/repo", "issues", str(i + 1))
-            github_url = URLEnricher.build_github_url("owner/repo", "issues", str(i + 1))
+            github_url = URLEnricher.build_github_url(
+                "owner/repo", "issues", str(i + 1)
+            )
             api_urls.append(api_url)
             github_urls.append(github_url)
-        
+
         url_generation_time = time.time() - start_time
-        
+
         # Verify URL generation performance
         assert len(api_urls) == 100
         assert len(github_urls) == 100
         assert url_generation_time < 0.1  # Should be very fast for URL generation
-        
+
         # Verify all URLs are unique and well-formed
         assert len(set(api_urls)) == 100  # All unique
         assert len(set(github_urls)) == 100  # All unique
