@@ -7,7 +7,9 @@ import time
 
 # Import shared fixtures for global availability
 pytest_plugins = [
-    "tests.shared.enhanced_fixtures",
+    "tests.shared.fixtures.enhanced.performance_fixtures",
+    "tests.shared.fixtures.enhanced.data_builder_fixtures",
+    "tests.shared.fixtures.enhanced.integration_fixtures",
     # Core Infrastructure Fixtures
     "tests.shared.fixtures.core.temp_data_dir",
     "tests.shared.fixtures.core.github_service_mock",

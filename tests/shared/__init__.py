@@ -59,7 +59,7 @@ from .mocks import (
 )
 
 # Enhanced fixtures - for advanced testing patterns
-from .enhanced_fixtures import (
+from .fixtures.enhanced import (
     performance_monitoring_services,
     rate_limiting_test_services,
     github_data_builder,
