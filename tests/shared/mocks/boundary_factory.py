@@ -1,4 +1,4 @@
-"""Mock utilities for GitHub Data tests."""
+"""Mock boundary factory for GitHub Data tests."""
 
 from unittest.mock import Mock
 
