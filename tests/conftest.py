@@ -6,7 +6,42 @@ import os
 import time
 
 # Import shared fixtures for global availability
-pytest_plugins = ["tests.shared.fixtures", "tests.shared.enhanced_fixtures"]
+pytest_plugins = [
+    "tests.shared.enhanced_fixtures",
+    # Core Infrastructure Fixtures
+    "tests.shared.fixtures.core.temp_data_dir",
+    "tests.shared.fixtures.core.github_service_mock",
+    "tests.shared.fixtures.core.storage_service_mock",
+    "tests.shared.fixtures.core.mock_boundary_class",
+    "tests.shared.fixtures.core.mock_boundary",
+    "tests.shared.fixtures.core.github_service_with_mock",
+    # Test Data Fixtures
+    "tests.shared.fixtures.test_data.sample_github_data",
+    "tests.shared.fixtures.test_data.empty_repository_data",
+    "tests.shared.fixtures.test_data.sample_sub_issues_data",
+    "tests.shared.fixtures.test_data.complex_hierarchy_data",
+    "tests.shared.fixtures.test_data.sample_pr_data",
+    "tests.shared.fixtures.test_data.sample_labels_data",
+    # Boundary Mock Fixtures
+    "tests.shared.fixtures.boundary_mocks.boundary_with_repository_data",
+    "tests.shared.fixtures.boundary_mocks.boundary_with_empty_repository",
+    "tests.shared.fixtures.boundary_mocks.boundary_with_large_dataset",
+    "tests.shared.fixtures.boundary_mocks.boundary_with_pr_workflow_data",
+    "tests.shared.fixtures.boundary_mocks.boundary_with_sub_issues_hierarchy",
+    # Error Simulation Fixtures
+    "tests.shared.fixtures.error_simulation.boundary_with_api_errors",
+    "tests.shared.fixtures.error_simulation.boundary_with_partial_failures",
+    "tests.shared.fixtures.error_simulation.boundary_with_rate_limiting",
+    # Workflow Service Fixtures
+    "tests.shared.fixtures.workflow_services.backup_workflow_services",
+    "tests.shared.fixtures.workflow_services.restore_workflow_services",
+    "tests.shared.fixtures.workflow_services.sync_workflow_services",
+    "tests.shared.fixtures.workflow_services.error_handling_workflow_services",
+    # Support Fixtures
+    "tests.shared.fixtures.support.boundary_factory",
+    "tests.shared.fixtures.support.boundary_with_data",
+    "tests.shared.fixtures.support.storage_service_for_temp_dir",
+]
 
 # Global test metrics collection
 _test_metrics = {

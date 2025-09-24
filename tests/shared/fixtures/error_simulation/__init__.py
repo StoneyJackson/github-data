@@ -1,0 +1,1 @@
+"""Error simulation fixtures for GitHub Data tests."""

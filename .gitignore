@@ -170,6 +170,7 @@ cython_debug/
 # Project specific
 data/
 *.json
+temp/
 
 # Manual testing data and configuration
 manual-test-data/
