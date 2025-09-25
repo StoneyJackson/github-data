@@ -1,4 +1,4 @@
-.PHONY: install install-dev test test-unit test-integration test-container test-fast lint format type-check clean build docker-build docker-run sync check check-all docker-compose-up-save docker-compose-up-restore docker-compose-test docker-compose-health docker-compose-down
+.PHONY: install install-dev test test-unit test-integration test-container test-containers test-fast lint format type-check clean build docker-build docker-run sync check check-all docker-compose-up-save docker-compose-up-restore docker-compose-test docker-compose-health docker-compose-down
 
 # Install production dependencies only
 install:
@@ -26,7 +26,10 @@ test-integration:
 
 # Run container integration tests only (excludes test files from coverage)
 test-container:
-	pdm run pytest --cov=src --cov-config=pytest.ini -m container --timeout=300
+	pdm run pytest --cov=src --cov-config=pytest.ini -m container
+
+# Alias for test-container (plural form)
+test-containers: test-container
 
 # Run all tests except container tests (excludes test files from coverage)
 test-fast:

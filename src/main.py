@@ -8,7 +8,10 @@ subissues, and comments based on environment variables.
 
 import os
 import sys
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.git.service import GitRepositoryServiceImpl
 
 
 def main() -> None:
@@ -48,9 +51,17 @@ def _perform_save_operation(config: "Configuration") -> None:
     # Create services using dependency injection
     github_service = create_github_service(config.github_token)
     storage_service = create_storage_service("json")
+    git_service = (
+        _create_git_repository_service(config) if config.include_git_repo else None
+    )
 
     save_repository_data_with_strategy_pattern(
-        github_service, storage_service, config.github_repo, config.data_path
+        github_service,
+        storage_service,
+        config.github_repo,
+        config.data_path,
+        include_git_repo=config.include_git_repo,
+        git_service=git_service,
     )
 
 
@@ -66,6 +77,9 @@ def _perform_restore_operation(config: "Configuration") -> None:
     # Create services using dependency injection
     github_service = create_github_service(config.github_token)
     storage_service = create_storage_service("json")
+    git_service = (
+        _create_git_repository_service(config) if config.include_git_repo else None
+    )
 
     restore_repository_data_with_strategy_pattern(
         github_service,
@@ -73,7 +87,21 @@ def _perform_restore_operation(config: "Configuration") -> None:
         config.github_repo,
         config.data_path,
         config.label_conflict_strategy,
+        include_original_metadata=True,
+        include_prs=False,
+        include_sub_issues=False,
+        include_git_repo=config.include_git_repo,
+        git_service=git_service,
     )
+
+
+def _create_git_repository_service(
+    config: "Configuration",
+) -> "GitRepositoryServiceImpl":
+    """Create Git repository service with configuration."""
+    from src.git.service import GitRepositoryServiceImpl
+
+    return GitRepositoryServiceImpl(auth_token=config.github_token)
 
 
 def _print_operation_info(config: "Configuration") -> None:
@@ -81,6 +109,8 @@ def _print_operation_info(config: "Configuration") -> None:
     print(f"GitHub Data - {config.operation.capitalize()} operation")
     print(f"Repository: {config.github_repo}")
     print(f"Data path: {config.data_path}")
+    if config.include_git_repo:
+        print(f"Git repository backup: enabled ({config.git_backup_format})")
 
 
 def _print_completion_message(operation: str) -> None:
@@ -98,12 +128,26 @@ def _load_configuration() -> "Configuration":
         _get_env_var("LABEL_CONFLICT_STRATEGY", required=False) or "fail-if-existing"
     )
 
+    # Git repository settings
+    include_git_repo = (
+        _get_env_var("INCLUDE_GIT_REPO", required=False) or "true"
+    ).lower() == "true"
+    git_backup_format = (
+        _get_env_var("GIT_BACKUP_FORMAT", required=False) or "mirror"
+    ).lower()
+    git_auth_method = (
+        _get_env_var("GIT_AUTH_METHOD", required=False) or "token"
+    ).lower()
+
     return Configuration(
         operation=operation,
         github_token=github_token,
         github_repo=github_repo,
         data_path=data_path,
         label_conflict_strategy=label_conflict_strategy,
+        include_git_repo=include_git_repo,
+        git_backup_format=git_backup_format,
+        git_auth_method=git_auth_method,
     )
 
 
@@ -145,12 +189,18 @@ class Configuration:
         github_repo: str,
         data_path: str,
         label_conflict_strategy: str,
+        include_git_repo: bool = True,
+        git_backup_format: str = "mirror",
+        git_auth_method: str = "token",
     ):
         self.operation = operation
         self.github_token = github_token
         self.github_repo = github_repo
         self.data_path = data_path
         self.label_conflict_strategy = label_conflict_strategy
+        self.include_git_repo = include_git_repo
+        self.git_backup_format = git_backup_format
+        self.git_auth_method = git_auth_method
 
 
 if __name__ == "__main__":

@@ -63,6 +63,7 @@ class TestMain:
         mock_get_env_var.side_effect = lambda name, required=True: {
             "DATA_PATH": "/data",
             "LABEL_CONFLICT_STRATEGY": None,
+            "INCLUDE_GIT_REPO": "false",
         }.get(name)
 
         main()
@@ -102,6 +103,7 @@ class TestMain:
         mock_get_env_var.side_effect = lambda name, required=True: {
             "DATA_PATH": "/data",
             "LABEL_CONFLICT_STRATEGY": None,
+            "INCLUDE_GIT_REPO": "false",
         }.get(name)
 
         main()

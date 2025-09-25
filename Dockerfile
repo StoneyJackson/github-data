@@ -1,5 +1,10 @@
 FROM python:3.11-slim
 
+# Install system dependencies including Git
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install PDM
 RUN pip install --no-cache-dir pdm
 
@@ -18,9 +23,17 @@ COPY src/ ./src/
 # Create data directory for volume mounting
 RUN mkdir -p /data
 
-# Set environment variables
+# Get the virtual environment path and configure environment
+RUN pdm info --env > /tmp/venv_path
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 ENV DATA_PATH=/data
+
+# Git-specific environment variables with defaults
+ENV INCLUDE_GIT_REPO=true
+ENV GIT_BACKUP_FORMAT=mirror
+ENV GIT_AUTH_METHOD=token
 
 # Run the application using PDM
 CMD ["pdm", "run", "python", "-m", "src.main"]

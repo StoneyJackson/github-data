@@ -8,6 +8,7 @@ saves it to JSON files for backup purposes.
 from typing import List, Optional
 from src.github.protocols import RepositoryService
 from src.storage.protocols import StorageService
+from src.git.protocols import GitRepositoryService
 
 
 def save_repository_data_with_strategy_pattern(
@@ -17,6 +18,8 @@ def save_repository_data_with_strategy_pattern(
     output_path: str,
     include_prs: bool = True,
     include_sub_issues: bool = True,
+    include_git_repo: bool = True,
+    git_service: Optional[GitRepositoryService] = None,
     data_types: Optional[List[str]] = None,
 ) -> None:
     """Save using strategy pattern approach."""
@@ -50,6 +53,12 @@ def save_repository_data_with_strategy_pattern(
 
         orchestrator.register_strategy(SubIssuesSaveStrategy())
 
+    # Add Git repository strategy if requested
+    if include_git_repo and git_service:
+        from .strategies.git_repository_strategy import GitRepositoryStrategy
+
+        orchestrator.register_strategy(GitRepositoryStrategy(git_service))
+
     # Determine entities to save
     if data_types is None:
         requested_entities = ["labels", "issues", "comments"]
@@ -57,6 +66,8 @@ def save_repository_data_with_strategy_pattern(
             requested_entities.extend(["pull_requests", "pr_comments"])
         if include_sub_issues:
             requested_entities.append("sub_issues")
+        if include_git_repo and git_service:
+            requested_entities.append("git_repository")
     else:
         requested_entities = data_types
 

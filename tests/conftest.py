@@ -100,6 +100,11 @@ def pytest_configure(config):
         "markers",
         "pull_requests: marks tests related to pull request workflow functionality",
     )
+    config.addinivalue_line(
+        "markers",
+        "git_repositories: "
+        "marks tests related to Git repository backup/restore functionality",
+    )
 
     # Infrastructure markers
     config.addinivalue_line(
@@ -158,6 +163,14 @@ def pytest_configure(config):
     )
     config.addinivalue_line(
         "markers", "mixed_states: Tests with mixed state data (open/closed, etc.)"
+    )
+    config.addinivalue_line(
+        "markers",
+        "cross_component_interaction: "
+        "Tests validating interactions between multiple components",
+    )
+    config.addinivalue_line(
+        "markers", "data_enrichment: Tests for data enrichment utilities"
     )
 
     # Additional compatibility markers

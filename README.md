@@ -1,16 +1,18 @@
 # GitHub Data
 
-A containerized tool for saving and restoring GitHub repository labels, issues, comments, sub-issues, and pull requests to/from JSON files. This tool allows you to backup and restore comprehensive GitHub repository data including issue management, hierarchical sub-issue relationships, and pull request workflows.
+A containerized tool for saving and restoring comprehensive GitHub repository data including labels, issues, comments, sub-issues, pull requests, and complete Git repository history. This tool allows you to backup and restore GitHub repository metadata alongside full Git repository data with commit history, branches, and tags.
 
 > **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Features](#features)
 - [Usage](#usage)
   - [Save Data](#save-data)
   - [Restore Data](#restore-data)
   - [Environment Variables](#environment-variables)
+  - [Git Repository Backup](#git-repository-backup)
 - [Data Format](#data-format)
 - [Contributing](#contributing)
 - [License](#license)
@@ -18,10 +20,25 @@ A containerized tool for saving and restoring GitHub repository labels, issues, 
 ## Overview
 
 The `github-data` container provides two main operations:
-- **Save**: Extract labels, issues, comments, sub-issues, and pull requests from a GitHub repository and save them to JSON files
-- **Restore**: Read JSON data files and restore/recreate repository labels, issues, comments, sub-issue relationships, and pull requests
+- **Save**: Extract labels, issues, comments, sub-issues, pull requests, and complete Git repository history from a GitHub repository
+- **Restore**: Read saved data and restore/recreate repository labels, issues, comments, sub-issue relationships, pull requests, and Git repository data
 
 All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
+
+## Features
+
+### GitHub Metadata Management
+- **Labels**: Complete label backup/restore with conflict resolution strategies
+- **Issues & Comments**: Full issue data with hierarchical sub-issue relationships
+- **Pull Requests**: PR workflows with branch dependency validation
+- **Rate Limiting**: Intelligent API rate limiting with automatic retries
+
+### Git Repository Backup (NEW)
+- **Complete Repository Cloning**: Full commit history, branches, and tags
+- **Multiple Backup Formats**: Mirror clones and Git bundles
+- **Repository Validation**: Integrity checks and verification  
+- **Flexible Restore Options**: Restore to new locations or directories
+- **Authentication Support**: Token-based authentication for private repositories
 
 ## Important Notes
 
@@ -65,6 +82,9 @@ docker run --rm \
 | `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
+| `INCLUDE_GIT_REPO` | No | Enable/disable Git repository backup (default: `true`) |
+| `GIT_BACKUP_FORMAT` | No | Git backup format: `mirror`, `bundle` (default: `mirror`) |
+| `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
 
@@ -113,21 +133,106 @@ The tool automatically handles GitHub API rate limiting with intelligent retry l
 
 For large repositories, operations may take longer when approaching rate limits as the tool waits for the rate limit window to reset.
 
-## Data Format
+### Git Repository Backup
 
-The container saves/restores data in JSON format with the following structure:
+The Git repository backup feature provides complete repository cloning alongside GitHub metadata backup.
+
+#### Configuration
+
+Git repository backup is controlled through environment variables:
+
+```bash
+# Enable/disable Git repository backup (default: true)
+INCLUDE_GIT_REPO=true
+
+# Backup format: mirror, bundle (default: mirror)
+GIT_BACKUP_FORMAT=mirror
+
+# Authentication method: token, ssh (default: token)  
+GIT_AUTH_METHOD=token
+
+# GitHub token for private repositories
+GITHUB_TOKEN=your_github_token
+```
+
+#### Usage Examples
+
+```bash
+# Backup with Git repository (default behavior)
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  github-data
+
+# Backup excluding Git repository (metadata only)
+docker run --rm \
+  -v /path/to/data:/data \
+  -e INCLUDE_GIT_REPO=false \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  github-data
+
+# Backup with bundle format
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GIT_BACKUP_FORMAT=bundle \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  github-data
+```
+
+#### Backup Formats
+
+- **Mirror Clone** (`mirror`): Complete repository clone with all branches, tags, and references
+  - Best for: Complete repository backup, easy browsing with Git tools
+  - Storage: Directory structure with `.git` contents
+  
+- **Bundle** (`bundle`): Compressed Git bundle containing repository data
+  - Best for: Space-efficient storage, single-file backups
+  - Storage: Single `.bundle` file that can be cloned from
+
+#### Directory Structure
 
 ```
 /data/
-├── labels.json         # Repository labels
-├── issues.json         # Issues and their metadata
-├── comments.json       # All issue comments
-├── sub_issues.json     # Sub-issue relationships
-├── pull_requests.json  # Pull requests and their metadata
-└── pr_comments.json    # All pull request comments
+├── github-data/          # JSON metadata (existing)
+│   ├── issues.json
+│   ├── labels.json
+│   └── pull_requests.json
+└── git-data/             # Git repository data (new)
+    ├── repository/       # Mirror clone (if mirror format)
+    └── repository.bundle # Bundle file (if bundle format)
 ```
 
+## Data Format
+
+The container saves/restores data with the following directory structure:
+
+```
+/data/
+├── github-data/            # GitHub metadata (JSON format)
+│   ├── labels.json         # Repository labels
+│   ├── issues.json         # Issues and their metadata
+│   ├── comments.json       # All issue comments
+│   ├── sub_issues.json     # Sub-issue relationships
+│   ├── pull_requests.json  # Pull requests and their metadata
+│   └── pr_comments.json    # All pull request comments
+└── git-data/               # Git repository data (if enabled)
+    ├── repository/         # Mirror clone (default format)
+    └── repository.bundle   # Bundle file (alternative format)
+```
+
+### GitHub Metadata
 Each JSON file contains structured data that can be used to recreate the repository's issue management state, hierarchical sub-issue relationships, and pull request workflows. All data includes original metadata (authors, timestamps, relationships) preserved in the restored content.
+
+### Git Repository Data
+- **Mirror clones**: Complete `.git` directory structure with all branches, tags, and commit history
+- **Bundle files**: Compressed Git bundle format containing complete repository data
+- **Validation**: All Git data includes integrity checks and metadata for verification
 
 ## Contributing
 

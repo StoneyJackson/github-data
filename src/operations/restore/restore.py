@@ -5,8 +5,10 @@ Implements the restore functionality that reads JSON files and
 recreates labels, issues, and comments in GitHub repositories.
 """
 
+from typing import Optional
 from src.github.protocols import RepositoryService
 from src.storage.protocols import StorageService
+from src.git.protocols import GitRepositoryService
 
 
 def restore_repository_data_with_strategy_pattern(
@@ -18,6 +20,8 @@ def restore_repository_data_with_strategy_pattern(
     include_original_metadata: bool = True,
     include_prs: bool = False,
     include_sub_issues: bool = False,
+    include_git_repo: bool = False,
+    git_service: Optional[GitRepositoryService] = None,
 ) -> None:
     """Restore using strategy pattern approach."""
 
@@ -77,12 +81,22 @@ def restore_repository_data_with_strategy_pattern(
 
         orchestrator.register_strategy(SubIssuesRestoreStrategy())
 
+    # Add Git repository strategy if requested
+    if include_git_repo and git_service:
+        from src.operations.restore.strategies.git_repository_strategy import (
+            GitRepositoryRestoreStrategy,
+        )
+
+        orchestrator.register_strategy(GitRepositoryRestoreStrategy(git_service))
+
     # Determine entities to restore
     requested_entities = ["labels", "issues", "comments"]
     if include_prs:
         requested_entities.extend(["pull_requests", "pr_comments"])
     if include_sub_issues:
         requested_entities.append("sub_issues")
+    if include_git_repo and git_service:
+        requested_entities.append("git_repository")
 
     # Execute restoration
     results = orchestrator.execute_restore(repo_name, data_path, requested_entities)
