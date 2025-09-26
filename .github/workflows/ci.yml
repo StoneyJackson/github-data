@@ -61,12 +61,17 @@ jobs:
         run: echo "branch=${GITHUB_HEAD_REF}" >> $GITHUB_OUTPUT
         id: extract_branch
 
+      - name: Convert repository name to lowercase
+        shell: bash
+        run: echo "repository=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+        id: lowercase_repo
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.extract_branch.outputs.branch }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:${{ steps.extract_branch.outputs.branch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
