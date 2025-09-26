@@ -213,9 +213,7 @@ class TestDockerComposeExecution:
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
-        compose_content = compose_content.replace(
-            "build: .", f"build: {project_root}"
-        )
+        compose_content = compose_content.replace("build: .", f"build: {project_root}")
         compose_dest.write_text(compose_content)
 
         # Build first
@@ -251,9 +249,7 @@ class TestDockerComposeExecution:
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
-        compose_content = compose_content.replace(
-            "build: .", f"build: {project_root}"
-        )
+        compose_content = compose_content.replace("build: .", f"build: {project_root}")
         compose_dest.write_text(compose_content)
 
         # Build first
@@ -315,9 +311,7 @@ class TestDockerComposeExecution:
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
-        compose_content = compose_content.replace(
-            "build: .", f"build: {project_root}"
-        )
+        compose_content = compose_content.replace("build: .", f"build: {project_root}")
         compose_dest.write_text(compose_content)
 
         # Build first
