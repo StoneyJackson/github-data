@@ -57,7 +57,7 @@ docker run --rm \
   -e GITHUB_TOKEN=your_token_here \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 ```
 
 ### Restore Data
@@ -70,7 +70,7 @@ docker run --rm \
   -e GITHUB_TOKEN=your_token_here \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=restore \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 ```
 
 ### Environment Variables
@@ -104,7 +104,7 @@ docker run --rm \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=restore \
   -e LABEL_CONFLICT_STRATEGY=overwrite \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 ```
 
 #### GitHub Token Permissions
@@ -164,7 +164,7 @@ docker run --rm \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 
 # Backup excluding Git repository (metadata only)
 docker run --rm \
@@ -173,7 +173,7 @@ docker run --rm \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 
 # Backup with bundle format
 docker run --rm \
@@ -182,7 +182,7 @@ docker run --rm \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
-  github-data
+  ghcr.io/stoneyjackson/github-data:latest
 ```
 
 #### Backup Formats
