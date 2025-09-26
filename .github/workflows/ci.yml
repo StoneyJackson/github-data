@@ -1,9 +1,6 @@
 name: CI - Feature Branches
 
 on:
-  push:
-    branches-ignore:
-      - main
   pull_request:
     branches:
       - main
