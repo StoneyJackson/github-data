@@ -34,13 +34,13 @@ jobs:
         run: make type-check
 
       - name: Run tests
-        run: make test-fast
+        run: make test
 
   build:
     name: Build and Push Image
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push'
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
