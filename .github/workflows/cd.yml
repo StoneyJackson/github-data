@@ -82,7 +82,24 @@ jobs:
 
       - name: Run semantic-release
         id: semantic
-        run: npx semantic-release
+        run: |
+          export GITHUB_OUTPUT_FILE="$GITHUB_OUTPUT"
+          npx semantic-release > semantic-release-output.log 2>&1
+          
+          # Check if semantic-release created a new release
+          if grep -q "Published release" semantic-release-output.log; then
+            echo "new_release_published=true" >> $GITHUB_OUTPUT_FILE
+            # Extract version from git tag
+            LATEST_TAG=$(git describe --tags --abbrev=0)
+            echo "new_release_version=${LATEST_TAG}" >> $GITHUB_OUTPUT_FILE
+            echo "✓ New release published: ${LATEST_TAG}"
+          else
+            echo "new_release_published=false" >> $GITHUB_OUTPUT_FILE
+            echo "new_release_version=" >> $GITHUB_OUTPUT_FILE
+            echo "ℹ No new release published"
+          fi
+          
+          cat semantic-release-output.log
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
