@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/StoneyJackson/github-data/compare/v1.0.2...v1.0.3) (2025-09-26)
+
+
+### Bug Fixes
+
+* implement client-side position calculation for sub-issues ([#13](https://github.com/StoneyJackson/github-data/issues/13)) ([29ddcf6](https://github.com/StoneyJackson/github-data/commit/29ddcf60bdf64c6ecd18b6ea8e5b190f3110384a))
+
 ## [1.0.2](https://github.com/StoneyJackson/github-data/compare/v1.0.1...v1.0.2) (2025-09-26)
 
 
