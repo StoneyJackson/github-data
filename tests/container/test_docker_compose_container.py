@@ -33,7 +33,8 @@ class DockerComposeTestHelper:
     ) -> subprocess.CompletedProcess:
         """Run docker-compose command with test configuration."""
         cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             DockerComposeTestHelper.COMPOSE_FILE,
             "-p",
@@ -221,7 +222,8 @@ class TestDockerComposeExecution:
 
         # Run test service using 'run' to capture output directly
         run_cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             "docker-compose.test.yml",
             "-p",
@@ -259,7 +261,8 @@ class TestDockerComposeExecution:
         import subprocess
 
         cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             DockerComposeTestHelper.COMPOSE_FILE,
             "-p",
@@ -411,7 +414,7 @@ services:
 """
         )
 
-        cmd = ["docker-compose", "-f", str(invalid_compose), "build"]
+        cmd = ["docker", "compose", "-f", str(invalid_compose), "build"]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
         assert result.returncode != 0, "Should fail with invalid build context"
