@@ -207,12 +207,14 @@ class TestDockerComposeExecution:
         monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -243,12 +245,14 @@ class TestDockerComposeExecution:
         monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -305,12 +309,14 @@ class TestDockerComposeExecution:
         test_data_dir.mkdir(exist_ok=True)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -448,12 +454,14 @@ class TestDockerComposePerformance:
             monkeypatch.chdir(temp_dir)
 
             # Copy compose file and fix build context
-            compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+            # Find project root dynamically
+            project_root = Path(__file__).parent.parent.parent
+            compose_source = project_root / "docker-compose.test.yml"
             compose_dest = Path(temp_dir) / "docker-compose.test.yml"
             compose_content = compose_source.read_text()
             # Fix build context to point to project root
             compose_content = compose_content.replace(
-                "build: .", "build: /workspaces/github-data"
+                "build: .", f"build: {project_root}"
             )
             compose_dest.write_text(compose_content)
 
