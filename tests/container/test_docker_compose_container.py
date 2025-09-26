@@ -33,7 +33,8 @@ class DockerComposeTestHelper:
     ) -> subprocess.CompletedProcess:
         """Run docker-compose command with test configuration."""
         cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             DockerComposeTestHelper.COMPOSE_FILE,
             "-p",
@@ -206,12 +207,14 @@ class TestDockerComposeExecution:
         monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -221,7 +224,8 @@ class TestDockerComposeExecution:
 
         # Run test service using 'run' to capture output directly
         run_cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             "docker-compose.test.yml",
             "-p",
@@ -241,12 +245,14 @@ class TestDockerComposeExecution:
         monkeypatch.chdir(compose_temp_dir)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -259,7 +265,8 @@ class TestDockerComposeExecution:
         import subprocess
 
         cmd = [
-            "docker-compose",
+            "docker",
+            "compose",
             "-f",
             DockerComposeTestHelper.COMPOSE_FILE,
             "-p",
@@ -302,12 +309,14 @@ class TestDockerComposeExecution:
         test_data_dir.mkdir(exist_ok=True)
 
         # Copy compose file to temp directory and fix build context
-        compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+        # Find project root dynamically
+        project_root = Path(__file__).parent.parent.parent
+        compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
         # Fix build context to point to project root
         compose_content = compose_content.replace(
-            "build: .", "build: /workspaces/github-data"
+            "build: .", f"build: {project_root}"
         )
         compose_dest.write_text(compose_content)
 
@@ -411,7 +420,7 @@ services:
 """
         )
 
-        cmd = ["docker-compose", "-f", str(invalid_compose), "build"]
+        cmd = ["docker", "compose", "-f", str(invalid_compose), "build"]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
         assert result.returncode != 0, "Should fail with invalid build context"
@@ -445,12 +454,14 @@ class TestDockerComposePerformance:
             monkeypatch.chdir(temp_dir)
 
             # Copy compose file and fix build context
-            compose_source = Path("/workspaces/github-data/docker-compose.test.yml")
+            # Find project root dynamically
+            project_root = Path(__file__).parent.parent.parent
+            compose_source = project_root / "docker-compose.test.yml"
             compose_dest = Path(temp_dir) / "docker-compose.test.yml"
             compose_content = compose_source.read_text()
             # Fix build context to point to project root
             compose_content = compose_content.replace(
-                "build: .", "build: /workspaces/github-data"
+                "build: .", f"build: {project_root}"
             )
             compose_dest.write_text(compose_content)
 
