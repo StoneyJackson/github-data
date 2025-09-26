@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/StoneyJackson/github-data/compare/v1.0.0...v1.0.1) (2025-09-26)
+
+
+### Bug Fixes
+
+* enhance semantic-release with output capture and release detection ([#8](https://github.com/StoneyJackson/github-data/issues/8)) ([272ae29](https://github.com/StoneyJackson/github-data/commit/272ae29fae768a0a07ee47dbd0c9d82d56614d43))
+
 # 1.0.0 (2025-09-26)
 
 
