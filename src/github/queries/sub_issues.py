@@ -28,7 +28,6 @@ REPOSITORY_SUB_ISSUES_QUERY = gql(
                         nodes {
                             id
                             number
-                            position
                         }
                         pageInfo {
                             hasNextPage
@@ -68,7 +67,6 @@ ISSUE_SUB_ISSUES_QUERY = gql(
                     nodes {
                         id
                         number
-                        position
                         title
                         state
                         url
