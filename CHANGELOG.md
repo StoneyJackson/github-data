@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/StoneyJackson/github-data/compare/v1.0.3...v1.0.4) (2025-09-26)
+
+
+### Bug Fixes
+
+* correct GraphQL field name from parentIssue to parent ([#15](https://github.com/StoneyJackson/github-data/issues/15)) ([ae7b0d3](https://github.com/StoneyJackson/github-data/commit/ae7b0d376ecc099bd06ef6e1b5f7e4bc07bf3184))
+
 ## [1.0.3](https://github.com/StoneyJackson/github-data/compare/v1.0.2...v1.0.3) (2025-09-26)
 
 
