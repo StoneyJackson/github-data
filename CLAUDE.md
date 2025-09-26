@@ -194,3 +194,4 @@ For comprehensive development information, see:
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Main developer documentation, setup, workflow, and coding standards
 - **[docs/testing.md](docs/testing.md)** - Complete testing guide and best practices
 - Use TDD.
+- Never commit to main.
