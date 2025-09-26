@@ -34,7 +34,7 @@ REPOSITORY_SUB_ISSUES_QUERY = gql(
                             endCursor
                         }
                     }
-                    parentIssue {
+                    parent {
                         id
                         number
                     }
@@ -76,7 +76,7 @@ ISSUE_SUB_ISSUES_QUERY = gql(
                         endCursor
                     }
                 }
-                parentIssue {
+                parent {
                     id
                     number
                 }
