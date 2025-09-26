@@ -160,3 +160,137 @@ jobs:
           tags: ${{ steps.version_tags.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  cleanup-packages:
+    name: Cleanup Untagged Packages
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: needs.release.outputs.new_release_published == 'true'
+
+    steps:
+      - name: Cleanup untagged packages
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const packageName = context.repo.repo;
+            
+            console.log(`Cleaning up packages for ${owner}/${packageName}`);
+            
+            try {
+              // Get all package versions
+              const { data: versions } = await github.rest.packages.getAllPackageVersionsForPackageOwnedByOrg({
+                package_type: 'container',
+                package_name: packageName,
+                org: owner,
+                per_page: 100
+              });
+              
+              console.log(`Found ${versions.length} package versions`);
+              
+              const versionsToDelete = [];
+              
+              for (const version of versions) {
+                const tags = version.metadata?.container?.tags || [];
+                console.log(`Version ${version.id}: tags = [${tags.join(', ')}]`);
+                
+                // Keep versions that have valid tags
+                const hasValidTag = tags.some(tag => {
+                  // Keep 'latest' tag
+                  if (tag === 'latest') return true;
+                  
+                  // Keep version tags (v1, v1.2, v1.2.3, 1.0.0, etc.)
+                  const versionPattern = /^v?\d+(\.\d+)?(\.\d+)?$/;
+                  return versionPattern.test(tag);
+                });
+                
+                if (!hasValidTag && tags.length > 0) {
+                  console.log(`Marking version ${version.id} for deletion (tags: [${tags.join(', ')}])`);
+                  versionsToDelete.push(version);
+                } else if (tags.length === 0) {
+                  console.log(`Marking untagged version ${version.id} for deletion`);
+                  versionsToDelete.push(version);
+                } else {
+                  console.log(`Keeping version ${version.id} (tags: [${tags.join(', ')}])`);
+                }
+              }
+              
+              console.log(`Deleting ${versionsToDelete.length} package versions`);
+              
+              for (const version of versionsToDelete) {
+                try {
+                  await github.rest.packages.deletePackageVersionForOrg({
+                    package_type: 'container',
+                    package_name: packageName,
+                    org: owner,
+                    package_version_id: version.id
+                  });
+                  console.log(`✓ Deleted package version ${version.id}`);
+                } catch (error) {
+                  console.log(`✗ Failed to delete package version ${version.id}: ${error.message}`);
+                }
+              }
+              
+              console.log('Package cleanup completed');
+              
+            } catch (error) {
+              // Handle case where package doesn't exist or is owned by user instead of org
+              if (error.status === 404) {
+                console.log('Package not found or checking user-owned packages...');
+                try {
+                  const { data: userVersions } = await github.rest.packages.getAllPackageVersionsForPackageOwnedByUser({
+                    package_type: 'container',
+                    package_name: packageName,
+                    username: owner,
+                    per_page: 100
+                  });
+                  
+                  console.log(`Found ${userVersions.length} user package versions`);
+                  
+                  const userVersionsToDelete = [];
+                  
+                  for (const version of userVersions) {
+                    const tags = version.metadata?.container?.tags || [];
+                    console.log(`User version ${version.id}: tags = [${tags.join(', ')}]`);
+                    
+                    const hasValidTag = tags.some(tag => {
+                      if (tag === 'latest') return true;
+                      const versionPattern = /^v?\d+(\.\d+)?(\.\d+)?$/;
+                      return versionPattern.test(tag);
+                    });
+                    
+                    if (!hasValidTag && tags.length > 0) {
+                      console.log(`Marking user version ${version.id} for deletion (tags: [${tags.join(', ')}])`);
+                      userVersionsToDelete.push(version);
+                    } else if (tags.length === 0) {
+                      console.log(`Marking untagged user version ${version.id} for deletion`);
+                      userVersionsToDelete.push(version);
+                    } else {
+                      console.log(`Keeping user version ${version.id} (tags: [${tags.join(', ')}])`);
+                    }
+                  }
+                  
+                  console.log(`Deleting ${userVersionsToDelete.length} user package versions`);
+                  
+                  for (const version of userVersionsToDelete) {
+                    try {
+                      await github.rest.packages.deletePackageVersionForUser({
+                        package_type: 'container',
+                        package_name: packageName,
+                        username: owner,
+                        package_version_id: version.id
+                      });
+                      console.log(`✓ Deleted user package version ${version.id}`);
+                    } catch (deleteError) {
+                      console.log(`✗ Failed to delete user package version ${version.id}: ${deleteError.message}`);
+                    }
+                  }
+                  
+                } catch (userError) {
+                  console.log(`Error accessing user packages: ${userError.message}`);
+                }
+              } else {
+                console.log(`Error accessing packages: ${error.message}`);
+              }
+            }
