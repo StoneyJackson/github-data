@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/StoneyJackson/github-data/compare/v1.0.1...v1.0.2) (2025-09-26)
+
+
+### Bug Fixes
+
+* implement multi-tag Docker image strategy for releases ([#11](https://github.com/StoneyJackson/github-data/issues/11)) ([250c4b7](https://github.com/StoneyJackson/github-data/commit/250c4b785eee0d45445630b32d70f0a9f8258522))
+
 ## [1.0.1](https://github.com/StoneyJackson/github-data/compare/v1.0.0...v1.0.1) (2025-09-26)
 
 
