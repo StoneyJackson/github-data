@@ -28,16 +28,16 @@ jobs:
           python-version: '3.11'
           
       - name: Install dependencies
-        run: pdm install --dev
+        run: make install-dev
         
       - name: Run linting
-        run: pdm run flake8
+        run: make lint
         
       - name: Run type checking
-        run: pdm run mypy src/
+        run: make type-check
         
       - name: Run tests
-        run: pdm run pytest --cov=src --cov-report=xml
+        run: make test-fast
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
