@@ -95,10 +95,10 @@ class SubIssueRelationshipBuilder:
         all_sub_issues = []
         for issue in issues_nodes:
             sub_issues = issue.get("subIssues", {}).get("nodes", [])
-            for sub_issue in sub_issues:
+            for position, sub_issue in enumerate(sub_issues, 1):
                 all_sub_issues.append(
                     SubIssueRelationshipBuilder.create_relationship_object(
-                        sub_issue, issue, include_metadata=False
+                        sub_issue, issue, position, include_metadata=False
                     )
                 )
         return all_sub_issues
@@ -119,15 +119,16 @@ class SubIssueRelationshipBuilder:
         """
         return [
             SubIssueRelationshipBuilder.create_relationship_object(
-                sub_issue, parent_issue, include_metadata=True
+                sub_issue, parent_issue, position + 1, include_metadata=True
             )
-            for sub_issue in sub_issues_nodes
+            for position, sub_issue in enumerate(sub_issues_nodes)
         ]
 
     @staticmethod
     def create_relationship_object(
         sub_issue: Dict[str, Any],
         parent_issue: Dict[str, Any],
+        position: int,
         include_metadata: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -136,6 +137,7 @@ class SubIssueRelationshipBuilder:
         Args:
             sub_issue (Dict[str, Any]): Sub-issue details
             parent_issue (Dict[str, Any]): Parent issue details
+            position (int): Position of sub-issue in parent's list
             include_metadata: Include additional metadata. Defaults to False.
 
         Returns:
@@ -146,7 +148,7 @@ class SubIssueRelationshipBuilder:
             "sub_issue_number": sub_issue["number"],
             "parent_issue_id": parent_issue["id"],
             "parent_issue_number": parent_issue["number"],
-            "position": sub_issue.get("position"),
+            "position": position,
         }
 
         if include_metadata:

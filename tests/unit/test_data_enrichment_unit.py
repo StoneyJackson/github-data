@@ -250,7 +250,7 @@ class TestSubIssueRelationshipBuilder:
         }
 
         result = SubIssueRelationshipBuilder.create_relationship_object(
-            sub_issue, parent_issue, include_metadata=False
+            sub_issue, parent_issue, 1, include_metadata=False
         )
 
         expected_keys = {
@@ -283,7 +283,7 @@ class TestSubIssueRelationshipBuilder:
         }
 
         result = SubIssueRelationshipBuilder.create_relationship_object(
-            sub_issue, parent_issue, include_metadata=True
+            sub_issue, parent_issue, 1, include_metadata=True
         )
 
         expected_keys = {
@@ -318,10 +318,10 @@ class TestSubIssueRelationshipBuilder:
         }
 
         result = SubIssueRelationshipBuilder.create_relationship_object(
-            sub_issue, parent_issue, include_metadata=False
+            sub_issue, parent_issue, 1, include_metadata=False
         )
 
-        assert result["position"] is None
+        assert result["position"] == 1
 
 
 class TestURLEnricher:
