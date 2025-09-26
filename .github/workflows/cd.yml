@@ -128,13 +128,35 @@ jobs:
         run: echo "repository=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
         id: lowercase_repo
 
+      - name: Generate version tags
+        id: version_tags
+        shell: bash
+        run: |
+          VERSION="${{ needs.release.outputs.new_release_version }}"
+          # Remove 'v' prefix if present for processing
+          VERSION_NO_V="${VERSION#v}"
+          
+          # Split version into parts (e.g., 1.2.3 -> 1, 2, 3)
+          IFS='.' read -ra VERSION_PARTS <<< "$VERSION_NO_V"
+          MAJOR="${VERSION_PARTS[0]}"
+          MINOR="${VERSION_PARTS[1]:-0}"
+          PATCH="${VERSION_PARTS[2]:-0}"
+          
+          # Build tag list
+          REPO="ghcr.io/${{ steps.lowercase_repo.outputs.repository }}"
+          TAGS="${REPO}:latest"
+          TAGS="${TAGS},${REPO}:${VERSION}"
+          TAGS="${TAGS},${REPO}:v${MAJOR}.${MINOR}"
+          TAGS="${TAGS},${REPO}:v${MAJOR}"
+          
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "Generated tags: ${TAGS}"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:${{ needs.release.outputs.new_release_version }}
-            ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:latest
+          tags: ${{ steps.version_tags.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
