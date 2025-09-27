@@ -56,15 +56,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract and sanitize branch name
+      - name: Generate PR tag
         shell: bash
         run: |
-          # Extract branch name and sanitize for Docker tag
-          BRANCH_NAME="${GITHUB_HEAD_REF}"
-          # Convert to lowercase, replace / with -, and remove other invalid characters
-          SANITIZED_TAG=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/[\/]/-/g' | sed 's/[^a-z0-9._-]//g')
-          echo "branch_tag=${SANITIZED_TAG}" >> $GITHUB_OUTPUT
-        id: extract_branch
+          # Use PR number for tagging
+          PR_NUMBER="${{ github.event.number }}"
+          echo "pr_tag=pr-${PR_NUMBER}" >> $GITHUB_OUTPUT
+        id: generate_tag
 
       - name: Convert repository name to lowercase
         shell: bash
@@ -77,6 +75,6 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:${{ steps.extract_branch.outputs.branch_tag }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:${{ steps.generate_tag.outputs.pr_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
