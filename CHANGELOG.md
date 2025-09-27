@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/StoneyJackson/github-data/compare/v1.0.4...v1.0.5) (2025-09-27)
+
+
+### Bug Fixes
+
+* improve container image cleanup with safe multi-arch support ([#16](https://github.com/StoneyJackson/github-data/issues/16)) ([c711d10](https://github.com/StoneyJackson/github-data/commit/c711d104515a273084db6ded78b053ac17bfbfda))
+
 ## [1.0.4](https://github.com/StoneyJackson/github-data/compare/v1.0.3...v1.0.4) (2025-09-26)
 
 
