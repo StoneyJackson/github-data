@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/StoneyJackson/github-data/compare/v1.0.5...v1.1.0) (2025-09-27)
+
+
+### Features
+
+* flatten Git repository structure from git-data/orgname_reponame to git-repo ([#17](https://github.com/StoneyJackson/github-data/issues/17)) ([27227aa](https://github.com/StoneyJackson/github-data/commit/27227aa19f8b127016dcb63815b143ac8ea3e12f))
+
 ## [1.0.5](https://github.com/StoneyJackson/github-data/compare/v1.0.4...v1.0.5) (2025-09-27)
 
 
