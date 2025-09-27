@@ -76,15 +76,15 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             repo_name = entity["repo_name"]
             repo_url = entity["repo_url"]
 
-            # Create Git data directory using simple filesystem operations
-            git_data_dir = Path(output_path) / "git-data"
-            git_data_dir.mkdir(parents=True, exist_ok=True)
+            # Create Git repository directory using simple filesystem operations
+            git_repo_dir = Path(output_path) / "git-repo"
+            git_repo_dir.mkdir(parents=True, exist_ok=True)
 
-            # Determine backup destination
+            # Determine backup destination - flatten directly to git-repo
             if self._backup_format == GitBackupFormat.BUNDLE:
-                backup_path = git_data_dir / f"{repo_name.replace('/', '_')}.bundle"
+                backup_path = git_repo_dir / f"{repo_name.replace('/', '_')}.bundle"
             else:
-                backup_path = git_data_dir / repo_name.replace("/", "_")
+                backup_path = git_repo_dir
 
             # Perform Git backup
             result = self._git_service.clone_repository(

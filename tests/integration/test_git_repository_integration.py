@@ -79,7 +79,7 @@ class TestGitRepositoryIntegration:
             mock_result = GitOperationResult(
                 success=True,
                 backup_format="mirror",
-                destination=str(Path(temp_data_dir) / "git-data" / "test_repo"),
+                destination=str(Path(temp_data_dir) / "git-repo"),
                 size_bytes=1024,
             )
             mock_clone.return_value = mock_result
@@ -90,7 +90,7 @@ class TestGitRepositoryIntegration:
 
         assert result["total_repositories"] == 1
         assert result["saved_repositories"] == 1
-        assert (Path(temp_data_dir) / "git-data").exists()
+        assert (Path(temp_data_dir) / "git-repo").exists()
         mock_clone.assert_called_once()
 
     def test_git_strategy_save_data_error_handling(
@@ -141,7 +141,7 @@ class TestGitRepositoryIntegration:
             mock_result = GitOperationResult(
                 success=True,
                 backup_format="bundle",
-                destination=str(Path(temp_data_dir) / "git-data" / "test_repo.bundle"),
+                destination=str(Path(temp_data_dir) / "git-repo" / "test_repo.bundle"),
                 size_bytes=2048,
             )
             mock_clone.return_value = mock_result
@@ -167,7 +167,7 @@ class TestGitRepositoryIntegration:
             mock_execute.return_value = {
                 "success": True,
                 "method": "mirror",
-                "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
+                "destination": str(Path(temp_data_dir) / "git-repo"),
                 "size_bytes": 2048,
             }
 
@@ -181,43 +181,29 @@ class TestGitRepositoryIntegration:
         self, git_restore_strategy, storage_service_mock, temp_data_dir
     ):
         """Test Git restore strategy load data functionality."""
-        # Create mock git-data directory structure
-        git_data_dir = Path(temp_data_dir) / "git-data"
+        # Create mock git-repo directory structure with flattened layout
+        git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir(parents=True)
 
-        # Create mock mirror repository
-        mirror_repo = git_data_dir / "test_repo"
-        mirror_repo.mkdir()
-
-        # Create mock bundle file
-        bundle_file = git_data_dir / "another_repo.bundle"
-        bundle_file.touch()
+        # Create mock Git repository directly in git-repo (simulating clone)
+        git_dir = git_data_dir / ".git"
+        git_dir.mkdir()
 
         # Act
         repositories = git_restore_strategy.load_data(
             temp_data_dir, storage_service_mock
         )
 
-        # Assert
-        assert len(repositories) == 2
+        # Assert - only one repository should be found (the flattened one)
+        assert len(repositories) == 1
 
-        # Check mirror repository
-        mirror_data = next(
-            r
-            for r in repositories
-            if r["backup_format"] == GitBackupFormat.MIRROR.value
-        )
-        assert mirror_data["repo_name"] == "test/repo"
-        assert Path(mirror_data["backup_path"]).name == "test_repo"
-
-        # Check bundle file
-        bundle_data = next(
-            r
-            for r in repositories
-            if r["backup_format"] == GitBackupFormat.BUNDLE.value
-        )
-        assert bundle_data["repo_name"] == "another/repo"
-        assert Path(bundle_data["backup_path"]).name == "another_repo.bundle"
+        # Check mirror repository (flattened structure)
+        mirror_data = repositories[0]
+        assert mirror_data["backup_format"] == GitBackupFormat.MIRROR.value
+        assert (
+            mirror_data["repo_name"] == "repository"
+        )  # Generic name for flattened structure
+        assert mirror_data["backup_path"] == str(git_data_dir)
 
     def test_git_restore_strategy_restore_data(
         self, git_restore_strategy, temp_data_dir
@@ -298,7 +284,7 @@ class TestGitRepositoryStorageIntegration:
     """Integration tests for Git repository storage operations."""
 
     def test_git_data_directory_creation(self, temp_data_dir, storage_service_mock):
-        """Test that git-data directory is created properly."""
+        """Test that git-repo directory is created properly."""
         git_service = GitRepositoryServiceImpl()
         strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
 
@@ -316,13 +302,13 @@ class TestGitRepositoryStorageIntegration:
             mock_execute.return_value = {
                 "success": True,
                 "method": "mirror",
-                "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
+                "destination": str(Path(temp_data_dir) / "git-repo"),
                 "size_bytes": 512,
             }
 
             strategy.save_data(entities, temp_data_dir, storage_service_mock)
 
-            git_data_dir = Path(temp_data_dir) / "git-data"
+            git_data_dir = Path(temp_data_dir) / "git-repo"
             assert git_data_dir.exists()
             assert git_data_dir.is_dir()
 
@@ -345,18 +331,14 @@ class TestGitRepositoryStorageIntegration:
             mock_execute.return_value = {
                 "success": True,
                 "method": "mirror",
-                "destination": str(
-                    Path(temp_data_dir) / "git-data" / "organization_repository-name"
-                ),
+                "destination": str(Path(temp_data_dir) / "git-repo"),
                 "size_bytes": 1024,
             }
 
             strategy.save_data(entities, temp_data_dir, storage_service_mock)
 
-            # Verify the path was sanitized (slash replaced with underscore)
-            expected_path = (
-                Path(temp_data_dir) / "git-data" / "organization_repository-name"
-            )
+            # Verify the path goes directly to git-repo (flattened structure)
+            expected_path = Path(temp_data_dir) / "git-repo"
             mock_execute.assert_called_once()
             args, kwargs = mock_execute.call_args
             assert args[1] == expected_path  # destination parameter
@@ -383,7 +365,7 @@ class TestGitRepositoryStorageIntegration:
             mock_mirror.return_value = {
                 "success": True,
                 "method": "mirror",
-                "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
+                "destination": str(Path(temp_data_dir) / "git-repo"),
                 "size_bytes": 1024,
             }
 
@@ -412,7 +394,7 @@ class TestGitRepositoryStorageIntegration:
                 "success": True,
                 "method": "bundle",
                 "destination": str(
-                    Path(temp_data_dir) / "git-data" / "test_repo.bundle"
+                    Path(temp_data_dir) / "git-repo" / "test_repo.bundle"
                 ),
                 "size_bytes": 2048,
             }
@@ -452,7 +434,7 @@ class TestGitRepositoryWorkflow:
             mock_clone.return_value = {
                 "success": True,
                 "method": "mirror",
-                "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
+                "destination": str(Path(temp_data_dir) / "git-repo"),
                 "size_bytes": 1024,
             }
 
@@ -462,11 +444,12 @@ class TestGitRepositoryWorkflow:
 
         assert save_result["saved_repositories"] == 1
 
-        # Simulate the saved directory structure
-        git_data_dir = Path(temp_data_dir) / "git-data"
+        # Simulate the saved directory structure (flattened)
+        git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir(parents=True, exist_ok=True)
-        saved_repo = git_data_dir / "test_repo"
-        saved_repo.mkdir()
+        # Create .git directory to simulate a Git repository
+        git_dir = git_data_dir / ".git"
+        git_dir.mkdir()
 
         # Step 2: Restore operation
         restore_strategy = GitRepositoryRestoreStrategy(git_service)
@@ -493,43 +476,39 @@ class TestGitRepositoryWorkflow:
     def test_empty_git_data_directory_handling(
         self, temp_data_dir, storage_service_mock
     ):
-        """Test handling of empty git-data directory."""
+        """Test handling of empty git-repo directory."""
         git_service = GitRepositoryServiceImpl()
         restore_strategy = GitRepositoryRestoreStrategy(git_service)
 
-        # No git-data directory exists
+        # No git-repo directory exists
         repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
         assert repositories == []
 
-        # Empty git-data directory
-        git_data_dir = Path(temp_data_dir) / "git-data"
+        # Empty git-repo directory
+        git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir()
 
         repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
         assert repositories == []
 
-    def test_mixed_format_repository_handling(
+    def test_bundle_format_repository_handling(
         self, temp_data_dir, storage_service_mock
     ):
-        """Test handling repositories with mixed backup formats."""
+        """Test handling repositories with bundle backup format."""
         git_service = GitRepositoryServiceImpl()
         restore_strategy = GitRepositoryRestoreStrategy(git_service)
 
-        # Create mixed format backup structure
-        git_data_dir = Path(temp_data_dir) / "git-data"
+        # Create bundle format backup structure
+        git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir(parents=True)
 
-        # Mirror repository
-        mirror_repo = git_data_dir / "mirror_repo"
-        mirror_repo.mkdir()
-
         # Bundle file
-        bundle_file = git_data_dir / "bundle_repo.bundle"
+        bundle_file = git_data_dir / "test_repo.bundle"
         bundle_file.touch()
 
         repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
 
-        assert len(repositories) == 2
-        formats = [r["backup_format"] for r in repositories]
-        assert GitBackupFormat.MIRROR.value in formats
-        assert GitBackupFormat.BUNDLE.value in formats
+        assert len(repositories) == 1
+        assert repositories[0]["backup_format"] == GitBackupFormat.BUNDLE.value
+        assert repositories[0]["repo_name"] == "test/repo"
+        assert repositories[0]["backup_path"] == str(bundle_file)

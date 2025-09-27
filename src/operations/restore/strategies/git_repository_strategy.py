@@ -30,32 +30,35 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
         self, input_path: str, storage_service: "StorageService"
     ) -> List[Dict[str, Any]]:
         """Load Git repository backup data."""
-        git_data_dir = Path(input_path) / "git-data"
+        git_repo_dir = Path(input_path) / "git-repo"
 
-        if not git_data_dir.exists():
+        if not git_repo_dir.exists():
             return []
 
         repositories = []
 
-        # Find all Git repositories (directories and bundle files)
-        for item in git_data_dir.iterdir():
-            if item.is_dir():
-                repositories.append(
-                    {
-                        "backup_path": str(item),
-                        "backup_format": GitBackupFormat.MIRROR.value,
-                        "repo_name": item.name.replace("_", "/"),
-                    }
-                )
-            elif item.suffix == ".bundle":
-                repo_name = item.stem.replace("_", "/")
-                repositories.append(
-                    {
-                        "backup_path": str(item),
-                        "backup_format": GitBackupFormat.BUNDLE.value,
-                        "repo_name": repo_name,
-                    }
-                )
+        # Check if git-repo contains a Git repository directly or bundle files
+        if (git_repo_dir / ".git").exists():
+            # Direct git repository in git-repo directory
+            repositories.append(
+                {
+                    "backup_path": str(git_repo_dir),
+                    "backup_format": GitBackupFormat.MIRROR.value,
+                    "repo_name": "repository",  # Generic name for flattened structure
+                }
+            )
+        else:
+            # Look for bundle files in git-repo directory
+            for item in git_repo_dir.iterdir():
+                if item.suffix == ".bundle":
+                    repo_name = item.stem.replace("_", "/")
+                    repositories.append(
+                        {
+                            "backup_path": str(item),
+                            "backup_format": GitBackupFormat.BUNDLE.value,
+                            "repo_name": repo_name,
+                        }
+                    )
 
         return repositories
 
