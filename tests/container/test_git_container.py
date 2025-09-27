@@ -398,9 +398,9 @@ try:
 
     # Test directory creation (part of save_data)
     output_path = "/data"
-    git_data_dir = Path(output_path) / "git-data"
+    git_data_dir = Path(output_path) / "git-repo"
     git_data_dir.mkdir(parents=True, exist_ok=True)
-    print(f"SUCCESS: Created git-data directory at {git_data_dir}")
+    print(f"SUCCESS: Created git-repo directory at {git_data_dir}")
 
     assert git_data_dir.exists()
     print("SUCCESS: Git-data directory verified")
@@ -422,8 +422,8 @@ except Exception as e:
         assert "SUCCESS: Collected 1 entities" in output
         assert "SUCCESS: Git-data directory verified" in output
 
-        # Verify git-data directory was created in mounted volume
-        git_data_dir = Path(temp_data_dir) / "git-data"
+        # Verify git-repo directory was created in mounted volume
+        git_data_dir = Path(temp_data_dir) / "git-repo"
         assert git_data_dir.exists()
 
     @pytest.mark.slow
@@ -456,8 +456,8 @@ def mock_save_function(config):
     """Mock save function that creates expected directory structure."""
     output_path = config.data_path  # Use config.data_path instead of args[3]
 
-    # Create git-data directory to simulate successful operation
-    git_data_dir = Path(output_path) / "git-data"
+    # Create git-repo directory to simulate successful operation
+    git_data_dir = Path(output_path) / "git-repo"
     git_data_dir.mkdir(parents=True, exist_ok=True)
 
     # Create a dummy file to simulate backup

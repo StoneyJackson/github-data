@@ -203,9 +203,10 @@ docker run --rm \
 │   ├── issues.json
 │   ├── labels.json
 │   └── pull_requests.json
-└── git-data/             # Git repository data (new)
-    ├── repository/       # Mirror clone (if mirror format)
-    └── repository.bundle # Bundle file (if bundle format)
+└── git-repo/             # Git repository data (new, flattened structure)
+    ├── .git/             # Git repository content
+    ├── README.md         # Repository files
+    └── ...               # Other repository content
 ```
 
 ## Data Format
@@ -221,9 +222,10 @@ The container saves/restores data with the following directory structure:
 │   ├── sub_issues.json     # Sub-issue relationships
 │   ├── pull_requests.json  # Pull requests and their metadata
 │   └── pr_comments.json    # All pull request comments
-└── git-data/               # Git repository data (if enabled)
-    ├── repository/         # Mirror clone (default format)
-    └── repository.bundle   # Bundle file (alternative format)
+└── git-repo/               # Git repository data (if enabled, flattened structure)
+    ├── .git/               # Git repository content (mirror format)
+    ├── README.md           # Repository files
+    └── ...                 # Other repository content
 ```
 
 ### GitHub Metadata
