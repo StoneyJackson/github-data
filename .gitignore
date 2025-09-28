@@ -189,3 +189,4 @@ Thumbs.db
 # Claude Code
 .claude/*
 !.claude/settings.json
+!.claude/agents/
