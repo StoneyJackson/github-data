@@ -9,6 +9,8 @@ from typing import List, Optional
 from src.github.protocols import RepositoryService
 from src.storage.protocols import StorageService
 from src.git.protocols import GitRepositoryService
+from src.config.settings import ApplicationConfig
+from src.operations.strategy_factory import StrategyFactory
 
 
 def save_repository_data_with_strategy_pattern(
@@ -22,24 +24,54 @@ def save_repository_data_with_strategy_pattern(
     git_service: Optional[GitRepositoryService] = None,
     data_types: Optional[List[str]] = None,
 ) -> None:
-    """Save using strategy pattern approach."""
+    """Save using strategy pattern approach (legacy interface)."""
+    # For backward compatibility, create a temporary config from parameters
+    # This will be removed in Phase 2 when we fully transition to config-driven approach
+    temp_config = ApplicationConfig(
+        operation="save",
+        github_token="",  # Not used in save operation
+        github_repo=repo_name,
+        data_path=output_path,
+        label_conflict_strategy="fail-if-existing",
+        include_git_repo=include_git_repo,
+        include_issue_comments=True,  # Default to include comments
+        git_auth_method="token",
+    )
 
-    # Create orchestrator
+    save_repository_data_with_config(
+        temp_config,
+        github_service,
+        storage_service,
+        repo_name,
+        output_path,
+        include_prs=include_prs,
+        include_sub_issues=include_sub_issues,
+        git_service=git_service,
+        data_types=data_types,
+    )
+
+
+def save_repository_data_with_config(
+    config: ApplicationConfig,
+    github_service: RepositoryService,
+    storage_service: StorageService,
+    repo_name: str,
+    output_path: str,
+    include_prs: bool = True,
+    include_sub_issues: bool = True,
+    git_service: Optional[GitRepositoryService] = None,
+    data_types: Optional[List[str]] = None,
+) -> None:
+    """Save using strategy pattern approach with configuration."""
+
+    # Create orchestrator with configuration
     from .orchestrator import StrategyBasedSaveOrchestrator
 
-    orchestrator = StrategyBasedSaveOrchestrator(github_service, storage_service)
+    orchestrator = StrategyBasedSaveOrchestrator(
+        config, github_service, storage_service
+    )
 
-    # Register strategies directly in operations (not entities)
-    from .strategies.labels_strategy import LabelsSaveStrategy
-    from .strategies.issues_strategy import IssuesSaveStrategy
-    from .strategies.comments_strategy import CommentsSaveStrategy
-
-    # Register entity strategies
-    orchestrator.register_strategy(LabelsSaveStrategy())
-    orchestrator.register_strategy(IssuesSaveStrategy())
-    orchestrator.register_strategy(CommentsSaveStrategy())
-
-    # Add PR strategies if requested
+    # Add additional strategies not yet in the factory
     if include_prs:
         from .strategies.pull_requests_strategy import PullRequestsSaveStrategy
         from .strategies.pr_comments_strategy import PullRequestCommentsSaveStrategy
@@ -54,19 +86,22 @@ def save_repository_data_with_strategy_pattern(
         orchestrator.register_strategy(SubIssuesSaveStrategy())
 
     # Add Git repository strategy if requested
-    if include_git_repo and git_service:
+    if config.include_git_repo and git_service:
         from .strategies.git_repository_strategy import GitRepositoryStrategy
 
         orchestrator.register_strategy(GitRepositoryStrategy(git_service))
 
     # Determine entities to save
     if data_types is None:
-        requested_entities = ["labels", "issues", "comments"]
+        # Start with config-based entities
+        requested_entities = StrategyFactory.get_enabled_entities(config)
+
+        # Add additional entities based on parameters
         if include_prs:
             requested_entities.extend(["pull_requests", "pr_comments"])
         if include_sub_issues:
             requested_entities.append("sub_issues")
-        if include_git_repo and git_service:
+        if config.include_git_repo and git_service:
             requested_entities.append("git_repository")
     else:
         requested_entities = data_types

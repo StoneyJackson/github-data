@@ -6,12 +6,13 @@ This script handles saving and restoring GitHub repository labels, issues,
 subissues, and comments based on environment variables.
 """
 
-import os
 import sys
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.git.service import GitRepositoryServiceImpl
+
+from src.config.settings import ApplicationConfig
 
 
 def main() -> None:
@@ -25,15 +26,15 @@ def main() -> None:
         sys.exit(1)
 
 
-def _setup_and_validate_configuration() -> "Configuration":
+def _setup_and_validate_configuration() -> ApplicationConfig:
     """Set up and validate configuration for the operation."""
-    config = _load_configuration()
-    _validate_operation(config.operation)
+    config = ApplicationConfig.from_environment()
+    config.validate()
     _print_operation_info(config)
     return config
 
 
-def _execute_operation(config: "Configuration") -> None:
+def _execute_operation(config: ApplicationConfig) -> None:
     """Execute the requested operation based on configuration."""
     if config.operation == "save":
         _perform_save_operation(config)
@@ -41,7 +42,7 @@ def _execute_operation(config: "Configuration") -> None:
         _perform_restore_operation(config)
 
 
-def _perform_save_operation(config: "Configuration") -> None:
+def _perform_save_operation(config: ApplicationConfig) -> None:
     """Perform the save operation to backup GitHub data."""
     print("Saving GitHub data...")
     from .operations.save import save_repository_data_with_strategy_pattern
@@ -65,7 +66,7 @@ def _perform_save_operation(config: "Configuration") -> None:
     )
 
 
-def _perform_restore_operation(config: "Configuration") -> None:
+def _perform_restore_operation(config: ApplicationConfig) -> None:
     """Perform the restore operation to restore GitHub data."""
     print("Restoring GitHub data...")
     from .operations.restore.restore import (
@@ -96,7 +97,7 @@ def _perform_restore_operation(config: "Configuration") -> None:
 
 
 def _create_git_repository_service(
-    config: "Configuration",
+    config: ApplicationConfig,
 ) -> "GitRepositoryServiceImpl":
     """Create Git repository service with configuration."""
     from src.git.service import GitRepositoryServiceImpl
@@ -104,7 +105,7 @@ def _create_git_repository_service(
     return GitRepositoryServiceImpl(auth_token=config.github_token)
 
 
-def _print_operation_info(config: "Configuration") -> None:
+def _print_operation_info(config: ApplicationConfig) -> None:
     """Print information about the operation being performed."""
     print(f"GitHub Data - {config.operation.capitalize()} operation")
     print(f"Repository: {config.github_repo}")
@@ -116,85 +117,6 @@ def _print_operation_info(config: "Configuration") -> None:
 def _print_completion_message(operation: str) -> None:
     """Print completion message for the operation."""
     print(f"{operation.capitalize()} operation completed successfully")
-
-
-def _load_configuration() -> "Configuration":
-    """Load configuration from environment variables."""
-    operation = _get_required_env_var("OPERATION")
-    github_token = _get_required_env_var("GITHUB_TOKEN")
-    github_repo = _get_required_env_var("GITHUB_REPO")
-    data_path = _get_env_var("DATA_PATH", required=False) or "/data"
-    label_conflict_strategy = (
-        _get_env_var("LABEL_CONFLICT_STRATEGY", required=False) or "fail-if-existing"
-    )
-
-    # Git repository settings
-    include_git_repo = (
-        _get_env_var("INCLUDE_GIT_REPO", required=False) or "true"
-    ).lower() == "true"
-    git_auth_method = (
-        _get_env_var("GIT_AUTH_METHOD", required=False) or "token"
-    ).lower()
-
-    return Configuration(
-        operation=operation,
-        github_token=github_token,
-        github_repo=github_repo,
-        data_path=data_path,
-        label_conflict_strategy=label_conflict_strategy,
-        include_git_repo=include_git_repo,
-        git_auth_method=git_auth_method,
-    )
-
-
-def _validate_operation(operation: str) -> None:
-    """Validate that the operation is supported."""
-    if operation not in ["save", "restore"]:
-        print(
-            f"Error: OPERATION must be 'save' or 'restore', got '{operation}'",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-
-def _get_env_var(name: str, required: bool = True) -> Optional[str]:
-    """Get environment variable with optional requirement check."""
-    value = os.getenv(name)
-    if required and not value:
-        print(f"Error: Required environment variable {name} not set", file=sys.stderr)
-        sys.exit(1)
-    return value
-
-
-def _get_required_env_var(name: str) -> str:
-    """Get required environment variable, guaranteed to return non-None value."""
-    value = os.getenv(name)
-    if not value:
-        print(f"Error: Required environment variable {name} not set", file=sys.stderr)
-        sys.exit(1)
-    return value
-
-
-class Configuration:
-    """Configuration data class for application settings."""
-
-    def __init__(
-        self,
-        operation: str,
-        github_token: str,
-        github_repo: str,
-        data_path: str,
-        label_conflict_strategy: str,
-        include_git_repo: bool = True,
-        git_auth_method: str = "token",
-    ):
-        self.operation = operation
-        self.github_token = github_token
-        self.github_repo = github_repo
-        self.data_path = data_path
-        self.label_conflict_strategy = label_conflict_strategy
-        self.include_git_repo = include_git_repo
-        self.git_auth_method = git_auth_method
 
 
 if __name__ == "__main__":

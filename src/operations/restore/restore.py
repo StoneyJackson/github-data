@@ -9,6 +9,8 @@ from typing import Optional
 from src.github.protocols import RepositoryService
 from src.storage.protocols import StorageService
 from src.git.protocols import GitRepositoryService
+from src.config.settings import ApplicationConfig
+from src.operations.strategy_factory import StrategyFactory
 
 
 def restore_repository_data_with_strategy_pattern(
@@ -23,32 +25,55 @@ def restore_repository_data_with_strategy_pattern(
     include_git_repo: bool = False,
     git_service: Optional[GitRepositoryService] = None,
 ) -> None:
-    """Restore using strategy pattern approach."""
+    """Restore using strategy pattern approach (legacy interface)."""
+    # For backward compatibility, create a temporary config from parameters
+    # This will be removed in Phase 2 when we fully transition to config-driven approach
+    temp_config = ApplicationConfig(
+        operation="restore",
+        github_token="",  # Not used in restore operation
+        github_repo=repo_name,
+        data_path=data_path,
+        label_conflict_strategy=label_conflict_strategy,
+        include_git_repo=include_git_repo,
+        include_issue_comments=True,  # Default to include comments
+        git_auth_method="token",
+    )
 
-    # Create orchestrator
+    restore_repository_data_with_config(
+        temp_config,
+        github_service,
+        storage_service,
+        repo_name,
+        data_path,
+        include_original_metadata=include_original_metadata,
+        include_prs=include_prs,
+        include_sub_issues=include_sub_issues,
+        git_service=git_service,
+    )
+
+
+def restore_repository_data_with_config(
+    config: ApplicationConfig,
+    github_service: RepositoryService,
+    storage_service: StorageService,
+    repo_name: str,
+    data_path: str,
+    include_original_metadata: bool = True,
+    include_prs: bool = False,
+    include_sub_issues: bool = False,
+    git_service: Optional[GitRepositoryService] = None,
+) -> None:
+    """Restore using strategy pattern approach with configuration."""
+
+    # Create orchestrator with configuration
     from .orchestrator import StrategyBasedRestoreOrchestrator
 
-    orchestrator = StrategyBasedRestoreOrchestrator(github_service, storage_service)
-
-    # Register strategies
-    from src.operations.restore.strategies.labels_strategy import (
-        LabelsRestoreStrategy,
-        create_conflict_strategy,
-    )
-    from src.operations.restore.strategies.issues_strategy import IssuesRestoreStrategy
-    from src.operations.restore.strategies.comments_strategy import (
-        CommentsRestoreStrategy,
+    orchestrator = StrategyBasedRestoreOrchestrator(
+        config, github_service, storage_service, include_original_metadata
     )
 
-    # Create conflict resolution strategy
-    conflict_strategy = create_conflict_strategy(
-        label_conflict_strategy, github_service
-    )
-
-    # Register entity strategies
-    orchestrator.register_strategy(LabelsRestoreStrategy(conflict_strategy))
-    orchestrator.register_strategy(IssuesRestoreStrategy(include_original_metadata))
-    orchestrator.register_strategy(CommentsRestoreStrategy(include_original_metadata))
+    # The orchestrator now auto-registers strategies based on config
+    # Additional strategies for features not yet fully integrated:
 
     # Add PR and PR comment strategies if requested
     if include_prs:
@@ -82,7 +107,7 @@ def restore_repository_data_with_strategy_pattern(
         orchestrator.register_strategy(SubIssuesRestoreStrategy())
 
     # Add Git repository strategy if requested
-    if include_git_repo and git_service:
+    if config.include_git_repo and git_service:
         from src.operations.restore.strategies.git_repository_strategy import (
             GitRepositoryRestoreStrategy,
         )
@@ -90,12 +115,12 @@ def restore_repository_data_with_strategy_pattern(
         orchestrator.register_strategy(GitRepositoryRestoreStrategy(git_service))
 
     # Determine entities to restore
-    requested_entities = ["labels", "issues", "comments"]
+    requested_entities = StrategyFactory.get_enabled_entities(config)
     if include_prs:
         requested_entities.extend(["pull_requests", "pr_comments"])
     if include_sub_issues:
         requested_entities.append("sub_issues")
-    if include_git_repo and git_service:
+    if config.include_git_repo and git_service:
         requested_entities.append("git_repository")
 
     # Execute restoration
