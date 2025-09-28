@@ -185,3 +185,8 @@ manual-test-repos.local.yml
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Claude Code
+.claude/*
+!.claude/settings.json
+!.claude/agents/
