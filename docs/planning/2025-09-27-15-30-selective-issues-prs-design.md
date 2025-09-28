@@ -34,38 +34,73 @@ PULL_REQUESTS="1,3,5-8,12"
 
 ### Input Format Specification
 ```
-Format: "number[,number|range]..."
+Format: "true" | "false" | "number[separator][number|range]..."
 Range: "start-end" (inclusive)
-Examples:
+Separators: comma (,), whitespace ( ), or comma+whitespace (, )
+
+Boolean values:
+  - "true"        → backup/restore all items (default behavior)
+  - "false"       → backup/restore no items
+
+Number specifications:
   - "1"           → [1]
-  - "1,3,5"       → [1, 3, 5]
+  - "1,3,5"       → [1, 3, 5] (comma separated)
+  - "1 3 5"       → [1, 3, 5] (whitespace separated)
+  - "1, 3, 5"     → [1, 3, 5] (comma + space separated)
   - "1-5"         → [1, 2, 3, 4, 5]
-  - "1,3,5-8,12"  → [1, 3, 5, 6, 7, 8, 12]
+  - "1,3,5-8,12"  → [1, 3, 5, 6, 7, 8, 12] (comma separated)
+  - "1 3 5-8 12"  → [1, 3, 5, 6, 7, 8, 12] (whitespace separated)
+  - "1, 3, 5-8, 12" → [1, 3, 5, 6, 7, 8, 12] (comma + space separated)
   - "1-3,8-10"    → [1, 2, 3, 8, 9, 10]
+  - "1-3 8-10"    → [1, 2, 3, 8, 9, 10] (whitespace separated ranges)
+  - "1-3, 8-10"   → [1, 2, 3, 8, 9, 10] (comma + space separated ranges)
 ```
 
 ### Environment Variable Examples
 ```bash
-# Backup specific issues
+# Default behavior - backup all issues and PRs
+python -m github_data backup --repo owner/repo
+
+# Explicitly backup all issues
+export ISSUES="true"
+python -m github_data backup --repo owner/repo
+
+# Skip all issues
+export ISSUES="false"
+python -m github_data backup --repo owner/repo
+
+# Backup specific issues (comma separated)
 export ISSUES="1,3,5-8,12"
 python -m github_data backup --repo owner/repo
 
-# Backup specific PRs
+# Backup specific issues (whitespace separated)
+export ISSUES="1 3 5-8 12"
+python -m github_data backup --repo owner/repo
+
+# Backup specific issues (comma + space separated)
+export ISSUES="1, 3, 5-8, 12"
+python -m github_data backup --repo owner/repo
+
+# Backup specific PRs (various separator styles)
 export PULL_REQUESTS="1,3,5-8,12"
 python -m github_data backup --repo owner/repo
 
-# Backup both issues and PRs
-export ISSUES="1-10"
-export PULL_REQUESTS="5,7,9-12"
+# Skip PRs but backup all issues
+export PULL_REQUESTS="false"
 python -m github_data backup --repo owner/repo
 
-# Restore specific issues
-export ISSUES="1,3,5"
+# Backup both issues and PRs selectively (mixed separator styles)
+export ISSUES="1-10"
+export PULL_REQUESTS="5, 7, 9-12"
+python -m github_data backup --repo owner/repo
+
+# Restore specific issues (comma + space separated)
+export ISSUES="1, 3, 5"
 python -m github_data restore --repo owner/repo --data-file backup.json
 
-# Using .env file for complex configurations
-echo "ISSUES=1,3,5-8,12" > .env
-echo "PULL_REQUESTS=1,3,5-8,12" >> .env
+# Using .env file for complex configurations (comma + space style)
+echo "ISSUES=1, 3, 5-8, 12" > .env
+echo "PULL_REQUESTS=false" >> .env
 python -m github_data backup --repo owner/repo
 
 # CI/CD pipeline example
@@ -74,8 +109,18 @@ env:
   PULL_REQUESTS: "1-20"
 run: python -m github_data backup --repo ${{ github.repository }}
 
-# Alternative shorter form for PRs
-export PRS="1,3,5-8,12"
+# YAML configuration friendly format (comma + space style)
+env:
+  ISSUES: >
+    1
+    3
+    5-8
+    12
+  PULL_REQUESTS: "1, 3, 5-8, 12"
+run: python -m github_data backup --repo owner/repo
+
+# Alternative shorter form for PRs (comma + space style)
+export PULL_REQUESTS="1, 3, 5-8, 12"
 python -m github_data backup --repo owner/repo
 ```
 
@@ -84,10 +129,19 @@ python -m github_data backup --repo owner/repo
 ### 1. Input Parsing Module
 ```python
 # github_data/utils/number_parser.py
+from typing import Union, List, Optional
+
 class NumberRangeParser:
     @staticmethod
-    def parse(input_str: str) -> List[int]:
-        """Parse "1,3,5-8,12" into [1, 3, 5, 6, 7, 8, 12]"""
+    def parse(input_str: str) -> Union[bool, List[int], None]:
+        """
+        Parse input string into appropriate format:
+        - "true" → True (backup/restore all)
+        - "false" → False (backup/restore none)
+        - "1,3,5-8,12" → [1, 3, 5, 6, 7, 8, 12]
+        - "1 3 5-8 12" → [1, 3, 5, 6, 7, 8, 12]
+        - "" or None → None (default behavior)
+        """
 
     @staticmethod
     def validate_range(start: int, end: int) -> None:
@@ -96,6 +150,13 @@ class NumberRangeParser:
     @staticmethod
     def expand_range(range_str: str) -> List[int]:
         """Expand "5-8" into [5, 6, 7, 8]"""
+
+    @staticmethod
+    def normalize_separators(input_str: str) -> str:
+        """
+        Normalize all separator types to commas for consistent parsing.
+        Handles: comma, whitespace, and comma+whitespace separators
+        """
 ```
 
 ### 2. Environment Variable Integration
@@ -106,27 +167,55 @@ from typing import Optional, List
 
 class SelectiveConfig:
     @staticmethod
-    def get_issue_numbers() -> Optional[List[int]]:
-        """Get issue numbers from ISSUES environment variable"""
+    def get_issue_numbers() -> Union[bool, List[int], None]:
+        """
+        Get issue numbers from ISSUES environment variable.
+        Returns:
+        - True: backup/restore all issues
+        - False: backup/restore no issues
+        - List[int]: backup/restore specific issues
+        - None: default behavior (backup/restore all)
+        """
         issues_env = os.getenv('ISSUES')
         return NumberRangeParser.parse(issues_env) if issues_env else None
 
     @staticmethod
-    def get_pr_numbers() -> Optional[List[int]]:
-        """Get PR numbers from PULL_REQUESTS or PRS environment variable"""
-        # Check PULL_REQUESTS first, then PRS as fallback
-        prs_env = os.getenv('PULL_REQUESTS') or os.getenv('PRS')
+    def get_pr_numbers() -> Union[bool, List[int], None]:
+        """
+        Get PR numbers from PULL_REQUESTS environment variable.
+        Returns:
+        - True: backup/restore all PRs
+        - False: backup/restore no PRs
+        - List[int]: backup/restore specific PRs
+        - None: default behavior (backup/restore all)
+        """
+        # Check PULL_REQUESTS
+        prs_env = os.getenv('PULL_REQUESTS')
         return NumberRangeParser.parse(prs_env) if prs_env else None
 
 # github_data/cli.py modifications
 def backup(repo: str, ...):
-    issue_numbers = SelectiveConfig.get_issue_numbers()
-    pr_numbers = SelectiveConfig.get_pr_numbers()
+    issue_selection = SelectiveConfig.get_issue_numbers()
+    pr_selection = SelectiveConfig.get_pr_numbers()
 
-    if issue_numbers:
-        click.echo(f"Selective backup: Issues {issue_numbers}")
-    if pr_numbers:
-        click.echo(f"Selective backup: PRs {pr_numbers}")
+    # Handle different selection types
+    if issue_selection is True:
+        click.echo("Backup: All issues")
+    elif issue_selection is False:
+        click.echo("Backup: No issues")
+    elif isinstance(issue_selection, list):
+        click.echo(f"Selective backup: Issues {issue_selection}")
+    else:  # None - default behavior
+        click.echo("Backup: All issues (default)")
+
+    if pr_selection is True:
+        click.echo("Backup: All PRs")
+    elif pr_selection is False:
+        click.echo("Backup: No PRs")
+    elif isinstance(pr_selection, list):
+        click.echo(f"Selective backup: PRs {pr_selection}")
+    else:  # None - default behavior
+        click.echo("Backup: All PRs (default)")
 ```
 
 ### 3. Service Layer Updates
@@ -136,16 +225,26 @@ class BackupService:
     async def backup_selective_issues(
         self,
         repo: str,
-        issue_numbers: Optional[List[int]] = None
+        issue_selection: Union[bool, List[int], None] = None
     ) -> List[Dict]:
-        """Backup only specified issues"""
+        """
+        Backup issues based on selection:
+        - True/None: backup all issues
+        - False: backup no issues (return empty list)
+        - List[int]: backup only specified issues
+        """
 
     async def backup_selective_prs(
         self,
         repo: str,
-        pr_numbers: Optional[List[int]] = None
+        pr_selection: Union[bool, List[int], None] = None
     ) -> List[Dict]:
-        """Backup only specified PRs"""
+        """
+        Backup PRs based on selection:
+        - True/None: backup all PRs
+        - False: backup no PRs (return empty list)
+        - List[int]: backup only specified PRs
+        """
 ```
 
 ### 4. GitHub API Client Updates
@@ -171,13 +270,18 @@ class GitHubClient:
 ```python
 # For restore operations
 class RestoreService:
-    def filter_data_by_numbers(
+    def filter_data_by_selection(
         self,
         data: Dict,
-        issue_numbers: Optional[List[int]] = None,
-        pr_numbers: Optional[List[int]] = None
+        issue_selection: Union[bool, List[int], None] = None,
+        pr_selection: Union[bool, List[int], None] = None
     ) -> Dict:
-        """Filter backup data to only specified items"""
+        """
+        Filter backup data based on selection:
+        - True/None: restore all items
+        - False: restore no items (remove from data)
+        - List[int]: restore only specified items
+        """
 ```
 
 ## Implementation Phases
@@ -278,24 +382,32 @@ class RestoreService:
 ### Edge Case Tests
 ```python
 # Test cases to cover
+- Boolean values: "true", "false"
 - Empty ranges: ""
 - Single numbers: "5"
 - Complex ranges: "1,3,5-8,10-12,15"
+- Whitespace separated: "1 3 5-8 10-12 15"
+- Comma + space separated: "1, 3, 5-8, 10-12, 15"
+- Mixed separators: "1, 3 5-8, 10-12 15"
 - Invalid formats: "1-", "-5", "abc", "1--5"
 - Large ranges: "1-1000"
 - Duplicate numbers: "1,2,2,3"
 - Reverse ranges: "8-5" (should error)
 - Non-existent numbers: Issues that don't exist
+- Case sensitivity for booleans: "True", "FALSE", "yes", "no"
 
 # Environment variable specific tests
 - Missing environment variables
 - Empty environment variables: ISSUES=""
-- Whitespace handling: ISSUES=" 1, 3, 5-8 "
-- Case sensitivity (should be case sensitive)
+- Boolean values: ISSUES="true", ISSUES="false"
+- Whitespace handling: ISSUES=" 1, 3, 5-8 ", ISSUES=" 1 3 5-8 "
+- Comma + space handling: ISSUES="1, 3, 5-8, 12"
+- Mixed separator handling: ISSUES="1, 3 5-8, 12"
+- Case sensitivity (should be case sensitive for booleans)
 - Multiple processes with different env vars
 - .env file loading and precedence
 - Environment variable injection attacks
-- PULL_REQUESTS vs PRS precedence testing
+- Boolean value edge cases: "TRUE", "False", "yes", "no", "1", "0"
 ```
 
 ## Future Enhancements
@@ -308,9 +420,9 @@ class RestoreService:
 
 ### Configuration Files
 ```bash
-# .env file approach (recommended)
-ISSUES="1,3,5-8,12"
-PULL_REQUESTS="1-5"
+# .env file approach (recommended) - comma + space style
+ISSUES="1, 3, 5-8, 12"
+PULL_REQUESTS="false"
 ISSUE_LABELS="bug,critical"
 ISSUE_SINCE="2024-01-01"
 PR_STATE="merged"
