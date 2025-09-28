@@ -55,7 +55,6 @@ class GitRepositoryServiceImpl(GitRepositoryService):
         """Create mirror clone of repository."""
         return self._command_executor.execute_clone_mirror(repo_url, destination)
 
-
     def update_repository(
         self, repo_path: Path, backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> GitOperationResult:
@@ -103,7 +102,6 @@ class GitRepositoryServiceImpl(GitRepositoryService):
         except Exception as e:
             return {"valid": False, "error": str(e)}
 
-
     def get_repository_info(self, repo_path: Path) -> GitRepositoryInfo:
         """Get repository metadata and statistics using mirror format."""
         # Only mirror format is supported
@@ -117,7 +115,6 @@ class GitRepositoryServiceImpl(GitRepositoryService):
             branch_count=info.get("branch_count"),
             tag_count=info.get("tag_count"),
         )
-
 
     def restore_repository(
         self,
@@ -165,4 +162,3 @@ class GitRepositoryServiceImpl(GitRepositoryService):
             "destination": str(destination),
             "size_bytes": self._command_executor.get_directory_size(destination),
         }
-

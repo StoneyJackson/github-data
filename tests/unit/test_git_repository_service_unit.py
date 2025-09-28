@@ -52,7 +52,6 @@ class TestGitRepositoryService:
             repo_url, destination
         )
 
-
     def test_clone_repository_failure_returns_error_result(
         self, git_service, mock_command_executor, temp_data_dir
     ):
@@ -232,7 +231,6 @@ class TestGitCommandExecutor:
             git_executor.execute_clone_mirror(
                 "https://github.com/test/repo.git", destination
             )
-
 
     def test_prepare_authenticated_url_https(self, git_executor):
         """Test HTTPS URL authentication preparation."""

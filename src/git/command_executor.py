@@ -39,7 +39,6 @@ class GitCommandExecutorImpl(GitCommandExecutor):
             **repo_info,
         }
 
-
     def execute_remote_update(self, repo_path: Path) -> Dict[str, Any]:
         """Execute git remote update command."""
         cmd = ["git", "-C", str(repo_path), "remote", "update"]

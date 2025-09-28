@@ -122,7 +122,6 @@ class TestGitRepositoryIntegration:
         assert result["results"][0]["success"] is False
         assert "Authentication failed" in result["results"][0]["error"]
 
-
     def test_git_service_and_strategy_integration(
         self, git_service, storage_service_mock, temp_data_dir
     ):
@@ -429,4 +428,3 @@ class TestGitRepositoryWorkflow:
 
         repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
         assert repositories == []
-

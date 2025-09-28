@@ -80,7 +80,8 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             git_repo_dir = Path(output_path) / "git-repo"
             git_repo_dir.mkdir(parents=True, exist_ok=True)
 
-            # Determine backup destination - flatten directly to git-repo (mirror format only)
+            # Determine backup destination - flatten directly to git-repo
+            # (mirror format only)
             backup_path = git_repo_dir
 
             # Perform Git backup
