@@ -1,6 +1,6 @@
 # GitHub Data
 
-A containerized tool for saving and restoring comprehensive GitHub repository data including labels, issues, comments, sub-issues, pull requests, and complete Git repository history. This tool allows you to backup and restore GitHub repository metadata alongside full Git repository data with commit history, branches, and tags.
+A containerized tool for saving and restoring comprehensive GitHub repository data including labels, issues, comments, sub-issues, pull requests, and complete Git repository history. This tool allows you to save and restore GitHub repository metadata alongside full Git repository data with commit history, branches, and tags.
 
 > **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
 
@@ -12,7 +12,7 @@ A containerized tool for saving and restoring comprehensive GitHub repository da
   - [Save Data](#save-data)
   - [Restore Data](#restore-data)
   - [Environment Variables](#environment-variables)
-  - [Git Repository Backup](#git-repository-backup)
+  - [Git Repository Save](#git-repository-save)
 - [Data Format](#data-format)
 - [Contributing](#contributing)
 - [License](#license)
@@ -28,15 +28,15 @@ All configuration is done through environment variables, and data files are acce
 ## Features
 
 ### GitHub Metadata Management
-- **Labels**: Complete label backup/restore with conflict resolution strategies
+- **Labels**: Complete label save/restore with conflict resolution strategies
 - **Issues & Comments**: Full issue data with hierarchical sub-issue relationships
 - **Pull Requests**: PR workflows with branch dependency validation
 - **Rate Limiting**: Intelligent API rate limiting with automatic retries
 
-### Git Repository Backup (NEW)
+### Git Repository Save
 - **Complete Repository Cloning**: Full commit history, branches, and tags
-- **Mirror Clone Format**: Complete repository backups with full Git history
-- **Repository Validation**: Integrity checks and verification  
+- **Mirror Clone Format**: Complete repository saves with full Git history
+- **Repository Validation**: Integrity checks and verification
 - **Flexible Restore Options**: Restore to new locations or directories
 - **Authentication Support**: Token-based authentication for private repositories
 
@@ -82,7 +82,7 @@ docker run --rm \
 | `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
-| `INCLUDE_GIT_REPO` | No | Enable/disable Git repository backup (default: `true`) |
+| `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
@@ -132,19 +132,19 @@ The tool automatically handles GitHub API rate limiting with intelligent retry l
 
 For large repositories, operations may take longer when approaching rate limits as the tool waits for the rate limit window to reset.
 
-### Git Repository Backup
+### Git Repository Save
 
-The Git repository backup feature provides complete repository cloning alongside GitHub metadata backup.
+The Git repository save feature provides complete repository cloning alongside GitHub metadata save.
 
 #### Configuration
 
-Git repository backup is controlled through environment variables:
+Git repository save is controlled through environment variables:
 
 ```bash
-# Enable/disable Git repository backup (default: true)
+# Enable/disable Git repository save (default: true)
 INCLUDE_GIT_REPO=true
 
-# Authentication method: token, ssh (default: token)  
+# Authentication method: token, ssh (default: token)
 GIT_AUTH_METHOD=token
 
 # GitHub token for private repositories
@@ -154,7 +154,7 @@ GITHUB_TOKEN=your_github_token
 #### Usage Examples
 
 ```bash
-# Backup with Git repository (default behavior)
+# Save with Git repository (default behavior)
 docker run --rm \
   -v /path/to/data:/data \
   -e GITHUB_TOKEN=your_token \
@@ -162,7 +162,7 @@ docker run --rm \
   -e OPERATION=save \
   ghcr.io/stoneyjackson/github-data:latest
 
-# Backup excluding Git repository (metadata only)
+# Save excluding Git repository (metadata only)
 docker run --rm \
   -v /path/to/data:/data \
   -e INCLUDE_GIT_REPO=false \
@@ -171,7 +171,7 @@ docker run --rm \
   -e OPERATION=save \
   ghcr.io/stoneyjackson/github-data:latest
 
-# Basic Git repository backup
+# Basic Git repository save
 docker run --rm \
   -v /path/to/data:/data \
   -e GITHUB_TOKEN=your_token \
@@ -180,11 +180,11 @@ docker run --rm \
   ghcr.io/stoneyjackson/github-data:latest
 ```
 
-#### Git Backup Format
+#### Git Save Format
 
 Git repositories are backed up using **Mirror Clone** format:
 - Complete repository clone with all branches, tags, and references
-- Best for: Complete repository backup, easy browsing with Git tools
+- Best for: Complete repository save, easy browsing with Git tools
 - Storage: Directory structure with `.git` contents
 
 #### Directory Structure
