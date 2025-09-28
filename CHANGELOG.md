@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/StoneyJackson/github-data/compare/v1.1.0...v1.2.0) (2025-09-28)
+
+
+### Features
+
+* add Claude Code configuration with permission settings ([#21](https://github.com/StoneyJackson/github-data/issues/21)) ([ff353cc](https://github.com/StoneyJackson/github-data/commit/ff353ccafe73f531e2e33f5408dd4707e6ce8334))
+
 # [1.1.0](https://github.com/StoneyJackson/github-data/compare/v1.0.5...v1.1.0) (2025-09-27)
 
 
