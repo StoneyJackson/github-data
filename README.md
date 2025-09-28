@@ -83,6 +83,7 @@ docker run --rm \
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
+| `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in backup/restore (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
@@ -103,6 +104,41 @@ docker run --rm \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=restore \
   -e LABEL_CONFLICT_STRATEGY=overwrite \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+#### Boolean Environment Variables
+
+Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`) accept the following values:
+- **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
+- **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
+
+Examples:
+```bash
+# Save repository data including issue comments (default behavior)
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  ghcr.io/stoneyjackson/github-data:latest
+
+# Save repository data excluding issue comments
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e OPERATION=save \
+  -e INCLUDE_ISSUE_COMMENTS=false \
+  ghcr.io/stoneyjackson/github-data:latest
+
+# Restore repository data excluding issue comments
+docker run --rm \
+  -v /path/to/data:/data \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/new-repository \
+  -e OPERATION=restore \
+  -e INCLUDE_ISSUE_COMMENTS=false \
   ghcr.io/stoneyjackson/github-data:latest
 ```
 

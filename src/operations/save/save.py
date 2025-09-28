@@ -112,5 +112,10 @@ def save_repository_data_with_config(
     # Handle errors
     failed_operations = [r for r in results if not r["success"]]
     if failed_operations:
-        error_messages = [r["error"] for r in failed_operations if r.get("error")]
+        error_messages = []
+        for r in failed_operations:
+            if r.get("error"):
+                error_messages.append(r["error"])
+            else:
+                error_messages.append(f"Unknown error in {r.get('entity_name', 'unknown entity')}")
         raise Exception(f"Save operation failed: {'; '.join(error_messages)}")

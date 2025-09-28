@@ -149,11 +149,7 @@ class TestStrategyFactory:
 
         # Find the labels strategy and check it has the correct conflict strategy
         labels_strategy = next(
-            (
-                s
-                for s in strategies
-                if type(s).__name__ == "LabelsRestoreStrategy"
-            ),
+            (s for s in strategies if type(s).__name__ == "LabelsRestoreStrategy"),
             None,
         )
         assert labels_strategy is not None

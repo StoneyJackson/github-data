@@ -86,9 +86,7 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
         self,
         github_service: "RepositoryService",
         repo_name: str,
-        existing_entities: List[Any],
         entities_to_restore: List[Any],
-        context: Dict[str, Any],
     ) -> List[Any]:
         """Resolve conflicts between existing and restored entities."""
         # Git repository restore doesn't have conflicts in the same way

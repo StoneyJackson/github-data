@@ -18,7 +18,7 @@ pytestmark = [
 class TestMain:
     """Test cases for main function."""
 
-    @patch("src.operations.save.save_repository_data_with_strategy_pattern")
+    @patch("src.operations.save.save_repository_data_with_config")
     @patch("src.github.create_github_service")
     @patch("src.storage.create_storage_service")
     @patch("src.config.settings.ApplicationConfig.from_environment")
@@ -59,7 +59,7 @@ class TestMain:
         for call in expected_calls:
             assert any(call in str(args) for args, _ in mock_print.call_args_list)
 
-    @patch("src.operations.restore.restore_repository_data_with_strategy_pattern")
+    @patch("src.operations.restore.restore_repository_data_with_config")
     @patch("src.github.create_github_service")
     @patch("src.storage.create_storage_service")
     @patch("src.config.settings.ApplicationConfig.from_environment")
