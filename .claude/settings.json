@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make test:*)",
+      "Bash(make:*)",
+      "Bash(pdm run pytest:*)",
+      "Bash(pdm run flake8:*)",
+      "Bash(pdm run:*)",
+      "Bash(python -m pytest tests/test_sub_issues_integration.py -v)",
+      "Bash(time make:*)",
+      "Bash(python -m pytest tests/test_metadata.py -v)",
+      "Bash(python -m pytest tests/test_metadata.py::TestMetadataIntegration::test_restore_creates_issues_and_comments_successfully -v)",
+      "Bash(sed:*)",
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(python:*)",
+      "Bash(find:*)",
+      "Bash(chmod:*)",
+      "Bash(pytest:*)",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(gh pr:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
