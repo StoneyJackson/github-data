@@ -122,37 +122,6 @@ class TestGitRepositoryIntegration:
         assert result["results"][0]["success"] is False
         assert "Authentication failed" in result["results"][0]["error"]
 
-    def test_git_strategy_bundle_format_integration(
-        self, storage_service_mock, temp_data_dir
-    ):
-        """Test Git strategy with bundle format."""
-        git_service = GitRepositoryServiceImpl()
-        strategy = GitRepositoryStrategy(git_service, GitBackupFormat.BUNDLE)
-
-        entities = [
-            {
-                "repo_name": "test/repo",
-                "repo_url": "https://github.com/test/repo.git",
-                "backup_format": GitBackupFormat.BUNDLE.value,
-            }
-        ]
-
-        with patch.object(git_service, "clone_repository") as mock_clone:
-            mock_result = GitOperationResult(
-                success=True,
-                backup_format="bundle",
-                destination=str(Path(temp_data_dir) / "git-repo" / "test_repo.bundle"),
-                size_bytes=2048,
-            )
-            mock_clone.return_value = mock_result
-
-            result = strategy.save_data(entities, temp_data_dir, storage_service_mock)
-
-        assert result["saved_repositories"] == 1
-        # Verify bundle format was passed to clone_repository
-        mock_clone.assert_called_once()
-        args, kwargs = mock_clone.call_args
-        assert args[2] == GitBackupFormat.BUNDLE  # backup_format parameter
 
     def test_git_service_and_strategy_integration(
         self, git_service, storage_service_mock, temp_data_dir
@@ -343,10 +312,10 @@ class TestGitRepositoryStorageIntegration:
             args, kwargs = mock_execute.call_args
             assert args[1] == expected_path  # destination parameter
 
-    def test_git_bundle_vs_mirror_path_handling(
+    def test_git_mirror_path_handling(
         self, temp_data_dir, storage_service_mock
     ):
-        """Test different path handling for bundle vs mirror formats."""
+        """Test mirror format path handling."""
         git_service = GitRepositoryServiceImpl()
 
         # Test mirror format
@@ -376,36 +345,6 @@ class TestGitRepositoryStorageIntegration:
             # Verify mirror path (directory)
             args, kwargs = mock_mirror.call_args
             assert not str(args[1]).endswith(".bundle")
-
-        # Test bundle format
-        bundle_strategy = GitRepositoryStrategy(git_service, GitBackupFormat.BUNDLE)
-        bundle_entities = [
-            {
-                "repo_name": "test/repo",
-                "repo_url": "https://github.com/test/repo.git",
-                "backup_format": GitBackupFormat.BUNDLE.value,
-            }
-        ]
-
-        with patch.object(
-            git_service._command_executor, "execute_clone_bundle"
-        ) as mock_bundle:
-            mock_bundle.return_value = {
-                "success": True,
-                "method": "bundle",
-                "destination": str(
-                    Path(temp_data_dir) / "git-repo" / "test_repo.bundle"
-                ),
-                "size_bytes": 2048,
-            }
-
-            bundle_strategy.save_data(
-                bundle_entities, temp_data_dir, storage_service_mock
-            )
-
-            # Verify bundle path (file with .bundle extension)
-            args, kwargs = mock_bundle.call_args
-            assert str(args[1]).endswith(".bundle")
 
 
 @pytest.mark.integration
@@ -491,24 +430,3 @@ class TestGitRepositoryWorkflow:
         repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
         assert repositories == []
 
-    def test_bundle_format_repository_handling(
-        self, temp_data_dir, storage_service_mock
-    ):
-        """Test handling repositories with bundle backup format."""
-        git_service = GitRepositoryServiceImpl()
-        restore_strategy = GitRepositoryRestoreStrategy(git_service)
-
-        # Create bundle format backup structure
-        git_data_dir = Path(temp_data_dir) / "git-repo"
-        git_data_dir.mkdir(parents=True)
-
-        # Bundle file
-        bundle_file = git_data_dir / "test_repo.bundle"
-        bundle_file.touch()
-
-        repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
-
-        assert len(repositories) == 1
-        assert repositories[0]["backup_format"] == GitBackupFormat.BUNDLE.value
-        assert repositories[0]["repo_name"] == "test/repo"
-        assert repositories[0]["backup_path"] == str(bundle_file)

@@ -37,7 +37,7 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
 
         repositories = []
 
-        # Check if git-repo contains a Git repository directly or bundle files
+        # Check if git-repo contains a Git repository (mirror format only)
         if (git_repo_dir / ".git").exists():
             # Direct git repository in git-repo directory
             repositories.append(
@@ -47,18 +47,6 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
                     "repo_name": "repository",  # Generic name for flattened structure
                 }
             )
-        else:
-            # Look for bundle files in git-repo directory
-            for item in git_repo_dir.iterdir():
-                if item.suffix == ".bundle":
-                    repo_name = item.stem.replace("_", "/")
-                    repositories.append(
-                        {
-                            "backup_path": str(item),
-                            "backup_format": GitBackupFormat.BUNDLE.value,
-                            "repo_name": repo_name,
-                        }
-                    )
 
         return repositories
 

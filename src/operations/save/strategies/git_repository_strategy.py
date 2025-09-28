@@ -80,11 +80,8 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             git_repo_dir = Path(output_path) / "git-repo"
             git_repo_dir.mkdir(parents=True, exist_ok=True)
 
-            # Determine backup destination - flatten directly to git-repo
-            if self._backup_format == GitBackupFormat.BUNDLE:
-                backup_path = git_repo_dir / f"{repo_name.replace('/', '_')}.bundle"
-            else:
-                backup_path = git_repo_dir
+            # Determine backup destination - flatten directly to git-repo (mirror format only)
+            backup_path = git_repo_dir
 
             # Perform Git backup
             result = self._git_service.clone_repository(

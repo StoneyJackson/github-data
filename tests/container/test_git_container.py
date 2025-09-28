@@ -108,7 +108,6 @@ class TestGitRepositoryContainer:
         """Test Git-related environment variables are properly set."""
         env_vars = {
             "INCLUDE_GIT_REPO": "true",
-            "GIT_BACKUP_FORMAT": "mirror",
             "GIT_AUTH_METHOD": "token",
             "GITHUB_TOKEN": "test_token_value",
         }
@@ -371,7 +370,6 @@ except Exception as e:
             "PYTHONPATH": "/app",
             "DATA_PATH": "/data",
             "INCLUDE_GIT_REPO": "true",
-            "GIT_BACKUP_FORMAT": "mirror",
         }
 
         python_script = """
@@ -436,7 +434,6 @@ except Exception as e:
             "GITHUB_REPO": "test/repo",
             "DATA_PATH": "/data",
             "INCLUDE_GIT_REPO": "true",
-            "GIT_BACKUP_FORMAT": "mirror",
             "PYTHONPATH": "/app",
         }
 
@@ -514,7 +511,6 @@ except Exception as e:
                 "bash",
                 "-c",
                 "echo INCLUDE_GIT_REPO=$INCLUDE_GIT_REPO "
-                "GIT_BACKUP_FORMAT=$GIT_BACKUP_FORMAT "
                 "GIT_AUTH_METHOD=$GIT_AUTH_METHOD",
             ],
             {},
@@ -526,5 +522,4 @@ except Exception as e:
 
         # Verify defaults from Dockerfile
         assert "INCLUDE_GIT_REPO=true" in output
-        assert "GIT_BACKUP_FORMAT=mirror" in output
         assert "GIT_AUTH_METHOD=token" in output

@@ -1,7 +1,6 @@
 """Git command executor implementation."""
 
 import subprocess
-import tempfile
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
@@ -40,45 +39,6 @@ class GitCommandExecutorImpl(GitCommandExecutor):
             **repo_info,
         }
 
-    def execute_clone_bundle(self, repo_url: str, bundle_path: Path) -> Dict[str, Any]:
-        """Execute git bundle create command."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_clone = Path(temp_dir) / "temp_clone"
-
-            # First clone the repository
-            auth_url = self._prepare_authenticated_url(repo_url)
-            clone_cmd = ["git", "clone", auth_url, str(temp_clone)]
-            result = subprocess.run(
-                clone_cmd, capture_output=True, text=True, timeout=self._git_timeout
-            )
-
-            if result.returncode != 0:
-                raise RuntimeError(f"Git clone for bundle failed: {result.stderr}")
-
-            # Create bundle
-            bundle_cmd = [
-                "git",
-                "-C",
-                str(temp_clone),
-                "bundle",
-                "create",
-                str(bundle_path),
-                "--all",
-            ]
-
-            result = subprocess.run(
-                bundle_cmd, capture_output=True, text=True, timeout=self._git_timeout
-            )
-
-            if result.returncode != 0:
-                raise RuntimeError(f"Git bundle failed: {result.stderr}")
-
-        return {
-            "success": True,
-            "method": "bundle",
-            "destination": str(bundle_path),
-            "size_bytes": bundle_path.stat().st_size,
-        }
 
     def execute_remote_update(self, repo_path: Path) -> Dict[str, Any]:
         """Execute git remote update command."""

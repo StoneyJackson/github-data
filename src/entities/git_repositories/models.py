@@ -9,8 +9,6 @@ class GitBackupFormat(Enum):
     """Git backup format options."""
 
     MIRROR = "mirror"
-    BUNDLE = "bundle"
-    BOTH = "both"
 
 
 class GitAuthMethod(Enum):

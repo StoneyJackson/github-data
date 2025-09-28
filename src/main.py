@@ -110,7 +110,7 @@ def _print_operation_info(config: "Configuration") -> None:
     print(f"Repository: {config.github_repo}")
     print(f"Data path: {config.data_path}")
     if config.include_git_repo:
-        print(f"Git repository backup: enabled ({config.git_backup_format})")
+        print("Git repository backup: enabled (mirror format)")
 
 
 def _print_completion_message(operation: str) -> None:
@@ -132,9 +132,6 @@ def _load_configuration() -> "Configuration":
     include_git_repo = (
         _get_env_var("INCLUDE_GIT_REPO", required=False) or "true"
     ).lower() == "true"
-    git_backup_format = (
-        _get_env_var("GIT_BACKUP_FORMAT", required=False) or "mirror"
-    ).lower()
     git_auth_method = (
         _get_env_var("GIT_AUTH_METHOD", required=False) or "token"
     ).lower()
@@ -146,7 +143,6 @@ def _load_configuration() -> "Configuration":
         data_path=data_path,
         label_conflict_strategy=label_conflict_strategy,
         include_git_repo=include_git_repo,
-        git_backup_format=git_backup_format,
         git_auth_method=git_auth_method,
     )
 
@@ -190,7 +186,6 @@ class Configuration:
         data_path: str,
         label_conflict_strategy: str,
         include_git_repo: bool = True,
-        git_backup_format: str = "mirror",
         git_auth_method: str = "token",
     ):
         self.operation = operation
@@ -199,7 +194,6 @@ class Configuration:
         self.data_path = data_path
         self.label_conflict_strategy = label_conflict_strategy
         self.include_git_repo = include_git_repo
-        self.git_backup_format = git_backup_format
         self.git_auth_method = git_auth_method
 
 
