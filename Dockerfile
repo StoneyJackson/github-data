@@ -32,7 +32,6 @@ ENV DATA_PATH=/data
 
 # Git-specific environment variables with defaults
 ENV INCLUDE_GIT_REPO=true
-ENV GIT_BACKUP_FORMAT=mirror
 ENV GIT_AUTH_METHOD=token
 
 # Run the application using PDM

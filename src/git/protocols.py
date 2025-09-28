@@ -60,11 +60,6 @@ class GitCommandExecutor(ABC):
         pass
 
     @abstractmethod
-    def execute_clone_bundle(self, repo_url: str, bundle_path: Path) -> Dict[str, Any]:
-        """Execute git bundle create command."""
-        pass
-
-    @abstractmethod
     def execute_remote_update(self, repo_path: Path) -> Dict[str, Any]:
         """Execute git remote update command."""
         pass

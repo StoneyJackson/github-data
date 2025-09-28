@@ -35,7 +35,7 @@ All configuration is done through environment variables, and data files are acce
 
 ### Git Repository Backup (NEW)
 - **Complete Repository Cloning**: Full commit history, branches, and tags
-- **Multiple Backup Formats**: Mirror clones and Git bundles
+- **Mirror Clone Format**: Complete repository backups with full Git history
 - **Repository Validation**: Integrity checks and verification  
 - **Flexible Restore Options**: Restore to new locations or directories
 - **Authentication Support**: Token-based authentication for private repositories
@@ -83,7 +83,6 @@ docker run --rm \
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository backup (default: `true`) |
-| `GIT_BACKUP_FORMAT` | No | Git backup format: `mirror`, `bundle` (default: `mirror`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
@@ -145,9 +144,6 @@ Git repository backup is controlled through environment variables:
 # Enable/disable Git repository backup (default: true)
 INCLUDE_GIT_REPO=true
 
-# Backup format: mirror, bundle (default: mirror)
-GIT_BACKUP_FORMAT=mirror
-
 # Authentication method: token, ssh (default: token)  
 GIT_AUTH_METHOD=token
 
@@ -175,25 +171,21 @@ docker run --rm \
   -e OPERATION=save \
   ghcr.io/stoneyjackson/github-data:latest
 
-# Backup with bundle format
+# Basic Git repository backup
 docker run --rm \
   -v /path/to/data:/data \
-  -e GIT_BACKUP_FORMAT=bundle \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
   ghcr.io/stoneyjackson/github-data:latest
 ```
 
-#### Backup Formats
+#### Git Backup Format
 
-- **Mirror Clone** (`mirror`): Complete repository clone with all branches, tags, and references
-  - Best for: Complete repository backup, easy browsing with Git tools
-  - Storage: Directory structure with `.git` contents
-  
-- **Bundle** (`bundle`): Compressed Git bundle containing repository data
-  - Best for: Space-efficient storage, single-file backups
-  - Storage: Single `.bundle` file that can be cloned from
+Git repositories are backed up using **Mirror Clone** format:
+- Complete repository clone with all branches, tags, and references
+- Best for: Complete repository backup, easy browsing with Git tools
+- Storage: Directory structure with `.git` contents
 
 #### Directory Structure
 
@@ -233,7 +225,6 @@ Each JSON file contains structured data that can be used to recreate the reposit
 
 ### Git Repository Data
 - **Mirror clones**: Complete `.git` directory structure with all branches, tags, and commit history
-- **Bundle files**: Compressed Git bundle format containing complete repository data
 - **Validation**: All Git data includes integrity checks and metadata for verification
 
 ## Contributing

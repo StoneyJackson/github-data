@@ -52,34 +52,6 @@ class TestGitRepositoryService:
             repo_url, destination
         )
 
-    def test_clone_repository_success_bundle(
-        self, git_service, mock_command_executor, temp_data_dir
-    ):
-        """Test successful bundle repository clone."""
-        # Arrange
-        repo_url = "https://github.com/test/repo.git"
-        destination = Path(temp_data_dir) / "test_repo.bundle"
-        expected_result = {
-            "success": True,
-            "method": "bundle",
-            "destination": str(destination),
-            "size_bytes": 2048,
-        }
-        mock_command_executor.execute_clone_bundle.return_value = expected_result
-
-        # Act
-        result = git_service.clone_repository(
-            repo_url, destination, GitBackupFormat.BUNDLE
-        )
-
-        # Assert
-        assert result.success is True
-        assert result.backup_format == "bundle"
-        assert result.destination == str(destination)
-        mock_command_executor.execute_clone_bundle.assert_called_once_with(
-            repo_url, destination
-        )
-
     def test_clone_repository_failure_returns_error_result(
         self, git_service, mock_command_executor, temp_data_dir
     ):
@@ -259,33 +231,6 @@ class TestGitCommandExecutor:
             git_executor.execute_clone_mirror(
                 "https://github.com/test/repo.git", destination
             )
-
-    @patch("src.git.command_executor.subprocess.run")
-    def test_execute_clone_bundle_success(
-        self, mock_subprocess, git_executor, temp_data_dir
-    ):
-        """Test successful git bundle create execution."""
-        # Arrange
-        bundle_path = Path(temp_data_dir) / "test_repo.bundle"
-        bundle_path.touch()  # Create file for stat
-
-        # Mock both clone and bundle operations
-        mock_result = Mock()
-        mock_result.returncode = 0
-        mock_result.stderr = ""
-        mock_subprocess.return_value = mock_result
-
-        # Act
-        result = git_executor.execute_clone_bundle(
-            "https://github.com/test/repo.git", bundle_path
-        )
-
-        # Assert
-        assert result["success"] is True
-        assert result["method"] == "bundle"
-        assert result["destination"] == str(bundle_path)
-        assert "size_bytes" in result
-        assert mock_subprocess.call_count == 2  # clone + bundle
 
     def test_prepare_authenticated_url_https(self, git_executor):
         """Test HTTPS URL authentication preparation."""
