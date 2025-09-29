@@ -178,7 +178,7 @@ class TestIssuesIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify comments were called in chronological order (earliest first)
@@ -333,7 +333,7 @@ class TestIssuesIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called
@@ -453,7 +453,7 @@ class TestIssuesIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called
@@ -565,7 +565,7 @@ class TestIssuesIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify that issue was created with correct labels

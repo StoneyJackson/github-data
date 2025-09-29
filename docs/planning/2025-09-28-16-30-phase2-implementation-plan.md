@@ -1006,6 +1006,6 @@ Before considering Phase 2 complete:
 After Phase 2 completion:
 
 1. **Phase 3**: Enhanced orchestrators and metadata tracking
-2. **Future Features**: `INCLUDE_PR_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_PRS`
+2. **Future Features**: `INCLUDE_PR_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_PULL_REQUESTS`
 3. **Configuration Profiles**: Support for multiple repository configurations
 4. **Advanced Filtering**: Fine-grained control over what data is saved/restored

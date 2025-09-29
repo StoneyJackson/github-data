@@ -376,7 +376,7 @@ class TestSaveRestoreWorkflows:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called correctly
@@ -604,7 +604,7 @@ class TestSaveRestoreWorkflows:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify data integrity by checking that saved data matches restored data
@@ -730,7 +730,7 @@ class TestSaveRestoreWorkflows:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify no creation methods were called for empty data

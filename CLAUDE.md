@@ -48,7 +48,12 @@ The following environment variables control backup and restore operations:
 - `GITHUB_TOKEN`: GitHub Personal Access Token for API access - **required**
 - `GITHUB_REPO`: Target repository in format `owner/repo` - **required**
 - `DATA_PATH`: Directory path for backup/restore data files (default: `/data`)
+- `LABEL_CONFLICT_STRATEGY`: How to handle label conflicts during restore (default: `fail-if-existing`)
+- `INCLUDE_GIT_REPO`: Enable/disable Git repository save (default: `true`)
 - `INCLUDE_ISSUE_COMMENTS`: Include issue comments in backup/restore operations (default: `true`)
+- `INCLUDE_PULL_REQUESTS`: Include pull requests in backup/restore operations (default: `false`)
+- `INCLUDE_SUB_ISSUES`: Include sub-issue relationships in backup/restore operations (default: `false`)
+- `GIT_AUTH_METHOD`: Git authentication method: `token`, `ssh` (default: `token`)
 
 ### Environment Variable Examples
 
@@ -78,7 +83,7 @@ docker run --rm \
 
 ### Boolean Value Formats
 
-The `INCLUDE_ISSUE_COMMENTS` variable accepts these boolean formats:
+Boolean variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_SUB_ISSUES`) accept these formats:
 - **True values**: `true`, `1`, `yes`, `on` (case-insensitive)
 - **False values**: `false`, `0`, `no`, `off` (case-insensitive)
 

@@ -84,7 +84,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
         # Verify first label succeeded, second failed and stopped execution
@@ -124,7 +124,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
     @patch("src.github.service.GitHubApiBoundary")
@@ -218,7 +218,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
         assert "labels.json" in str(exc_info.value)
@@ -253,7 +253,7 @@ class TestErrorHandlingIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify unicode content was processed correctly
@@ -311,7 +311,7 @@ class TestErrorHandlingIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify all items were processed
@@ -356,7 +356,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
         # Verify first label succeeded before timeout
@@ -434,7 +434,7 @@ class TestErrorHandlingIntegration:
             "owner/repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify calls were made despite empty/null values

@@ -86,7 +86,7 @@ class TestLabelsIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify all labels were created
@@ -178,7 +178,7 @@ class TestLabelsIntegration:
             "owner/repo",
             temp_data_dir,
             label_conflict_strategy="skip",
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify only the new label was created (existing one skipped)
@@ -248,7 +248,7 @@ class TestLabelsIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify all labels were created with various color formats
@@ -298,7 +298,7 @@ class TestLabelsIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify all 50 labels were processed
@@ -419,7 +419,7 @@ class TestLabelsIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify all three labels were created as separate entities
