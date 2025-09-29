@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/StoneyJackson/github-data/compare/v1.2.0...v1.3.0) (2025-09-29)
+
+
+### Features
+
+* INCLUDE_ISSUE_COMMENTS, INCLUDE_PULL_REQUESTS, and INCLUDE_SUB_ISSUES ([67f1c90](https://github.com/StoneyJackson/github-data/commit/67f1c90711c03066d432e8da82c6a71af6eb369c))
+
 # [1.2.0](https://github.com/StoneyJackson/github-data/compare/v1.1.0...v1.2.0) (2025-09-28)
 
 
