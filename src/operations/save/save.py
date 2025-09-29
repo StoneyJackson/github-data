@@ -18,9 +18,9 @@ def save_repository_data_with_strategy_pattern(
     storage_service: StorageService,
     repo_name: str,
     output_path: str,
-    include_prs: bool = True,
+    include_pull_requests: bool = True,
     include_sub_issues: bool = True,
-    include_git_repo: bool = True,
+    include_git_repo: bool = False,
     git_service: Optional[GitRepositoryService] = None,
     data_types: Optional[List[str]] = None,
 ) -> None:
@@ -35,6 +35,8 @@ def save_repository_data_with_strategy_pattern(
         label_conflict_strategy="fail-if-existing",
         include_git_repo=include_git_repo,
         include_issue_comments=True,  # Default to include comments
+        include_pull_requests=include_pull_requests,
+        include_sub_issues=include_sub_issues,
         git_auth_method="token",
     )
 
@@ -44,7 +46,7 @@ def save_repository_data_with_strategy_pattern(
         storage_service,
         repo_name,
         output_path,
-        include_prs=include_prs,
+        include_pull_requests=include_pull_requests,
         include_sub_issues=include_sub_issues,
         git_service=git_service,
         data_types=data_types,
@@ -57,52 +59,39 @@ def save_repository_data_with_config(
     storage_service: StorageService,
     repo_name: str,
     output_path: str,
-    include_prs: bool = True,
+    include_pull_requests: bool = True,
     include_sub_issues: bool = True,
     git_service: Optional[GitRepositoryService] = None,
     data_types: Optional[List[str]] = None,
 ) -> None:
     """Save using strategy pattern approach with configuration."""
 
-    # Create orchestrator with configuration
+    # Create updated configuration that considers legacy parameters
+    updated_config = ApplicationConfig(
+        operation=config.operation,
+        github_token=config.github_token,
+        github_repo=config.github_repo,
+        data_path=config.data_path,
+        label_conflict_strategy=config.label_conflict_strategy,
+        include_git_repo=config.include_git_repo,
+        include_issue_comments=config.include_issue_comments,
+        include_pull_requests=config.include_pull_requests
+        or include_pull_requests,  # Support legacy parameter
+        include_sub_issues=config.include_sub_issues
+        or include_sub_issues,  # Support legacy parameter
+        git_auth_method=config.git_auth_method,
+    )
+
+    # Create orchestrator with updated configuration
     from .orchestrator import StrategyBasedSaveOrchestrator
 
     orchestrator = StrategyBasedSaveOrchestrator(
-        config, github_service, storage_service
+        updated_config, github_service, storage_service, git_service
     )
-
-    # Add additional strategies not yet in the factory
-    if include_prs:
-        from .strategies.pull_requests_strategy import PullRequestsSaveStrategy
-        from .strategies.pr_comments_strategy import PullRequestCommentsSaveStrategy
-
-        orchestrator.register_strategy(PullRequestsSaveStrategy())
-        orchestrator.register_strategy(PullRequestCommentsSaveStrategy())
-
-    # Add sub-issues strategy if requested
-    if include_sub_issues:
-        from .strategies.sub_issues_strategy import SubIssuesSaveStrategy
-
-        orchestrator.register_strategy(SubIssuesSaveStrategy())
-
-    # Add Git repository strategy if requested
-    if config.include_git_repo and git_service:
-        from .strategies.git_repository_strategy import GitRepositoryStrategy
-
-        orchestrator.register_strategy(GitRepositoryStrategy(git_service))
 
     # Determine entities to save
     if data_types is None:
-        # Start with config-based entities
-        requested_entities = StrategyFactory.get_enabled_entities(config)
-
-        # Add additional entities based on parameters
-        if include_prs:
-            requested_entities.extend(["pull_requests", "pr_comments"])
-        if include_sub_issues:
-            requested_entities.append("sub_issues")
-        if config.include_git_repo and git_service:
-            requested_entities.append("git_repository")
+        requested_entities = StrategyFactory.get_enabled_entities(updated_config)
     else:
         requested_entities = data_types
 

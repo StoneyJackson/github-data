@@ -83,7 +83,7 @@ class TestStrategyFactory:
         base_config.include_issue_comments = True
         entities = StrategyFactory.get_enabled_entities(base_config)
 
-        expected_entities = ["labels", "issues", "comments"]
+        expected_entities = ["labels", "issues", "comments", "git_repository"]
         assert entities == expected_entities
 
     def test_get_enabled_entities_with_comments_disabled(
@@ -92,7 +92,7 @@ class TestStrategyFactory:
         """Test entity list generation with comments disabled."""
         entities = StrategyFactory.get_enabled_entities(config_with_comments_disabled)
 
-        expected_entities = ["labels", "issues"]
+        expected_entities = ["labels", "issues", "git_repository"]
         assert entities == expected_entities
 
     def test_get_enabled_entities_with_minimal_features(

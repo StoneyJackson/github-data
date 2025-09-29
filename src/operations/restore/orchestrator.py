@@ -10,6 +10,7 @@ from src.operations.strategy_factory import StrategyFactory
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
     from src.github.protocols import RepositoryService
+    from src.git.protocols import GitRepositoryService
 
 
 class StrategyBasedRestoreOrchestrator:
@@ -21,6 +22,7 @@ class StrategyBasedRestoreOrchestrator:
         github_service: "RepositoryService",
         storage_service: "StorageService",
         include_original_metadata: bool = True,
+        git_service: Optional["GitRepositoryService"] = None,
     ) -> None:
         self._config = config
         self._github_service = github_service
@@ -30,7 +32,7 @@ class StrategyBasedRestoreOrchestrator:
 
         # Auto-register strategies based on configuration
         for strategy in StrategyFactory.create_restore_strategies(
-            config, github_service, include_original_metadata
+            config, github_service, include_original_metadata, git_service
         ):
             self.register_strategy(strategy)
 

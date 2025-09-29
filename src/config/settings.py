@@ -13,6 +13,8 @@ class ApplicationConfig:
     label_conflict_strategy: str
     include_git_repo: bool
     include_issue_comments: bool
+    include_pull_requests: bool
+    include_sub_issues: bool
     git_auth_method: str
 
     @classmethod
@@ -30,6 +32,10 @@ class ApplicationConfig:
             include_issue_comments=cls._parse_bool_env(
                 "INCLUDE_ISSUE_COMMENTS", default=True
             ),
+            include_pull_requests=cls._parse_bool_env(
+                "INCLUDE_PULL_REQUESTS", default=False
+            ),
+            include_sub_issues=cls._parse_bool_env("INCLUDE_SUB_ISSUES", default=False),
             git_auth_method=cls._get_env_with_default("GIT_AUTH_METHOD", "token"),
         )
 

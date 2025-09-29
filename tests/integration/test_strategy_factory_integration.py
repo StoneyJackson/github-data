@@ -23,6 +23,8 @@ def base_config():
         label_conflict_strategy="fail-if-existing",
         include_git_repo=True,
         include_issue_comments=True,
+        include_pull_requests=False,
+        include_sub_issues=False,
         git_auth_method="token",
     )
 
@@ -38,6 +40,8 @@ def config_with_comments_disabled():
         label_conflict_strategy="fail-if-existing",
         include_git_repo=True,
         include_issue_comments=False,
+        include_pull_requests=False,
+        include_sub_issues=False,
         git_auth_method="token",
     )
 
@@ -96,6 +100,9 @@ class TestStrategyFactoryIntegration:
     ):
         """Test that entity list from factory matches what orchestrator registers."""
         base_config.include_issue_comments = True
+        base_config.include_git_repo = (
+            False  # Disable git repo for this test to avoid needing git_service
+        )
 
         # Get entities from factory
         expected_entities = StrategyFactory.get_enabled_entities(base_config)

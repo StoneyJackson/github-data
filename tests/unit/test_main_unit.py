@@ -42,6 +42,8 @@ class TestMain:
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
             include_issue_comments=True,
+            include_pull_requests=False,
+            include_sub_issues=False,
             git_auth_method="token",
         )
         mock_config_from_env.return_value = mock_config
@@ -83,6 +85,8 @@ class TestMain:
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
             include_issue_comments=True,
+            include_pull_requests=False,
+            include_sub_issues=False,
             git_auth_method="token",
         )
         mock_config_from_env.return_value = mock_config
@@ -113,6 +117,8 @@ class TestMain:
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
             include_issue_comments=True,
+            include_pull_requests=False,
+            include_sub_issues=False,
             git_auth_method="token",
         )
         mock_config_from_env.return_value = mock_config

@@ -8,6 +8,7 @@ from src.operations.strategy_factory import StrategyFactory
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
     from src.github.protocols import RepositoryService
+    from src.git.protocols import GitRepositoryService
 
 
 class StrategyBasedSaveOrchestrator:
@@ -18,6 +19,7 @@ class StrategyBasedSaveOrchestrator:
         config: ApplicationConfig,
         github_service: "RepositoryService",
         storage_service: "StorageService",
+        git_service: Optional["GitRepositoryService"] = None,
     ) -> None:
         self._config = config
         self._github_service = github_service
@@ -26,7 +28,7 @@ class StrategyBasedSaveOrchestrator:
         self._context: Dict[str, Any] = {}
 
         # Auto-register strategies based on configuration
-        for strategy in StrategyFactory.create_save_strategies(config):
+        for strategy in StrategyFactory.create_save_strategies(config, git_service):
             self.register_strategy(strategy)
 
     def register_strategy(self, strategy: SaveEntityStrategy) -> None:
