@@ -106,7 +106,8 @@ class TestIncludeIssueCommentsFeature:
             ):
                 with patch("src.storage.create_storage_service"):
                     with patch(
-                        "src.operations.restore.restore.restore_repository_data_with_config"
+                        "src.operations.restore."
+                        "restore.restore_repository_data_with_config"
                     ) as mock_restore:
                         main()
 

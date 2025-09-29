@@ -9,18 +9,18 @@ def github_service_mock():
     from unittest.mock import Mock
 
     service = Mock()
-    
+
     # Mock the required service methods with proper data structure
     service.get_repository_labels.return_value = [
         {
             "name": "bug",
-            "color": "d73a4a", 
+            "color": "d73a4a",
             "description": "Bug reports",
             "url": "https://api.github.com/repos/owner/repo/labels/bug",
             "id": 101,
         }
     ]
-    
+
     service.get_repository_issues.return_value = [
         {
             "id": 789,
@@ -51,7 +51,7 @@ def github_service_mock():
             "comments": 1,
         }
     ]
-    
+
     service.get_all_issue_comments.return_value = [
         {
             "id": 123,
@@ -68,5 +68,5 @@ def github_service_mock():
             "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
         }
     ]
-    
+
     return service

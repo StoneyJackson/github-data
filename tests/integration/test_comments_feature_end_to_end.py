@@ -31,6 +31,7 @@ class TestCommentsFeatureEndToEnd:
             "GITHUB_REPO": "owner/repo",
             "DATA_PATH": str(data_path),
             "INCLUDE_ISSUE_COMMENTS": "true",
+            "INCLUDE_GIT_REPO": "false",
         }
 
         with patch.dict(os.environ, save_env, clear=True):
@@ -55,6 +56,7 @@ class TestCommentsFeatureEndToEnd:
             "GITHUB_REPO": "owner/repo-new",
             "DATA_PATH": str(data_path),
             "INCLUDE_ISSUE_COMMENTS": "true",
+            "INCLUDE_GIT_REPO": "false",
         }
 
         with patch.dict(os.environ, restore_env, clear=True):
@@ -81,6 +83,7 @@ class TestCommentsFeatureEndToEnd:
             "GITHUB_REPO": "owner/repo",
             "DATA_PATH": str(data_path),
             "INCLUDE_ISSUE_COMMENTS": "false",
+            "INCLUDE_GIT_REPO": "false",
         }
 
         with patch.dict(os.environ, env_vars, clear=True):
