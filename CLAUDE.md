@@ -40,6 +40,48 @@ This GitHub Data project provides containerized tools for backing up and restori
 4. Customize backup/restore operations for specific data requirements
 5. Handle hierarchical sub-issue relationships and pull request workflows with branch dependency validation
 
+## Environment Variables
+
+The following environment variables control backup and restore operations:
+
+- `OPERATION`: Operation to perform (`save` or `restore`) - **required**
+- `GITHUB_TOKEN`: GitHub Personal Access Token for API access - **required**
+- `GITHUB_REPO`: Target repository in format `owner/repo` - **required**
+- `DATA_PATH`: Directory path for backup/restore data files (default: `/data`)
+- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in backup/restore operations (default: `true`)
+
+### Environment Variable Examples
+
+**Save repository data excluding issue comments:**
+```bash
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repo \
+  -e DATA_PATH=/data \
+  -e INCLUDE_ISSUE_COMMENTS=false \
+  -v $(pwd)/backup:/data \
+  github-data:latest
+```
+
+**Restore repository data with issue comments included (default):**
+```bash
+docker run --rm \
+  -e OPERATION=restore \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repo \
+  -e DATA_PATH=/data \
+  -e INCLUDE_ISSUE_COMMENTS=true \
+  -v $(pwd)/backup:/data \
+  github-data:latest
+```
+
+### Boolean Value Formats
+
+The `INCLUDE_ISSUE_COMMENTS` variable accepts these boolean formats:
+- **True values**: `true`, `1`, `yes`, `on` (case-insensitive)
+- **False values**: `false`, `0`, `no`, `off` (case-insensitive)
+
 ## Development Environment
 
 This repository uses DevContainer for consistent development environments:
