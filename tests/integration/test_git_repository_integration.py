@@ -311,9 +311,7 @@ class TestGitRepositoryStorageIntegration:
             args, kwargs = mock_execute.call_args
             assert args[1] == expected_path  # destination parameter
 
-    def test_git_mirror_path_handling(
-        self, temp_data_dir, storage_service_mock
-    ):
+    def test_git_mirror_path_handling(self, temp_data_dir, storage_service_mock):
         """Test mirror format path handling."""
         git_service = GitRepositoryServiceImpl()
 

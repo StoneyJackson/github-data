@@ -1,34 +1,55 @@
 """Strategy-based restore orchestrator."""
 
 import json
-from typing import List, Dict, Any, TYPE_CHECKING
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from .strategy import RestoreEntityStrategy
 from src.operations.restore.strategies.labels_strategy import OverwriteConflictStrategy
+from src.config.settings import ApplicationConfig
+from src.operations.strategy_factory import StrategyFactory
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
     from src.github.protocols import RepositoryService
+    from src.git.protocols import GitRepositoryService
 
 
 class StrategyBasedRestoreOrchestrator:
     """Orchestrator that executes restore operations using registered strategies."""
 
     def __init__(
-        self, github_service: "RepositoryService", storage_service: "StorageService"
+        self,
+        config: ApplicationConfig,
+        github_service: "RepositoryService",
+        storage_service: "StorageService",
+        include_original_metadata: bool = True,
+        git_service: Optional["GitRepositoryService"] = None,
     ) -> None:
+        self._config = config
         self._github_service = github_service
         self._storage_service = storage_service
         self._strategies: Dict[str, RestoreEntityStrategy] = {}
         self._context: Dict[str, Any] = {}
+
+        # Auto-register strategies based on configuration
+        for strategy in StrategyFactory.create_restore_strategies(
+            config, github_service, include_original_metadata, git_service
+        ):
+            self.register_strategy(strategy)
 
     def register_strategy(self, strategy: RestoreEntityStrategy) -> None:
         """Register an entity restoration strategy."""
         self._strategies[strategy.get_entity_name()] = strategy
 
     def execute_restore(
-        self, repo_name: str, input_path: str, requested_entities: List[str]
+        self,
+        repo_name: str,
+        input_path: str,
+        requested_entities: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
         """Execute restore operation using registered strategies."""
+        if requested_entities is None:
+            requested_entities = StrategyFactory.get_enabled_entities(self._config)
+
         results = []
 
         # Resolve dependency order

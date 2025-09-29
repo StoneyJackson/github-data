@@ -14,6 +14,9 @@ if TYPE_CHECKING:
 class SubIssuesRestoreStrategy(RestoreEntityStrategy):
     """Strategy for restoring GitHub sub-issue relationships."""
 
+    def __init__(self, include_original_metadata: bool = True):
+        self._include_original_metadata = include_original_metadata
+
     def get_entity_name(self) -> str:
         return "sub_issues"
 

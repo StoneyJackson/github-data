@@ -626,7 +626,7 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called correctly
@@ -854,7 +854,7 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify data integrity by checking that saved data matches restored data
@@ -980,7 +980,7 @@ class TestSaveRestoreIntegration:
             storage_service,
             "owner/repo",
             temp_data_dir,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify no creation methods were called for empty data
@@ -999,7 +999,7 @@ class TestSaveRestoreIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
         assert "labels.json" in str(exc_info.value)
@@ -1199,7 +1199,7 @@ class TestSaveRestoreIntegration:
             "owner/target_repo",
             temp_data_dir,
             include_original_metadata=False,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify comments were called in chronological order (earliest first)
@@ -1296,7 +1296,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
         # Verify first label succeeded, second failed and stopped execution
@@ -1336,7 +1336,7 @@ class TestErrorHandlingIntegration:
                 storage_service,
                 "owner/repo",
                 temp_data_dir,
-                include_prs=True,
+                include_pull_requests=True,
             )
 
     @patch("src.github.service.GitHubApiBoundary")
@@ -1550,7 +1550,7 @@ class TestErrorHandlingIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called
@@ -1674,7 +1674,7 @@ class TestErrorHandlingIntegration:
             "owner/repo",
             str(data_path),
             include_original_metadata=True,
-            include_prs=True,
+            include_pull_requests=True,
         )
 
         # Verify boundary methods were called
