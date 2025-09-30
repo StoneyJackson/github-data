@@ -43,6 +43,7 @@ class TestMain:
             include_git_repo=False,
             include_issue_comments=True,
             include_pull_requests=False,
+            include_pull_request_comments=True,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -86,6 +87,7 @@ class TestMain:
             include_git_repo=False,
             include_issue_comments=True,
             include_pull_requests=False,
+            include_pull_request_comments=True,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -118,6 +120,7 @@ class TestMain:
             include_git_repo=False,
             include_issue_comments=True,
             include_pull_requests=False,
+            include_pull_request_comments=True,
             include_sub_issues=False,
             git_auth_method="token",
         )

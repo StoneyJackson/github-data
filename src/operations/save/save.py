@@ -36,6 +36,7 @@ def save_repository_data_with_strategy_pattern(
         include_git_repo=include_git_repo,
         include_issue_comments=True,  # Default to include comments
         include_pull_requests=include_pull_requests,
+        include_pull_request_comments=include_pull_requests,  # Enable only if PRs
         include_sub_issues=include_sub_issues,
         git_auth_method="token",
     )
@@ -77,6 +78,7 @@ def save_repository_data_with_config(
         include_issue_comments=config.include_issue_comments,
         include_pull_requests=config.include_pull_requests
         or include_pull_requests,  # Support legacy parameter
+        include_pull_request_comments=config.include_pull_request_comments,
         include_sub_issues=config.include_sub_issues
         or include_sub_issues,  # Support legacy parameter
         git_auth_method=config.git_auth_method,

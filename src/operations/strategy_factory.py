@@ -1,4 +1,5 @@
 from typing import List, Optional, TYPE_CHECKING
+import logging
 from src.config.settings import ApplicationConfig
 
 if TYPE_CHECKING:
@@ -34,12 +35,21 @@ class StrategyFactory:
             from src.operations.save.strategies.pull_requests_strategy import (
                 PullRequestsSaveStrategy,
             )
-            from src.operations.save.strategies.pr_comments_strategy import (
-                PullRequestCommentsSaveStrategy,
-            )
 
             strategies.append(PullRequestsSaveStrategy())
-            strategies.append(PullRequestCommentsSaveStrategy())
+
+            if config.include_pull_request_comments:
+                from src.operations.save.strategies.pr_comments_strategy import (
+                    PullRequestCommentsSaveStrategy,
+                )
+
+                strategies.append(PullRequestCommentsSaveStrategy())
+        elif config.include_pull_request_comments:
+            # Warn if PR comments are enabled but PRs are not
+            logging.warning(
+                "Warning: INCLUDE_PULL_REQUEST_COMMENTS=true requires "
+                "INCLUDE_PULL_REQUESTS=true. Ignoring PR comments."
+            )
 
         if config.include_sub_issues:
             from src.operations.save.strategies.sub_issues_strategy import (
@@ -98,23 +108,32 @@ class StrategyFactory:
                 PullRequestsRestoreStrategy,
                 create_conflict_strategy as create_pr_conflict_strategy,
             )
-            from src.operations.restore.strategies.pr_comments_strategy import (
-                PullRequestCommentsRestoreStrategy,
-                create_conflict_strategy as create_pr_comment_conflict_strategy,
-            )
 
             pr_conflict_strategy = create_pr_conflict_strategy()
-            pr_comment_conflict_strategy = create_pr_comment_conflict_strategy()
 
             strategies.append(
                 PullRequestsRestoreStrategy(
                     pr_conflict_strategy, include_original_metadata
                 )
             )
-            strategies.append(
-                PullRequestCommentsRestoreStrategy(
-                    pr_comment_conflict_strategy, include_original_metadata
+
+            if config.include_pull_request_comments:
+                from src.operations.restore.strategies.pr_comments_strategy import (
+                    PullRequestCommentsRestoreStrategy,
+                    create_conflict_strategy as create_pr_comment_conflict_strategy,
                 )
+
+                pr_comment_conflict_strategy = create_pr_comment_conflict_strategy()
+                strategies.append(
+                    PullRequestCommentsRestoreStrategy(
+                        pr_comment_conflict_strategy, include_original_metadata
+                    )
+                )
+        elif config.include_pull_request_comments:
+            # Warn if PR comments are enabled but PRs are not
+            logging.warning(
+                "Warning: INCLUDE_PULL_REQUEST_COMMENTS=true requires "
+                "INCLUDE_PULL_REQUESTS=true. Ignoring PR comments."
             )
 
         # Create sub-issues strategy if enabled
@@ -144,7 +163,9 @@ class StrategyFactory:
             entities.append("comments")
 
         if config.include_pull_requests:
-            entities.extend(["pull_requests", "pr_comments"])
+            entities.append("pull_requests")
+            if config.include_pull_request_comments:
+                entities.append("pr_comments")
 
         if config.include_sub_issues:
             entities.append("sub_issues")

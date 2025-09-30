@@ -83,7 +83,14 @@ class TestStrategyFactory:
         base_config.include_issue_comments = True
         entities = StrategyFactory.get_enabled_entities(base_config)
 
-        expected_entities = ["labels", "issues", "comments", "git_repository"]
+        expected_entities = [
+            "labels",
+            "issues",
+            "comments",
+            "pull_requests",
+            "pr_comments",
+            "git_repository",
+        ]
         assert entities == expected_entities
 
     def test_get_enabled_entities_with_comments_disabled(
@@ -92,7 +99,13 @@ class TestStrategyFactory:
         """Test entity list generation with comments disabled."""
         entities = StrategyFactory.get_enabled_entities(config_with_comments_disabled)
 
-        expected_entities = ["labels", "issues", "git_repository"]
+        expected_entities = [
+            "labels",
+            "issues",
+            "pull_requests",
+            "pr_comments",
+            "git_repository",
+        ]
         assert entities == expected_entities
 
     def test_get_enabled_entities_with_minimal_features(
@@ -184,3 +197,193 @@ class TestStrategyFactory:
             assert hasattr(strategy, "transform_for_creation")
             assert hasattr(strategy, "create_entity")
             assert hasattr(strategy, "post_create_actions")
+
+
+class TestStrategyFactoryPullRequestComments:
+    """Test cases for StrategyFactory PR comments functionality."""
+
+    def test_create_save_strategies_with_pr_comments_enabled(
+        self, config_with_prs_and_comments
+    ):
+        """Test save strategy creation with PR comments enabled."""
+        strategies = StrategyFactory.create_save_strategies(
+            config_with_prs_and_comments
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsSaveStrategy" in strategy_types
+        assert "IssuesSaveStrategy" in strategy_types
+        assert "CommentsSaveStrategy" in strategy_types
+        assert "PullRequestsSaveStrategy" in strategy_types
+        assert "PullRequestCommentsSaveStrategy" in strategy_types
+
+    def test_create_save_strategies_with_prs_no_comments(
+        self, config_with_prs_no_comments
+    ):
+        """Test save strategy creation with PRs enabled but comments disabled."""
+        strategies = StrategyFactory.create_save_strategies(config_with_prs_no_comments)
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsSaveStrategy" in strategy_types
+        assert "IssuesSaveStrategy" in strategy_types
+        assert "CommentsSaveStrategy" in strategy_types  # Issue comments still enabled
+        assert "PullRequestsSaveStrategy" in strategy_types
+        assert "PullRequestCommentsSaveStrategy" not in strategy_types
+
+    def test_create_save_strategies_with_pr_comments_but_no_prs_shows_warning(
+        self, config_with_pr_comments_only, caplog
+    ):
+        """Test save strategy with PR comments enabled but PRs disabled (warns)."""
+        strategies = StrategyFactory.create_save_strategies(
+            config_with_pr_comments_only
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsSaveStrategy" in strategy_types
+        assert "IssuesSaveStrategy" in strategy_types
+        assert "CommentsSaveStrategy" in strategy_types  # Issue comments still enabled
+        assert "PullRequestsSaveStrategy" not in strategy_types
+        assert "PullRequestCommentsSaveStrategy" not in strategy_types
+
+        # Should have warning about dependency not met
+        warning_found = any(
+            "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true"
+            in record.message
+            for record in caplog.records
+            if record.levelname == "WARNING"
+        )
+        assert warning_found, "Expected warning about PR comments dependency not found"
+
+    def test_create_restore_strategies_with_pr_comments_enabled(
+        self, config_with_prs_and_comments
+    ):
+        """Test restore strategy creation with PR comments enabled."""
+        mock_github_service = Mock()
+
+        strategies = StrategyFactory.create_restore_strategies(
+            config_with_prs_and_comments,
+            github_service=mock_github_service,
+            include_original_metadata=True,
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsRestoreStrategy" in strategy_types
+        assert "IssuesRestoreStrategy" in strategy_types
+        assert "CommentsRestoreStrategy" in strategy_types
+        assert "PullRequestsRestoreStrategy" in strategy_types
+        assert "PullRequestCommentsRestoreStrategy" in strategy_types
+
+    def test_create_restore_strategies_with_prs_no_comments(
+        self, config_with_prs_no_comments
+    ):
+        """Test restore strategy creation with PRs enabled but comments disabled."""
+        mock_github_service = Mock()
+
+        strategies = StrategyFactory.create_restore_strategies(
+            config_with_prs_no_comments,
+            github_service=mock_github_service,
+            include_original_metadata=True,
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsRestoreStrategy" in strategy_types
+        assert "IssuesRestoreStrategy" in strategy_types
+        assert (
+            "CommentsRestoreStrategy" in strategy_types
+        )  # Issue comments still enabled
+        assert "PullRequestsRestoreStrategy" in strategy_types
+        assert "PullRequestCommentsRestoreStrategy" not in strategy_types
+
+    def test_create_restore_strategies_with_pr_comments_but_no_prs_shows_warning(
+        self, config_with_pr_comments_only, caplog
+    ):
+        """Test restore strategy with PR comments enabled but PRs disabled (warns)."""
+        mock_github_service = Mock()
+
+        strategies = StrategyFactory.create_restore_strategies(
+            config_with_pr_comments_only,
+            github_service=mock_github_service,
+            include_original_metadata=True,
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsRestoreStrategy" in strategy_types
+        assert "IssuesRestoreStrategy" in strategy_types
+        assert (
+            "CommentsRestoreStrategy" in strategy_types
+        )  # Issue comments still enabled
+        assert "PullRequestsRestoreStrategy" not in strategy_types
+        assert "PullRequestCommentsRestoreStrategy" not in strategy_types
+
+        # Should have warning about dependency not met
+        warning_found = any(
+            "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true"
+            in record.message
+            for record in caplog.records
+            if record.levelname == "WARNING"
+        )
+        assert warning_found, "Expected warning about PR comments dependency not found"
+
+    def test_get_enabled_entities_with_pr_comments(self, config_with_prs_and_comments):
+        """Test entity list generation with PR comments enabled."""
+        entities = StrategyFactory.get_enabled_entities(config_with_prs_and_comments)
+
+        expected_entities = [
+            "labels",
+            "issues",
+            "comments",
+            "pull_requests",
+            "pr_comments",
+            "git_repository",
+        ]
+        assert entities == expected_entities
+
+    def test_get_enabled_entities_with_prs_no_comments(
+        self, config_with_prs_no_comments
+    ):
+        """Test entity list generation with PRs enabled but comments disabled."""
+        entities = StrategyFactory.get_enabled_entities(config_with_prs_no_comments)
+
+        expected_entities = [
+            "labels",
+            "issues",
+            "comments",
+            "pull_requests",
+            "git_repository",
+        ]
+        assert entities == expected_entities
+
+    def test_get_enabled_entities_with_pr_comments_but_no_prs(
+        self, config_with_pr_comments_only
+    ):
+        """Test entity list generation with PR comments enabled but PRs disabled."""
+        entities = StrategyFactory.get_enabled_entities(config_with_pr_comments_only)
+
+        # PR comments should be excluded due to dependency validation
+        expected_entities = ["labels", "issues", "comments", "git_repository"]
+        assert entities == expected_entities
+
+    def test_pr_comment_dependency_validation_in_entity_list(self):
+        """Test that entity list properly validates PR comment dependencies."""
+        from src.config.settings import ApplicationConfig
+
+        # Create config with invalid combination
+        config = ApplicationConfig(
+            operation="save",
+            github_token="test-token",
+            github_repo="test-owner/test-repo",
+            data_path="/tmp/test-data",
+            label_conflict_strategy="fail-if-existing",
+            include_git_repo=True,
+            include_issue_comments=True,
+            include_pull_requests=False,  # PRs disabled
+            include_pull_request_comments=True,  # But PR comments enabled
+            include_sub_issues=False,
+            git_auth_method="token",
+        )
+
+        entities = StrategyFactory.get_enabled_entities(config)
+
+        # pr_comments should not be in the list due to failed dependency
+        assert "pr_comments" not in entities
+        assert "pull_requests" not in entities

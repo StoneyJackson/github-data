@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import os
+import logging
 
 
 @dataclass
@@ -14,6 +15,7 @@ class ApplicationConfig:
     include_git_repo: bool
     include_issue_comments: bool
     include_pull_requests: bool
+    include_pull_request_comments: bool
     include_sub_issues: bool
     git_auth_method: str
 
@@ -34,6 +36,9 @@ class ApplicationConfig:
             ),
             include_pull_requests=cls._parse_bool_env(
                 "INCLUDE_PULL_REQUESTS", default=False
+            ),
+            include_pull_request_comments=cls._parse_bool_env(
+                "INCLUDE_PULL_REQUEST_COMMENTS", default=True
             ),
             include_sub_issues=cls._parse_bool_env("INCLUDE_SUB_ISSUES", default=False),
             git_auth_method=cls._get_env_with_default("GIT_AUTH_METHOD", "token"),
@@ -89,3 +94,12 @@ class ApplicationConfig:
                 f"Git auth method must be one of {valid_auth_methods}, "
                 f"got: {self.git_auth_method}"
             )
+
+        # Validate PR comments dependency
+        if self.include_pull_request_comments and not self.include_pull_requests:
+            logging.warning(
+                "Warning: INCLUDE_PULL_REQUEST_COMMENTS=true requires "
+                "INCLUDE_PULL_REQUESTS=true. Ignoring PR comments."
+            )
+            # Disable PR comments when dependency is not met
+            self.include_pull_request_comments = False
