@@ -85,6 +85,7 @@ docker run --rm \
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
 | `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in backup/restore (default: `true`) |
 | `INCLUDE_PULL_REQUESTS` | No | Include pull requests in backup/restore (default: `false`) |
+| `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in backup/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`) |
 | `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in backup/restore (default: `false`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
@@ -111,7 +112,7 @@ docker run --rm \
 
 #### Boolean Environment Variables
 
-Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_SUB_ISSUES`) accept the following values:
+Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept the following values:
 - **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
 - **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
 
