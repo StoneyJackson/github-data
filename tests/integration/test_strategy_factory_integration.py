@@ -24,6 +24,7 @@ def base_config():
         include_git_repo=True,
         include_issue_comments=True,
         include_pull_requests=False,
+        include_pull_request_comments=True,
         include_sub_issues=False,
         git_auth_method="token",
     )
@@ -41,6 +42,7 @@ def config_with_comments_disabled():
         include_git_repo=True,
         include_issue_comments=False,
         include_pull_requests=False,
+        include_pull_request_comments=False,
         include_sub_issues=False,
         git_auth_method="token",
     )

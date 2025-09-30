@@ -23,11 +23,20 @@ def restore_repository_data_with_strategy_pattern(
     include_pull_requests: bool = False,
     include_sub_issues: bool = False,
     include_git_repo: bool = False,
+    include_pull_request_comments: Optional[bool] = None,
     git_service: Optional[GitRepositoryService] = None,
 ) -> None:
     """Restore using strategy pattern approach (legacy interface)."""
     # For backward compatibility, create a temporary config from parameters
     # This will be removed in Phase 2 when we fully transition to config-driven approach
+    # Handle PR comments - if not specified, default to same as PRs for
+    # backward compatibility
+    pr_comments_enabled = (
+        include_pull_request_comments
+        if include_pull_request_comments is not None
+        else include_pull_requests
+    )
+
     temp_config = ApplicationConfig(
         operation="restore",
         github_token="",  # Not used in restore operation
@@ -37,6 +46,7 @@ def restore_repository_data_with_strategy_pattern(
         include_git_repo=include_git_repo,
         include_issue_comments=True,  # Default to include comments
         include_pull_requests=include_pull_requests,
+        include_pull_request_comments=pr_comments_enabled,
         include_sub_issues=include_sub_issues,
         git_auth_method="token",
     )
@@ -78,6 +88,7 @@ def restore_repository_data_with_config(
         include_issue_comments=config.include_issue_comments,
         include_pull_requests=config.include_pull_requests
         or include_pull_requests,  # Support legacy parameter
+        include_pull_request_comments=config.include_pull_request_comments,
         include_sub_issues=config.include_sub_issues
         or include_sub_issues,  # Support legacy parameter
         git_auth_method=config.git_auth_method,

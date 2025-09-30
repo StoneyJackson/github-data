@@ -93,7 +93,9 @@ class TestIncludePullRequestCommentsFeature:
                         config = mock_save.call_args[0][0]
                         assert config.include_pull_request_comments is False
 
-    def test_restore_with_pr_comments_disabled(self, temp_data_dir, github_service_mock):
+    def test_restore_with_pr_comments_disabled(
+        self, temp_data_dir, github_service_mock
+    ):
         """Test restore operation with INCLUDE_PULL_REQUEST_COMMENTS=false."""
         env_vars = {
             "OPERATION": "restore",
@@ -118,7 +120,9 @@ class TestIncludePullRequestCommentsFeature:
                         config = mock_restore.call_args[0][0]
                         assert config.include_pull_request_comments is False
 
-    def test_pr_comments_enabled_without_pull_requests_logs_warning(self, temp_data_dir, github_service_mock, caplog):
+    def test_pr_comments_enabled_without_pull_requests_logs_warning(
+        self, temp_data_dir, github_service_mock, caplog
+    ):
         """Test that enabling PR comments without pull requests logs a warning."""
         env_vars = {
             "OPERATION": "save",
@@ -142,14 +146,23 @@ class TestIncludePullRequestCommentsFeature:
 
                         # Verify warning was logged
                         warning_found = any(
-                            "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true" in record.message
-                            for record in caplog.records if record.levelname == "WARNING"
+                            (
+                                "INCLUDE_PULL_REQUEST_COMMENTS=true requires "
+                                "INCLUDE_PULL_REQUESTS=true"
+                            )
+                            in record.message
+                            for record in caplog.records
+                            if record.levelname == "WARNING"
                         )
-                        assert warning_found, "Expected warning about PR comments dependency"
+                        assert (
+                            warning_found
+                        ), "Expected warning about PR comments dependency"
 
                         # Verify config still has PR comments disabled due to dependency
                         config = mock_save.call_args[0][0]
-                        assert config.include_pull_request_comments is False  # Should be disabled
+                        assert (
+                            config.include_pull_request_comments is False
+                        )  # Should be disabled
 
     def test_boolean_parsing_edge_cases(self):
         """Test various boolean value formats for INCLUDE_PULL_REQUEST_COMMENTS."""

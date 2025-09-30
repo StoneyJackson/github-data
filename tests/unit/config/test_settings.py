@@ -162,3 +162,67 @@ class TestApplicationConfig:
         with patch.dict(os.environ, {}, clear=True):
             result = ApplicationConfig._get_env_with_default("TEST_VAR", "default")
             assert result == "default"
+
+    def test_include_pull_request_comments_parsing_from_env(self):
+        """Test INCLUDE_PULL_REQUEST_COMMENTS environment variable parsing."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+        }
+
+        # Test with explicit true
+        with patch.dict(
+            os.environ,
+            {**base_env_vars, "INCLUDE_PULL_REQUEST_COMMENTS": "true"},
+            clear=True,
+        ):
+            config = ApplicationConfig.from_environment()
+            assert config.include_pull_request_comments is True
+
+        # Test with explicit false
+        with patch.dict(
+            os.environ,
+            {**base_env_vars, "INCLUDE_PULL_REQUEST_COMMENTS": "false"},
+            clear=True,
+        ):
+            config = ApplicationConfig.from_environment()
+            assert config.include_pull_request_comments is False
+
+        # Test with default (should be True)
+        with patch.dict(os.environ, base_env_vars, clear=True):
+            config = ApplicationConfig.from_environment()
+            assert config.include_pull_request_comments is True
+
+    def test_include_pull_request_comments_various_bool_values(self):
+        """Test INCLUDE_PULL_REQUEST_COMMENTS with various boolean representations."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+        }
+
+        true_values = ["true", "True", "1", "yes", "on"]
+        false_values = ["false", "False", "0", "no", "off"]
+
+        for value in true_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_PULL_REQUEST_COMMENTS": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert (
+                    config.include_pull_request_comments is True
+                ), f"Expected True for '{value}'"
+
+        for value in false_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_PULL_REQUEST_COMMENTS": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert (
+                    config.include_pull_request_comments is False
+                ), f"Expected False for '{value}'"

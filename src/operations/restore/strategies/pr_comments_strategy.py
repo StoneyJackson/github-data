@@ -1,5 +1,6 @@
 """Pull request comments restore strategy implementation."""
 
+import logging
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
@@ -8,6 +9,8 @@ from ..strategy import (
     RestoreConflictStrategy,
 )
 from src.entities.pr_comments.models import PullRequestComment
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
@@ -35,7 +38,11 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequestComment]:
         pr_comments_file = Path(input_path) / "pr_comments.json"
-        return storage_service.load_data(pr_comments_file, PullRequestComment)
+        try:
+            return storage_service.load_data(pr_comments_file, PullRequestComment)
+        except FileNotFoundError:
+            logger.info(f"PR comments file not found: {pr_comments_file}")
+            return []  # Return empty list if file doesn't exist
 
     def transform_for_creation(
         self, comment: PullRequestComment, context: Dict[str, Any]
@@ -45,9 +52,8 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
         original_pr_number = comment.pull_request_number
 
         if original_pr_number not in pr_number_mapping:
-            print(
-                f"Warning: No mapping found for PR #{original_pr_number}, "
-                f"skipping comment"
+            logger.warning(
+                f"No mapping found for PR #{original_pr_number}, " f"skipping comment"
             )
             return None
 

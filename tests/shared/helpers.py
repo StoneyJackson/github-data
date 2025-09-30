@@ -4,7 +4,14 @@ import pytest
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from unittest.mock import Mock
-from src.entities import GitHubUser, Issue, Comment, Label
+from src.entities import (
+    GitHubUser,
+    Issue,
+    Comment,
+    Label,
+    PullRequest,
+    PullRequestComment,
+)
 
 
 class TestDataHelper:
@@ -113,6 +120,74 @@ class TestDataHelper:
             fields.update(custom_fields)
 
         return Label(**fields)
+
+    @staticmethod
+    def create_test_pull_request(
+        pr_id: int = 2001,
+        number: int = 100,
+        title: str = "Test Pull Request",
+        body: str = "Test PR body",
+        state: str = "OPEN",
+        user: Optional[GitHubUser] = None,
+        base_ref: str = "main",
+        head_ref: str = "feature/test",
+        custom_fields: Optional[Dict[str, Any]] = None,
+    ) -> PullRequest:
+        """Create a standardized test pull request."""
+        if user is None:
+            user = TestDataHelper.create_test_user()
+
+        base_time = datetime(2023, 1, 15, 10, 30, 0, tzinfo=timezone.utc)
+        fields = {
+            "id": pr_id,
+            "number": number,
+            "title": title,
+            "body": body,
+            "state": state,
+            "user": user,
+            "created_at": base_time,
+            "updated_at": base_time,
+            "base_ref": base_ref,
+            "head_ref": head_ref,
+            "html_url": f"https://github.com/owner/repo/pull/{number}",
+            "comments_count": 0,
+        }
+        if custom_fields:
+            fields.update(custom_fields)
+
+        return PullRequest(**fields)
+
+    @staticmethod
+    def create_test_pr_comment(
+        comment_id: int = 5001,
+        body: str = "Test PR comment body",
+        user: Optional[GitHubUser] = None,
+        pull_request_number: int = 100,
+        custom_fields: Optional[Dict[str, Any]] = None,
+    ) -> PullRequestComment:
+        """Create a standardized test PR comment."""
+        if user is None:
+            user = TestDataHelper.create_test_user()
+
+        base_time = datetime(2023, 1, 15, 12, 0, 0, tzinfo=timezone.utc)
+        fields = {
+            "id": comment_id,
+            "body": body,
+            "user": user,
+            "created_at": base_time,
+            "updated_at": base_time,
+            "html_url": (
+                f"https://github.com/owner/repo/pull/"
+                f"{pull_request_number}#issuecomment-{comment_id}"
+            ),
+            "pull_request_url": (
+                f"https://api.github.com/repos/owner/repo/pulls/{pull_request_number}"
+            ),
+        }
+        if custom_fields:
+            fields.update(custom_fields)
+
+        return PullRequestComment(**fields)
 
 
 class MockHelper:
@@ -261,8 +336,20 @@ class FixtureHelper:
 
         return {
             "labels": [
-                {"name": "bug", "color": "ff0000", "description": "Bug label"},
-                {"name": "feature", "color": "00ff00", "description": "Feature label"},
+                {
+                    "name": "bug",
+                    "color": "ff0000",
+                    "description": "Bug label",
+                    "url": "https://api.github.com/repos/owner/repo/labels/bug",
+                    "id": 1000,
+                },
+                {
+                    "name": "feature",
+                    "color": "00ff00",
+                    "description": "Feature label",
+                    "url": "https://api.github.com/repos/owner/repo/labels/feature",
+                    "id": 1001,
+                },
             ],
             "issues": [
                 {
@@ -272,6 +359,8 @@ class FixtureHelper:
                     "body": "Test issue body 1",
                     "state": "open",
                     "user": user_data,
+                    "assignees": [],
+                    "labels": [],
                     "created_at": "2023-01-15T10:30:00Z",
                     "updated_at": "2023-01-15T10:30:00Z",
                     "html_url": "https://github.com/owner/repo/issues/1",
