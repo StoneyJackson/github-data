@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/StoneyJackson/github-data/compare/v1.3.0...v1.4.0) (2025-09-30)
+
+
+### Features
+
+* add INCLUDE_PULL_REQUEST_COMMENTS ([#23](https://github.com/StoneyJackson/github-data/issues/23)) ([7e057fb](https://github.com/StoneyJackson/github-data/commit/7e057fba8e322b7a268a0c9ccfb9c50bea2a9314))
+
 # [1.3.0](https://github.com/StoneyJackson/github-data/compare/v1.2.0...v1.3.0) (2025-09-29)
 
 
