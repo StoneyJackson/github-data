@@ -226,3 +226,71 @@ class TestApplicationConfig:
                 assert (
                     config.include_pull_request_comments is False
                 ), f"Expected False for '{value}'"
+
+    def test_include_issues_parsing_from_env(self):
+        """Test INCLUDE_ISSUES environment variable parsing."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+            "DATA_PATH": "/tmp/test",
+        }
+
+        # Test with True value
+        with patch.dict(
+            os.environ,
+            {**base_env_vars, "INCLUDE_ISSUES": "true"},
+            clear=True,
+        ):
+            config = ApplicationConfig.from_environment()
+            assert config.include_issues is True
+
+        # Test with False value
+        with patch.dict(
+            os.environ,
+            {**base_env_vars, "INCLUDE_ISSUES": "false"},
+            clear=True,
+        ):
+            config = ApplicationConfig.from_environment()
+            assert config.include_issues is False
+
+    def test_include_issues_boolean_parsing_edge_cases(self):
+        """Test INCLUDE_ISSUES with various boolean representations."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+            "DATA_PATH": "/tmp/test",
+        }
+
+        # True values
+        true_values = ["true", "True", "TRUE", "1", "yes", "YES", "on", "ON"]
+        for value in true_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_ISSUES": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert config.include_issues is True, f"Expected True for '{value}'"
+
+        # False values
+        false_values = [
+            "false",
+            "False",
+            "FALSE",
+            "0",
+            "no",
+            "NO",
+            "off",
+            "OFF",
+            "invalid",
+        ]
+        for value in false_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_ISSUES": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert config.include_issues is False, f"Expected False for '{value}'"

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, sub-issues, comments, and pull requests. It provides tools to backup and restore GitHub repository issue management data, hierarchical sub-issue relationships, and pull request workflows.
+This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, sub-issues, comments, and pull requests. It provides tools to save and restore GitHub repository issue management data, hierarchical sub-issue relationships, and pull request workflows.
 
 ## Project Status
 
@@ -17,43 +17,44 @@ This GitHub Data project is in initial development phase. The foundation include
 
 **Completed features:**
 - Comprehensive GitHub API client with GraphQL and REST support
-- Label backup and restore functionality with conflict resolution
-- Issue backup and restore capabilities with metadata preservation
-- Comment backup and restore functionality
+- Label save and restore functionality with conflict resolution
+- Issue save and restore capabilities with metadata preservation
+- Comment save and restore functionality
 - Sub-issues support with hierarchical relationships and two-phase restore (NEW)
-- Pull request backup and restore capabilities
+- Pull request save and restore capabilities
 - Rate limiting and caching for API operations
 - CLI interface for repository data operations
 
 **Future development phases:**
-- Enhanced CLI options for selective PR and sub-issues backup/restore
+- Enhanced CLI options for selective PR and sub-issues save/restore
 - Configuration management for multiple repositories
 - Advanced filtering and selection options
 
 ## Getting Started
 
-This GitHub Data project provides containerized tools for backing up and restoring GitHub repository data:
+This GitHub Data project provides containerized tools for saving and restoring GitHub repository data:
 
 1. Configure your GitHub access credentials and target repositories
-2. Use the backup tools to save repository labels, issues, comments, sub-issues, and pull requests
+2. Use the save tools to save repository labels, issues, comments, sub-issues, and pull requests
 3. Use the restore tools to recreate repository state from saved JSON data
-4. Customize backup/restore operations for specific data requirements
+4. Customize save/restore operations for specific data requirements
 5. Handle hierarchical sub-issue relationships and pull request workflows with branch dependency validation
 
 ## Environment Variables
 
-The following environment variables control backup and restore operations:
+The following environment variables control save and restore operations:
 
 - `OPERATION`: Operation to perform (`save` or `restore`) - **required**
 - `GITHUB_TOKEN`: GitHub Personal Access Token for API access - **required**
 - `GITHUB_REPO`: Target repository in format `owner/repo` - **required**
-- `DATA_PATH`: Directory path for backup/restore data files (default: `/data`)
+- `DATA_PATH`: Directory path for save/restore data files (default: `/data`)
 - `LABEL_CONFLICT_STRATEGY`: How to handle label conflicts during restore (default: `fail-if-existing`)
 - `INCLUDE_GIT_REPO`: Enable/disable Git repository save (default: `true`)
-- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in backup/restore operations (default: `true`)
-- `INCLUDE_PULL_REQUESTS`: Include pull requests in backup/restore operations (default: `false`)
-- `INCLUDE_PULL_REQUEST_COMMENTS`: Include pull request comments in backup/restore operations - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`)
-- `INCLUDE_SUB_ISSUES`: Include sub-issue relationships in backup/restore operations (default: `false`)
+- `INCLUDE_ISSUES`: Include issues in save/restore operations (default: `true`)
+- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in save/restore operations - requires `INCLUDE_ISSUES=true` (default: `true`)
+- `INCLUDE_PULL_REQUESTS`: Include pull requests in save/restore operations (default: `false`)
+- `INCLUDE_PULL_REQUEST_COMMENTS`: Include pull request comments in save/restore operations - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`)
+- `INCLUDE_SUB_ISSUES`: Include sub-issue relationships in save/restore operations (default: `false`)
 - `GIT_AUTH_METHOD`: Git authentication method: `token`, `ssh` (default: `token`)
 
 ### Environment Variable Examples
@@ -66,7 +67,7 @@ docker run --rm \
   -e GITHUB_REPO=owner/repo \
   -e DATA_PATH=/data \
   -e INCLUDE_ISSUE_COMMENTS=false \
-  -v $(pwd)/backup:/data \
+  -v $(pwd)/save:/data \
   github-data:latest
 ```
 
@@ -78,13 +79,13 @@ docker run --rm \
   -e GITHUB_REPO=owner/repo \
   -e DATA_PATH=/data \
   -e INCLUDE_ISSUE_COMMENTS=true \
-  -v $(pwd)/backup:/data \
+  -v $(pwd)/save:/data \
   github-data:latest
 ```
 
 ### Boolean Value Formats
 
-Boolean variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept these formats:
+Boolean variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept these formats:
 - **True values**: `true`, `1`, `yes`, `on` (case-insensitive)
 - **False values**: `false`, `0`, `no`, `off` (case-insensitive)
 
@@ -109,7 +110,7 @@ This repository is configured to use Claude Code agents for specialized developm
 The following specialized agents are available for this project:
 
 - **general-purpose**: Multi-step research, code search, and complex task execution
-- **backup-restore-workflow**: GitHub repository backup/restore operations, data migration, and containerized workflows
+- **backup-restore-workflow**: GitHub repository save/restore operations, data migration, and containerized workflows
 - **testing-quality**: Testing strategies, code quality, TDD practices, and development tooling
 - **github-api-specialist**: GitHub API operations, GraphQL/REST integration, rate limiting, and API client development
 
@@ -126,7 +127,7 @@ Agents are automatically invoked by Claude Code when working on tasks that match
 - Complex multi-step implementations
 - GitHub API integrations and workflows
 - Testing and quality assurance tasks
-- Backup and restore operations
+- Save and restore operations
 
 For manual agent invocation or configuration changes, refer to the Claude Code documentation.
 
@@ -168,7 +169,7 @@ The project uses **pytest markers** for sophisticated test organization and sele
 
 #### Enhanced Test Organization
 - **Performance Markers**: `fast`, `medium`, `slow`, `performance` for execution time targeting
-- **Feature Markers**: `labels`, `issues`, `comments`, `backup_workflow`, `restore_workflow`
+- **Feature Markers**: `labels`, `issues`, `comments`, `save_workflow`, `restore_workflow`
 - **Fixture Categories**: `enhanced_fixtures`, `data_builders`, `error_simulation`, `workflow_services`
 - **Scenario Markers**: `empty_repository`, `large_dataset`, `rate_limiting`, `api_errors`
 

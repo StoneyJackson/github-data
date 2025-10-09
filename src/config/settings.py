@@ -13,6 +13,7 @@ class ApplicationConfig:
     data_path: str
     label_conflict_strategy: str
     include_git_repo: bool
+    include_issues: bool
     include_issue_comments: bool
     include_pull_requests: bool
     include_pull_request_comments: bool
@@ -31,6 +32,7 @@ class ApplicationConfig:
                 "LABEL_CONFLICT_STRATEGY", "fail-if-existing"
             ),
             include_git_repo=cls._parse_bool_env("INCLUDE_GIT_REPO", default=True),
+            include_issues=cls._parse_bool_env("INCLUDE_ISSUES", default=True),
             include_issue_comments=cls._parse_bool_env(
                 "INCLUDE_ISSUE_COMMENTS", default=True
             ),
@@ -94,6 +96,15 @@ class ApplicationConfig:
                 f"Git auth method must be one of {valid_auth_methods}, "
                 f"got: {self.git_auth_method}"
             )
+
+        # Validate issue comments dependency
+        if self.include_issue_comments and not self.include_issues:
+            logging.warning(
+                "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
+                "INCLUDE_ISSUES=true. Ignoring issue comments."
+            )
+            # Disable issue comments when dependency is not met
+            self.include_issue_comments = False
 
         # Validate PR comments dependency
         if self.include_pull_request_comments and not self.include_pull_requests:

@@ -114,7 +114,7 @@ class TestStrategyFactory:
         """Test entity list generation with minimal features."""
         entities = StrategyFactory.get_enabled_entities(config_with_minimal_features)
 
-        expected_entities = ["labels", "issues"]
+        expected_entities = ["labels"]
         assert entities == expected_entities
 
     def test_restore_strategies_metadata_parameter(self, base_config):
@@ -375,6 +375,7 @@ class TestStrategyFactoryPullRequestComments:
             data_path="/tmp/test-data",
             label_conflict_strategy="fail-if-existing",
             include_git_repo=True,
+            include_issues=True,
             include_issue_comments=True,
             include_pull_requests=False,  # PRs disabled
             include_pull_request_comments=True,  # But PR comments enabled
@@ -387,3 +388,8 @@ class TestStrategyFactoryPullRequestComments:
         # pr_comments should not be in the list due to failed dependency
         assert "pr_comments" not in entities
         assert "pull_requests" not in entities
+        # But other expected entities should be present
+        assert "labels" in entities
+        assert "issues" in entities
+        assert "comments" in entities
+        assert "git_repository" in entities

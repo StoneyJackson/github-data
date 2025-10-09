@@ -15,7 +15,7 @@ from src.entities import Label
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.backup_workflow,
+    pytest.mark.save_workflow,
     pytest.mark.restore_workflow,
 ]
 
@@ -23,10 +23,10 @@ pytestmark = [
 class TestDependencyInjection:
     """Test dependency injection implementation."""
 
-    def test_save_operations_use_dependency_injection(self, backup_workflow_services):
+    def test_save_operations_use_dependency_injection(self, save_workflow_services):
         """Test that save operations properly use injected services."""
         # Arrange
-        services = backup_workflow_services
+        services = save_workflow_services
         github_service = services["github"]
         storage_service = services["storage"]
         temp_dir = services["temp_dir"]

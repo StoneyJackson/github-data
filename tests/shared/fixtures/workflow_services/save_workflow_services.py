@@ -1,11 +1,11 @@
-"""Backup workflow services fixture for testing."""
+"""Save workflow services fixture for testing."""
 
 import pytest
 
 
 @pytest.fixture
-def backup_workflow_services(boundary_with_repository_data, temp_data_dir):
-    """Pre-configured services for backup workflow testing."""
+def save_workflow_services(boundary_with_repository_data, temp_data_dir):
+    """Pre-configured services for save workflow testing."""
     from src.github.service import GitHubService
     from src.github.rate_limiter import RateLimitHandler
     from src.storage import create_storage_service

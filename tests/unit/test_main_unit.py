@@ -7,7 +7,7 @@ from src.main import main
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.backup_workflow,
+    pytest.mark.save_workflow,
     pytest.mark.restore_workflow,
 ]
 
@@ -41,6 +41,7 @@ class TestMain:
             data_path="/data",
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
+            include_issues=True,
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=True,
@@ -85,6 +86,7 @@ class TestMain:
             data_path="/data",
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
+            include_issues=True,
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=True,
@@ -118,6 +120,7 @@ class TestMain:
             data_path="/data",
             label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
+            include_issues=True,
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=True,

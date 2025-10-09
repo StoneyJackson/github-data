@@ -23,13 +23,21 @@ class StrategyFactory:
             CommentsSaveStrategy,
         )
 
-        strategies = [
+        strategies: List["SaveEntityStrategy"] = [
             LabelsSaveStrategy(),
-            IssuesSaveStrategy(),
         ]
 
-        if config.include_issue_comments:
+        if config.include_issues:
+            strategies.append(IssuesSaveStrategy())
+
+        if config.include_issues and config.include_issue_comments:
             strategies.append(CommentsSaveStrategy())
+        elif config.include_issue_comments and not config.include_issues:
+            # Warn if issue comments are enabled but issues are not
+            logging.warning(
+                "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
+                "INCLUDE_ISSUES=true. Ignoring issue comments."
+            )
 
         if config.include_pull_requests:
             from src.operations.save.strategies.pull_requests_strategy import (
@@ -95,12 +103,19 @@ class StrategyFactory:
             )
             strategies.append(LabelsRestoreStrategy(conflict_strategy))
 
-        # Create issues strategy
-        strategies.append(IssuesRestoreStrategy(include_original_metadata))
+        # Create issues strategy if enabled
+        if config.include_issues:
+            strategies.append(IssuesRestoreStrategy(include_original_metadata))
 
         # Create comments strategy if enabled
-        if config.include_issue_comments:
+        if config.include_issues and config.include_issue_comments:
             strategies.append(CommentsRestoreStrategy(include_original_metadata))
+        elif config.include_issue_comments and not config.include_issues:
+            # Warn if issue comments are enabled but issues are not
+            logging.warning(
+                "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
+                "INCLUDE_ISSUES=true. Ignoring issue comments."
+            )
 
         # Create PR strategies if enabled
         if config.include_pull_requests:
@@ -157,7 +172,10 @@ class StrategyFactory:
     @staticmethod
     def get_enabled_entities(config: ApplicationConfig) -> List[str]:
         """Get list of entities that should be processed based on configuration."""
-        entities = ["labels", "issues"]
+        entities = ["labels"]
+
+        if config.include_issues:
+            entities.append("issues")
 
         if config.include_issue_comments:
             entities.append("comments")

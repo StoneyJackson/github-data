@@ -40,7 +40,7 @@ Add infrastructure markers for API and storage tests:
 
 #### Workflow Markers
 Add workflow markers for backup/restore operations:
-- `pytest.mark.backup_workflow` - Backup operation workflows
+- `pytest.mark.save_workflow` - Save operation workflows
 - `pytest.mark.restore_workflow` - Restore operation workflows
 
 ## Writing Unit Tests
@@ -166,7 +166,7 @@ from tests.shared import (
     github_data_builder,
     parametrized_data_factory,
     boundary_with_repository_data,
-    backup_workflow_services
+    save_workflow_services
 )
 
 def test_with_enhanced_fixtures(github_data_builder):
@@ -181,9 +181,9 @@ def test_with_enhanced_fixtures(github_data_builder):
     # Test with realistic data
     process_github_data(test_data)
 
-def test_workflow_integration(backup_workflow_services):
+def test_workflow_integration(save_workflow_services):
     """Test complete workflow integration."""
-    services = backup_workflow_services
+    services = save_workflow_services
     github_service = services["github"]
     storage_service = services["storage"]
     
@@ -297,7 +297,7 @@ pdm run pytest -m "unit and github_api"
 pdm run pytest -m "unit and storage"
 
 # Workflow tests
-pdm run pytest -m "unit and (backup_workflow or restore_workflow)"
+pdm run pytest -m "unit and (save_workflow or restore_workflow)"
 ```
 
 ## Best Practices

@@ -17,7 +17,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.sub_issue
 class TestSubIssuesIntegration:
     """Integration tests for sub-issues save/restore workflows."""
 
-    @pytest.mark.backup_workflow
+    @pytest.mark.save_workflow
     @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_save_creates_json_files(
@@ -189,7 +189,7 @@ class TestSubIssuesIntegration:
         # Parent B -> Child B1
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 203, 205)
 
-    @pytest.mark.backup_workflow
+    @pytest.mark.save_workflow
     @pytest.mark.mixed_states
     @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")

@@ -455,12 +455,12 @@ class TestDataEnrichmentWorkflowIntegration:
     """Integration tests for data enrichment with workflow services."""
 
     @pytest.mark.integration
-    @pytest.mark.backup_workflow
-    def test_comment_enrichment_in_backup_workflow(
-        self, backup_workflow_services, parametrized_data_factory
+    @pytest.mark.save_workflow
+    def test_comment_enrichment_in_save_workflow(
+        self, save_workflow_services, parametrized_data_factory
     ):
-        """Test comment enrichment within complete backup workflow."""
-        services = backup_workflow_services
+        """Test comment enrichment within complete save workflow."""
+        services = save_workflow_services
         github_service = services["github"]
 
         # Create test data with comments and issues
