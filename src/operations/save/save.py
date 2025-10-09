@@ -34,6 +34,7 @@ def save_repository_data_with_strategy_pattern(
         data_path=output_path,
         label_conflict_strategy="fail-if-existing",
         include_git_repo=include_git_repo,
+        include_issues=True,  # Default to include issues
         include_issue_comments=True,  # Default to include comments
         include_pull_requests=include_pull_requests,
         include_pull_request_comments=include_pull_requests,  # Enable only if PRs
@@ -75,6 +76,7 @@ def save_repository_data_with_config(
         data_path=config.data_path,
         label_conflict_strategy=config.label_conflict_strategy,
         include_git_repo=config.include_git_repo,
+        include_issues=config.include_issues,
         include_issue_comments=config.include_issue_comments,
         include_pull_requests=config.include_pull_requests
         or include_pull_requests,  # Support legacy parameter

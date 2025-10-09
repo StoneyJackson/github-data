@@ -50,7 +50,8 @@ The following environment variables control backup and restore operations:
 - `DATA_PATH`: Directory path for backup/restore data files (default: `/data`)
 - `LABEL_CONFLICT_STRATEGY`: How to handle label conflicts during restore (default: `fail-if-existing`)
 - `INCLUDE_GIT_REPO`: Enable/disable Git repository save (default: `true`)
-- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in backup/restore operations (default: `true`)
+- `INCLUDE_ISSUES`: Include issues in backup/restore operations (default: `true`)
+- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in backup/restore operations - requires `INCLUDE_ISSUES=true` (default: `true`)
 - `INCLUDE_PULL_REQUESTS`: Include pull requests in backup/restore operations (default: `false`)
 - `INCLUDE_PULL_REQUEST_COMMENTS`: Include pull request comments in backup/restore operations - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`)
 - `INCLUDE_SUB_ISSUES`: Include sub-issue relationships in backup/restore operations (default: `false`)
@@ -84,7 +85,7 @@ docker run --rm \
 
 ### Boolean Value Formats
 
-Boolean variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept these formats:
+Boolean variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept these formats:
 - **True values**: `true`, `1`, `yes`, `on` (case-insensitive)
 - **False values**: `false`, `0`, `no`, `off` (case-insensitive)
 
