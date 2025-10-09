@@ -14,7 +14,7 @@ Usage:
     from tests.shared import temp_data_dir, sample_github_data
     from tests.shared import MockBoundaryFactory, add_pr_method_mocks
     from tests.shared import boundary_with_repository_data, github_data_builder
-    from tests.shared import backup_workflow_services, integration_test_environment
+    from tests.shared import save_workflow_services, integration_test_environment
 """
 
 # Core fixtures - used across most test files
@@ -45,7 +45,7 @@ from .fixtures import (
     boundary_with_partial_failures,
     boundary_with_rate_limiting,
     # Workflow service fixtures
-    backup_workflow_services,
+    save_workflow_services,
     restore_workflow_services,
     sync_workflow_services,
     error_handling_workflow_services,
@@ -119,7 +119,7 @@ __all__ = [
     "boundary_with_partial_failures",
     "boundary_with_rate_limiting",
     # Workflow service fixtures
-    "backup_workflow_services",
+    "save_workflow_services",
     "restore_workflow_services",
     "sync_workflow_services",
     "error_handling_workflow_services",

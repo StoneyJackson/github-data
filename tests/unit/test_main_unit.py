@@ -7,7 +7,7 @@ from src.main import main
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.backup_workflow,
+    pytest.mark.save_workflow,
     pytest.mark.restore_workflow,
 ]
 

@@ -83,11 +83,11 @@ docker run --rm \
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
-| `INCLUDE_ISSUES` | No | Include issues in backup/restore operations (default: `true`) |
-| `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in backup/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
-| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in backup/restore (default: `false`) |
-| `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in backup/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`) |
-| `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in backup/restore (default: `false`) |
+| `INCLUDE_ISSUES` | No | Include issues in save/restore operations (default: `true`) |
+| `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in save/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
+| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore (default: `false`) |
+| `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`) |
+| `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `false`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
@@ -222,7 +222,7 @@ docker run --rm \
 
 #### Git Save Format
 
-Git repositories are backed up using **Mirror Clone** format:
+Git repositories are saved using **Mirror Clone** format:
 - Complete repository clone with all branches, tags, and references
 - Best for: Complete repository save, easy browsing with Git tools
 - Storage: Directory structure with `.git` contents

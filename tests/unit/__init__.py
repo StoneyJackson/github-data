@@ -30,18 +30,18 @@ Tests should include appropriate markers based on functionality:
 - @pytest.mark.rate_limiting - Rate limiting behavior tests
 
 #### Workflow Markers:
-- @pytest.mark.backup_workflow - Backup operation workflows
+- @pytest.mark.save_workflow - Save operation workflows
 - @pytest.mark.restore_workflow - Restore operation workflows
 
 ### Test File Organization
 
-- `test_main_unit.py` - Main module and CLI (backup_workflow, restore_workflow)
+- `test_main_unit.py` - Main module and CLI (save_workflow, restore_workflow)
 - `test_json_storage_unit.py` - JSON storage operations (storage)
 - `test_rate_limit_handling_unit.py` - GitHub API rate limiting
   (github_api, rate_limiting)
 - `test_metadata_unit.py` - Metadata formatting (issues, comments)
 - `test_dependency_injection_unit.py` - Dependency injection
-  (backup_workflow, restore_workflow)
+  (save_workflow, restore_workflow)
 - `test_conflict_strategies_unit.py` - Label conflict resolution
   (labels, restore_workflow)
 - `test_graphql_paginator_unit.py` - GraphQL pagination (github_api)
@@ -61,7 +61,7 @@ Use standardized helpers from `tests.shared.helpers`:
 Leverage enhanced fixtures from `tests.shared`:
 - `github_data_builder` - Dynamic test data generation
 - `parametrized_data_factory` - Predefined test scenarios
-- `backup_workflow_services` - Complete workflow testing
+- `save_workflow_services` - Complete workflow testing
 - `boundary_with_repository_data` - Realistic API simulation
 
 ## Example Usage

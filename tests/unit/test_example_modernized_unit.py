@@ -28,7 +28,7 @@ pytestmark = [
     pytest.mark.fast,
     pytest.mark.issues,  # Feature area
     pytest.mark.comments,  # Feature area
-    pytest.mark.backup_workflow,  # Workflow type
+    pytest.mark.save_workflow,  # Workflow type
 ]
 
 
@@ -125,16 +125,16 @@ class TestModernizedDataProcessing:
 
     @pytest.mark.integration
     @pytest.mark.medium
-    def test_workflow_integration_with_services(self, backup_workflow_services):
+    def test_workflow_integration_with_services(self, save_workflow_services):
         """Test complete workflow using workflow services fixture."""
         # Arrange - Use pre-configured workflow services
-        services = backup_workflow_services
+        services = save_workflow_services
         github_service = services["github"]
         storage_service = services["storage"]
         temp_dir = services["temp_dir"]
 
         # Act - Execute workflow
-        result = self._execute_backup_workflow(
+        result = self._execute_save_workflow(
             github_service, storage_service, "test/repo", temp_dir
         )
 
@@ -239,7 +239,7 @@ class TestModernizedDataProcessing:
             "labels_count": len(test_data.get("labels", [])),
         }
 
-    def _execute_backup_workflow(self, github_service, storage_service, repo, temp_dir):
+    def _execute_save_workflow(self, github_service, storage_service, repo, temp_dir):
         """Example workflow execution."""
         from pathlib import Path
 

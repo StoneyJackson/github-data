@@ -35,7 +35,7 @@ pytest_plugins = [
     "tests.shared.fixtures.error_simulation.boundary_with_partial_failures",
     "tests.shared.fixtures.error_simulation.boundary_with_rate_limiting",
     # Workflow Service Fixtures
-    "tests.shared.fixtures.workflow_services.backup_workflow_services",
+    "tests.shared.fixtures.workflow_services.save_workflow_services",
     "tests.shared.fixtures.workflow_services.restore_workflow_services",
     "tests.shared.fixtures.workflow_services.sync_workflow_services",
     "tests.shared.fixtures.workflow_services.error_handling_workflow_services",
@@ -115,7 +115,7 @@ def pytest_configure(config):
         "markers", "storage: marks tests related to data storage and persistence"
     )
     config.addinivalue_line(
-        "markers", "backup_workflow: marks tests for backup operation workflows"
+        "markers", "save_workflow: marks tests for save operation workflows"
     )
     config.addinivalue_line(
         "markers", "restore_workflow: marks tests for restore operation workflows"
@@ -248,7 +248,7 @@ def pytest_runtest_setup(item):
     enhanced_fixtures = [
         "boundary_with_repository_data",
         "boundary_with_large_dataset",
-        "backup_workflow_services",
+        "save_workflow_services",
         "github_data_builder",
         "performance_monitoring_services",
         "integration_test_environment",
