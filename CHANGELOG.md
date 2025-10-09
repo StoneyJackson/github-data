@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/StoneyJackson/github-data/compare/v1.4.0...v1.5.0) (2025-10-09)
+
+
+### Features
+
+* add INCLUDE_ISSUES environment variable for configurable issue save/restore ([#24](https://github.com/StoneyJackson/github-data/issues/24)) ([1cbab1d](https://github.com/StoneyJackson/github-data/commit/1cbab1dc5bc369db12138890f2122b9265a02540))
+
 # [1.4.0](https://github.com/StoneyJackson/github-data/compare/v1.3.0...v1.4.0) (2025-09-30)
 
 
