@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch
 from src.operations.strategy_factory import StrategyFactory
 from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigBuilder, ConfigFactory
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -17,11 +18,7 @@ class TestPullRequestCommentsValidation:
     @pytest.fixture
     def base_env_vars(self):
         """Base environment variables for testing."""
-        return {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-        }
+        return ConfigBuilder().as_env_dict()
 
     def test_config_validation_pr_comments_without_prs_from_env(
         self, base_env_vars, caplog
@@ -85,19 +82,9 @@ class TestPullRequestCommentsValidation:
 
     def test_dependency_validation_shows_correct_warning_message(self, caplog):
         """Test dependency validation shows correct warning message."""
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_save_config(
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
 
         caplog.clear()
@@ -117,19 +104,9 @@ class TestPullRequestCommentsValidation:
 
     def test_dependency_validation_for_restore_operations(self, caplog):
         """Test that dependency validation works for restore operations too."""
-        config = ApplicationConfig(
-            operation="restore",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_restore_config(
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
 
         from unittest.mock import Mock
@@ -152,19 +129,9 @@ class TestPullRequestCommentsValidation:
 
     def test_entity_list_excludes_pr_comments_when_dependency_not_met(self):
         """Test that get_enabled_entities excludes pr_comments when dependency unmet."""
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_save_config(
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
 
         entities = StrategyFactory.get_enabled_entities(config)
@@ -179,20 +146,7 @@ class TestPullRequestCommentsValidation:
 
     def test_entity_list_includes_pr_comments_when_dependency_met(self):
         """Test that get_enabled_entities includes pr_comments when dependency met."""
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
-            include_pull_requests=True,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
-        )
+        config = ConfigFactory.create_pr_config()
 
         entities = StrategyFactory.get_enabled_entities(config)
 
@@ -207,19 +161,9 @@ class TestPullRequestCommentsValidation:
 
     def test_no_warning_when_both_disabled(self, caplog):
         """Test that no warning is shown when both PRs and PR comments are disabled."""
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_save_config(
             include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=False
         )
 
         caplog.clear()
@@ -238,19 +182,9 @@ class TestPullRequestCommentsValidation:
 
     def test_no_warning_when_pr_comments_explicitly_disabled(self, caplog):
         """Test that no warning is shown when PR comments are explicitly disabled."""
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="owner/repo",
-            data_path="/tmp/data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_save_config(
             include_pull_requests=True,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=False
         )
 
         caplog.clear()

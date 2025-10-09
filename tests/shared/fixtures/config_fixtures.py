@@ -1,138 +1,61 @@
 import pytest
-from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigFactory
 
 
 @pytest.fixture
 def base_config():
     """Base configuration for testing."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=True,
-        include_pull_requests=True,
-        include_pull_request_comments=True,
-        include_sub_issues=False,
-        git_auth_method="token",
-    )
+    return ConfigFactory.create_full_config(include_sub_issues=False)
 
 
 @pytest.fixture
-def config_with_comments_disabled(base_config):
+def config_with_comments_disabled():
     """Configuration with issue comments disabled."""
-    config = ApplicationConfig(
-        operation=base_config.operation,
-        github_token=base_config.github_token,
-        github_repo=base_config.github_repo,
-        data_path=base_config.data_path,
-        label_conflict_strategy=base_config.label_conflict_strategy,
-        include_git_repo=base_config.include_git_repo,
-        include_issues=base_config.include_issues,
-        include_issue_comments=False,
-        include_pull_requests=base_config.include_pull_requests,
-        include_pull_request_comments=base_config.include_pull_request_comments,
-        include_sub_issues=base_config.include_sub_issues,
-        git_auth_method=base_config.git_auth_method,
-    )
-    return config
+    return ConfigFactory.create_full_config(include_issue_comments=False, include_sub_issues=False)
 
 
 @pytest.fixture
-def config_with_minimal_features(base_config):
+def config_with_minimal_features():
     """Configuration with minimal features enabled."""
-    config = ApplicationConfig(
-        operation=base_config.operation,
-        github_token=base_config.github_token,
-        github_repo=base_config.github_repo,
-        data_path=base_config.data_path,
-        label_conflict_strategy=base_config.label_conflict_strategy,
-        include_git_repo=False,
-        include_issues=False,
-        include_issue_comments=False,
-        include_pull_requests=False,
-        include_pull_request_comments=False,
-        include_sub_issues=False,
-        git_auth_method=base_config.git_auth_method,
-    )
-    return config
+    return ConfigFactory.create_minimal_config()
 
 
 @pytest.fixture
-def restore_config(base_config):
+def restore_config():
     """Configuration for restore operations."""
-    config = ApplicationConfig(
-        operation="restore",
-        github_token=base_config.github_token,
-        github_repo=base_config.github_repo,
-        data_path=base_config.data_path,
-        label_conflict_strategy=base_config.label_conflict_strategy,
-        include_git_repo=base_config.include_git_repo,
-        include_issues=base_config.include_issues,
-        include_issue_comments=base_config.include_issue_comments,
-        include_pull_requests=base_config.include_pull_requests,
-        include_pull_request_comments=base_config.include_pull_request_comments,
-        include_sub_issues=base_config.include_sub_issues,
-        git_auth_method=base_config.git_auth_method,
+    return ConfigFactory.create_restore_config(
+        include_pull_requests=True,
+        include_pull_request_comments=True
     )
-    return config
 
 
 @pytest.fixture
 def config_with_pr_comments_only():
     """Configuration with PR comments enabled but PRs disabled (invalid)."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=True,
+    return ConfigFactory.create_save_config(
         include_pull_requests=False,
-        include_pull_request_comments=True,
-        include_sub_issues=False,
-        git_auth_method="token",
+        include_pull_request_comments=True
     )
 
 
 @pytest.fixture
 def config_with_prs_no_comments():
     """Configuration with pull requests enabled but comments disabled."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=True,
+    return ConfigFactory.create_save_config(
         include_pull_requests=True,
-        include_pull_request_comments=False,
-        include_sub_issues=False,
-        git_auth_method="token",
+        include_pull_request_comments=False
     )
 
 
 @pytest.fixture
 def config_with_prs_and_comments():
     """Configuration with both pull requests and PR comments enabled."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=True,
-        include_pull_requests=True,
-        include_pull_request_comments=True,
-        include_sub_issues=False,
-        git_auth_method="token",
-    )
+    return ConfigFactory.create_pr_config()
+
+
+# Environment variable fixtures have been moved to env_fixtures.py
+# Import them from there if needed:
+# from tests.shared.fixtures.env_fixtures import (
+#     minimal_env_vars, standard_env_vars, pr_enabled_env_vars,
+#     all_features_env_vars, minimal_features_env_vars
+# )

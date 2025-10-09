@@ -3,6 +3,7 @@ import os
 from unittest.mock import patch
 from src.main import main
 from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigBuilder
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -19,13 +20,8 @@ class TestIncludeIssueCommentsFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that comments are included by default in save operations."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            # INCLUDE_ISSUE_COMMENTS not set - should default to True
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).as_env_dict()
+        # INCLUDE_ISSUE_COMMENTS defaults to True in ConfigBuilder
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -46,13 +42,7 @@ class TestIncludeIssueCommentsFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test save operation with INCLUDE_ISSUE_COMMENTS=true."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUE_COMMENTS": "true",
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issue_comments(True).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -69,13 +59,7 @@ class TestIncludeIssueCommentsFeature:
 
     def test_save_with_comments_disabled(self, temp_data_dir, github_service_mock):
         """Test save operation with INCLUDE_ISSUE_COMMENTS=false."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUE_COMMENTS": "false",
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issue_comments(False).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(

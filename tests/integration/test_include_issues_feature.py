@@ -3,6 +3,7 @@ import os
 from unittest.mock import patch
 from src.main import main
 from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigBuilder
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -19,13 +20,8 @@ class TestIncludeIssuesFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that issues are included by default in save operations."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            # INCLUDE_ISSUES not set - should default to True
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).as_env_dict()
+        # INCLUDE_ISSUES defaults to True in ConfigBuilder
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -46,13 +42,7 @@ class TestIncludeIssuesFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test save operation with INCLUDE_ISSUES=true."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUES": "true",
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(True).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -69,13 +59,7 @@ class TestIncludeIssuesFeature:
 
     def test_save_with_issues_disabled(self, temp_data_dir, github_service_mock):
         """Test save operation with INCLUDE_ISSUES=false."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUES": "false",
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(False).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -92,13 +76,7 @@ class TestIncludeIssuesFeature:
 
     def test_restore_with_issues_disabled(self, temp_data_dir, github_service_mock):
         """Test restore operation with INCLUDE_ISSUES=false."""
-        env_vars = {
-            "OPERATION": "restore",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUES": "false",
-        }
+        env_vars = ConfigBuilder().with_operation("restore").with_data_path(str(temp_data_dir)).with_issues(False).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -118,14 +96,7 @@ class TestIncludeIssuesFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that issue comments are ignored when issues are disabled."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_ISSUES": "false",
-            "INCLUDE_ISSUE_COMMENTS": "true",
-        }
+        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(False).with_issue_comments(True).as_env_dict()
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -163,12 +134,8 @@ class TestIncludeIssuesFeature:
             ("", False),  # Empty string defaults to False
         ]
 
-        base_env = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": "/tmp/test",
-        }
+        base_env = ConfigBuilder().with_data_path("/tmp/test").as_env_dict()
+        base_env.pop("INCLUDE_ISSUES", None)  # Remove so we can test individual values
 
         for value, expected in test_cases:
             env_vars = {**base_env, "INCLUDE_ISSUES": value}

@@ -137,6 +137,61 @@ make check-all   # All quality checks including container tests
 
 For complete testing documentation, test categories, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
+#### Configuration Testing Guidelines
+
+When writing tests that involve configuration or environment variables, use the standardized patterns to ensure maintainability:
+
+**Use ConfigBuilder for test configuration:**
+```python
+from tests.shared.builders import ConfigBuilder
+
+# Preferred: Use ConfigBuilder for environment variables
+env_vars = ConfigBuilder().with_operation("save").with_pull_requests(True).as_env_dict()
+
+# Avoid: Manual environment variable dictionaries
+env_vars = {
+    "OPERATION": "save",
+    "GITHUB_TOKEN": "test-token",
+    "GITHUB_REPO": "owner/repo",
+    # ... many more fields
+}
+```
+
+**Use ConfigFactory for application configuration:**
+```python
+from tests.shared.builders import ConfigFactory
+
+# Preferred: Use ConfigFactory with overrides
+config = ConfigFactory.create_save_config(include_pull_requests=True)
+
+# Avoid: Direct ApplicationConfig instantiation
+config = ApplicationConfig(
+    operation="save",
+    github_token="test-token",
+    # ... many more required fields
+)
+```
+
+**Use shared fixtures for common scenarios:**
+```python
+from tests.shared.fixtures import standard_env_vars, pr_enabled_env_vars
+
+def test_with_pull_requests(pr_enabled_env_vars):
+    with patch.dict(os.environ, pr_enabled_env_vars, clear=True):
+        # Test implementation
+```
+
+**Benefits of using these patterns:**
+- **Maintainable**: Adding new environment variables requires minimal test changes
+- **Consistent**: All tests use the same configuration patterns
+- **Readable**: Tests focus on what they're testing, not configuration setup
+- **Future-proof**: New features can be added without breaking existing tests
+
+**When to use manual configuration:**
+- Testing configuration parsing logic itself (e.g., in `test_settings.py`)
+- Testing error conditions with invalid environment variables
+- Testing specific edge cases that require precise control over individual fields
+
 For detailed information about GitHub API rate limiting implementation, see **[docs/rate-limiting.md](docs/rate-limiting.md)**.
 
 ## Development Setup and Workflow

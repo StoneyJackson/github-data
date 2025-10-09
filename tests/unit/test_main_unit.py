@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import patch
 from src.main import main
+from tests.shared.builders import ConfigFactory
 
 pytestmark = [
     pytest.mark.unit,
@@ -34,19 +35,13 @@ class TestMain:
         """Test main function with save operation."""
         from src.config.settings import ApplicationConfig
 
-        mock_config = ApplicationConfig(
-            operation="save",
+        mock_config = ConfigFactory.create_save_config(
             github_token="token123",
             github_repo="owner/repo",
             data_path="/data",
-            label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
-            include_issues=True,
-            include_issue_comments=True,
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
         mock_config_from_env.return_value = mock_config
 
@@ -79,19 +74,13 @@ class TestMain:
         """Test main function with restore operation."""
         from src.config.settings import ApplicationConfig
 
-        mock_config = ApplicationConfig(
-            operation="restore",
+        mock_config = ConfigFactory.create_restore_config(
             github_token="token123",
             github_repo="owner/repo",
             data_path="/data",
-            label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
-            include_issues=True,
-            include_issue_comments=True,
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
         mock_config_from_env.return_value = mock_config
 
@@ -113,19 +102,14 @@ class TestMain:
         """Test that invalid operation causes exit."""
         from src.config.settings import ApplicationConfig
 
-        mock_config = ApplicationConfig(
+        mock_config = ConfigFactory.create_save_config(
             operation="invalid",
             github_token="token123",
             github_repo="owner/repo",
             data_path="/data",
-            label_conflict_strategy="fail-if-existing",
             include_git_repo=False,
-            include_issues=True,
-            include_issue_comments=True,
             include_pull_requests=False,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+            include_pull_request_comments=True
         )
         mock_config_from_env.return_value = mock_config
 
