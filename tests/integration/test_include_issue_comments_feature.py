@@ -42,7 +42,12 @@ class TestIncludeIssueCommentsFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test save operation with INCLUDE_ISSUE_COMMENTS=true."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issue_comments(True).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_issue_comments(True)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -59,7 +64,12 @@ class TestIncludeIssueCommentsFeature:
 
     def test_save_with_comments_disabled(self, temp_data_dir, github_service_mock):
         """Test save operation with INCLUDE_ISSUE_COMMENTS=false."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issue_comments(False).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_issue_comments(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(

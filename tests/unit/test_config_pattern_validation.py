@@ -6,7 +6,6 @@ the new ConfigBuilder and ConfigFactory patterns.
 
 import pytest
 from tests.shared.builders import ConfigBuilder, ConfigFactory
-from src.config.settings import ApplicationConfig
 
 
 class TestConfigPatternValidation:
@@ -83,7 +82,9 @@ class TestConfigPatternValidation:
 
         for key, expected_value in expected_vars.items():
             assert key in env_vars, f"Environment variable {key} is missing"
-            assert env_vars[key] == expected_value, f"Environment variable {key} has incorrect value"
+            assert (
+                env_vars[key] == expected_value
+            ), f"Environment variable {key} has incorrect value"
 
     def test_config_factory_all_preset_methods(self):
         """Test that ConfigFactory provides all necessary preset methods."""
@@ -135,9 +136,13 @@ class TestConfigPatternValidation:
         ]
 
         for field in fields_to_check:
-            assert hasattr(config, field), f"ApplicationConfig field {field} is not accessible"
+            assert hasattr(
+                config, field
+            ), f"ApplicationConfig field {field} is not accessible"
             # Ensure the field has a value (not None)
-            assert getattr(config, field) is not None, f"ApplicationConfig field {field} is None"
+            assert getattr(
+                config, field
+            ) is not None, f"ApplicationConfig field {field} is None"
 
     def test_future_environment_variable_compatibility(self):
         """Test that patterns support easy addition of new environment variables."""
@@ -148,7 +153,7 @@ class TestConfigPatternValidation:
         # Verify we can add new environment variables to the dict
         env_vars["SOME_FUTURE_OPTION"] = "future_value"
         assert "SOME_FUTURE_OPTION" in env_vars
-        
+
         # Verify base configuration still works
         config = ConfigFactory.create_save_config()
         assert config.operation == "save"
@@ -157,7 +162,9 @@ class TestConfigPatternValidation:
     @pytest.mark.parametrize("operation", ["save", "restore"])
     @pytest.mark.parametrize("include_prs", [True, False])
     @pytest.mark.parametrize("include_comments", [True, False])
-    def test_common_configuration_combinations(self, operation, include_prs, include_comments):
+    def test_common_configuration_combinations(
+        self, operation, include_prs, include_comments
+    ):
         """Test common configuration combinations work correctly."""
         config = (
             ConfigBuilder()
@@ -182,4 +189,6 @@ class TestConfigPatternValidation:
 
         assert env_vars["OPERATION"] == operation
         assert env_vars["INCLUDE_PULL_REQUESTS"] == str(include_prs).lower()
-        assert env_vars["INCLUDE_PULL_REQUEST_COMMENTS"] == str(include_comments).lower()
+        assert (
+            env_vars["INCLUDE_PULL_REQUEST_COMMENTS"] == str(include_comments).lower()
+        )

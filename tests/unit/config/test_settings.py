@@ -2,7 +2,7 @@ import pytest
 import os
 from unittest.mock import patch
 from src.config.settings import ApplicationConfig
-from tests.shared.builders import ConfigBuilder, ConfigFactory
+from tests.shared.builders import ConfigBuilder
 
 # Import fixtures from shared fixtures
 pytest_plugins = ["tests.shared.fixtures.config_fixtures"]

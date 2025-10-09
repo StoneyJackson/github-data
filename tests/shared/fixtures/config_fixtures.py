@@ -11,7 +11,9 @@ def base_config():
 @pytest.fixture
 def config_with_comments_disabled():
     """Configuration with issue comments disabled."""
-    return ConfigFactory.create_full_config(include_issue_comments=False, include_sub_issues=False)
+    return ConfigFactory.create_full_config(
+        include_issue_comments=False, include_sub_issues=False
+    )
 
 
 @pytest.fixture

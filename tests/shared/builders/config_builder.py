@@ -22,7 +22,12 @@ class ConfigBuilder:
         config = ConfigBuilder().with_operation("save").with_pr_features().build()
 
         # Restore operation with minimal features
-        config = ConfigBuilder().with_operation("restore").with_minimal_features().build()
+        config = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_minimal_features()
+            .build()
+        )
 
         # Environment variables for container tests
         env_vars = ConfigBuilder().with_pr_features().as_env_dict()

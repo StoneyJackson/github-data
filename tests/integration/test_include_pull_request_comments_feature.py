@@ -20,8 +20,14 @@ class TestIncludePullRequestCommentsFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that PR comments are included by default in save operations."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_pull_requests(True).as_env_dict()
-        # INCLUDE_PULL_REQUEST_COMMENTS defaults to False in ConfigBuilder, but test expects True
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_pull_requests(True)
+            .as_env_dict()
+        )
+        # INCLUDE_PULL_REQUEST_COMMENTS defaults to False in ConfigBuilder,
+        # but test expects True
         env_vars["INCLUDE_PULL_REQUEST_COMMENTS"] = "true"
 
         with patch.dict(os.environ, env_vars, clear=True):

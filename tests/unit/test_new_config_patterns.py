@@ -5,18 +5,12 @@ and enhanced fixture patterns work correctly.
 """
 
 import os
-import pytest
 from unittest.mock import patch
 
 from tests.shared.builders import ConfigBuilder, ConfigFactory
 from tests.shared.fixtures.env_fixtures import (
     env_config,
     make_env_vars,
-    minimal_env_vars,
-    standard_env_vars,
-    pr_enabled_env_vars,
-    config_builder,
-    config_factory,
 )
 from src.config.settings import ApplicationConfig
 

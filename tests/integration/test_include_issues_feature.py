@@ -42,7 +42,12 @@ class TestIncludeIssuesFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test save operation with INCLUDE_ISSUES=true."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(True).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_issues(True)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -59,7 +64,12 @@ class TestIncludeIssuesFeature:
 
     def test_save_with_issues_disabled(self, temp_data_dir, github_service_mock):
         """Test save operation with INCLUDE_ISSUES=false."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(False).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_issues(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -76,7 +86,13 @@ class TestIncludeIssuesFeature:
 
     def test_restore_with_issues_disabled(self, temp_data_dir, github_service_mock):
         """Test restore operation with INCLUDE_ISSUES=false."""
-        env_vars = ConfigBuilder().with_operation("restore").with_data_path(str(temp_data_dir)).with_issues(False).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_data_path(str(temp_data_dir))
+            .with_issues(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
@@ -96,7 +112,13 @@ class TestIncludeIssuesFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that issue comments are ignored when issues are disabled."""
-        env_vars = ConfigBuilder().with_data_path(str(temp_data_dir)).with_issues(False).with_issue_comments(True).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_issues(False)
+            .with_issue_comments(True)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(

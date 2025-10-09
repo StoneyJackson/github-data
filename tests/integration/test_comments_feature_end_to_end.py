@@ -26,7 +26,14 @@ class TestCommentsFeatureEndToEnd:
         data_path.mkdir()
 
         # Mock environment for save operation
-        save_env = ConfigBuilder().with_operation("save").with_data_path(str(data_path)).with_issue_comments(True).with_git_repo(False).as_env_dict()
+        save_env = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_data_path(str(data_path))
+            .with_issue_comments(True)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, save_env, clear=True):
             with patch("src.github.create_github_service") as mock_github:
@@ -44,7 +51,15 @@ class TestCommentsFeatureEndToEnd:
                 assert len(comments_data) > 0
 
         # Mock environment for restore operation
-        restore_env = ConfigBuilder().with_operation("restore").with_repo("owner/repo-new").with_data_path(str(data_path)).with_issue_comments(True).with_git_repo(False).as_env_dict()
+        restore_env = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_repo("owner/repo-new")
+            .with_data_path(str(data_path))
+            .with_issue_comments(True)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, restore_env, clear=True):
             with patch("src.github.create_github_service") as mock_github:
@@ -64,7 +79,14 @@ class TestCommentsFeatureEndToEnd:
         data_path = Path(temp_data_dir) / "backup"
         data_path.mkdir()
 
-        env_vars = ConfigBuilder().with_operation("save").with_data_path(str(data_path)).with_issue_comments(False).with_git_repo(False).as_env_dict()
+        env_vars = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_data_path(str(data_path))
+            .with_issue_comments(False)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch("src.github.create_github_service") as mock_github:
