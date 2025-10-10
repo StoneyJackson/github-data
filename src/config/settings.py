@@ -37,12 +37,12 @@ class ApplicationConfig:
                 "INCLUDE_ISSUE_COMMENTS", default=True
             ),
             include_pull_requests=cls._parse_bool_env(
-                "INCLUDE_PULL_REQUESTS", default=False
+                "INCLUDE_PULL_REQUESTS", default=True
             ),
             include_pull_request_comments=cls._parse_bool_env(
                 "INCLUDE_PULL_REQUEST_COMMENTS", default=True
             ),
-            include_sub_issues=cls._parse_bool_env("INCLUDE_SUB_ISSUES", default=False),
+            include_sub_issues=cls._parse_bool_env("INCLUDE_SUB_ISSUES", default=True),
             git_auth_method=cls._get_env_with_default("GIT_AUTH_METHOD", "token"),
         )
 

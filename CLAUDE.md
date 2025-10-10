@@ -42,20 +42,7 @@ This GitHub Data project provides containerized tools for saving and restoring G
 
 ## Environment Variables
 
-The following environment variables control save and restore operations:
-
-- `OPERATION`: Operation to perform (`save` or `restore`) - **required**
-- `GITHUB_TOKEN`: GitHub Personal Access Token for API access - **required**
-- `GITHUB_REPO`: Target repository in format `owner/repo` - **required**
-- `DATA_PATH`: Directory path for save/restore data files (default: `/data`)
-- `LABEL_CONFLICT_STRATEGY`: How to handle label conflicts during restore (default: `fail-if-existing`)
-- `INCLUDE_GIT_REPO`: Enable/disable Git repository save (default: `true`)
-- `INCLUDE_ISSUES`: Include issues in save/restore operations (default: `true`)
-- `INCLUDE_ISSUE_COMMENTS`: Include issue comments in save/restore operations - requires `INCLUDE_ISSUES=true` (default: `true`)
-- `INCLUDE_PULL_REQUESTS`: Include pull requests in save/restore operations (default: `false`)
-- `INCLUDE_PULL_REQUEST_COMMENTS`: Include pull request comments in save/restore operations - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`)
-- `INCLUDE_SUB_ISSUES`: Include sub-issue relationships in save/restore operations (default: `false`)
-- `GIT_AUTH_METHOD`: Git authentication method: `token`, `ssh` (default: `token`)
+For a complete list of environment variables and their descriptions, see the [Environment Variables section in the README](README.md#environment-variables).
 
 ### Environment Variable Examples
 
