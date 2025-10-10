@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from src.git.service import GitRepositoryServiceImpl
 
 from src.config.settings import ApplicationConfig
+from src.operations.strategy_factory import StrategyFactory
 
 
 def main() -> None:
@@ -92,7 +93,7 @@ def _execute_save_with_config(
         storage_service,
         config.github_repo,
         config.data_path,
-        include_pull_requests=config.include_pull_requests,
+        include_pull_requests=StrategyFactory._is_enabled(config.include_pull_requests),
         include_sub_issues=config.include_sub_issues,
         git_service=git_service,
     )
@@ -130,7 +131,7 @@ def _execute_restore_with_config(
         config.github_repo,
         config.data_path,
         include_original_metadata=True,
-        include_pull_requests=config.include_pull_requests,
+        include_pull_requests=StrategyFactory._is_enabled(config.include_pull_requests),
         include_sub_issues=config.include_sub_issues,
         git_service=git_service,
     )

@@ -24,11 +24,13 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         include_pull_requests: Union[bool, Set[int]] = True,
     ):
         """Initialize pull requests restore strategy.
-        
+
         Args:
             conflict_strategy: Strategy for handling conflicts
-            include_original_metadata: Whether to include original metadata in restored PRs
-            include_pull_requests: Boolean for all/none or set of PR numbers for selective filtering
+            include_original_metadata: Whether to include original metadata
+                in restored PRs
+            include_pull_requests: Boolean for all/none or set of PR numbers
+                for selective filtering
         """
         self._conflict_strategy = conflict_strategy
         self._include_original_metadata = include_original_metadata
@@ -46,7 +48,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         """Load and filter pull requests data based on selection criteria."""
         pull_requests_file = Path(input_path) / "pull_requests.json"
         all_prs = storage_service.load_data(pull_requests_file, PullRequest)
-        
+
         if isinstance(self._include_pull_requests, bool):
             if self._include_pull_requests:
                 # Include all pull requests
@@ -60,14 +62,20 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             for pr in all_prs:
                 if pr.number in self._include_pull_requests:
                     filtered_prs.append(pr)
-            
+
             # Log selection results for visibility
             found_numbers = {pr.number for pr in filtered_prs}
             missing_numbers = self._include_pull_requests - found_numbers
             if missing_numbers:
-                print(f"Warning: Pull requests not found in saved data: {sorted(missing_numbers)}")
-            
-            print(f"Selected {len(filtered_prs)} pull requests from {len(all_prs)} total for restoration")
+                print(
+                    f"Warning: Pull requests not found in saved data: "
+                    f"{sorted(missing_numbers)}"
+                )
+
+            print(
+                f"Selected {len(filtered_prs)} pull requests from "
+                f"{len(all_prs)} total for restoration"
+            )
             return filtered_prs
 
     def transform_for_creation(
@@ -117,11 +125,15 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         # Store PR number mapping for comments
         if "pr_number_mapping" not in context:
             context["pr_number_mapping"] = {}
-        context["pr_number_mapping"][created_data["original_number"]] = pr_number
+        context["pr_number_mapping"][
+            created_data["original_number"]
+        ] = pr_number
 
         # Handle closed/merged state
         if original_state in ["closed", "merged"]:
-            self._handle_pr_state(github_service, repo_name, pr_number, original_state)
+            self._handle_pr_state(
+                github_service, repo_name, pr_number, original_state
+            )
 
     def resolve_conflicts(
         self,
@@ -155,10 +167,14 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             if original_state == "closed":
                 # Note: close_pull_request method not available in
                 # RepositoryService protocol
-                print(f"Warning: Cannot restore closed state for PR #{pr_number}")
+                print(
+                    f"Warning: Cannot restore closed state for PR #{pr_number}"
+                )
             elif original_state == "merged":
                 # Note: Cannot actually merge PRs via API after creation
-                print(f"Warning: Cannot restore merged state for PR #{pr_number}")
+                print(
+                    f"Warning: Cannot restore merged state for PR #{pr_number}"
+                )
         except Exception as e:
             print(f"Warning: Failed to set PR #{pr_number} state: {e}")
 

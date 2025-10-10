@@ -71,13 +71,17 @@ def save_repository_data_with_config(
     # Create updated configuration that considers legacy parameters
     # For boolean fields, use OR logic; for Union types, prioritize config over legacy
     updated_include_pull_requests = config.include_pull_requests
-    if isinstance(config.include_pull_requests, bool) and not config.include_pull_requests and include_pull_requests:
+    if (
+        isinstance(config.include_pull_requests, bool)
+        and not config.include_pull_requests
+        and include_pull_requests
+    ):
         updated_include_pull_requests = include_pull_requests
-        
+
     updated_include_sub_issues = config.include_sub_issues
     if not config.include_sub_issues and include_sub_issues:
         updated_include_sub_issues = include_sub_issues
-    
+
     updated_config = ApplicationConfig(
         operation=config.operation,
         github_token=config.github_token,
@@ -114,7 +118,7 @@ def save_repository_data_with_config(
     if failed_operations:
         error_messages = []
         for r in failed_operations:
-            entity_name = r.get('entity_name', 'unknown entity')
+            entity_name = r.get("entity_name", "unknown entity")
             if r.get("error"):
                 error_messages.append(f"{entity_name}: {r['error']}")
             else:

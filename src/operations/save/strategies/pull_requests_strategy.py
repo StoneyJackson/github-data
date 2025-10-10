@@ -16,9 +16,10 @@ class PullRequestsSaveStrategy(SaveEntityStrategy):
 
     def __init__(self, include_pull_requests: Union[bool, Set[int]] = True):
         """Initialize pull requests save strategy.
-        
+
         Args:
-            include_pull_requests: Boolean for all/none or set of PR numbers for selective filtering
+            include_pull_requests: Boolean for all/none or set of PR numbers for
+                selective filtering
         """
         self._include_pull_requests = include_pull_requests
 
@@ -57,27 +58,34 @@ class PullRequestsSaveStrategy(SaveEntityStrategy):
             for pr in entities:
                 if self._should_include_pull_request(pr, self._include_pull_requests):
                     filtered_prs.append(pr)
-            
+
             # Log selection results for visibility
             found_numbers = {pr.number for pr in filtered_prs}
             missing_numbers = self._include_pull_requests - found_numbers
             if missing_numbers:
-                print(f"Warning: Pull requests not found in repository: {sorted(missing_numbers)}")
-            
-            print(f"Selected {len(filtered_prs)} pull requests from {len(entities)} total")
+                print(
+                    f"Warning: Pull requests not found in repository: "
+                    f"{sorted(missing_numbers)}"
+                )
+
+            print(
+                f"Selected {len(filtered_prs)} pull requests from {len(entities)} total"
+            )
             return filtered_prs
 
-    def _should_include_pull_request(self, pr_data: Any, include_spec: Set[int]) -> bool:
+    def _should_include_pull_request(
+        self, pr_data: Any, include_spec: Set[int]
+    ) -> bool:
         """Determine if pull request should be included based on specification.
-        
+
         Args:
             pr_data: PR data object with 'number' attribute
             include_spec: Set of specific PR numbers to include
-            
+
         Returns:
             True if PR should be included, False otherwise
         """
-        return hasattr(pr_data, 'number') and pr_data.number in include_spec
+        return hasattr(pr_data, "number") and pr_data.number in include_spec
 
     def save_data(
         self,

@@ -16,9 +16,10 @@ class IssuesSaveStrategy(SaveEntityStrategy):
 
     def __init__(self, include_issues: Union[bool, Set[int]] = True):
         """Initialize issues save strategy.
-        
+
         Args:
-            include_issues: Boolean for all/none or set of issue numbers for selective filtering
+            include_issues: Boolean for all/none or set of issue numbers for
+                selective filtering
         """
         self._include_issues = include_issues
 
@@ -55,27 +56,30 @@ class IssuesSaveStrategy(SaveEntityStrategy):
             for issue in entities:
                 if self._should_include_issue(issue, self._include_issues):
                     filtered_issues.append(issue)
-            
+
             # Log selection results for visibility
             found_numbers = {issue.number for issue in filtered_issues}
             missing_numbers = self._include_issues - found_numbers
             if missing_numbers:
-                print(f"Warning: Issues not found in repository: {sorted(missing_numbers)}")
-            
+                print(
+                    f"Warning: Issues not found in repository: "
+                    f"{sorted(missing_numbers)}"
+                )
+
             print(f"Selected {len(filtered_issues)} issues from {len(entities)} total")
             return filtered_issues
 
     def _should_include_issue(self, issue_data: Any, include_spec: Set[int]) -> bool:
         """Determine if issue should be included based on specification.
-        
+
         Args:
             issue_data: Issue data object with 'number' attribute
             include_spec: Set of specific issue numbers to include
-            
+
         Returns:
             True if issue should be included, False otherwise
         """
-        return hasattr(issue_data, 'number') and issue_data.number in include_spec
+        return hasattr(issue_data, "number") and issue_data.number in include_spec
 
     def save_data(
         self,

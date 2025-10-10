@@ -14,12 +14,18 @@ if TYPE_CHECKING:
 class IssuesRestoreStrategy(RestoreEntityStrategy):
     """Strategy for restoring GitHub issues with selective filtering support."""
 
-    def __init__(self, include_original_metadata: bool = True, include_issues: Union[bool, Set[int]] = True):
+    def __init__(
+        self,
+        include_original_metadata: bool = True,
+        include_issues: Union[bool, Set[int]] = True,
+    ):
         """Initialize issues restore strategy.
-        
+
         Args:
-            include_original_metadata: Whether to include original metadata in restored issues
-            include_issues: Boolean for all/none or set of issue numbers for selective filtering
+            include_original_metadata: Whether to include original metadata in
+                restored issues
+            include_issues: Boolean for all/none or set of issue numbers for
+                selective filtering
         """
         self._include_original_metadata = include_original_metadata
         self._include_issues = include_issues
@@ -36,7 +42,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         """Load and filter issues data based on selection criteria."""
         issues_file = Path(input_path) / "issues.json"
         all_issues = storage_service.load_data(issues_file, Issue)
-        
+
         if isinstance(self._include_issues, bool):
             if self._include_issues:
                 # Include all issues
@@ -50,14 +56,20 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
             for issue in all_issues:
                 if issue.number in self._include_issues:
                     filtered_issues.append(issue)
-            
+
             # Log selection results for visibility
             found_numbers = {issue.number for issue in filtered_issues}
             missing_numbers = self._include_issues - found_numbers
             if missing_numbers:
-                print(f"Warning: Issues not found in saved data: {sorted(missing_numbers)}")
-            
-            print(f"Selected {len(filtered_issues)} issues from {len(all_issues)} total for restoration")
+                print(
+                    f"Warning: Issues not found in saved data: "
+                    f"{sorted(missing_numbers)}"
+                )
+
+            print(
+                f"Selected {len(filtered_issues)} issues from "
+                f"{len(all_issues)} total for restoration"
+            )
             return filtered_issues
 
     def transform_for_creation(
@@ -90,7 +102,10 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         entity_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         created_issue = github_service.create_issue(
-            repo_name, entity_data["title"], entity_data["body"], entity_data["labels"]
+            repo_name,
+            entity_data["title"],
+            entity_data["body"],
+            entity_data["labels"]
         )
         return {
             "number": created_issue["number"],
@@ -111,7 +126,9 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         if created_data["original_state"] == "closed":
             try:
                 github_service.close_issue(
-                    repo_name, created_data["number"], created_data.get("state_reason")
+                    repo_name,
+                    created_data["number"],
+                    created_data.get("state_reason")
                 )
                 reason_text = (
                     f"with reason: {created_data['state_reason']}"
@@ -121,15 +138,16 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
                 print(f"Closed issue #{created_data['number']} {reason_text}")
             except Exception as e:
                 print(
-                    f"Warning: Failed to close issue " f"#{created_data['number']}: {e}"
+                    f"Warning: Failed to close issue "
+                    f"#{created_data['number']}: {e}"
                 )
 
         # Store number mapping for dependent entities
         if "issue_number_mapping" not in context:
             context["issue_number_mapping"] = {}
-        context["issue_number_mapping"][created_data["original_number"]] = created_data[
-            "number"
-        ]
+        context["issue_number_mapping"][
+            created_data["original_number"]
+        ] = created_data["number"]
 
         print(
             f"Created issue #{created_data['number']}: "

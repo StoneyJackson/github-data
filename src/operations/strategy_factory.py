@@ -1,4 +1,4 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING, Union, Set
 import logging
 from src.config.settings import ApplicationConfig
 
@@ -30,11 +30,16 @@ class StrategyFactory:
         if StrategyFactory._is_enabled(config.include_issues):
             strategies.append(IssuesSaveStrategy(config.include_issues))
 
-        if StrategyFactory._is_enabled(config.include_issues) and config.include_issue_comments:
+        if (
+            StrategyFactory._is_enabled(config.include_issues)
+            and config.include_issue_comments
+        ):
             # Determine if we're in selective mode
             selective_mode = isinstance(config.include_issues, set)
             strategies.append(CommentsSaveStrategy(selective_mode))
-        elif config.include_issue_comments and not StrategyFactory._is_enabled(config.include_issues):
+        elif config.include_issue_comments and not StrategyFactory._is_enabled(
+            config.include_issues
+        ):
             # Warn if issue comments are enabled but issues are not
             logging.warning(
                 "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
@@ -52,7 +57,7 @@ class StrategyFactory:
                 from src.operations.save.strategies.pr_comments_strategy import (
                     PullRequestCommentsSaveStrategy,
                 )
-                
+
                 # Determine if we're in selective mode
                 selective_mode = isinstance(config.include_pull_requests, set)
                 strategies.append(PullRequestCommentsSaveStrategy(selective_mode))
@@ -109,12 +114,19 @@ class StrategyFactory:
 
         # Create issues strategy if enabled
         if StrategyFactory._is_enabled(config.include_issues):
-            strategies.append(IssuesRestoreStrategy(include_original_metadata, config.include_issues))
+            strategies.append(
+                IssuesRestoreStrategy(include_original_metadata, config.include_issues)
+            )
 
         # Create comments strategy if enabled
-        if StrategyFactory._is_enabled(config.include_issues) and config.include_issue_comments:
+        if (
+            StrategyFactory._is_enabled(config.include_issues)
+            and config.include_issue_comments
+        ):
             strategies.append(CommentsRestoreStrategy(include_original_metadata))
-        elif config.include_issue_comments and not StrategyFactory._is_enabled(config.include_issues):
+        elif config.include_issue_comments and not StrategyFactory._is_enabled(
+            config.include_issues
+        ):
             # Warn if issue comments are enabled but issues are not
             logging.warning(
                 "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
@@ -132,7 +144,9 @@ class StrategyFactory:
 
             strategies.append(
                 PullRequestsRestoreStrategy(
-                    pr_conflict_strategy, include_original_metadata, config.include_pull_requests
+                    pr_conflict_strategy,
+                    include_original_metadata,
+                    config.include_pull_requests,
                 )
             )
 
@@ -199,18 +213,16 @@ class StrategyFactory:
         return entities
 
     @staticmethod
-    def _is_enabled(value) -> bool:
+    def _is_enabled(value: Union[bool, Set[int]]) -> bool:
         """Check if a Union[bool, Set[int]] value is enabled.
-        
+
         Args:
             value: Boolean or set of integers
-            
+
         Returns:
             True if enabled (True boolean or non-empty set), False otherwise
         """
         if isinstance(value, bool):
             return value
-        elif isinstance(value, set):
+        else:  # isinstance(value, set)
             return len(value) > 0
-        else:
-            return bool(value)  # Fallback for other types

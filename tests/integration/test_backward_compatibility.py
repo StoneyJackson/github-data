@@ -6,9 +6,7 @@ exactly as before when using the new selective features.
 
 import json
 import logging
-from pathlib import Path
 from unittest.mock import Mock, patch
-from typing import Set
 
 import pytest
 
@@ -18,7 +16,11 @@ from src.operations.restore.restore import restore_repository_data_with_config
 from src.storage import create_storage_service
 from tests.shared import add_pr_method_mocks
 
-pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.backward_compatibility]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.medium,
+    pytest.mark.backward_compatibility,
+]
 
 
 class TestBackwardCompatibility:
@@ -267,13 +269,19 @@ class TestBackwardCompatibility:
         github_service = Mock()
         github_service.get_repository_labels.return_value = sample_github_data["labels"]
         github_service.get_repository_issues.return_value = sample_github_data["issues"]
-        github_service.get_repository_pull_requests.return_value = sample_github_data["pull_requests"]
-        github_service.get_all_issue_comments.return_value = sample_github_data["comments"]
-        github_service.get_all_pull_request_comments.return_value = sample_github_data["pr_comments"]
-        
+        github_service.get_repository_pull_requests.return_value = sample_github_data[
+            "pull_requests"
+        ]
+        github_service.get_all_issue_comments.return_value = sample_github_data[
+            "comments"
+        ]
+        github_service.get_all_pull_request_comments.return_value = sample_github_data[
+            "pr_comments"
+        ]
+
         # Add PR-specific methods
         add_pr_method_mocks(github_service)
-        
+
         return github_service
 
     @pytest.fixture
@@ -281,7 +289,9 @@ class TestBackwardCompatibility:
         """Create real storage service for integration testing."""
         return create_storage_service()
 
-    def test_boolean_true_preserves_original_behavior(self, mock_github_service, storage_service, tmp_path):
+    def test_boolean_true_preserves_original_behavior(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test include_issues=True works exactly as Phase 1."""
         # Configure exactly as Phase 1 would: boolean True for issues
         config = ApplicationConfig(
@@ -313,7 +323,7 @@ class TestBackwardCompatibility:
         assert issues_file.exists()
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 3  # All issues saved
         issue_numbers = {issue["number"] for issue in saved_issues}
         assert issue_numbers == {1, 2, 3}
@@ -323,10 +333,12 @@ class TestBackwardCompatibility:
         assert comments_file.exists()
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         assert len(saved_comments) == 3  # All comments saved
 
-    def test_boolean_false_preserves_original_behavior(self, mock_github_service, storage_service, tmp_path):
+    def test_boolean_false_preserves_original_behavior(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test include_issues=False works exactly as Phase 1."""
         # Configure exactly as Phase 1 would: boolean False for issues
         config = ApplicationConfig(
@@ -345,10 +357,12 @@ class TestBackwardCompatibility:
         )
 
         # Expect warning about issue comments being ignored
-        with patch('src.config.settings.logging.warning') as mock_warning:
+        with patch("src.config.settings.logging.warning") as mock_warning:
             config.validate()
             mock_warning.assert_called_once()
-            assert "INCLUDE_ISSUE_COMMENTS=true requires INCLUDE_ISSUES=true" in str(mock_warning.call_args)
+            assert "INCLUDE_ISSUE_COMMENTS=true requires INCLUDE_ISSUES=true" in str(
+                mock_warning.call_args
+            )
 
         # Execute save operation
         save_repository_data_with_config(
@@ -367,7 +381,9 @@ class TestBackwardCompatibility:
         comments_file = tmp_path / "comments.json"
         assert not comments_file.exists()
 
-    def test_pr_boolean_behavior_unchanged(self, mock_github_service, storage_service, tmp_path):
+    def test_pr_boolean_behavior_unchanged(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test PR boolean operations unchanged."""
         # Test True case
         config_true = ApplicationConfig(
@@ -398,7 +414,7 @@ class TestBackwardCompatibility:
         assert prs_file.exists()
         with open(prs_file, "r") as f:
             saved_prs = json.load(f)
-        
+
         assert len(saved_prs) == 2  # All PRs saved
         pr_numbers = {pr["number"] for pr in saved_prs}
         assert pr_numbers == {10, 11}
@@ -408,7 +424,7 @@ class TestBackwardCompatibility:
         assert pr_comments_file.exists()
         with open(pr_comments_file, "r") as f:
             saved_pr_comments = json.load(f)
-        
+
         assert len(saved_pr_comments) == 2  # All PR comments saved
 
         # Test False case
@@ -428,10 +444,13 @@ class TestBackwardCompatibility:
         )
 
         # Expect warning about PR comments being ignored
-        with patch('src.config.settings.logging.warning') as mock_warning:
+        with patch("src.config.settings.logging.warning") as mock_warning:
             config_false.validate()
             mock_warning.assert_called_once()
-            assert "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true" in str(mock_warning.call_args)
+            assert (
+                "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true"
+                in str(mock_warning.call_args)
+            )
 
         save_repository_data_with_config(
             config_false,
@@ -449,7 +468,9 @@ class TestBackwardCompatibility:
         pr_comments_file = tmp_path / "false" / "pr_comments.json"
         assert not pr_comments_file.exists()
 
-    def test_comment_coupling_backward_compatible(self, mock_github_service, storage_service, tmp_path):
+    def test_comment_coupling_backward_compatible(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Verify comment coupling doesn't break existing behavior."""
         # Test that boolean True still includes ALL comments as before
         config = ApplicationConfig(
@@ -499,7 +520,9 @@ class TestBackwardCompatibility:
             saved_pr_comments = json.load(f)
         assert len(saved_pr_comments) == 2  # All PR comments
 
-    def test_mixed_boolean_selective_scenarios(self, mock_github_service, storage_service, tmp_path):
+    def test_mixed_boolean_selective_scenarios(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test mixing boolean and selective configurations."""
         # Test boolean True for issues, selective for PRs
         config = ApplicationConfig(
@@ -553,7 +576,9 @@ class TestBackwardCompatibility:
         assert len(saved_pr_comments) == 1
         assert saved_pr_comments[0]["pull_request_number"] == 10
 
-    def test_restore_boolean_behavior_preserved(self, mock_github_service, storage_service, tmp_path):
+    def test_restore_boolean_behavior_preserved(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that restore operations with boolean values work as before."""
         # First save all data using boolean True
         save_config = ApplicationConfig(
@@ -644,35 +669,40 @@ class TestBackwardCompatibility:
         ]
 
         for env_value, expected_result in test_cases:
-            with patch.dict('os.environ', {"INCLUDE_ISSUES": env_value}, clear=False):
+            with patch.dict("os.environ", {"INCLUDE_ISSUES": env_value}, clear=False):
                 config = ApplicationConfig(
                     operation="save",
                     github_token="test_token",
-                    github_repo="owner/repo", 
+                    github_repo="owner/repo",
                     data_path="/data",
                     label_conflict_strategy="skip",
                     include_git_repo=False,
-                    include_issues=ApplicationConfig._parse_number_or_bool_env("INCLUDE_ISSUES", False),
+                    include_issues=ApplicationConfig._parse_number_or_bool_env(
+                        "INCLUDE_ISSUES", False
+                    ),
                     include_issue_comments=True,
                     include_pull_requests=True,
                     include_pull_request_comments=True,
                     include_sub_issues=False,
                     git_auth_method="token",
                 )
-                
-                assert config.include_issues == expected_result, \
-                    f"Expected {env_value} to parse as {expected_result}, got {config.include_issues}"
+
+                assert (
+                    config.include_issues == expected_result
+                ), f"Expected {env_value} to parse as {expected_result}, got {config.include_issues}"
 
     def test_legacy_environment_variables_error_guidance(self):
         """Test that legacy "0"/"1" values provide helpful error messages."""
         # Test that legacy "0"/"1" formats provide helpful errors
         legacy_values = ["0", "1"]
-        
+
         for legacy_value in legacy_values:
-            with patch.dict('os.environ', {"INCLUDE_ISSUE_COMMENTS": legacy_value}, clear=False):
+            with patch.dict(
+                "os.environ", {"INCLUDE_ISSUE_COMMENTS": legacy_value}, clear=False
+            ):
                 with pytest.raises(ValueError) as exc_info:
                     ApplicationConfig.from_environment()
-                
+
                 error_message = str(exc_info.value)
                 assert "legacy format" in error_message
                 assert "enhanced boolean formats" in error_message
@@ -698,9 +728,11 @@ class TestBackwardCompatibility:
 
         with caplog.at_level(logging.WARNING):
             config.validate()
-            
-        assert any("INCLUDE_ISSUE_COMMENTS=true requires INCLUDE_ISSUES=true" in record.message 
-                  for record in caplog.records)
+
+        assert any(
+            "INCLUDE_ISSUE_COMMENTS=true requires INCLUDE_ISSUES=true" in record.message
+            for record in caplog.records
+        )
         assert config.include_issue_comments is False  # Should be corrected
 
         # Test PR comments warning
@@ -722,7 +754,10 @@ class TestBackwardCompatibility:
 
         with caplog.at_level(logging.WARNING):
             config.validate()
-            
-        assert any("INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true" in record.message 
-                  for record in caplog.records)
+
+        assert any(
+            "INCLUDE_PULL_REQUEST_COMMENTS=true requires INCLUDE_PULL_REQUESTS=true"
+            in record.message
+            for record in caplog.records
+        )
         assert config.include_pull_request_comments is False  # Should be corrected

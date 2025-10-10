@@ -1,16 +1,13 @@
 """Integration tests for selective issue/PR save/restore workflows."""
 
 import json
-from pathlib import Path
-from unittest.mock import Mock, patch
-from typing import Set
+from unittest.mock import Mock
 
 import pytest
 
 from src.config.settings import ApplicationConfig
 from src.operations.save.save import save_repository_data_with_config
 from src.operations.restore.restore import restore_repository_data_with_config
-from src.github import create_github_service
 from src.storage import create_storage_service
 from tests.shared import (
     add_pr_method_mocks,
@@ -267,13 +264,19 @@ class TestSelectiveSaveRestore:
         github_service = Mock()
         github_service.get_repository_labels.return_value = sample_github_data["labels"]
         github_service.get_repository_issues.return_value = sample_github_data["issues"]
-        github_service.get_repository_pull_requests.return_value = sample_github_data["pull_requests"]
-        github_service.get_all_issue_comments.return_value = sample_github_data["comments"]
-        github_service.get_all_pull_request_comments.return_value = sample_github_data["pr_comments"]
-        
+        github_service.get_repository_pull_requests.return_value = sample_github_data[
+            "pull_requests"
+        ]
+        github_service.get_all_issue_comments.return_value = sample_github_data[
+            "comments"
+        ]
+        github_service.get_all_pull_request_comments.return_value = sample_github_data[
+            "pr_comments"
+        ]
+
         # Add PR-specific methods
         add_pr_method_mocks(github_service)
-        
+
         return github_service
 
     @pytest.fixture
@@ -281,7 +284,9 @@ class TestSelectiveSaveRestore:
         """Create real storage service for integration testing."""
         return create_storage_service()
 
-    def test_save_single_issue_with_comments(self, mock_github_service, storage_service, tmp_path):
+    def test_save_single_issue_with_comments(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test saving a single issue and its comments."""
         # Configure to save only issue #5 with comments
         config = ApplicationConfig(
@@ -313,7 +318,7 @@ class TestSelectiveSaveRestore:
         assert issues_file.exists()
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 1
         assert saved_issues[0]["number"] == 5
         assert saved_issues[0]["title"] == "Security review"
@@ -323,12 +328,17 @@ class TestSelectiveSaveRestore:
         assert comments_file.exists()
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         assert len(saved_comments) == 1
-        assert saved_comments[0]["issue_url"] == "https://api.github.com/repos/owner/repo/issues/5"
+        assert (
+            saved_comments[0]["issue_url"]
+            == "https://api.github.com/repos/owner/repo/issues/5"
+        )
         assert saved_comments[0]["body"] == "Security is important"
 
-    def test_save_issue_range_without_comments(self, mock_github_service, storage_service, tmp_path):
+    def test_save_issue_range_without_comments(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test saving issue range without comments."""
         # Configure to save issues #1-3 without comments
         config = ApplicationConfig(
@@ -360,7 +370,7 @@ class TestSelectiveSaveRestore:
         assert issues_file.exists()
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 3
         issue_numbers = {issue["number"] for issue in saved_issues}
         assert issue_numbers == {1, 2, 3}
@@ -369,7 +379,9 @@ class TestSelectiveSaveRestore:
         comments_file = tmp_path / "comments.json"
         assert not comments_file.exists()
 
-    def test_save_mixed_specification(self, mock_github_service, storage_service, tmp_path):
+    def test_save_mixed_specification(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test combined issue and PR selection."""
         # Configure to save issues #1-3 and PRs #10-12
         config = ApplicationConfig(
@@ -401,7 +413,7 @@ class TestSelectiveSaveRestore:
         assert issues_file.exists()
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 3
         issue_numbers = {issue["number"] for issue in saved_issues}
         assert issue_numbers == {1, 2, 3}
@@ -411,7 +423,7 @@ class TestSelectiveSaveRestore:
         assert prs_file.exists()
         with open(prs_file, "r") as f:
             saved_prs = json.load(f)
-        
+
         assert len(saved_prs) == 3
         pr_numbers = {pr["number"] for pr in saved_prs}
         assert pr_numbers == {10, 11, 12}
@@ -421,7 +433,7 @@ class TestSelectiveSaveRestore:
         assert comments_file.exists()
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         # Should have comments for issues #1, #2, #3
         assert len(saved_comments) == 3
         comment_issue_urls = {comment["issue_url"] for comment in saved_comments}
@@ -437,7 +449,7 @@ class TestSelectiveSaveRestore:
         assert pr_comments_file.exists()
         with open(pr_comments_file, "r") as f:
             saved_pr_comments = json.load(f)
-        
+
         # Should have comments for PRs #10, #11, #12
         assert len(saved_pr_comments) == 3
         pr_comment_urls = {comment["pull_request_url"] for comment in saved_pr_comments}
@@ -448,7 +460,9 @@ class TestSelectiveSaveRestore:
         }
         assert pr_comment_urls == expected_pr_urls
 
-    def test_restore_selective_issues_from_full_backup(self, mock_github_service, storage_service, tmp_path):
+    def test_restore_selective_issues_from_full_backup(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test restoring specific issues from complete backup."""
         # First save all issues and comments
         save_config = ApplicationConfig(
@@ -512,14 +526,22 @@ class TestSelectiveSaveRestore:
 
         # Get the call arguments to verify the correct issues were restored
         issue_calls = mock_github_service.create_issue.call_args_list
-        restored_titles = [call[0][1] for call in issue_calls]  # Extract title from args
-        expected_titles = ["Add user dashboard", "Update documentation", "Security review"]
+        restored_titles = [
+            call[0][1] for call in issue_calls
+        ]  # Extract title from args
+        expected_titles = [
+            "Add user dashboard",
+            "Update documentation",
+            "Security review",
+        ]
         assert set(restored_titles) == set(expected_titles)
 
         # Verify only comments for restored issues were restored
         assert mock_github_service.create_issue_comment.call_count == 3
 
-    def test_restore_missing_issue_numbers(self, mock_github_service, storage_service, tmp_path):
+    def test_restore_missing_issue_numbers(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test restore behavior when specified numbers don't exist."""
         # First save only issues #1-3
         save_config = ApplicationConfig(
@@ -562,7 +584,10 @@ class TestSelectiveSaveRestore:
         )
 
         # Mock GitHub API for restore operation
-        mock_github_service.create_issue.return_value = {"number": 102, "title": "Add user dashboard"}
+        mock_github_service.create_issue.return_value = {
+            "number": 102,
+            "title": "Add user dashboard",
+        }
         mock_github_service.create_issue_comment.return_value = {"id": 9001}
 
         # Execute restore operation
@@ -580,7 +605,9 @@ class TestSelectiveSaveRestore:
         # Verify only comment for issue #2 was restored
         assert mock_github_service.create_issue_comment.call_count == 1
 
-    def test_comment_coupling_selective_save(self, mock_github_service, storage_service, tmp_path):
+    def test_comment_coupling_selective_save(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that comments are only saved for selected issues."""
         # Configure to save only issues #2 and #4 with comments
         config = ApplicationConfig(
@@ -612,7 +639,7 @@ class TestSelectiveSaveRestore:
         assert comments_file.exists()
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         assert len(saved_comments) == 2
         comment_issue_urls = {comment["issue_url"] for comment in saved_comments}
         expected_urls = {
@@ -621,7 +648,9 @@ class TestSelectiveSaveRestore:
         }
         assert comment_issue_urls == expected_urls
 
-    def test_selective_save_performance(self, mock_github_service, storage_service, tmp_path):
+    def test_selective_save_performance(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that selective operations process less data."""
         # Configure to save only issues #1-2
         selective_config = ApplicationConfig(
@@ -676,23 +705,23 @@ class TestSelectiveSaveRestore:
         # Verify selective save processed significantly less data
         selective_issues_file = tmp_path / "selective" / "issues.json"
         full_issues_file = tmp_path / "full" / "issues.json"
-        
+
         with open(selective_issues_file, "r") as f:
             selective_issues = json.load(f)
         with open(full_issues_file, "r") as f:
             full_issues = json.load(f)
-        
+
         assert len(selective_issues) == 2
         assert len(full_issues) == 5
-        
+
         # Verify selective comments are fewer
         selective_comments_file = tmp_path / "selective" / "comments.json"
         full_comments_file = tmp_path / "full" / "comments.json"
-        
+
         with open(selective_comments_file, "r") as f:
             selective_comments = json.load(f)
         with open(full_comments_file, "r") as f:
             full_comments = json.load(f)
-        
+
         assert len(selective_comments) == 2
         assert len(full_comments) == 6

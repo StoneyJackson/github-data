@@ -1,7 +1,6 @@
 """Integration tests for comment coupling in selective operations."""
 
 import json
-from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -304,13 +303,19 @@ class TestCommentCoupling:
         github_service = Mock()
         github_service.get_repository_labels.return_value = sample_github_data["labels"]
         github_service.get_repository_issues.return_value = sample_github_data["issues"]
-        github_service.get_repository_pull_requests.return_value = sample_github_data["pull_requests"]
-        github_service.get_all_issue_comments.return_value = sample_github_data["comments"]
-        github_service.get_all_pull_request_comments.return_value = sample_github_data["pr_comments"]
-        
+        github_service.get_repository_pull_requests.return_value = sample_github_data[
+            "pull_requests"
+        ]
+        github_service.get_all_issue_comments.return_value = sample_github_data[
+            "comments"
+        ]
+        github_service.get_all_pull_request_comments.return_value = sample_github_data[
+            "pr_comments"
+        ]
+
         # Add PR-specific methods
         add_pr_method_mocks(github_service)
-        
+
         return github_service
 
     @pytest.fixture
@@ -318,7 +323,9 @@ class TestCommentCoupling:
         """Create real storage service for integration testing."""
         return create_storage_service()
 
-    def test_issue_comments_follow_issue_selection(self, mock_github_service, storage_service, tmp_path):
+    def test_issue_comments_follow_issue_selection(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Verify issue comments are automatically coupled to issue selection."""
         # Configure to save only issue #20 with comments enabled
         config = ApplicationConfig(
@@ -349,7 +356,7 @@ class TestCommentCoupling:
         issues_file = tmp_path / "issues.json"
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 1
         assert saved_issues[0]["number"] == 20
 
@@ -357,16 +364,21 @@ class TestCommentCoupling:
         comments_file = tmp_path / "comments.json"
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         assert len(saved_comments) == 2
         for comment in saved_comments:
-            assert comment["issue_url"] == "https://api.github.com/repos/owner/repo/issues/20"
-        
+            assert (
+                comment["issue_url"]
+                == "https://api.github.com/repos/owner/repo/issues/20"
+            )
+
         comment_bodies = {comment["body"] for comment in saved_comments}
         expected_bodies = {"Comment 1 on issue 20", "Comment 2 on issue 20"}
         assert comment_bodies == expected_bodies
 
-    def test_issue_comments_disabled_overrides_selection(self, mock_github_service, storage_service, tmp_path):
+    def test_issue_comments_disabled_overrides_selection(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Verify INCLUDE_ISSUE_COMMENTS=false disables comments regardless of issue selection."""
         # Configure to save issue #10 but with comments disabled
         config = ApplicationConfig(
@@ -397,7 +409,7 @@ class TestCommentCoupling:
         issues_file = tmp_path / "issues.json"
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 1
         assert saved_issues[0]["number"] == 10
 
@@ -405,7 +417,9 @@ class TestCommentCoupling:
         comments_file = tmp_path / "comments.json"
         assert not comments_file.exists()
 
-    def test_pr_comments_follow_pr_selection(self, mock_github_service, storage_service, tmp_path):
+    def test_pr_comments_follow_pr_selection(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Verify PR comments are automatically coupled to PR selection."""
         # Configure to save only PR #100 with comments enabled
         config = ApplicationConfig(
@@ -436,7 +450,7 @@ class TestCommentCoupling:
         prs_file = tmp_path / "pull_requests.json"
         with open(prs_file, "r") as f:
             saved_prs = json.load(f)
-        
+
         assert len(saved_prs) == 1
         assert saved_prs[0]["number"] == 100
 
@@ -444,16 +458,21 @@ class TestCommentCoupling:
         pr_comments_file = tmp_path / "pr_comments.json"
         with open(pr_comments_file, "r") as f:
             saved_pr_comments = json.load(f)
-        
+
         assert len(saved_pr_comments) == 2
         for comment in saved_pr_comments:
-            assert comment["pull_request_url"] == "https://api.github.com/repos/owner/repo/pulls/100"
-        
+            assert (
+                comment["pull_request_url"]
+                == "https://api.github.com/repos/owner/repo/pulls/100"
+            )
+
         comment_bodies = {comment["body"] for comment in saved_pr_comments}
         expected_bodies = {"Comment 1 on PR 100", "Comment 2 on PR 100"}
         assert comment_bodies == expected_bodies
 
-    def test_pr_comments_disabled_overrides_selection(self, mock_github_service, storage_service, tmp_path):
+    def test_pr_comments_disabled_overrides_selection(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Verify INCLUDE_PULL_REQUEST_COMMENTS=false disables comments regardless of PR selection."""
         # Configure to save PR #200 but with comments disabled
         config = ApplicationConfig(
@@ -484,7 +503,7 @@ class TestCommentCoupling:
         prs_file = tmp_path / "pull_requests.json"
         with open(prs_file, "r") as f:
             saved_prs = json.load(f)
-        
+
         assert len(saved_prs) == 1
         assert saved_prs[0]["number"] == 200
 
@@ -492,7 +511,9 @@ class TestCommentCoupling:
         pr_comments_file = tmp_path / "pr_comments.json"
         assert not pr_comments_file.exists()
 
-    def test_comment_coupling_selective_restore(self, mock_github_service, storage_service, tmp_path):
+    def test_comment_coupling_selective_restore(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that comments are only restored for restored issues."""
         # First save all issues and comments
         save_config = ApplicationConfig(
@@ -536,8 +557,14 @@ class TestCommentCoupling:
 
         # Mock GitHub API for restore operation
         mock_github_service.create_issue.side_effect = [
-            {"number": 110, "title": "Issue 10"},  # Maps original issue 10 to new issue 110
-            {"number": 130, "title": "Issue 30"},  # Maps original issue 30 to new issue 130
+            {
+                "number": 110,
+                "title": "Issue 10",
+            },  # Maps original issue 10 to new issue 110
+            {
+                "number": 130,
+                "title": "Issue 30",
+            },  # Maps original issue 30 to new issue 130
         ]
         mock_github_service.create_issue_comment.return_value = {"id": 9001}
 
@@ -558,13 +585,17 @@ class TestCommentCoupling:
 
         # Verify the comments were created for the correct new issue numbers
         comment_calls = mock_github_service.create_issue_comment.call_args_list
-        created_issue_numbers = [call[0][1] for call in comment_calls]  # Extract issue number from args
-        
+        created_issue_numbers = [
+            call[0][1] for call in comment_calls
+        ]  # Extract issue number from args
+
         # Should have 2 comments for issue 110 (mapped from 10) and 2 comments for issue 130 (mapped from 30)
         assert created_issue_numbers.count(110) == 2
         assert created_issue_numbers.count(130) == 2
 
-    def test_mixed_comment_coupling(self, mock_github_service, storage_service, tmp_path):
+    def test_mixed_comment_coupling(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test comment coupling with both issues and PRs selected."""
         # Configure to save mixed selection: issue #20, PR #200, with both comment types enabled
         config = ApplicationConfig(
@@ -595,7 +626,7 @@ class TestCommentCoupling:
         issues_file = tmp_path / "issues.json"
         with open(issues_file, "r") as f:
             saved_issues = json.load(f)
-        
+
         assert len(saved_issues) == 1
         assert saved_issues[0]["number"] == 20
 
@@ -603,7 +634,7 @@ class TestCommentCoupling:
         prs_file = tmp_path / "pull_requests.json"
         with open(prs_file, "r") as f:
             saved_prs = json.load(f)
-        
+
         assert len(saved_prs) == 1
         assert saved_prs[0]["number"] == 200
 
@@ -611,20 +642,28 @@ class TestCommentCoupling:
         comments_file = tmp_path / "comments.json"
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
-        
+
         assert len(saved_comments) == 2
         for comment in saved_comments:
-            assert comment["issue_url"] == "https://api.github.com/repos/owner/repo/issues/20"
+            assert (
+                comment["issue_url"]
+                == "https://api.github.com/repos/owner/repo/issues/20"
+            )
 
         # Verify only comments for PR #200 were saved
         pr_comments_file = tmp_path / "pr_comments.json"
         with open(pr_comments_file, "r") as f:
             saved_pr_comments = json.load(f)
-        
-        assert len(saved_pr_comments) == 1
-        assert saved_pr_comments[0]["pull_request_url"] == "https://api.github.com/repos/owner/repo/pulls/200"
 
-    def test_no_issues_selected_skips_all_comments(self, mock_github_service, storage_service, tmp_path):
+        assert len(saved_pr_comments) == 1
+        assert (
+            saved_pr_comments[0]["pull_request_url"]
+            == "https://api.github.com/repos/owner/repo/pulls/200"
+        )
+
+    def test_no_issues_selected_skips_all_comments(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that no comments are saved when no issues are selected."""
         # Configure to save no issues but with comments enabled
         config = ApplicationConfig(
@@ -659,7 +698,9 @@ class TestCommentCoupling:
         comments_file = tmp_path / "comments.json"
         assert not comments_file.exists()
 
-    def test_no_prs_selected_skips_all_pr_comments(self, mock_github_service, storage_service, tmp_path):
+    def test_no_prs_selected_skips_all_pr_comments(
+        self, mock_github_service, storage_service, tmp_path
+    ):
         """Test that no PR comments are saved when no PRs are selected."""
         # Configure to save no PRs but with PR comments enabled
         config = ApplicationConfig(
