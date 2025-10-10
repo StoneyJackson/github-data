@@ -40,7 +40,7 @@ class ConfigBuilder:
             "github_token": "test-token",
             "github_repo": "test-owner/test-repo",
             "data_path": "/tmp/test-data",
-            "label_conflict_strategy": "fail-if-existing",
+            "label_conflict_strategy": "skip",
             "include_git_repo": True,
             "include_issues": True,
             "include_issue_comments": True,

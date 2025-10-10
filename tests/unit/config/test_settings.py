@@ -62,7 +62,7 @@ class TestApplicationConfig:
             config = ApplicationConfig.from_environment()
 
         assert config.data_path == "/data"
-        assert config.label_conflict_strategy == "fail-if-existing"
+        assert config.label_conflict_strategy == "skip"
         assert config.include_git_repo is True
         assert config.include_issue_comments is True
         assert config.git_auth_method == "token"
