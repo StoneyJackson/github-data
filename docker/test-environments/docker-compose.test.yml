@@ -1,0 +1,132 @@
+# Docker Compose configuration for testing selective operations
+
+version: '3.8'
+
+services:
+  # Basic selective save test
+  selective-save:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    env_file:
+      - selective.env
+    volumes:
+      - ./test-data/selective-save:/data
+    profiles:
+      - test-selective
+
+  # Selective restore test
+  selective-restore:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    env_file:
+      - selective-restore.env
+    volumes:
+      - ./test-data/selective-restore:/data
+    profiles:
+      - test-selective
+
+  # Mixed configuration test
+  selective-mixed:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    env_file:
+      - selective-mixed.env
+    volumes:
+      - ./test-data/selective-mixed:/data
+    profiles:
+      - test-selective
+
+  # Large range performance test
+  selective-large:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    env_file:
+      - selective-large-range.env
+    volumes:
+      - ./test-data/selective-large:/data
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    profiles:
+      - test-performance
+
+  # Error testing service
+  selective-error:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      - OPERATION=save
+      - GITHUB_TOKEN=test_token
+      - GITHUB_REPO=owner/repo
+      - INCLUDE_ISSUES=invalid-format  # Should cause error
+      - INCLUDE_ISSUE_COMMENTS=maybe   # Invalid boolean
+    volumes:
+      - ./test-data/selective-error:/data
+    profiles:
+      - test-errors
+
+  # Concurrent operations test - Instance 1
+  concurrent-1:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      - OPERATION=save
+      - GITHUB_TOKEN=test_token_1
+      - GITHUB_REPO=owner/repo1
+      - INCLUDE_ISSUES=1-10
+      - INCLUDE_ISSUE_COMMENTS=true
+      - INCLUDE_PULL_REQUESTS=false
+    volumes:
+      - ./test-data/concurrent-1:/data
+    profiles:
+      - test-concurrent
+
+  # Concurrent operations test - Instance 2  
+  concurrent-2:
+    build: 
+      context: ../..
+      dockerfile: Dockerfile
+    environment:
+      - OPERATION=save
+      - GITHUB_TOKEN=test_token_2
+      - GITHUB_REPO=owner/repo2
+      - INCLUDE_ISSUES=20-30
+      - INCLUDE_ISSUE_COMMENTS=false
+      - INCLUDE_PULL_REQUESTS=10-20
+      - INCLUDE_PULL_REQUEST_COMMENTS=true
+    volumes:
+      - ./test-data/concurrent-2:/data
+    profiles:
+      - test-concurrent
+
+volumes:
+  test-data:
+
+# Usage examples:
+#
+# Run selective operation tests:
+# docker-compose --profile test-selective up
+#
+# Run performance tests:
+# docker-compose --profile test-performance up
+#
+# Run error handling tests:
+# docker-compose --profile test-errors up
+#
+# Run concurrent operation tests:
+# docker-compose --profile test-concurrent up
+#
+# Run all tests:
+# docker-compose --profile test-selective --profile test-performance --profile test-errors --profile test-concurrent up
+#
+# Clean up test data:
+# docker-compose down -v
