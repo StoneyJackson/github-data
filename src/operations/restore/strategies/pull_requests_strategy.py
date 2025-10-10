@@ -1,6 +1,6 @@
 """Pull requests restore strategy implementation."""
 
-from typing import List, Dict, Any, Optional, TYPE_CHECKING
+from typing import List, Dict, Any, Optional, TYPE_CHECKING, Union, Set
 from pathlib import Path
 
 from ..strategy import (
@@ -15,15 +15,24 @@ if TYPE_CHECKING:
 
 
 class PullRequestsRestoreStrategy(RestoreEntityStrategy):
-    """Strategy for restoring GitHub pull requests."""
+    """Strategy for restoring GitHub pull requests with selective filtering support."""
 
     def __init__(
         self,
         conflict_strategy: RestoreConflictStrategy,
         include_original_metadata: bool = False,
+        include_pull_requests: Union[bool, Set[int]] = True,
     ):
+        """Initialize pull requests restore strategy.
+        
+        Args:
+            conflict_strategy: Strategy for handling conflicts
+            include_original_metadata: Whether to include original metadata in restored PRs
+            include_pull_requests: Boolean for all/none or set of PR numbers for selective filtering
+        """
         self._conflict_strategy = conflict_strategy
         self._include_original_metadata = include_original_metadata
+        self._include_pull_requests = include_pull_requests
 
     def get_entity_name(self) -> str:
         return "pull_requests"
@@ -34,8 +43,32 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
     def load_data(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequest]:
+        """Load and filter pull requests data based on selection criteria."""
         pull_requests_file = Path(input_path) / "pull_requests.json"
-        return storage_service.load_data(pull_requests_file, PullRequest)
+        all_prs = storage_service.load_data(pull_requests_file, PullRequest)
+        
+        if isinstance(self._include_pull_requests, bool):
+            if self._include_pull_requests:
+                # Include all pull requests
+                return all_prs
+            else:
+                # Skip all pull requests
+                return []
+        else:
+            # Selective filtering: include only specified PR numbers
+            filtered_prs = []
+            for pr in all_prs:
+                if pr.number in self._include_pull_requests:
+                    filtered_prs.append(pr)
+            
+            # Log selection results for visibility
+            found_numbers = {pr.number for pr in filtered_prs}
+            missing_numbers = self._include_pull_requests - found_numbers
+            if missing_numbers:
+                print(f"Warning: Pull requests not found in saved data: {sorted(missing_numbers)}")
+            
+            print(f"Selected {len(filtered_prs)} pull requests from {len(all_prs)} total for restoration")
+            return filtered_prs
 
     def transform_for_creation(
         self, pull_request: PullRequest, context: Dict[str, Any]

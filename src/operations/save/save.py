@@ -61,14 +61,23 @@ def save_repository_data_with_config(
     storage_service: StorageService,
     repo_name: str,
     output_path: str,
-    include_pull_requests: bool = True,
-    include_sub_issues: bool = True,
+    include_pull_requests: bool = False,
+    include_sub_issues: bool = False,
     git_service: Optional[GitRepositoryService] = None,
     data_types: Optional[List[str]] = None,
 ) -> None:
     """Save using strategy pattern approach with configuration."""
 
     # Create updated configuration that considers legacy parameters
+    # For boolean fields, use OR logic; for Union types, prioritize config over legacy
+    updated_include_pull_requests = config.include_pull_requests
+    if isinstance(config.include_pull_requests, bool) and not config.include_pull_requests and include_pull_requests:
+        updated_include_pull_requests = include_pull_requests
+        
+    updated_include_sub_issues = config.include_sub_issues
+    if not config.include_sub_issues and include_sub_issues:
+        updated_include_sub_issues = include_sub_issues
+    
     updated_config = ApplicationConfig(
         operation=config.operation,
         github_token=config.github_token,
@@ -78,11 +87,9 @@ def save_repository_data_with_config(
         include_git_repo=config.include_git_repo,
         include_issues=config.include_issues,
         include_issue_comments=config.include_issue_comments,
-        include_pull_requests=config.include_pull_requests
-        or include_pull_requests,  # Support legacy parameter
+        include_pull_requests=updated_include_pull_requests,
         include_pull_request_comments=config.include_pull_request_comments,
-        include_sub_issues=config.include_sub_issues
-        or include_sub_issues,  # Support legacy parameter
+        include_sub_issues=updated_include_sub_issues,
         git_auth_method=config.git_auth_method,
     )
 

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class CommentsSaveStrategy(SaveEntityStrategy):
-    """Strategy for saving repository comments."""
+    """Strategy for saving repository comments with selective filtering based on included issues."""
 
     def get_entity_name(self) -> str:
         """Return the entity type name."""
@@ -35,9 +35,33 @@ class CommentsSaveStrategy(SaveEntityStrategy):
         return comments
 
     def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform comments data."""
-        # Comments don't require any processing
-        return entities
+        """Process and transform comments data with issue coupling."""
+        # Check if we have saved issues in the context to couple with
+        saved_issues = context.get("issues", [])
+        
+        if not saved_issues:
+            # No issues were saved, so no comments should be saved
+            print("No issues were saved, skipping all issue comments")
+            return []
+        
+        # Create a set of issue URLs from saved issues for efficient lookup
+        saved_issue_urls = set()
+        for issue in saved_issues:
+            if hasattr(issue, 'url'):
+                saved_issue_urls.add(issue.url)
+        
+        if not saved_issue_urls:
+            print("No valid issue URLs found in saved issues, skipping all comments")
+            return []
+        
+        # Filter comments to only include those from saved issues
+        filtered_comments = []
+        for comment in entities:
+            if hasattr(comment, 'issue_url') and comment.issue_url in saved_issue_urls:
+                filtered_comments.append(comment)
+        
+        print(f"Selected {len(filtered_comments)} comments from {len(entities)} total (coupling to {len(saved_issues)} saved issues)")
+        return filtered_comments
 
     def save_data(
         self,

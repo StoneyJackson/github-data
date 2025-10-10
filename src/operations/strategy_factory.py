@@ -27,24 +27,24 @@ class StrategyFactory:
             LabelsSaveStrategy(),
         ]
 
-        if config.include_issues:
-            strategies.append(IssuesSaveStrategy())
+        if StrategyFactory._is_enabled(config.include_issues):
+            strategies.append(IssuesSaveStrategy(config.include_issues))
 
-        if config.include_issues and config.include_issue_comments:
+        if StrategyFactory._is_enabled(config.include_issues) and config.include_issue_comments:
             strategies.append(CommentsSaveStrategy())
-        elif config.include_issue_comments and not config.include_issues:
+        elif config.include_issue_comments and not StrategyFactory._is_enabled(config.include_issues):
             # Warn if issue comments are enabled but issues are not
             logging.warning(
                 "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
                 "INCLUDE_ISSUES=true. Ignoring issue comments."
             )
 
-        if config.include_pull_requests:
+        if StrategyFactory._is_enabled(config.include_pull_requests):
             from src.operations.save.strategies.pull_requests_strategy import (
                 PullRequestsSaveStrategy,
             )
 
-            strategies.append(PullRequestsSaveStrategy())
+            strategies.append(PullRequestsSaveStrategy(config.include_pull_requests))
 
             if config.include_pull_request_comments:
                 from src.operations.save.strategies.pr_comments_strategy import (
@@ -104,13 +104,13 @@ class StrategyFactory:
             strategies.append(LabelsRestoreStrategy(conflict_strategy))
 
         # Create issues strategy if enabled
-        if config.include_issues:
-            strategies.append(IssuesRestoreStrategy(include_original_metadata))
+        if StrategyFactory._is_enabled(config.include_issues):
+            strategies.append(IssuesRestoreStrategy(include_original_metadata, config.include_issues))
 
         # Create comments strategy if enabled
-        if config.include_issues and config.include_issue_comments:
+        if StrategyFactory._is_enabled(config.include_issues) and config.include_issue_comments:
             strategies.append(CommentsRestoreStrategy(include_original_metadata))
-        elif config.include_issue_comments and not config.include_issues:
+        elif config.include_issue_comments and not StrategyFactory._is_enabled(config.include_issues):
             # Warn if issue comments are enabled but issues are not
             logging.warning(
                 "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
@@ -118,7 +118,7 @@ class StrategyFactory:
             )
 
         # Create PR strategies if enabled
-        if config.include_pull_requests:
+        if StrategyFactory._is_enabled(config.include_pull_requests):
             from src.operations.restore.strategies.pull_requests_strategy import (
                 PullRequestsRestoreStrategy,
                 create_conflict_strategy as create_pr_conflict_strategy,
@@ -128,7 +128,7 @@ class StrategyFactory:
 
             strategies.append(
                 PullRequestsRestoreStrategy(
-                    pr_conflict_strategy, include_original_metadata
+                    pr_conflict_strategy, include_original_metadata, config.include_pull_requests
                 )
             )
 
@@ -174,13 +174,14 @@ class StrategyFactory:
         """Get list of entities that should be processed based on configuration."""
         entities = ["labels"]
 
-        if config.include_issues:
+        # Handle Union[bool, Set[int]] types - enabled if True or non-empty set
+        if StrategyFactory._is_enabled(config.include_issues):
             entities.append("issues")
 
         if config.include_issue_comments:
             entities.append("comments")
 
-        if config.include_pull_requests:
+        if StrategyFactory._is_enabled(config.include_pull_requests):
             entities.append("pull_requests")
             if config.include_pull_request_comments:
                 entities.append("pr_comments")
@@ -192,3 +193,20 @@ class StrategyFactory:
             entities.append("git_repository")
 
         return entities
+
+    @staticmethod
+    def _is_enabled(value) -> bool:
+        """Check if a Union[bool, Set[int]] value is enabled.
+        
+        Args:
+            value: Boolean or set of integers
+            
+        Returns:
+            True if enabled (True boolean or non-empty set), False otherwise
+        """
+        if isinstance(value, bool):
+            return value
+        elif isinstance(value, set):
+            return len(value) > 0
+        else:
+            return bool(value)  # Fallback for other types
