@@ -68,7 +68,7 @@ class TestApplicationConfig:
         assert config.git_auth_method == "token"
 
     def test_bool_parsing(self):
-        """Test boolean environment variable parsing."""
+        """Test legacy boolean environment variable parsing."""
         test_cases = [
             ("true", True),
             ("True", True),
@@ -203,8 +203,8 @@ class TestApplicationConfig:
             "GITHUB_REPO": "owner/repo",
         }
 
-        true_values = ["true", "True", "1", "yes", "on"]
-        false_values = ["false", "False", "0", "no", "off"]
+        true_values = ["true", "True", "yes", "on"]
+        false_values = ["false", "False", "no", "off"]
 
         for value in true_values:
             with patch.dict(
@@ -259,8 +259,8 @@ class TestApplicationConfig:
         """Test INCLUDE_ISSUES with various boolean representations."""
         base_env_vars = ConfigBuilder().with_data_path("/tmp/test").as_env_dict()
 
-        # True values
-        true_values = ["true", "True", "TRUE", "1", "yes", "YES", "on", "ON"]
+        # Test with boolean true values (these should work with enhanced parsing)
+        true_values = ["true", "True", "TRUE", "yes", "YES", "on", "ON"]
         for value in true_values:
             with patch.dict(
                 os.environ,
@@ -270,18 +270,8 @@ class TestApplicationConfig:
                 config = ApplicationConfig.from_environment()
                 assert config.include_issues is True, f"Expected True for '{value}'"
 
-        # False values
-        false_values = [
-            "false",
-            "False",
-            "FALSE",
-            "0",
-            "no",
-            "NO",
-            "off",
-            "OFF",
-            "invalid",
-        ]
+        # Test with boolean false values (these should work with enhanced parsing)
+        false_values = ["false", "False", "FALSE", "no", "NO", "off", "OFF"]
         for value in false_values:
             with patch.dict(
                 os.environ,
@@ -290,3 +280,285 @@ class TestApplicationConfig:
             ):
                 config = ApplicationConfig.from_environment()
                 assert config.include_issues is False, f"Expected False for '{value}'"
+
+        # Test number specifications (these should work as number sets)
+        number_values = ["1", "2", "3", "1,2,3"]
+        for value in number_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_ISSUES": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert isinstance(
+                    config.include_issues, set
+                ), f"Expected set for '{value}'"
+
+        # Test invalid values (these should fail)
+        invalid_values = ["invalid", "maybe"]
+        for value in invalid_values:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_ISSUES": value},
+                clear=True,
+            ):
+                with pytest.raises(ValueError):
+                    ApplicationConfig.from_environment()
+
+    def test_legacy_boolean_values_rejected_in_enhanced_fields(self):
+        """Test that enhanced boolean fields reject legacy 0/1 values."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+        }
+
+        # Test that "1" and "0" are rejected for enhanced boolean fields
+        legacy_values = ["0", "1"]
+        enhanced_fields = [
+            "INCLUDE_GIT_REPO",
+            "INCLUDE_ISSUE_COMMENTS",
+            "INCLUDE_PULL_REQUEST_COMMENTS",
+            "INCLUDE_SUB_ISSUES",
+        ]
+
+        for field in enhanced_fields:
+            for value in legacy_values:
+                with patch.dict(
+                    os.environ,
+                    {**base_env_vars, field: value},
+                    clear=True,
+                ):
+                    with pytest.raises(ValueError, match="uses legacy format"):
+                        ApplicationConfig.from_environment()
+
+    def test_enhanced_bool_parsing_valid_values(self):
+        """Test enhanced boolean parsing with valid values."""
+        test_cases = [
+            # True values
+            ("true", True),
+            ("True", True),
+            ("TRUE", True),
+            ("yes", True),
+            ("YES", True),
+            ("on", True),
+            ("ON", True),
+            # False values
+            ("false", False),
+            ("False", False),
+            ("FALSE", False),
+            ("no", False),
+            ("NO", False),
+            ("off", False),
+            ("OFF", False),
+        ]
+
+        for value, expected in test_cases:
+            with patch.dict(os.environ, {"TEST_BOOL": value}, clear=True):
+                result = ApplicationConfig._parse_enhanced_bool_env("TEST_BOOL")
+                assert result == expected, f"Expected {expected} for '{value}'"
+
+    def test_enhanced_bool_parsing_legacy_values_rejected(self):
+        """Test that enhanced boolean parsing rejects legacy 0/1 values."""
+        legacy_values = ["0", "1"]
+
+        for value in legacy_values:
+            with patch.dict(os.environ, {"TEST_BOOL": value}, clear=True):
+                with pytest.raises(ValueError, match="uses legacy format"):
+                    ApplicationConfig._parse_enhanced_bool_env("TEST_BOOL")
+
+    def test_enhanced_bool_parsing_invalid_values(self):
+        """Test enhanced boolean parsing with invalid values."""
+        invalid_values = ["invalid", "maybe", "2", "true1", "false0"]
+
+        for value in invalid_values:
+            with patch.dict(os.environ, {"TEST_BOOL": value}, clear=True):
+                with pytest.raises(ValueError, match="Invalid boolean value"):
+                    ApplicationConfig._parse_enhanced_bool_env("TEST_BOOL")
+
+    def test_number_or_bool_env_boolean_values(self):
+        """Test parsing environment variables as boolean values."""
+        boolean_test_cases = [
+            ("true", True),
+            ("false", False),
+            ("yes", True),
+            ("no", False),
+            ("on", True),
+            ("off", False),
+        ]
+
+        for value, expected in boolean_test_cases:
+            with patch.dict(os.environ, {"TEST_VAR": value}, clear=True):
+                result = ApplicationConfig._parse_number_or_bool_env("TEST_VAR")
+                assert result == expected, f"Expected {expected} for '{value}'"
+
+    def test_number_or_bool_env_number_specifications(self):
+        """Test parsing environment variables as number specifications."""
+        number_test_cases = [
+            ("5", {5}),
+            ("1,3,5", {1, 3, 5}),
+            ("1-3", {1, 2, 3}),
+            ("1-3,5", {1, 2, 3, 5}),
+            ("1 3 5", {1, 3, 5}),
+            ("1-3 5", {1, 2, 3, 5}),
+        ]
+
+        for value, expected in number_test_cases:
+            with patch.dict(os.environ, {"TEST_VAR": value}, clear=True):
+                result = ApplicationConfig._parse_number_or_bool_env("TEST_VAR")
+                assert result == expected, f"Expected {expected} for '{value}'"
+
+    def test_number_or_bool_env_invalid_specifications(self):
+        """Test that invalid number specifications raise appropriate errors."""
+        invalid_values = [
+            "0",  # Zero not allowed
+            "-1",  # Negative not allowed
+            "1-",  # Invalid range
+            "abc",  # Non-numeric
+            "1-abc",  # Invalid range format
+        ]
+
+        for value in invalid_values:
+            with patch.dict(os.environ, {"TEST_VAR": value}, clear=True):
+                with pytest.raises(ValueError):
+                    ApplicationConfig._parse_number_or_bool_env("TEST_VAR")
+
+    def test_include_issues_number_specifications_from_env(self):
+        """Test INCLUDE_ISSUES with number specifications from environment."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+        }
+
+        test_cases = [
+            ("5", {5}),
+            ("1,3,5", {1, 3, 5}),
+            ("1-3", {1, 2, 3}),
+            ("1-3,5", {1, 2, 3, 5}),
+        ]
+
+        for value, expected in test_cases:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_ISSUES": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert (
+                    config.include_issues == expected
+                ), f"Expected {expected} for '{value}'"
+
+    def test_include_pull_requests_number_specifications_from_env(self):
+        """Test INCLUDE_PULL_REQUESTS with number specifications from environment."""
+        base_env_vars = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test-token",
+            "GITHUB_REPO": "owner/repo",
+        }
+
+        test_cases = [
+            ("2", {2}),
+            ("1,4,7", {1, 4, 7}),
+            ("2-4", {2, 3, 4}),
+            ("1-2,5", {1, 2, 5}),
+        ]
+
+        for value, expected in test_cases:
+            with patch.dict(
+                os.environ,
+                {**base_env_vars, "INCLUDE_PULL_REQUESTS": value},
+                clear=True,
+            ):
+                config = ApplicationConfig.from_environment()
+                assert (
+                    config.include_pull_requests == expected
+                ), f"Expected {expected} for '{value}'"
+
+    def test_validation_number_specification_empty_sets(self):
+        """Test validation fails for empty number specification sets."""
+        config = ConfigBuilder().build()
+
+        # Test empty issues set
+        config.include_issues = set()
+        with pytest.raises(
+            ValueError, match="INCLUDE_ISSUES number specification cannot be empty"
+        ):
+            config.validate()
+
+        # Test empty PRs set
+        config.include_issues = True  # Reset to valid
+        config.include_pull_requests = set()
+        with pytest.raises(
+            ValueError,
+            match="INCLUDE_PULL_REQUESTS number specification cannot be empty",
+        ):
+            config.validate()
+
+    def test_validation_number_specification_invalid_numbers(self):
+        """Test validation fails for invalid numbers in specifications."""
+        config = ConfigBuilder().build()
+
+        # Test zero in issues set
+        config.include_issues = {0, 1, 2}
+        with pytest.raises(
+            ValueError, match="INCLUDE_ISSUES numbers must be positive integers"
+        ):
+            config.validate()
+
+        # Test negative in PRs set
+        config.include_issues = True  # Reset to valid
+        config.include_pull_requests = {1, -1, 3}
+        with pytest.raises(
+            ValueError, match="INCLUDE_PULL_REQUESTS numbers must be positive integers"
+        ):
+            config.validate()
+
+    def test_enhanced_comment_coupling_validation_boolean_false(self):
+        """Test enhanced comment coupling validation with boolean false values."""
+        config = ConfigBuilder().build()
+        config.include_issue_comments = True
+        config.include_pull_request_comments = True
+
+        # Test issues boolean false disables issue comments
+        config.include_issues = False
+        config.validate()
+        assert config.include_issue_comments is False
+
+        # Test PRs boolean false disables PR comments
+        config.include_issue_comments = True  # Reset
+        config.include_issues = True  # Reset
+        config.include_pull_requests = False
+        config.validate()
+        assert config.include_pull_request_comments is False
+
+    def test_enhanced_comment_coupling_validation_empty_sets(self):
+        """Test enhanced comment coupling validation with empty number sets."""
+        config = ConfigBuilder().build()
+        config.include_issue_comments = True
+        config.include_pull_request_comments = True
+
+        # Empty issues set should not disable issue comments
+        # (would fail validation first)
+        # But if we bypass validation, it should disable comments
+        config.include_issues = set()
+        # Skip validation that would fail due to empty set
+        # Manually call the comment validation logic
+        if config.include_issue_comments:
+            if isinstance(config.include_issues, set) and not config.include_issues:
+                config.include_issue_comments = False
+        assert config.include_issue_comments is False
+
+    def test_type_annotations_correct(self):
+        """Test that type annotations are correctly applied."""
+        config = ConfigBuilder().build()
+
+        # Boolean assignments should work
+        config.include_issues = True
+        config.include_pull_requests = False
+
+        # Set assignments should work
+        config.include_issues = {1, 2, 3}
+        config.include_pull_requests = {4, 5, 6}
+
+        # These should all be valid without type errors

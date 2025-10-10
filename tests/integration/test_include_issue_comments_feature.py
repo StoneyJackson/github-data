@@ -110,11 +110,11 @@ class TestIncludeIssueCommentsFeature:
 
     def test_boolean_parsing_edge_cases(self):
         """Test various boolean value formats for INCLUDE_ISSUE_COMMENTS."""
-        test_cases = [
+        # Valid enhanced boolean values
+        valid_test_cases = [
             ("true", True),
             ("True", True),
             ("TRUE", True),
-            ("1", True),
             ("yes", True),
             ("YES", True),
             ("on", True),
@@ -122,13 +122,10 @@ class TestIncludeIssueCommentsFeature:
             ("false", False),
             ("False", False),
             ("FALSE", False),
-            ("0", False),
             ("no", False),
             ("NO", False),
             ("off", False),
             ("OFF", False),
-            ("invalid", False),  # Invalid values default to False
-            ("", False),  # Empty string defaults to False
         ]
 
         base_env = {
@@ -138,7 +135,8 @@ class TestIncludeIssueCommentsFeature:
             "DATA_PATH": "/tmp/test",
         }
 
-        for value, expected in test_cases:
+        # Test valid values
+        for value, expected in valid_test_cases:
             env_vars = {**base_env, "INCLUDE_ISSUE_COMMENTS": value}
 
             with patch.dict(os.environ, env_vars, clear=True):
@@ -146,6 +144,22 @@ class TestIncludeIssueCommentsFeature:
                 assert (
                     config.include_issue_comments == expected
                 ), f"Failed for value: '{value}'"
+
+        # Test that legacy values are rejected
+        legacy_values = ["0", "1"]
+        for value in legacy_values:
+            env_vars = {**base_env, "INCLUDE_ISSUE_COMMENTS": value}
+            with patch.dict(os.environ, env_vars, clear=True):
+                with pytest.raises(ValueError, match="uses legacy format"):
+                    ApplicationConfig.from_environment()
+
+        # Test that invalid values are rejected
+        invalid_values = ["invalid", "maybe"]
+        for value in invalid_values:
+            env_vars = {**base_env, "INCLUDE_ISSUE_COMMENTS": value}
+            with patch.dict(os.environ, env_vars, clear=True):
+                with pytest.raises(ValueError, match="Invalid boolean value"):
+                    ApplicationConfig.from_environment()
 
 
 # Use shared fixtures from tests.shared instead of local fixtures
