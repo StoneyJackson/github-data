@@ -34,9 +34,9 @@ def standard_env_vars(minimal_env_vars):
         "INCLUDE_GIT_REPO": "true",
         "INCLUDE_ISSUES": "true",
         "INCLUDE_ISSUE_COMMENTS": "true",
-        "INCLUDE_PULL_REQUESTS": "false",
-        "INCLUDE_PULL_REQUEST_COMMENTS": "false",
-        "INCLUDE_SUB_ISSUES": "false",
+        "INCLUDE_PULL_REQUESTS": "true",
+        "INCLUDE_PULL_REQUEST_COMMENTS": "true",
+        "INCLUDE_SUB_ISSUES": "true",
         "GIT_AUTH_METHOD": "token",
     }
 
@@ -134,9 +134,9 @@ def env_config(**env_overrides):
         "INCLUDE_GIT_REPO": "true",
         "INCLUDE_ISSUES": "true",
         "INCLUDE_ISSUE_COMMENTS": "true",
-        "INCLUDE_PULL_REQUESTS": "false",
-        "INCLUDE_PULL_REQUEST_COMMENTS": "false",
-        "INCLUDE_SUB_ISSUES": "false",
+        "INCLUDE_PULL_REQUESTS": "true",
+        "INCLUDE_PULL_REQUEST_COMMENTS": "true",
+        "INCLUDE_SUB_ISSUES": "true",
         "GIT_AUTH_METHOD": "token",
     }
 
@@ -173,9 +173,9 @@ def make_env_vars(**overrides) -> Dict[str, str]:
         "INCLUDE_GIT_REPO": "true",
         "INCLUDE_ISSUES": "true",
         "INCLUDE_ISSUE_COMMENTS": "true",
-        "INCLUDE_PULL_REQUESTS": "false",
-        "INCLUDE_PULL_REQUEST_COMMENTS": "false",
-        "INCLUDE_SUB_ISSUES": "false",
+        "INCLUDE_PULL_REQUESTS": "true",
+        "INCLUDE_PULL_REQUEST_COMMENTS": "true",
+        "INCLUDE_SUB_ISSUES": "true",
         "GIT_AUTH_METHOD": "token",
     }
 

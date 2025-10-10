@@ -44,9 +44,9 @@ class ConfigBuilder:
             "include_git_repo": True,
             "include_issues": True,
             "include_issue_comments": True,
-            "include_pull_requests": False,
-            "include_pull_request_comments": False,
-            "include_sub_issues": False,
+            "include_pull_requests": True,
+            "include_pull_request_comments": True,
+            "include_sub_issues": True,
             "git_auth_method": "token",
         }
 

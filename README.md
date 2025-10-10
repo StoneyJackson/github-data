@@ -85,9 +85,9 @@ docker run --rm \
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
 | `INCLUDE_ISSUES` | No | Include issues in save/restore operations (default: `true`) |
 | `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in save/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
-| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore (default: `false`) |
-| `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `false`) |
-| `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `false`) |
+| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore (default: `true`) |
+| `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `true`) |
+| `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies

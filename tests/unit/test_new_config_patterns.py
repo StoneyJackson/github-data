@@ -27,7 +27,7 @@ class TestConfigBuilder:
         assert config.github_repo == "test-owner/test-repo"
         assert config.data_path == "/tmp/test-data"
         assert config.include_issues is True
-        assert config.include_pull_requests is False
+        assert config.include_pull_requests is True
 
     def test_fluent_api_chaining(self):
         """Test fluent API allows method chaining."""
@@ -132,7 +132,7 @@ class TestEnvFixtures:
         """Test standard environment variables fixture."""
         assert standard_env_vars["OPERATION"] == "save"
         assert standard_env_vars["INCLUDE_ISSUES"] == "true"
-        assert standard_env_vars["INCLUDE_PULL_REQUESTS"] == "false"
+        assert standard_env_vars["INCLUDE_PULL_REQUESTS"] == "true"
         assert len(standard_env_vars) > 3  # Includes defaults
 
     def test_pr_enabled_env_vars_fixture(self, pr_enabled_env_vars):
