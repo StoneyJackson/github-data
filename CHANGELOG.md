@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/StoneyJackson/github-data/compare/v1.5.0...v1.6.0) (2025-10-10)
+
+
+### Features
+
+* enable comprehensive data processing by default ([#26](https://github.com/StoneyJackson/github-data/issues/26)) ([09497cd](https://github.com/StoneyJackson/github-data/commit/09497cdefcc6474a6c91e7f5b9f080d21e0efbb3))
+
 # [1.5.0](https://github.com/StoneyJackson/github-data/compare/v1.4.0...v1.5.0) (2025-10-09)
 
 
