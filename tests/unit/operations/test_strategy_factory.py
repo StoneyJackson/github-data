@@ -363,7 +363,13 @@ class TestStrategyFactoryPullRequestComments:
         entities = StrategyFactory.get_enabled_entities(config_with_pr_comments_only)
 
         # PR comments should be excluded due to dependency validation
-        expected_entities = ["labels", "issues", "comments", "sub_issues", "git_repository"]
+        expected_entities = [
+            "labels",
+            "issues",
+            "comments",
+            "sub_issues",
+            "git_repository",
+        ]
         assert entities == expected_entities
 
     def test_pr_comment_dependency_validation_in_entity_list(self):
