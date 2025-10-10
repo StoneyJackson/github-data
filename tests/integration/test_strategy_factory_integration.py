@@ -2,7 +2,7 @@ import pytest
 from src.operations.strategy_factory import StrategyFactory
 from src.operations.save.orchestrator import StrategyBasedSaveOrchestrator
 from src.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
-from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigFactory
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -15,39 +15,13 @@ pytestmark = [
 @pytest.fixture
 def base_config():
     """Base configuration for testing."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=True,
-        include_pull_requests=False,
-        include_pull_request_comments=True,
-        include_sub_issues=False,
-        git_auth_method="token",
-    )
+    return ConfigFactory.create_save_config()
 
 
 @pytest.fixture
 def config_with_comments_disabled():
     """Configuration with issue comments disabled."""
-    return ApplicationConfig(
-        operation="save",
-        github_token="test-token",
-        github_repo="test-owner/test-repo",
-        data_path="/tmp/test-data",
-        label_conflict_strategy="fail-if-existing",
-        include_git_repo=True,
-        include_issues=True,
-        include_issue_comments=False,
-        include_pull_requests=False,
-        include_pull_request_comments=False,
-        include_sub_issues=False,
-        git_auth_method="token",
-    )
+    return ConfigFactory.create_save_config(include_issue_comments=False)
 
 
 class TestStrategyFactoryIntegration:

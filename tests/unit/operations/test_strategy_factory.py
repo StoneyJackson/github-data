@@ -1,5 +1,6 @@
 from unittest.mock import Mock
 from src.operations.strategy_factory import StrategyFactory
+from tests.shared.builders import ConfigFactory
 
 # Import fixtures from shared fixtures
 pytest_plugins = ["tests.shared.fixtures.config_fixtures"]
@@ -365,22 +366,10 @@ class TestStrategyFactoryPullRequestComments:
 
     def test_pr_comment_dependency_validation_in_entity_list(self):
         """Test that entity list properly validates PR comment dependencies."""
-        from src.config.settings import ApplicationConfig
-
         # Create config with invalid combination
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test-token",
-            github_repo="test-owner/test-repo",
-            data_path="/tmp/test-data",
-            label_conflict_strategy="fail-if-existing",
-            include_git_repo=True,
-            include_issues=True,
-            include_issue_comments=True,
+        config = ConfigFactory.create_save_config(
             include_pull_requests=False,  # PRs disabled
             include_pull_request_comments=True,  # But PR comments enabled
-            include_sub_issues=False,
-            git_auth_method="token",
         )
 
         entities = StrategyFactory.get_enabled_entities(config)

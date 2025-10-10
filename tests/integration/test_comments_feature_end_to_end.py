@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from src.main import main
+from tests.shared.builders import ConfigBuilder
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -25,14 +26,14 @@ class TestCommentsFeatureEndToEnd:
         data_path.mkdir()
 
         # Mock environment for save operation
-        save_env = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(data_path),
-            "INCLUDE_ISSUE_COMMENTS": "true",
-            "INCLUDE_GIT_REPO": "false",
-        }
+        save_env = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_data_path(str(data_path))
+            .with_issue_comments(True)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, save_env, clear=True):
             with patch("src.github.create_github_service") as mock_github:
@@ -50,14 +51,15 @@ class TestCommentsFeatureEndToEnd:
                 assert len(comments_data) > 0
 
         # Mock environment for restore operation
-        restore_env = {
-            "OPERATION": "restore",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo-new",
-            "DATA_PATH": str(data_path),
-            "INCLUDE_ISSUE_COMMENTS": "true",
-            "INCLUDE_GIT_REPO": "false",
-        }
+        restore_env = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_repo("owner/repo-new")
+            .with_data_path(str(data_path))
+            .with_issue_comments(True)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, restore_env, clear=True):
             with patch("src.github.create_github_service") as mock_github:
@@ -77,14 +79,14 @@ class TestCommentsFeatureEndToEnd:
         data_path = Path(temp_data_dir) / "backup"
         data_path.mkdir()
 
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(data_path),
-            "INCLUDE_ISSUE_COMMENTS": "false",
-            "INCLUDE_GIT_REPO": "false",
-        }
+        env_vars = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_data_path(str(data_path))
+            .with_issue_comments(False)
+            .with_git_repo(False)
+            .as_env_dict()
+        )
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch("src.github.create_github_service") as mock_github:

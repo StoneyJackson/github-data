@@ -2,6 +2,7 @@ import pytest
 import os
 from unittest.mock import patch
 from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigBuilder
 
 # Import fixtures from shared fixtures
 pytest_plugins = ["tests.shared.fixtures.config_fixtures"]
@@ -256,12 +257,7 @@ class TestApplicationConfig:
 
     def test_include_issues_boolean_parsing_edge_cases(self):
         """Test INCLUDE_ISSUES with various boolean representations."""
-        base_env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": "/tmp/test",
-        }
+        base_env_vars = ConfigBuilder().with_data_path("/tmp/test").as_env_dict()
 
         # True values
         true_values = ["true", "True", "TRUE", "1", "yes", "YES", "on", "ON"]

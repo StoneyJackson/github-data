@@ -51,6 +51,32 @@ from .support.boundary_factory import boundary_factory
 from .support.boundary_with_data import boundary_with_data
 from .support.storage_service_for_temp_dir import storage_service_for_temp_dir
 
+# Configuration Fixtures
+from .config_fixtures import (
+    base_config,
+    config_with_comments_disabled,
+    config_with_minimal_features,
+    restore_config,
+    config_with_pr_comments_only,
+    config_with_prs_no_comments,
+    config_with_prs_and_comments,
+)
+
+# Environment Variable Fixtures
+from .env_fixtures import (
+    minimal_env_vars,
+    standard_env_vars,
+    pr_enabled_env_vars,
+    minimal_features_env_vars,
+    all_features_env_vars,
+    restore_env_vars,
+    issues_only_env_vars,
+    config_builder,
+    config_factory,
+    env_config_context,
+    make_env_vars,
+)
+
 # Export all fixtures
 __all__ = [
     # Core Infrastructure Fixtures
@@ -86,4 +112,24 @@ __all__ = [
     "boundary_factory",
     "boundary_with_data",
     "storage_service_for_temp_dir",
+    # Configuration Fixtures
+    "base_config",
+    "config_with_comments_disabled",
+    "config_with_minimal_features",
+    "restore_config",
+    "config_with_pr_comments_only",
+    "config_with_prs_no_comments",
+    "config_with_prs_and_comments",
+    # Environment Variable Fixtures
+    "minimal_env_vars",
+    "standard_env_vars",
+    "pr_enabled_env_vars",
+    "minimal_features_env_vars",
+    "all_features_env_vars",
+    "restore_env_vars",
+    "issues_only_env_vars",
+    "config_builder",
+    "config_factory",
+    "env_config_context",
+    "make_env_vars",
 ]

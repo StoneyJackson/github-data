@@ -43,6 +43,9 @@ pytest_plugins = [
     "tests.shared.fixtures.support.boundary_factory",
     "tests.shared.fixtures.support.boundary_with_data",
     "tests.shared.fixtures.support.storage_service_for_temp_dir",
+    # Configuration Fixtures
+    "tests.shared.fixtures.env_fixtures",
+    "tests.shared.fixtures.config_fixtures",
 ]
 
 # Global test metrics collection

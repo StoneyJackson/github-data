@@ -3,6 +3,7 @@ import os
 from unittest.mock import patch
 from src.main import main
 from src.config.settings import ApplicationConfig
+from tests.shared.builders import ConfigBuilder
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -19,14 +20,15 @@ class TestIncludePullRequestCommentsFeature:
         self, temp_data_dir, github_service_mock
     ):
         """Test that PR comments are included by default in save operations."""
-        env_vars = {
-            "OPERATION": "save",
-            "GITHUB_TOKEN": "test-token",
-            "GITHUB_REPO": "owner/repo",
-            "DATA_PATH": str(temp_data_dir),
-            "INCLUDE_PULL_REQUESTS": "true",
-            # INCLUDE_PULL_REQUEST_COMMENTS not set - should default to True
-        }
+        env_vars = (
+            ConfigBuilder()
+            .with_data_path(str(temp_data_dir))
+            .with_pull_requests(True)
+            .as_env_dict()
+        )
+        # INCLUDE_PULL_REQUEST_COMMENTS defaults to False in ConfigBuilder,
+        # but test expects True
+        env_vars["INCLUDE_PULL_REQUEST_COMMENTS"] = "true"
 
         with patch.dict(os.environ, env_vars, clear=True):
             with patch(
