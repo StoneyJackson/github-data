@@ -179,7 +179,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-01T11:00:00Z",
                     "updated_at": "2023-01-01T11:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/10#issuecomment-4001",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/10#issuecomment-4001"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/10",
                 },
                 {
@@ -193,7 +195,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-01T12:00:00Z",
                     "updated_at": "2023-01-01T12:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/10#issuecomment-4002",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/10#issuecomment-4002"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/10",
                 },
                 # Comments for issue 20
@@ -208,7 +212,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-02T11:00:00Z",
                     "updated_at": "2023-01-02T11:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/20#issuecomment-4003",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/20#issuecomment-4003"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/20",
                 },
                 {
@@ -222,7 +228,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-02T12:00:00Z",
                     "updated_at": "2023-01-02T12:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/20#issuecomment-4004",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/20#issuecomment-4004"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/20",
                 },
                 # Comments for issue 30
@@ -237,7 +245,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-03T11:00:00Z",
                     "updated_at": "2023-01-03T11:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/30#issuecomment-4005",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/30#issuecomment-4005"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/30",
                 },
                 {
@@ -251,7 +261,9 @@ class TestCommentCoupling:
                     },
                     "created_at": "2023-01-03T12:00:00Z",
                     "updated_at": "2023-01-03T12:00:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/30#issuecomment-4006",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/30#issuecomment-4006"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/30",
                 },
             ],
@@ -262,8 +274,12 @@ class TestCommentCoupling:
                     "body": "Comment 1 on PR 100",
                     "created_at": "2023-01-04T11:00:00Z",
                     "updated_at": "2023-01-04T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5001",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/100",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5001"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/100"
+                    ),
                     "pull_request_number": 100,
                 },
                 {
@@ -271,8 +287,12 @@ class TestCommentCoupling:
                     "body": "Comment 2 on PR 100",
                     "created_at": "2023-01-04T12:00:00Z",
                     "updated_at": "2023-01-04T12:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5002",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/100",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5002"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/100"
+                    ),
                     "pull_request_number": 100,
                 },
                 # Comments for PR 200
@@ -281,8 +301,12 @@ class TestCommentCoupling:
                     "body": "Comment 1 on PR 200",
                     "created_at": "2023-01-05T11:00:00Z",
                     "updated_at": "2023-01-05T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5003",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/200",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5003"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/200"
+                    ),
                     "pull_request_number": 200,
                 },
                 {
@@ -290,8 +314,12 @@ class TestCommentCoupling:
                     "body": "Comment 1 on PR 300",
                     "created_at": "2023-01-06T11:00:00Z",
                     "updated_at": "2023-01-06T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5004",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/300",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5004"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/300"
+                    ),
                     "pull_request_number": 300,
                 },
             ],
@@ -379,7 +407,9 @@ class TestCommentCoupling:
     def test_issue_comments_disabled_overrides_selection(
         self, mock_github_service, storage_service, tmp_path
     ):
-        """Verify INCLUDE_ISSUE_COMMENTS=false disables comments regardless of issue selection."""
+        """Verify INCLUDE_ISSUE_COMMENTS=false disables comments regardless of issue
+        selection.
+        """
         # Configure to save issue #10 but with comments disabled
         config = ApplicationConfig(
             operation="save",
@@ -473,7 +503,9 @@ class TestCommentCoupling:
     def test_pr_comments_disabled_overrides_selection(
         self, mock_github_service, storage_service, tmp_path
     ):
-        """Verify INCLUDE_PULL_REQUEST_COMMENTS=false disables comments regardless of PR selection."""
+        """Verify INCLUDE_PULL_REQUEST_COMMENTS=false disables comments regardless of
+        PR selection.
+        """
         # Configure to save PR #200 but with comments disabled
         config = ApplicationConfig(
             operation="save",
@@ -589,7 +621,8 @@ class TestCommentCoupling:
             call[0][1] for call in comment_calls
         ]  # Extract issue number from args
 
-        # Should have 2 comments for issue 110 (mapped from 10) and 2 comments for issue 130 (mapped from 30)
+        # Should have 2 comments for issue 110 (mapped from 10) and 2 comments for
+        # issue 130 (mapped from 30)
         assert created_issue_numbers.count(110) == 2
         assert created_issue_numbers.count(130) == 2
 
@@ -597,7 +630,8 @@ class TestCommentCoupling:
         self, mock_github_service, storage_service, tmp_path
     ):
         """Test comment coupling with both issues and PRs selected."""
-        # Configure to save mixed selection: issue #20, PR #200, with both comment types enabled
+        # Configure to save mixed selection: issue #20, PR #200, with both comment
+        # types enabled
         config = ApplicationConfig(
             operation="save",
             github_token="test_token",
@@ -713,7 +747,8 @@ class TestCommentCoupling:
             include_issues=False,
             include_issue_comments=False,
             include_pull_requests=False,  # No PRs selected
-            include_pull_request_comments=True,  # PR comments enabled but should be ignored
+            include_pull_request_comments=True,  # PR comments enabled but should be
+            # ignored
             include_sub_issues=False,
             git_auth_method="token",
         )

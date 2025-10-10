@@ -5,7 +5,6 @@ for the selective issue/PR numbers feature.
 """
 
 import json
-import logging
 from unittest.mock import Mock
 
 import pytest
@@ -71,9 +70,17 @@ class TestSelectiveEdgeCases:
                         },
                         "created_at": f"2023-01-{i:02d}T1{j}:00:00Z",
                         "updated_at": f"2023-01-{i:02d}T1{j}:00:00Z",
-                        "url": f"https://api.github.com/repos/owner/repo/issues/comments/{4000 + (i * 10) + j}",
-                        "html_url": f"https://github.com/owner/repo/issues/{i}#issuecomment-{4000 + (i * 10) + j}",
-                        "issue_url": f"https://api.github.com/repos/owner/repo/issues/{i}",
+                        "url": (
+                            f"https://api.github.com/repos/owner/repo/issues/comments/"
+                            f"{4000 + (i * 10) + j}"
+                        ),
+                        "html_url": (
+                            f"https://github.com/owner/repo/issues/{i}#issuecomment-"
+                            f"{4000 + (i * 10) + j}"
+                        ),
+                        "issue_url": (
+                            f"https://api.github.com/repos/owner/repo/issues/{i}"
+                        ),
                     }
                 )
 
@@ -123,9 +130,17 @@ class TestSelectiveEdgeCases:
                     },
                     "created_at": f"2023-02-{(i % 28) + 1:02d}T11:00:00Z",
                     "updated_at": f"2023-02-{(i % 28) + 1:02d}T11:00:00Z",
-                    "url": f"https://api.github.com/repos/owner/repo/pulls/comments/{7000 + i}",
-                    "html_url": f"https://github.com/owner/repo/pulls/{i}#issuecomment-{7000 + i}",
-                    "pull_request_url": f"https://api.github.com/repos/owner/repo/pulls/{i}",
+                    "url": (
+                        f"https://api.github.com/repos/owner/repo/pulls/comments/"
+                        f"{7000 + i}"
+                    ),
+                    "html_url": (
+                        f"https://github.com/owner/repo/pulls/{i}#issuecomment-"
+                        f"{7000 + i}"
+                    ),
+                    "pull_request_url": (
+                        f"https://api.github.com/repos/owner/repo/pulls/{i}"
+                    ),
                     "pull_request_number": i,
                 }
             )

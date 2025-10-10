@@ -102,7 +102,10 @@ class TestBackwardCompatibility:
                             "name": "enhancement",
                             "color": "a2eeef",
                             "description": "New feature or request",
-                            "url": "https://api.github.com/repos/owner/repo/labels/enhancement",
+                            "url": (
+                                "https://api.github.com/repos/owner/repo/labels/"
+                                "enhancement"
+                            ),
                             "id": 1002,
                         }
                     ],
@@ -192,8 +195,12 @@ class TestBackwardCompatibility:
                     },
                     "created_at": "2023-01-01T11:00:00Z",
                     "updated_at": "2023-01-01T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4001",
-                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4001",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4001"
+                    ),
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/1#issuecomment-4001"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                 },
                 {
@@ -207,8 +214,12 @@ class TestBackwardCompatibility:
                     },
                     "created_at": "2023-01-01T12:00:00Z",
                     "updated_at": "2023-01-01T12:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4002",
-                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4002",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4002"
+                    ),
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/1#issuecomment-4002"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                 },
                 {
@@ -222,8 +233,12 @@ class TestBackwardCompatibility:
                     },
                     "created_at": "2023-01-02T11:00:00Z",
                     "updated_at": "2023-01-02T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4003",
-                    "html_url": "https://github.com/owner/repo/issues/2#issuecomment-4003",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4003"
+                    ),
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/2#issuecomment-4003"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
                 },
             ],
@@ -239,9 +254,15 @@ class TestBackwardCompatibility:
                     },
                     "created_at": "2023-01-06T11:00:00Z",
                     "updated_at": "2023-01-06T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5001",
-                    "html_url": "https://github.com/owner/repo/pulls/10#issuecomment-5001",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/10",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5001"
+                    ),
+                    "html_url": (
+                        "https://github.com/owner/repo/pulls/10#issuecomment-5001"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/10"
+                    ),
                     "pull_request_number": 10,
                 },
                 {
@@ -255,9 +276,15 @@ class TestBackwardCompatibility:
                     },
                     "created_at": "2023-01-07T11:00:00Z",
                     "updated_at": "2023-01-07T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5002",
-                    "html_url": "https://github.com/owner/repo/pulls/11#issuecomment-5002",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/11",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5002"
+                    ),
+                    "html_url": (
+                        "https://github.com/owner/repo/pulls/11#issuecomment-5002"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/11"
+                    ),
                     "pull_request_number": 11,
                 },
             ],
@@ -689,7 +716,10 @@ class TestBackwardCompatibility:
 
                 assert (
                     config.include_issues == expected_result
-                ), f"Expected {env_value} to parse as {expected_result}, got {config.include_issues}"
+                ), (
+                    f"Expected {env_value} to parse as {expected_result}, "
+                    f"got {config.include_issues}"
+                )
 
     def test_legacy_environment_variables_error_guidance(self):
         """Test that legacy "0"/"1" values provide helpful error messages."""

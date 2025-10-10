@@ -125,15 +125,11 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         # Store PR number mapping for comments
         if "pr_number_mapping" not in context:
             context["pr_number_mapping"] = {}
-        context["pr_number_mapping"][
-            created_data["original_number"]
-        ] = pr_number
+        context["pr_number_mapping"][created_data["original_number"]] = pr_number
 
         # Handle closed/merged state
         if original_state in ["closed", "merged"]:
-            self._handle_pr_state(
-                github_service, repo_name, pr_number, original_state
-            )
+            self._handle_pr_state(github_service, repo_name, pr_number, original_state)
 
     def resolve_conflicts(
         self,
@@ -167,14 +163,10 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             if original_state == "closed":
                 # Note: close_pull_request method not available in
                 # RepositoryService protocol
-                print(
-                    f"Warning: Cannot restore closed state for PR #{pr_number}"
-                )
+                print(f"Warning: Cannot restore closed state for PR #{pr_number}")
             elif original_state == "merged":
                 # Note: Cannot actually merge PRs via API after creation
-                print(
-                    f"Warning: Cannot restore merged state for PR #{pr_number}"
-                )
+                print(f"Warning: Cannot restore merged state for PR #{pr_number}")
         except Exception as e:
             print(f"Warning: Failed to set PR #{pr_number} state: {e}")
 

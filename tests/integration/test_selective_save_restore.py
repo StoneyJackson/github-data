@@ -77,7 +77,10 @@ class TestSelectiveSaveRestore:
                             "name": "enhancement",
                             "color": "a2eeef",
                             "description": "New feature or request",
-                            "url": "https://api.github.com/repos/owner/repo/labels/enhancement",
+                            "url": (
+                                "https://api.github.com/repos/owner/repo/labels/"
+                                "enhancement"
+                            ),
                             "id": 1002,
                         }
                     ],
@@ -183,7 +186,9 @@ class TestSelectiveSaveRestore:
                     "body": "This is a critical bug",
                     "created_at": "2023-01-01T11:00:00Z",
                     "updated_at": "2023-01-01T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4001",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4001"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                 },
                 {
@@ -191,7 +196,9 @@ class TestSelectiveSaveRestore:
                     "body": "I can reproduce this issue",
                     "created_at": "2023-01-01T12:00:00Z",
                     "updated_at": "2023-01-01T12:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4002",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4002"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                 },
                 {
@@ -199,7 +206,9 @@ class TestSelectiveSaveRestore:
                     "body": "Great idea for the dashboard",
                     "created_at": "2023-01-02T11:00:00Z",
                     "updated_at": "2023-01-02T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4003",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4003"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
                 },
                 {
@@ -207,7 +216,9 @@ class TestSelectiveSaveRestore:
                     "body": "Performance looks good now",
                     "created_at": "2023-01-03T11:00:00Z",
                     "updated_at": "2023-01-03T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4004",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4004"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/3",
                 },
                 {
@@ -215,7 +226,9 @@ class TestSelectiveSaveRestore:
                     "body": "Documentation needs update",
                     "created_at": "2023-01-04T11:00:00Z",
                     "updated_at": "2023-01-04T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4005",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4005"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/4",
                 },
                 {
@@ -223,7 +236,9 @@ class TestSelectiveSaveRestore:
                     "body": "Security is important",
                     "created_at": "2023-01-05T11:00:00Z",
                     "updated_at": "2023-01-05T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/issues/comments/4006",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/issues/comments/4006"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/5",
                 },
             ],
@@ -233,8 +248,12 @@ class TestSelectiveSaveRestore:
                     "body": "Code looks good",
                     "created_at": "2023-01-06T11:00:00Z",
                     "updated_at": "2023-01-06T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5001",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/10",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5001"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/10"
+                    ),
                     "pull_request_number": 10,
                 },
                 {
@@ -242,8 +261,12 @@ class TestSelectiveSaveRestore:
                     "body": "Nice dashboard implementation",
                     "created_at": "2023-01-07T11:00:00Z",
                     "updated_at": "2023-01-07T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5002",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/11",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5002"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/11"
+                    ),
                     "pull_request_number": 11,
                 },
                 {
@@ -251,8 +274,12 @@ class TestSelectiveSaveRestore:
                     "body": "Performance improvements look solid",
                     "created_at": "2023-01-08T11:00:00Z",
                     "updated_at": "2023-01-08T11:00:00Z",
-                    "url": "https://api.github.com/repos/owner/repo/pulls/comments/5003",
-                    "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/12",
+                    "url": (
+                        "https://api.github.com/repos/owner/repo/pulls/comments/5003"
+                    ),
+                    "pull_request_url": (
+                        "https://api.github.com/repos/owner/repo/pulls/12"
+                    ),
                     "pull_request_number": 12,
                 },
             ],

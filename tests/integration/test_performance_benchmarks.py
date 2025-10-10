@@ -92,7 +92,10 @@ class TestPerformanceBenchmarks:
                     "id": 2000000 + i,
                     "number": i,
                     "title": f"Performance Test Issue {i}",
-                    "body": f"This is a performance test issue #{i} with substantial body content. "
+                    "body": (
+                        f"This is a performance test issue #{i} with substantial body "
+                        f"content. "
+                    )
                     * 10,
                     "state": "open" if i % 3 != 0 else "closed",
                     "state_reason": None if i % 3 != 0 else "completed",
@@ -107,15 +110,23 @@ class TestPerformanceBenchmarks:
                             {
                                 "login": f"assignee{(i % 5)}",
                                 "id": 4000000 + (i % 5),
-                                "avatar_url": f"https://github.com/assignee{(i % 5)}.png",
-                                "html_url": f"https://github.com/assignee{(i % 5)}",
+                                "avatar_url": (
+                                    f"https://github.com/assignee{(i % 5)}.png"
+                                ),
+                                "html_url": (
+                                    f"https://github.com/assignee{(i % 5)}"
+                                ),
                             }
                         ]
                         if i % 4 == 0
                         else []
                     ),
-                    "created_at": f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T10:00:00Z",
-                    "updated_at": f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T10:00:00Z",
+                    "created_at": (
+                        f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T10:00:00Z"
+                    ),
+                    "updated_at": (
+                        f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T10:00:00Z"
+                    ),
                     "closed_at": (
                         None
                         if i % 3 != 0
@@ -129,7 +140,10 @@ class TestPerformanceBenchmarks:
                             "name": f"label{j}",
                             "color": f"{j:06x}",
                             "description": f"Label {j} description",
-                            "url": f"https://api.github.com/repos/owner/repo/labels/label{j}",
+                            "url": (
+                                f"https://api.github.com/repos/owner/repo/labels/"
+                                f"label{j}"
+                            ),
                             "id": 1000000 + j,
                         }
                         for j in range(i % 3)  # 0-2 labels per issue
@@ -149,11 +163,25 @@ class TestPerformanceBenchmarks:
                             "avatar_url": f"https://github.com/commenter{j % 3}.png",
                             "html_url": f"https://github.com/commenter{j % 3}",
                         },
-                        "created_at": f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T1{j + 1}:00:00Z",
-                        "updated_at": f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T1{j + 1}:00:00Z",
-                        "url": f"https://api.github.com/repos/owner/repo/issues/comments/{5000000 + (i * 10) + j}",
-                        "html_url": f"https://github.com/owner/repo/issues/{i}#issuecomment-{5000000 + (i * 10) + j}",
-                        "issue_url": f"https://api.github.com/repos/owner/repo/issues/{i}",
+                        "created_at": (
+                            f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T1"
+                            f"{j + 1}:00:00Z"
+                        ),
+                        "updated_at": (
+                            f"2023-{(i % 12) + 1:02d}-{(i % 28) + 1:02d}T1"
+                            f"{j + 1}:00:00Z"
+                        ),
+                        "url": (
+                            f"https://api.github.com/repos/owner/repo/issues/comments/"
+                            f"{5000000 + (i * 10) + j}"
+                        ),
+                        "html_url": (
+                            f"https://github.com/owner/repo/issues/{i}#issuecomment-"
+                            f"{5000000 + (i * 10) + j}"
+                        ),
+                        "issue_url": (
+                            f"https://api.github.com/repos/owner/repo/issues/{i}"
+                        ),
                     }
                 )
 
@@ -164,7 +192,10 @@ class TestPerformanceBenchmarks:
                     "id": 7000000 + i,
                     "number": i,
                     "title": f"Performance Test PR {i}",
-                    "body": f"This is a performance test PR #{i} with substantial body content. "
+                    "body": (
+                        f"This is a performance test PR #{i} with substantial body "
+                        f"content. "
+                    )
                     * 8,
                     "state": "open" if i % 4 != 0 else "merged",
                     "user": {
@@ -174,17 +205,29 @@ class TestPerformanceBenchmarks:
                         "html_url": f"https://github.com/pruser{i % 7}",
                     },
                     "assignees": [],
-                    "created_at": f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T10:00:00Z",
-                    "updated_at": f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T10:00:00Z",
+                    "created_at": (
+                        f"2023-{((i - 1000) % 12) + 1:02d}-"
+                        f"{((i - 1000) % 28) + 1:02d}T10:00:00Z"
+                    ),
+                    "updated_at": (
+                        f"2023-{((i - 1000) % 12) + 1:02d}-"
+                        f"{((i - 1000) % 28) + 1:02d}T10:00:00Z"
+                    ),
                     "closed_at": (
                         None
                         if i % 4 != 0
-                        else f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T12:00:00Z"
+                        else (
+                            f"2023-{((i - 1000) % 12) + 1:02d}-"
+                            f"{((i - 1000) % 28) + 1:02d}T12:00:00Z"
+                        )
                     ),
                     "merged_at": (
                         None
                         if i % 4 != 0
-                        else f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T12:00:00Z"
+                        else (
+                            f"2023-{((i - 1000) % 12) + 1:02d}-"
+                            f"{((i - 1000) % 28) + 1:02d}T12:00:00Z"
+                        )
                     ),
                     "url": f"https://api.github.com/repos/owner/repo/pulls/{i}",
                     "html_url": f"https://github.com/owner/repo/pulls/{i}",
@@ -207,11 +250,25 @@ class TestPerformanceBenchmarks:
                             "avatar_url": f"https://github.com/prcommenter{j % 4}.png",
                             "html_url": f"https://github.com/prcommenter{j % 4}",
                         },
-                        "created_at": f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T1{j + 1}:00:00Z",
-                        "updated_at": f"2023-{((i - 1000) % 12) + 1:02d}-{((i - 1000) % 28) + 1:02d}T1{j + 1}:00:00Z",
-                        "url": f"https://api.github.com/repos/owner/repo/pulls/comments/{9000000 + (i * 10) + j}",
-                        "html_url": f"https://github.com/owner/repo/pulls/{i}#issuecomment-{9000000 + (i * 10) + j}",
-                        "pull_request_url": f"https://api.github.com/repos/owner/repo/pulls/{i}",
+                        "created_at": (
+                            f"2023-{((i - 1000) % 12) + 1:02d}-"
+                            f"{((i - 1000) % 28) + 1:02d}T1{j + 1}:00:00Z"
+                        ),
+                        "updated_at": (
+                            f"2023-{((i - 1000) % 12) + 1:02d}-"
+                            f"{((i - 1000) % 28) + 1:02d}T1{j + 1}:00:00Z"
+                        ),
+                        "url": (
+                            f"https://api.github.com/repos/owner/repo/pulls/comments/"
+                            f"{9000000 + (i * 10) + j}"
+                        ),
+                        "html_url": (
+                            f"https://github.com/owner/repo/pulls/{i}#issuecomment-"
+                            f"{9000000 + (i * 10) + j}"
+                        ),
+                        "pull_request_url": (
+                            f"https://api.github.com/repos/owner/repo/pulls/{i}"
+                        ),
                         "pull_request_number": i,
                     }
                 )
@@ -222,7 +279,9 @@ class TestPerformanceBenchmarks:
                     "name": f"perf-label-{i}",
                     "color": f"{i:06x}",
                     "description": f"Performance test label {i}",
-                    "url": f"https://api.github.com/repos/owner/repo/labels/perf-label-{i}",
+                    "url": (
+                        f"https://api.github.com/repos/owner/repo/labels/perf-label-{i}"
+                    ),
                     "id": 2000000 + i,
                 }
                 for i in range(10)
