@@ -31,7 +31,9 @@ class StrategyFactory:
             strategies.append(IssuesSaveStrategy(config.include_issues))
 
         if StrategyFactory._is_enabled(config.include_issues) and config.include_issue_comments:
-            strategies.append(CommentsSaveStrategy())
+            # Determine if we're in selective mode
+            selective_mode = isinstance(config.include_issues, set)
+            strategies.append(CommentsSaveStrategy(selective_mode))
         elif config.include_issue_comments and not StrategyFactory._is_enabled(config.include_issues):
             # Warn if issue comments are enabled but issues are not
             logging.warning(
@@ -50,8 +52,10 @@ class StrategyFactory:
                 from src.operations.save.strategies.pr_comments_strategy import (
                     PullRequestCommentsSaveStrategy,
                 )
-
-                strategies.append(PullRequestCommentsSaveStrategy())
+                
+                # Determine if we're in selective mode
+                selective_mode = isinstance(config.include_pull_requests, set)
+                strategies.append(PullRequestCommentsSaveStrategy(selective_mode))
         elif config.include_pull_request_comments:
             # Warn if PR comments are enabled but PRs are not
             logging.warning(
