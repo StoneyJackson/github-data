@@ -114,7 +114,7 @@ class TestConfigPatternValidation:
         custom_save = ConfigFactory.create_save_config(
             github_repo="custom/repo",
             include_pull_requests=True,
-            data_path="/custom/path"
+            data_path="/custom/path",
         )
 
         assert custom_save.operation == "save"  # Default preserved
@@ -129,10 +129,18 @@ class TestConfigPatternValidation:
 
         # Verify all ApplicationConfig fields are accessible
         fields_to_check = [
-            'operation', 'github_token', 'github_repo', 'data_path',
-            'label_conflict_strategy', 'include_git_repo', 'include_issues',
-            'include_issue_comments', 'include_pull_requests',
-            'include_pull_request_comments', 'include_sub_issues', 'git_auth_method'
+            "operation",
+            "github_token",
+            "github_repo",
+            "data_path",
+            "label_conflict_strategy",
+            "include_git_repo",
+            "include_issues",
+            "include_issue_comments",
+            "include_pull_requests",
+            "include_pull_request_comments",
+            "include_sub_issues",
+            "git_auth_method",
         ]
 
         for field in fields_to_check:
@@ -140,9 +148,9 @@ class TestConfigPatternValidation:
                 config, field
             ), f"ApplicationConfig field {field} is not accessible"
             # Ensure the field has a value (not None)
-            assert getattr(
-                config, field
-            ) is not None, f"ApplicationConfig field {field} is None"
+            assert (
+                getattr(config, field) is not None
+            ), f"ApplicationConfig field {field} is None"
 
     def test_future_environment_variable_compatibility(self):
         """Test that patterns support easy addition of new environment variables."""

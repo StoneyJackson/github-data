@@ -39,7 +39,7 @@ class TestMain:
             data_path="/data",
             include_git_repo=False,
             include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_request_comments=True,
         )
         mock_config_from_env.return_value = mock_config
 
@@ -76,7 +76,7 @@ class TestMain:
             data_path="/data",
             include_git_repo=False,
             include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_request_comments=True,
         )
         mock_config_from_env.return_value = mock_config
 
@@ -103,7 +103,7 @@ class TestMain:
             data_path="/data",
             include_git_repo=False,
             include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_request_comments=True,
         )
         mock_config_from_env.return_value = mock_config
 

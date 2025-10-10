@@ -26,8 +26,7 @@ def config_with_minimal_features():
 def restore_config():
     """Configuration for restore operations."""
     return ConfigFactory.create_restore_config(
-        include_pull_requests=True,
-        include_pull_request_comments=True
+        include_pull_requests=True, include_pull_request_comments=True
     )
 
 
@@ -35,8 +34,7 @@ def restore_config():
 def config_with_pr_comments_only():
     """Configuration with PR comments enabled but PRs disabled (invalid)."""
     return ConfigFactory.create_save_config(
-        include_pull_requests=False,
-        include_pull_request_comments=True
+        include_pull_requests=False, include_pull_request_comments=True
     )
 
 
@@ -44,8 +42,7 @@ def config_with_pr_comments_only():
 def config_with_prs_no_comments():
     """Configuration with pull requests enabled but comments disabled."""
     return ConfigFactory.create_save_config(
-        include_pull_requests=True,
-        include_pull_request_comments=False
+        include_pull_requests=True, include_pull_request_comments=False
     )
 
 

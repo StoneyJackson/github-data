@@ -83,8 +83,7 @@ class TestPullRequestCommentsValidation:
     def test_dependency_validation_shows_correct_warning_message(self, caplog):
         """Test dependency validation shows correct warning message."""
         config = ConfigFactory.create_save_config(
-            include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_requests=False, include_pull_request_comments=True
         )
 
         caplog.clear()
@@ -105,8 +104,7 @@ class TestPullRequestCommentsValidation:
     def test_dependency_validation_for_restore_operations(self, caplog):
         """Test that dependency validation works for restore operations too."""
         config = ConfigFactory.create_restore_config(
-            include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_requests=False, include_pull_request_comments=True
         )
 
         from unittest.mock import Mock
@@ -130,8 +128,7 @@ class TestPullRequestCommentsValidation:
     def test_entity_list_excludes_pr_comments_when_dependency_not_met(self):
         """Test that get_enabled_entities excludes pr_comments when dependency unmet."""
         config = ConfigFactory.create_save_config(
-            include_pull_requests=False,
-            include_pull_request_comments=True
+            include_pull_requests=False, include_pull_request_comments=True
         )
 
         entities = StrategyFactory.get_enabled_entities(config)
@@ -162,8 +159,7 @@ class TestPullRequestCommentsValidation:
     def test_no_warning_when_both_disabled(self, caplog):
         """Test that no warning is shown when both PRs and PR comments are disabled."""
         config = ConfigFactory.create_save_config(
-            include_pull_requests=False,
-            include_pull_request_comments=False
+            include_pull_requests=False, include_pull_request_comments=False
         )
 
         caplog.clear()
@@ -183,8 +179,7 @@ class TestPullRequestCommentsValidation:
     def test_no_warning_when_pr_comments_explicitly_disabled(self, caplog):
         """Test that no warning is shown when PR comments are explicitly disabled."""
         config = ConfigFactory.create_save_config(
-            include_pull_requests=True,
-            include_pull_request_comments=False
+            include_pull_requests=True, include_pull_request_comments=False
         )
 
         caplog.clear()
