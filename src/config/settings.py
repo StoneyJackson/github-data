@@ -29,7 +29,7 @@ class ApplicationConfig:
             github_repo=cls._get_required_env("GITHUB_REPO"),
             data_path=cls._get_env_with_default("DATA_PATH", "/data"),
             label_conflict_strategy=cls._get_env_with_default(
-                "LABEL_CONFLICT_STRATEGY", "fail-if-existing"
+                "LABEL_CONFLICT_STRATEGY", "skip"
             ),
             include_git_repo=cls._parse_bool_env("INCLUDE_GIT_REPO", default=True),
             include_issues=cls._parse_bool_env("INCLUDE_ISSUES", default=True),

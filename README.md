@@ -81,7 +81,7 @@ docker run --rm \
 | `GITHUB_TOKEN` | Yes | GitHub personal access token with repo and read:user permissions. See [Token Setup Guide](docs/github-token-setup.md) |
 | `GITHUB_REPO` | Yes | Target repository in format `owner/repository` |
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
-| `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `fail-if-existing`) |
+| `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `skip`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
 | `INCLUDE_ISSUES` | No | Include issues in save/restore operations (default: `true`) |
 | `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in save/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
