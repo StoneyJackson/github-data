@@ -82,6 +82,20 @@ class StrategyBasedSaveOrchestrator:
 
         return resolved
 
+    def _is_selective_mode(self, entity_name: str) -> bool:
+        """Check if we're in selective mode for the given entity type."""
+        if entity_name == "issues":
+            return isinstance(self._config.include_issues, set)
+        elif entity_name == "pull_requests":
+            return isinstance(self._config.include_pull_requests, set)
+        elif entity_name == "comments":
+            # Comments depend on issues, so if issues are selective, comments are too
+            return isinstance(self._config.include_issues, set)
+        elif entity_name == "pr_comments":
+            # PR comments depend on PRs, so if PRs are selective, PR comments are too
+            return isinstance(self._config.include_pull_requests, set)
+        return False
+
     def _execute_strategy(
         self, entity_name: str, repo_name: str, output_path: str
     ) -> Dict[str, Any]:
@@ -98,6 +112,18 @@ class StrategyBasedSaveOrchestrator:
 
             # Process data
             processed_entities = strategy.process_data(entities, self._context)
+
+            # In selective mode, skip saving if no entities remain after processing
+            if self._is_selective_mode(entity_name) and not processed_entities:
+                return {
+                    "entity_name": entity_name,
+                    "success": True,
+                    "entities_processed": len(entities),
+                    "entities_saved": 0,
+                    "data_type": entity_name,
+                    "items_processed": 0,
+                    "execution_time_seconds": 0,
+                }
 
             # Save data
             result = strategy.save_data(
