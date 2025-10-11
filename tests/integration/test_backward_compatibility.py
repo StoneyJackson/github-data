@@ -714,9 +714,7 @@ class TestBackwardCompatibility:
                     git_auth_method="token",
                 )
 
-                assert (
-                    config.include_issues == expected_result
-                ), (
+                assert config.include_issues == expected_result, (
                     f"Expected {env_value} to parse as {expected_result}, "
                     f"got {config.include_issues}"
                 )

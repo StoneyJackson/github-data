@@ -19,7 +19,6 @@ class PullRequestComment(BaseModel):
     pull_request_url: str
 
     @computed_field
-    @property
     def pull_request_number(self) -> int:
         """Extract pull request number from pull_request_url."""
         return int(self.pull_request_url.split("/")[-1])

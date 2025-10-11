@@ -48,7 +48,9 @@ class TestSelectiveEdgeCases:
                     "assignees": [],
                     "created_at": f"2023-01-{(i % 31) + 1:02d}T10:00:00Z",
                     "updated_at": f"2023-01-{(i % 31) + 1:02d}T10:00:00Z",
-                    "closed_at": None if i % 2 == 0 else f"2023-01-{(i % 31) + 1:02d}T12:00:00Z",
+                    "closed_at": (
+                        None if i % 2 == 0 else f"2023-01-{(i % 31) + 1:02d}T12:00:00Z"
+                    ),
                     "url": f"https://api.github.com/repos/owner/repo/issues/{i}",
                     "html_url": f"https://github.com/owner/repo/issues/{i}",
                     "comments": 0,
@@ -441,7 +443,9 @@ class TestSelectiveEdgeCases:
 
         # Verify comments were saved correctly (coupling logic determines count)
         # Note: Comment coupling includes related comments based on issue URL patterns
-        assert len(saved_comments) >= len(complex_selection) * 2  # At least 2 comments per issue
+        assert (
+            len(saved_comments) >= len(complex_selection) * 2
+        )  # At least 2 comments per issue
 
         # Verify correct PR comments were saved (1 per PR)
         pr_comments_file = tmp_path / "pr_comments.json"

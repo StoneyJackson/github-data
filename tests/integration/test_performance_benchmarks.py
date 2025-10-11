@@ -113,9 +113,7 @@ class TestPerformanceBenchmarks:
                                 "avatar_url": (
                                     f"https://github.com/assignee{(i % 5)}.png"
                                 ),
-                                "html_url": (
-                                    f"https://github.com/assignee{(i % 5)}"
-                                ),
+                                "html_url": (f"https://github.com/assignee{(i % 5)}"),
                             }
                         ]
                         if i % 4 == 0
@@ -494,11 +492,15 @@ class TestPerformanceBenchmarks:
         # Memory usage patterns in mocked environment may not scale linearly
         # Focus on ensuring memory usage is reasonable (< 50MB per operation)
         for config_name, memory_mb in memories.items():
-            assert memory_mb < 50, f"{config_name} used too much memory: {memory_mb:.1f}MB"
-        
+            assert (
+                memory_mb < 50
+            ), f"{config_name} used too much memory: {memory_mb:.1f}MB"
+
         # Ensure no configuration uses negative memory (implementation issue)
         for config_name, memory_mb in memories.items():
-            assert memory_mb >= 0, f"{config_name} reported negative memory: {memory_mb:.1f}MB"
+            assert (
+                memory_mb >= 0
+            ), f"{config_name} reported negative memory: {memory_mb:.1f}MB"
 
     @pytest.mark.performance
     def test_api_call_optimization(self, storage_service, tmp_path):
@@ -687,8 +689,8 @@ class TestPerformanceBenchmarks:
             )
             print(f"Comment overhead: {overhead:.1f}%")
 
-            # Comment coupling should not add excessive overhead (< 1000% in test environment)
-            # Note: In mocked environment, overhead can be high due to comment filtering logic
+            # Comment coupling should not add excessive overhead (< 1000% in test)
+            # Note: In mocked environment, overhead can be high due to filtering
             assert (
                 overhead < 1000
             ), f"Comment coupling added too much overhead: {overhead:.1f}%"

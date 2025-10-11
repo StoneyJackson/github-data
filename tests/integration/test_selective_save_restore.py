@@ -245,7 +245,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4001"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4001",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/1#issuecomment-4001"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                     "user": {
                         "login": "alice",
@@ -262,7 +264,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4002"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4002",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/1#issuecomment-4002"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
                     "user": {
                         "login": "bob",
@@ -279,7 +283,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4003"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/2#issuecomment-4003",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/2#issuecomment-4003"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
                     "user": {
                         "login": "charlie",
@@ -296,7 +302,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4004"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/3#issuecomment-4004",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/3#issuecomment-4004"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/3",
                     "user": {
                         "login": "dave",
@@ -313,7 +321,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4005"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/4#issuecomment-4005",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/4#issuecomment-4005"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/4",
                     "user": {
                         "login": "eve",
@@ -330,7 +340,9 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4006"
                     ),
-                    "html_url": "https://github.com/owner/repo/issues/5#issuecomment-4006",
+                    "html_url": (
+                        "https://github.com/owner/repo/issues/5#issuecomment-4006"
+                    ),
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/5",
                     "user": {
                         "login": "frank",
