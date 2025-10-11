@@ -51,6 +51,13 @@ class TestSelectiveSaveRestore:
                     "updated_at": "2023-01-01T10:00:00Z",
                     "closed_at": None,
                     "url": "https://api.github.com/repos/owner/repo/issues/1",
+                    "html_url": "https://github.com/owner/repo/issues/1",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                     "labels": [
                         {
                             "name": "bug",
@@ -72,6 +79,13 @@ class TestSelectiveSaveRestore:
                     "updated_at": "2023-01-02T10:00:00Z",
                     "closed_at": None,
                     "url": "https://api.github.com/repos/owner/repo/issues/2",
+                    "html_url": "https://github.com/owner/repo/issues/2",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
                     "labels": [
                         {
                             "name": "enhancement",
@@ -96,6 +110,13 @@ class TestSelectiveSaveRestore:
                     "updated_at": "2023-01-03T12:00:00Z",
                     "closed_at": "2023-01-03T12:00:00Z",
                     "url": "https://api.github.com/repos/owner/repo/issues/3",
+                    "html_url": "https://github.com/owner/repo/issues/3",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
                     "labels": [],
                 },
                 {
@@ -109,6 +130,13 @@ class TestSelectiveSaveRestore:
                     "updated_at": "2023-01-04T10:00:00Z",
                     "closed_at": None,
                     "url": "https://api.github.com/repos/owner/repo/issues/4",
+                    "html_url": "https://github.com/owner/repo/issues/4",
+                    "user": {
+                        "login": "dave",
+                        "id": 3004,
+                        "avatar_url": "https://github.com/dave.png",
+                        "html_url": "https://github.com/dave",
+                    },
                     "labels": [],
                 },
                 {
@@ -122,6 +150,13 @@ class TestSelectiveSaveRestore:
                     "updated_at": "2023-01-05T10:00:00Z",
                     "closed_at": None,
                     "url": "https://api.github.com/repos/owner/repo/issues/5",
+                    "html_url": "https://github.com/owner/repo/issues/5",
+                    "user": {
+                        "login": "eve",
+                        "id": 3005,
+                        "avatar_url": "https://github.com/eve.png",
+                        "html_url": "https://github.com/eve",
+                    },
                     "labels": [
                         {
                             "name": "bug",
@@ -145,8 +180,15 @@ class TestSelectiveSaveRestore:
                     "closed_at": None,
                     "merged_at": None,
                     "url": "https://api.github.com/repos/owner/repo/pulls/10",
+                    "html_url": "https://github.com/owner/repo/pull/10",
                     "head": {"ref": "fix-login"},
                     "base": {"ref": "main"},
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                     "labels": [],
                 },
                 {
@@ -160,8 +202,15 @@ class TestSelectiveSaveRestore:
                     "closed_at": None,
                     "merged_at": None,
                     "url": "https://api.github.com/repos/owner/repo/pulls/11",
+                    "html_url": "https://github.com/owner/repo/pull/11",
                     "head": {"ref": "add-dashboard"},
                     "base": {"ref": "main"},
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
                     "labels": [],
                 },
                 {
@@ -175,8 +224,15 @@ class TestSelectiveSaveRestore:
                     "closed_at": "2023-01-08T12:00:00Z",
                     "merged_at": "2023-01-08T12:00:00Z",
                     "url": "https://api.github.com/repos/owner/repo/pulls/12",
+                    "html_url": "https://github.com/owner/repo/pull/12",
                     "head": {"ref": "perf-improvements"},
                     "base": {"ref": "main"},
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
                     "labels": [],
                 },
             ],
@@ -189,7 +245,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4001"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4001",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                 },
                 {
                     "id": 4002,
@@ -199,7 +262,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4002"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4002",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
                 },
                 {
                     "id": 4003,
@@ -209,7 +279,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4003"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/2#issuecomment-4003",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/2",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
                 },
                 {
                     "id": 4004,
@@ -219,7 +296,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4004"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/3#issuecomment-4004",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/3",
+                    "user": {
+                        "login": "dave",
+                        "id": 3004,
+                        "avatar_url": "https://github.com/dave.png",
+                        "html_url": "https://github.com/dave",
+                    },
                 },
                 {
                     "id": 4005,
@@ -229,7 +313,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4005"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/4#issuecomment-4005",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/4",
+                    "user": {
+                        "login": "eve",
+                        "id": 3005,
+                        "avatar_url": "https://github.com/eve.png",
+                        "html_url": "https://github.com/eve",
+                    },
                 },
                 {
                     "id": 4006,
@@ -239,7 +330,14 @@ class TestSelectiveSaveRestore:
                     "url": (
                         "https://api.github.com/repos/owner/repo/issues/comments/4006"
                     ),
+                    "html_url": "https://github.com/owner/repo/issues/5#issuecomment-4006",
                     "issue_url": "https://api.github.com/repos/owner/repo/issues/5",
+                    "user": {
+                        "login": "frank",
+                        "id": 3006,
+                        "avatar_url": "https://github.com/frank.png",
+                        "html_url": "https://github.com/frank",
+                    },
                 },
             ],
             "pr_comments": [
@@ -476,8 +574,8 @@ class TestSelectiveSaveRestore:
         with open(comments_file, "r") as f:
             saved_comments = json.load(f)
 
-        # Should have comments for issues #1, #2, #3
-        assert len(saved_comments) == 3
+        # Should have comments for issues #1, #2, #3 (2 + 1 + 1 = 4 comments)
+        assert len(saved_comments) == 4
         comment_issue_urls = {comment["issue_url"] for comment in saved_comments}
         expected_urls = {
             "https://api.github.com/repos/owner/repo/issues/1",
@@ -765,5 +863,5 @@ class TestSelectiveSaveRestore:
         with open(full_comments_file, "r") as f:
             full_comments = json.load(f)
 
-        assert len(selective_comments) == 2
+        assert len(selective_comments) == 3
         assert len(full_comments) == 6

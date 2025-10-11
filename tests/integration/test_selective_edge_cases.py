@@ -46,9 +46,9 @@ class TestSelectiveEdgeCases:
                         "html_url": f"https://github.com/user{i % 3}",
                     },
                     "assignees": [],
-                    "created_at": f"2023-01-{i:02d}T10:00:00Z",
-                    "updated_at": f"2023-01-{i:02d}T10:00:00Z",
-                    "closed_at": None if i % 2 == 0 else f"2023-01-{i:02d}T12:00:00Z",
+                    "created_at": f"2023-01-{(i % 31) + 1:02d}T10:00:00Z",
+                    "updated_at": f"2023-01-{(i % 31) + 1:02d}T10:00:00Z",
+                    "closed_at": None if i % 2 == 0 else f"2023-01-{(i % 31) + 1:02d}T12:00:00Z",
                     "url": f"https://api.github.com/repos/owner/repo/issues/{i}",
                     "html_url": f"https://github.com/owner/repo/issues/{i}",
                     "comments": 0,
@@ -68,8 +68,8 @@ class TestSelectiveEdgeCases:
                             "avatar_url": f"https://github.com/commenter{j}.png",
                             "html_url": f"https://github.com/commenter{j}",
                         },
-                        "created_at": f"2023-01-{i:02d}T1{j}:00:00Z",
-                        "updated_at": f"2023-01-{i:02d}T1{j}:00:00Z",
+                        "created_at": f"2023-01-{(i % 31) + 1:02d}T1{j}:00:00Z",
+                        "updated_at": f"2023-01-{(i % 31) + 1:02d}T1{j}:00:00Z",
                         "url": (
                             f"https://api.github.com/repos/owner/repo/issues/comments/"
                             f"{4000 + (i * 10) + j}"
