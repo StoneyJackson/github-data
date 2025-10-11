@@ -273,8 +273,8 @@ class TestIssueCommentsValidationUnit:
         assert "labels" in entities  # Always included
         assert "issues" not in entities  # Explicitly disabled
         assert (
-            "comments" in entities
-        )  # Still in the list because we check config directly
+            "comments" not in entities
+        )  # Excluded because issues are disabled (dependency requirement)
 
     def test_get_enabled_entities_with_issues_enabled(self, base_env_vars):
         """Test enabled entities includes issues/comments when enabled."""

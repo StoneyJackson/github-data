@@ -97,11 +97,13 @@ class PullRequestsSaveStrategy(SaveEntityStrategy):
         start_time = time.time()
 
         try:
-            output_dir = Path(output_path)
-            output_dir.mkdir(parents=True, exist_ok=True)
+            # Only create files if there's data to save
+            if entities:
+                output_dir = Path(output_path)
+                output_dir.mkdir(parents=True, exist_ok=True)
 
-            prs_file = output_dir / "pull_requests.json"
-            storage_service.save_data(entities, prs_file)
+                prs_file = output_dir / "pull_requests.json"
+                storage_service.save_data(entities, prs_file)
 
             execution_time = time.time() - start_time
 

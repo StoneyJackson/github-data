@@ -726,10 +726,17 @@ class TestBackwardCompatibility:
         # Test that legacy "0"/"1" formats provide helpful errors
         legacy_values = ["0", "1"]
 
+        # Base environment variables required for ApplicationConfig
+        base_env = {
+            "OPERATION": "save",
+            "GITHUB_TOKEN": "test_token",
+            "GITHUB_REPO": "owner/repo",
+            "DATA_PATH": "/data",
+        }
+
         for legacy_value in legacy_values:
-            with patch.dict(
-                "os.environ", {"INCLUDE_ISSUE_COMMENTS": legacy_value}, clear=False
-            ):
+            test_env = {**base_env, "INCLUDE_ISSUE_COMMENTS": legacy_value}
+            with patch.dict("os.environ", test_env, clear=True):
                 with pytest.raises(ValueError) as exc_info:
                     ApplicationConfig.from_environment()
 
