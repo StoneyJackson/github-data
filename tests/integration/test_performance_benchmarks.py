@@ -312,7 +312,7 @@ class TestPerformanceBenchmarks:
             large_repository_data["pr_comments"]
         )
 
-        add_pr_method_mocks(github_service)
+        add_pr_method_mocks(github_service, large_repository_data)
 
         return github_service
 

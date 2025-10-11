@@ -246,41 +246,56 @@ class TestSelectiveSaveRestore:
                 {
                     "id": 5001,
                     "body": "Code looks good",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                     "created_at": "2023-01-06T11:00:00Z",
                     "updated_at": "2023-01-06T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5001"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/10#issuecomment-5001"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/10"
                     ),
-                    "pull_request_number": 10,
                 },
                 {
                     "id": 5002,
                     "body": "Nice dashboard implementation",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
                     "created_at": "2023-01-07T11:00:00Z",
                     "updated_at": "2023-01-07T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5002"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/11#issuecomment-5002"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/11"
                     ),
-                    "pull_request_number": 11,
                 },
                 {
                     "id": 5003,
                     "body": "Performance improvements look solid",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
                     "created_at": "2023-01-08T11:00:00Z",
                     "updated_at": "2023-01-08T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5003"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/12#issuecomment-5003"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/12"
                     ),
-                    "pull_request_number": 12,
                 },
             ],
         }
@@ -302,7 +317,7 @@ class TestSelectiveSaveRestore:
         ]
 
         # Add PR-specific methods
-        add_pr_method_mocks(github_service)
+        add_pr_method_mocks(github_service, sample_github_data)
 
         return github_service
 

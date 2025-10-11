@@ -196,7 +196,10 @@ class StrategyFactory:
         if StrategyFactory._is_enabled(config.include_issues):
             entities.append("issues")
 
-        if config.include_issue_comments:
+        if (
+            StrategyFactory._is_enabled(config.include_issues)
+            and config.include_issue_comments
+        ):
             entities.append("comments")
 
         if StrategyFactory._is_enabled(config.include_pull_requests):

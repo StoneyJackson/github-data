@@ -307,7 +307,7 @@ class TestBackwardCompatibility:
         ]
 
         # Add PR-specific methods
-        add_pr_method_mocks(github_service)
+        add_pr_method_mocks(github_service, sample_github_data)
 
         return github_service
 

@@ -272,55 +272,75 @@ class TestCommentCoupling:
                 {
                     "id": 5001,
                     "body": "Comment 1 on PR 100",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                     "created_at": "2023-01-04T11:00:00Z",
                     "updated_at": "2023-01-04T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5001"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/100#issuecomment-5001"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/100"
                     ),
-                    "pull_request_number": 100,
                 },
                 {
                     "id": 5002,
                     "body": "Comment 2 on PR 100",
+                    "user": {
+                        "login": "bob",
+                        "id": 3002,
+                        "avatar_url": "https://github.com/bob.png",
+                        "html_url": "https://github.com/bob",
+                    },
                     "created_at": "2023-01-04T12:00:00Z",
                     "updated_at": "2023-01-04T12:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5002"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/100#issuecomment-5002"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/100"
                     ),
-                    "pull_request_number": 100,
                 },
                 # Comments for PR 200
                 {
                     "id": 5003,
                     "body": "Comment 1 on PR 200",
+                    "user": {
+                        "login": "charlie",
+                        "id": 3003,
+                        "avatar_url": "https://github.com/charlie.png",
+                        "html_url": "https://github.com/charlie",
+                    },
                     "created_at": "2023-01-05T11:00:00Z",
                     "updated_at": "2023-01-05T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5003"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/200#issuecomment-5003"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/200"
                     ),
-                    "pull_request_number": 200,
                 },
                 {
                     "id": 5004,
                     "body": "Comment 1 on PR 300",
+                    "user": {
+                        "login": "alice",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/alice.png",
+                        "html_url": "https://github.com/alice",
+                    },
                     "created_at": "2023-01-06T11:00:00Z",
                     "updated_at": "2023-01-06T11:00:00Z",
-                    "url": (
-                        "https://api.github.com/repos/owner/repo/pulls/comments/5004"
+                    "html_url": (
+                        "https://github.com/owner/repo/pull/300#issuecomment-5004"
                     ),
                     "pull_request_url": (
                         "https://api.github.com/repos/owner/repo/pulls/300"
                     ),
-                    "pull_request_number": 300,
                 },
             ],
         }
@@ -342,7 +362,7 @@ class TestCommentCoupling:
         ]
 
         # Add PR-specific methods
-        add_pr_method_mocks(github_service)
+        add_pr_method_mocks(github_service, sample_github_data)
 
         return github_service
 
