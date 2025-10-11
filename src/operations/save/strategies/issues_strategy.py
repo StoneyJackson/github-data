@@ -91,13 +91,11 @@ class IssuesSaveStrategy(SaveEntityStrategy):
         start_time = time.time()
 
         try:
-            # Only create files if there's data to save
-            if entities:
-                output_dir = Path(output_path)
-                output_dir.mkdir(parents=True, exist_ok=True)
+            output_dir = Path(output_path)
+            output_dir.mkdir(parents=True, exist_ok=True)
 
-                issues_file = output_dir / "issues.json"
-                storage_service.save_data(entities, issues_file)
+            issues_file = output_dir / "issues.json"
+            storage_service.save_data(entities, issues_file)
 
             execution_time = time.time() - start_time
 
