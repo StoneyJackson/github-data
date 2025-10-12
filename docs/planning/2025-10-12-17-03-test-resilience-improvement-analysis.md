@@ -22,9 +22,9 @@ During the addition of PR reviews functionality (`include_pr_reviews` and `inclu
 
 ## Current Test Architecture Issues
 
-### 1. **Excessive Manual Configuration**
+### 1. **Inconsistent Use of Configuration Builder** ✅ **PARTIALLY SOLVED**
 ```python
-# Problem: Manual constructor calls scattered throughout tests
+# Problem: Manual constructor calls scattered throughout tests instead of using ConfigBuilder
 config = ApplicationConfig(
     operation="save",
     github_token="test_token",
@@ -38,9 +38,20 @@ config = ApplicationConfig(
     include_pull_request_comments=False,
     # MISSING: New fields cause failures
 )
+
+# Solution available but not consistently used:
+config = ConfigBuilder().with_operation("save").with_data_path(str(tmp_path)).build()
 ```
 
-### 2. **Fragile JSON File Creation**
+**Status**: We have an excellent `ConfigBuilder` class in `tests/shared/builders/config_builder.py` that provides:
+- ✅ Fluent API with sensible defaults for all fields including new PR review fields
+- ✅ Preset configurations (`with_pr_features()`, `with_minimal_features()`, `with_all_features()`)
+- ✅ Environment variable mapping for container tests (`as_env_dict()`)
+- ✅ Chainable methods for all configuration options
+
+**Remaining Issue**: Many tests still use manual `ApplicationConfig()` constructors instead of the builder.
+
+### 2. **Fragile JSON File Creation** ❌ **NEEDS SOLUTION**
 ```python
 # Problem: Manual JSON file creation in each test
 with open(data_path / "labels.json", "w") as f:
@@ -50,56 +61,40 @@ with open(data_path / "issues.json", "w") as f:
 # MISSING: pr_reviews.json, pr_review_comments.json
 ```
 
-### 3. **Lack of Configuration Abstractions**
-- No centralized config builders for common test scenarios
-- No validation of configuration completeness
-- No automatic JSON file dependency resolution
+**Status**: This is the main unsolved problem. We have:
+- ✅ Some fixtures like `restore_workflow_services` that create sets of JSON files
+- ✅ Integration fixtures that create expected file structures
+- ❌ **No centralized system** to automatically create all required JSON files based on `ApplicationConfig`
+
+**Impact**: When `include_pull_requests=True`, the system automatically enables PR reviews, but tests fail because expected `pr_reviews.json` and `pr_review_comments.json` files don't exist.
+
+### 3. **Lack of Configuration Abstractions** ✅ **MOSTLY SOLVED**
+- ✅ **Centralized config builders exist** - `ConfigBuilder` provides excellent abstractions
+- ✅ **Common test scenarios supported** - `with_pr_features()`, `with_minimal_features()`, etc.
+- ❌ **No validation of configuration completeness** - could be added to `ApplicationConfig`
+- ❌ **No automatic JSON file dependency resolution** - this is the main gap
 
 ## Recommended Improvements
 
-### 1. **Enhanced Configuration Builders**
+### 1. **Migration to Consistent ConfigBuilder Usage** ✅ **ALREADY AVAILABLE**
 
-Expand the existing config builder pattern:
+**Current Status**: The `ConfigBuilder` class already provides everything needed:
 
 ```python
-# Enhanced pattern in tests/shared/builders/config_builder.py
-class ConfigBuilder:
-    @classmethod
-    def default_save_config(cls, **overrides):
-        """Create complete save config with all required fields."""
-        return ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo", 
-            data_path="/tmp/test",
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=True,
-            include_issue_comments=True,
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_pr_reviews=False,
-            include_pr_review_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
-            **overrides
-        )
-    
-    @classmethod  
-    def with_pr_features(cls, **overrides):
-        """Config with PR features enabled."""
-        return cls.default_save_config(
-            include_pull_requests=True,
-            include_pull_request_comments=True,
-            include_pr_reviews=True,
-            include_pr_review_comments=True,
-            **overrides
-        )
+# Available now in tests/shared/builders/config_builder.py
+config = ConfigBuilder().with_pr_features().with_data_path(str(tmp_path)).build()
+
+# All necessary methods already exist:
+# - with_operation(), with_repo(), with_token(), with_data_path()
+# - with_pr_features(), with_minimal_features(), with_all_features()
+# - with_custom(**kwargs), as_env_dict()
 ```
 
-### 2. **Automatic JSON File Management**
+**Action Required**: Migrate existing tests from manual `ApplicationConfig()` constructors to use `ConfigBuilder`. This would have prevented the 61 constructor failures we experienced.
 
-Create a centralized test data manager:
+### 2. **Automatic JSON File Management** ❌ **NEEDS IMPLEMENTATION**
+
+**Current Gap**: This is the main missing piece. We need a centralized test data manager:
 
 ```python
 # New: tests/shared/fixtures/test_data_manager.py
@@ -237,40 +232,68 @@ def test_save_with_pr_reviews(self, tmp_path):
 ### Benefits of Proposed Improvements
 
 1. **Resilience to Schema Changes**
-   - New required fields automatically handled by config builders
-   - Default values prevent breaking existing tests
-   - Centralized updates vs. scattered manual fixes
+   - ✅ **Already available** - `ConfigBuilder` handles new required fields with defaults
+   - ❌ **Not utilized** - Many tests still use manual constructors
+   - **Action**: Migrate to consistent `ConfigBuilder` usage
 
-2. **Automatic Dependency Management**
+2. **Automatic Dependency Management** ❌ **NEEDS IMPLEMENTATION**  
    - JSON files automatically created based on configuration
-   - No missing file errors
+   - No missing file errors (would have prevented the 40+ JSON file failures)
    - Consistent test data structure
 
 3. **Maintainability**
-   - Fewer places to update when schema changes
-   - Clear separation of test logic from test setup
-   - Reusable components across test suites
+   - ✅ **Partially achieved** - `ConfigBuilder` provides centralized config management
+   - ❌ **Missing** - JSON file management still scattered
+   - **Need**: Centralized test data manager
 
 4. **Developer Experience**  
-   - Less boilerplate code in individual tests
-   - Self-documenting test configurations
-   - Faster test development
+   - ✅ **Available** - `ConfigBuilder` reduces boilerplate and is self-documenting
+   - ❌ **Underutilized** - Many developers still write manual configs
+   - **Need**: Better adoption of existing tools
 
-### Migration Strategy
+### Revised Migration Strategy
 
-1. **Phase 1**: Implement enhanced builders and fixtures
-2. **Phase 2**: Migrate high-impact test files to use new patterns
-3. **Phase 3**: Gradual migration of remaining tests
-4. **Phase 4**: Deprecate old manual patterns
+**Current State**: 
+- ✅ **ConfigBuilder exists and is excellent** - No implementation needed
+- ❌ **TestDataManager needed** - 1-2 days implementation
+- ❌ **Inconsistent adoption** - Migration effort required
+
+**Recommended Phases**:
+
+1. **Phase 1**: Implement `TestDataManager` (1-2 days)
+   - Automatic JSON file creation based on `ApplicationConfig`
+   - Integration with existing fixture system
+
+2. **Phase 2**: Migrate high-impact test files to use `ConfigBuilder` (1-2 days per file)
+   - Focus on files with manual `ApplicationConfig()` constructors
+   - Would have prevented 61 constructor failures
+
+3. **Phase 3**: Gradual migration of remaining tests (ongoing)
+   - Convert remaining manual JSON file creation
+   - Standardize on `ConfigBuilder` + `TestDataManager` pattern
 
 ### Effort Estimation
 
-- **Implementation**: 2-3 days for core infrastructure
-- **Migration**: 1-2 days per major test file
-- **Total Impact**: Prevent 80%+ of schema change breakage
+- **TestDataManager Implementation**: 1-2 days
+- **ConfigBuilder Migration**: 1-2 days per major test file  
+- **Total Impact**: Prevent 95%+ of schema change breakage
+  - ConfigBuilder prevents constructor failures
+  - TestDataManager prevents JSON file dependency failures
 
 ## Conclusion
 
-The current test failures highlight the need for more resilient test architecture. By implementing centralized configuration builders, automatic JSON file management, and enhanced validation, we can significantly reduce the maintenance burden of future schema changes while improving test reliability and developer productivity.
+**Key Finding**: We already have an excellent `ConfigBuilder` that would have prevented most test failures, but it's not consistently used across the test suite.
 
-**Key Takeaway**: Tests should be resilient to schema evolution through abstraction, not brittle through manual configuration.
+**Updated Assessment**:
+- ✅ **Configuration resilience is solved** - `ConfigBuilder` provides comprehensive abstractions
+- ❌ **JSON file management is the main gap** - No automatic file creation based on config
+- ❌ **Adoption issue** - Many tests still use manual patterns instead of available tools
+
+**Revised Recommendations**:
+1. **Immediate**: Implement `TestDataManager` for automatic JSON file creation (1-2 days)
+2. **Short-term**: Migrate tests to use existing `ConfigBuilder` (prevents future constructor failures)  
+3. **Long-term**: Establish development practices to use abstractions by default
+
+**Impact**: This approach would have prevented 95%+ of the 101 test failures we experienced, with most gains coming from using tools we already have.
+
+**Key Takeaway**: Sometimes the solution already exists - we need better adoption of existing abstractions, not just new ones.
