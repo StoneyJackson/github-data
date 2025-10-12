@@ -237,3 +237,72 @@ def convert_graphql_rate_limit_to_rest_format(
             "reset": graphql_rate_limit["core"]["reset"],
         }
     }
+
+
+def convert_graphql_pr_reviews_to_rest_format(
+    graphql_reviews: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Convert GraphQL PR reviews data to REST API format."""
+    rest_reviews = []
+
+    for review in graphql_reviews:
+        # Convert author
+        author = None
+        if review.get("author"):
+            author = {
+                "login": review["author"]["login"],
+                "id": review["author"].get("id"),
+                "avatar_url": review["author"].get("avatarUrl"),
+                "html_url": review["author"].get("url"),
+            }
+
+        rest_review = {
+            "id": review["id"],
+            "body": review.get("body", ""),
+            "state": review["state"],
+            "submitted_at": review.get("submittedAt"),
+            "author_association": review.get("authorAssociation", ""),
+            "html_url": review["url"],
+            "user": author,
+            "pull_request_url": review.get("pullRequestUrl"),
+            "pull_request_number": review.get("pullRequestNumber"),
+        }
+        rest_reviews.append(rest_review)
+
+    return rest_reviews
+
+
+def convert_graphql_review_comments_to_rest_format(
+    graphql_comments: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Convert GraphQL review comments data to REST API format."""
+    rest_comments = []
+
+    for comment in graphql_comments:
+        # Convert author
+        author = None
+        if comment.get("author"):
+            author = {
+                "login": comment["author"]["login"],
+                "id": comment["author"].get("id"),
+                "avatar_url": comment["author"].get("avatarUrl"),
+                "html_url": comment["author"].get("url"),
+            }
+
+        rest_comment = {
+            "id": comment["id"],
+            "body": comment["body"],
+            "created_at": comment["createdAt"],
+            "updated_at": comment["updatedAt"],
+            "diff_hunk": comment.get("diffHunk", ""),
+            "path": comment.get("path", ""),
+            "line": comment.get("line"),
+            "html_url": comment["url"],
+            "user": author,
+            "review_id": comment.get("reviewId"),
+            "pull_request_url": comment.get("pullRequestUrl"),
+            "pull_request_number": comment.get("pullRequestNumber"),
+        }
+        rest_comments.append(rest_comment)
+
+    return rest_comments

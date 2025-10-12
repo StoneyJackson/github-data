@@ -8,7 +8,7 @@ sub-issues, and rate limits using GraphQL for better performance.
 
 from typing import Dict, List, Any
 from .utils.graphql_paginator import GraphQLPaginator
-from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder
+from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder, ReviewEnricher, ReviewCommentEnricher
 
 # Required GraphQL imports
 from gql import Client
@@ -24,12 +24,20 @@ from .queries import (
     ISSUE_SUB_ISSUES_QUERY,
     RATE_LIMIT_QUERY,
 )
+from .queries.pr_reviews import (
+    PULL_REQUEST_REVIEWS_QUERY,
+    REPOSITORY_PR_REVIEWS_QUERY,
+    REVIEW_COMMENTS_QUERY,
+    REPOSITORY_REVIEW_COMMENTS_QUERY,
+)
 from .graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,
     convert_graphql_pull_requests_to_rest_format,
     convert_graphql_pr_comments_to_rest_format,
+    convert_graphql_pr_reviews_to_rest_format,
+    convert_graphql_review_comments_to_rest_format,
     convert_graphql_rate_limit_to_rest_format,
 )
 
@@ -268,6 +276,118 @@ class GitHubGraphQLClient:
         )
 
         return all_sub_issues
+
+    # Pull Request Reviews
+
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request using GraphQL."""
+        owner, name = self._parse_repo_name(repo_name)
+
+        def review_post_processor(
+            reviews_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process reviews with additional metadata."""
+            return ReviewEnricher.enrich_pr_reviews(reviews_nodes, pr_number)
+
+        paginator = GraphQLPaginator(self._gql_client)
+        all_reviews = paginator.paginate_all(
+            query=PULL_REQUEST_REVIEWS_QUERY,
+            variable_values={
+                "owner": owner,
+                "name": name,
+                "prNumber": pr_number,
+            },
+            data_path="repository.pullRequest.reviews",
+            post_processor=review_post_processor,
+        )
+
+        return convert_graphql_pr_reviews_to_rest_format(all_reviews)
+
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all reviews from all pull requests using GraphQL for performance."""
+        owner, name = self._parse_repo_name(repo_name)
+
+        def review_post_processor(
+            prs_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process reviews by adding pull request URL and flattening."""
+            all_reviews = []
+            for pr in prs_nodes:
+                reviews = ReviewEnricher.enrich_pr_reviews(
+                    pr["reviews"]["nodes"], pr["number"]
+                )
+                for review in reviews:
+                    review["pullRequestUrl"] = pr["url"]
+                all_reviews.extend(reviews)
+            return all_reviews
+
+        paginator = GraphQLPaginator(self._gql_client)
+        all_reviews = paginator.paginate_all(
+            query=REPOSITORY_PR_REVIEWS_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.pullRequests",
+            post_processor=review_post_processor,
+        )
+
+        return convert_graphql_pr_reviews_to_rest_format(all_reviews)
+
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review using GraphQL."""
+        owner, name = self._parse_repo_name(repo_name)
+
+        def comment_post_processor(
+            comments_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process review comments with additional metadata."""
+            return ReviewCommentEnricher.enrich_review_comments(comments_nodes, review_id)
+
+        paginator = GraphQLPaginator(self._gql_client)
+        all_comments = paginator.paginate_all(
+            query=REVIEW_COMMENTS_QUERY,
+            variable_values={
+                "owner": owner,
+                "name": name,
+                "reviewId": review_id,
+            },
+            data_path="repository.pullRequest.review.comments",
+            post_processor=comment_post_processor,
+        )
+
+        return convert_graphql_review_comments_to_rest_format(all_comments)
+
+    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all review comments from all reviews using GraphQL for performance."""
+        owner, name = self._parse_repo_name(repo_name)
+
+        def comment_post_processor(
+            prs_nodes: List[Dict[str, Any]],
+        ) -> List[Dict[str, Any]]:
+            """Post-process review comments by flattening and enriching."""
+            all_comments = []
+            for pr in prs_nodes:
+                for review in pr["reviews"]["nodes"]:
+                    comments = ReviewCommentEnricher.enrich_review_comments(
+                        review["comments"]["nodes"], review["id"]
+                    )
+                    for comment in comments:
+                        comment["pullRequestUrl"] = pr["url"]
+                        comment["pullRequestNumber"] = pr["number"]
+                    all_comments.extend(comments)
+            return all_comments
+
+        paginator = GraphQLPaginator(self._gql_client)
+        all_comments = paginator.paginate_all(
+            query=REPOSITORY_REVIEW_COMMENTS_QUERY,
+            variable_values={"owner": owner, "name": name},
+            data_path="repository.pullRequests",
+            post_processor=comment_post_processor,
+        )
+
+        return convert_graphql_review_comments_to_rest_format(all_comments)
 
     # Rate Limit Monitoring
 

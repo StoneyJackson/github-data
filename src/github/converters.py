@@ -14,6 +14,8 @@ from ..entities import (
     GitHubUser,
     PullRequest,
     PullRequestComment,
+    PullRequestReview,
+    PullRequestReviewComment,
     SubIssue,
 )
 
@@ -132,6 +134,54 @@ def convert_to_sub_issue(raw_data: Dict[str, Any]) -> SubIssue:
         parent_issue_number=raw_data["parent_issue_number"],
         position=raw_data["position"],
     )
+
+
+def convert_to_pr_review(api_data: Dict[str, Any]) -> PullRequestReview:
+    """Convert GitHub API review data to PullRequestReview model."""
+    return PullRequestReview(
+        id=api_data["id"],
+        pr_number=_extract_pr_number_from_url(api_data.get("pull_request_url", "")),
+        user=convert_to_user(api_data["user"]),
+        body=api_data.get("body", ""),
+        state=api_data["state"],
+        html_url=api_data["html_url"],
+        pull_request_url=api_data.get("pull_request_url", ""),
+        author_association=api_data.get("author_association", ""),
+        submitted_at=_parse_datetime(api_data["submitted_at"]) if api_data.get("submitted_at") else None,
+        commit_id=api_data.get("commit_id")
+    )
+
+
+def convert_to_pr_review_comment(api_data: Dict[str, Any]) -> PullRequestReviewComment:
+    """Convert GitHub API review comment data to PullRequestReviewComment model."""
+    return PullRequestReviewComment(
+        id=api_data["id"],
+        review_id=api_data.get("review_id", ""),
+        pr_number=_extract_pr_number_from_url(api_data.get("pull_request_url", "")),
+        diff_hunk=api_data.get("diff_hunk", ""),
+        path=api_data.get("path", ""),
+        line=api_data.get("line"),
+        body=api_data["body"],
+        user=convert_to_user(api_data["user"]),
+        created_at=_parse_datetime(api_data["created_at"]),
+        updated_at=_parse_datetime(api_data["updated_at"]),
+        html_url=api_data["html_url"],
+        pull_request_url=api_data.get("pull_request_url", ""),
+        in_reply_to_id=api_data.get("in_reply_to_id")
+    )
+
+
+def _extract_pr_number_from_url(url: str) -> int:
+    """Extract PR number from GitHub URL."""
+    if not url:
+        return 0
+    try:
+        # URL format: https://github.com/owner/repo/pull/123
+        # or: https://api.github.com/repos/owner/repo/pulls/123
+        parts = url.rstrip('/').split('/')
+        return int(parts[-1])
+    except (ValueError, IndexError):
+        return 0
 
 
 def _parse_datetime(datetime_str: str) -> datetime:

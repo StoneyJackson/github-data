@@ -54,6 +54,30 @@ class RepositoryService(ABC):
         pass
 
     @abstractmethod
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request."""
+        pass
+
+    @abstractmethod
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews."""
+        pass
+
+    @abstractmethod
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review."""
+        pass
+
+    @abstractmethod
+    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request review comments."""
+        pass
+
+    @abstractmethod
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issue relationships from repository."""
         pass
@@ -131,6 +155,20 @@ class RepositoryService(ABC):
         self, repo_name: str, pr_number: int, body: str
     ) -> Dict[str, Any]:
         """Create a new PR comment."""
+        pass
+
+    @abstractmethod
+    def create_pull_request_review(
+        self, repo_name: str, pr_number: int, body: str, state: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review."""
+        pass
+
+    @abstractmethod
+    def create_pull_request_review_comment(
+        self, repo_name: str, review_id: str, body: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review comment."""
         pass
 
     @abstractmethod
@@ -213,6 +251,30 @@ class GitHubApiBoundary(ABC):
         pass
 
     @abstractmethod
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request from GitHub API."""
+        pass
+
+    @abstractmethod
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews from GitHub API."""
+        pass
+
+    @abstractmethod
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review from GitHub API."""
+        pass
+
+    @abstractmethod
+    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request review comments from GitHub API."""
+        pass
+
+    @abstractmethod
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issues from GitHub API."""
         pass
@@ -288,6 +350,20 @@ class GitHubApiBoundary(ABC):
         self, repo_name: str, pr_number: int, body: str
     ) -> Dict[str, Any]:
         """Create PR comment via GitHub API."""
+        pass
+
+    @abstractmethod
+    def create_pull_request_review(
+        self, repo_name: str, pr_number: int, body: str, state: str
+    ) -> Dict[str, Any]:
+        """Create pull request review via GitHub API."""
+        pass
+
+    @abstractmethod
+    def create_pull_request_review_comment(
+        self, repo_name: str, review_id: str, body: str
+    ) -> Dict[str, Any]:
+        """Create pull request review comment via GitHub API."""
         pass
 
     @abstractmethod

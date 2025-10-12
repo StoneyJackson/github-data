@@ -196,3 +196,47 @@ class URLEnricher:
             str: Constructed GitHub web URL
         """
         return f"https://github.com/{repo_name}/{resource_type}/{resource_id}"
+
+
+class ReviewEnricher:
+    """Utility for enriching GitHub pull request reviews with additional metadata."""
+
+    @staticmethod
+    def enrich_pr_reviews(
+        reviews: List[Dict[str, Any]], pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """
+        Add pull request number and metadata to reviews.
+
+        Args:
+            reviews (List[Dict[str, Any]]): List of review dictionaries
+            pr_number (int): Pull request number
+
+        Returns:
+            List[Dict[str, Any]]: Enriched reviews with PR number added
+        """
+        for review in reviews:
+            review["pullRequestNumber"] = pr_number
+        return reviews
+
+
+class ReviewCommentEnricher:
+    """Utility for enriching GitHub pull request review comments with additional metadata."""
+
+    @staticmethod
+    def enrich_review_comments(
+        comments: List[Dict[str, Any]], review_id: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Add review ID and metadata to review comments.
+
+        Args:
+            comments (List[Dict[str, Any]]): List of review comment dictionaries
+            review_id (str): Review ID
+
+        Returns:
+            List[Dict[str, Any]]: Enriched comments with review ID added
+        """
+        for comment in comments:
+            comment["reviewId"] = review_id
+        return comments

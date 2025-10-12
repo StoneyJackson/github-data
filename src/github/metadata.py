@@ -7,7 +7,7 @@ issue and comment bodies during restore operations.
 
 from datetime import datetime
 
-from ..entities import Issue, Comment, PullRequest, PullRequestComment
+from ..entities import Issue, Comment, PullRequest, PullRequestComment, PullRequestReview, PullRequestReviewComment
 
 
 def add_issue_metadata_footer(issue: Issue) -> str:
@@ -165,6 +165,85 @@ def _format_pr_comment_metadata(comment: PullRequestComment) -> str:
     # Only add update time if different from creation time
     if comment.updated_at != comment.created_at:
         metadata_lines.append(f"*Last updated on {updated_at}*")
+
+    return "\n".join(metadata_lines)
+
+
+def add_pr_review_metadata_footer(review: PullRequestReview) -> str:
+    """
+    Add original metadata footer to a pull request review body.
+
+    Args:
+        review: The original pull request review with metadata to preserve
+
+    Returns:
+        The review body with metadata footer appended
+    """
+    original_body = review.body or ""
+    metadata_footer = _format_pr_review_metadata(review)
+
+    if original_body:
+        return f"{original_body}\n\n{metadata_footer}"
+    else:
+        return metadata_footer
+
+
+def add_pr_review_comment_metadata_footer(comment: PullRequestReviewComment) -> str:
+    """
+    Add original metadata footer to a pull request review comment body.
+
+    Args:
+        comment: The original pull request review comment with metadata to preserve
+
+    Returns:
+        The review comment body with metadata footer appended
+    """
+    original_body = comment.body
+    metadata_footer = _format_pr_review_comment_metadata(comment)
+
+    return f"{original_body}\n\n{metadata_footer}"
+
+
+def _format_pr_review_metadata(review: PullRequestReview) -> str:
+    """Format PR review metadata into a readable footer."""
+    author = review.user.login
+    submitted_at = _format_datetime(review.submitted_at) if review.submitted_at else "Unknown"
+
+    metadata_lines = [
+        "",
+        "---",
+        "*Original Review Metadata:*",
+        f"- **Original ID:** {review.id}",
+        f"- **Original Reviewer:** @{author}",
+        f"- **Original State:** {review.state}",
+        f"- **Original Submitted:** {submitted_at}",
+        f"- **Original URL:** {review.html_url}"
+    ]
+
+    return "\n".join(metadata_lines)
+
+
+def _format_pr_review_comment_metadata(comment: PullRequestReviewComment) -> str:
+    """Format PR review comment metadata into a readable footer."""
+    author = comment.user.login
+    created_at = _format_datetime(comment.created_at)
+
+    metadata_lines = [
+        "",
+        "---",
+        "*Original Review Comment Metadata:*",
+        f"- **Original ID:** {comment.id}",
+        f"- **Original Author:** @{author}",
+        f"- **Original Path:** {comment.path}",
+    ]
+
+    if comment.line:
+        metadata_lines.append(f"- **Original Line:** {comment.line}")
+
+    metadata_lines.extend([
+        f"- **Original Created:** {created_at}",
+        f"- **Original URL:** {comment.html_url}"
+    ])
 
     return "\n".join(metadata_lines)
 
