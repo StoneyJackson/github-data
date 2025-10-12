@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/StoneyJackson/github-data/compare/v1.6.0...v1.7.0) (2025-10-12)
+
+
+### Features
+
+* selective issue and PR numbers feature ([#28](https://github.com/StoneyJackson/github-data/issues/28)) ([5e3e0ad](https://github.com/StoneyJackson/github-data/commit/5e3e0ad9aab5c7cceb4dbfe2302fc5e3bbe214a3))
+
 # [1.6.0](https://github.com/StoneyJackson/github-data/compare/v1.5.0...v1.6.0) (2025-10-10)
 
 
