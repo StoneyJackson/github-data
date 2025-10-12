@@ -46,6 +46,8 @@ class ConfigBuilder:
             "include_issue_comments": True,
             "include_pull_requests": True,
             "include_pull_request_comments": True,
+            "include_pr_reviews": True,
+            "include_pr_review_comments": True,
             "include_sub_issues": True,
             "git_auth_method": "token",
         }
@@ -105,17 +107,29 @@ class ConfigBuilder:
         self._config["include_pull_request_comments"] = enabled
         return self
 
+    def with_pr_reviews(self, enabled: bool = True) -> "ConfigBuilder":
+        """Enable/disable pull request reviews inclusion."""
+        self._config["include_pr_reviews"] = enabled
+        return self
+
+    def with_pr_review_comments(self, enabled: bool = True) -> "ConfigBuilder":
+        """Enable/disable pull request review comments inclusion."""
+        self._config["include_pr_review_comments"] = enabled
+        return self
+
     def with_sub_issues(self, enabled: bool = True) -> "ConfigBuilder":
         """Enable/disable sub-issues inclusion."""
         self._config["include_sub_issues"] = enabled
         return self
 
     def with_pr_features(
-        self, prs: bool = True, pr_comments: bool = True
+        self, prs: bool = True, pr_comments: bool = True, pr_reviews: bool = True, pr_review_comments: bool = True
     ) -> "ConfigBuilder":
-        """Enable pull request features (both PRs and comments)."""
+        """Enable pull request features (PRs, comments, reviews, and review comments)."""
         self._config["include_pull_requests"] = prs
         self._config["include_pull_request_comments"] = pr_comments
+        self._config["include_pr_reviews"] = pr_reviews
+        self._config["include_pr_review_comments"] = pr_review_comments
         return self
 
     def with_minimal_features(self) -> "ConfigBuilder":
@@ -127,6 +141,8 @@ class ConfigBuilder:
                 "include_issue_comments": False,
                 "include_pull_requests": False,
                 "include_pull_request_comments": False,
+                "include_pr_reviews": False,
+                "include_pr_review_comments": False,
                 "include_sub_issues": False,
             }
         )
@@ -141,6 +157,8 @@ class ConfigBuilder:
                 "include_issue_comments": True,
                 "include_pull_requests": True,
                 "include_pull_request_comments": True,
+                "include_pr_reviews": True,
+                "include_pr_review_comments": True,
                 "include_sub_issues": True,
             }
         )
@@ -168,6 +186,8 @@ class ConfigBuilder:
             "include_issue_comments": "INCLUDE_ISSUE_COMMENTS",
             "include_pull_requests": "INCLUDE_PULL_REQUESTS",
             "include_pull_request_comments": "INCLUDE_PULL_REQUEST_COMMENTS",
+            "include_pr_reviews": "INCLUDE_PR_REVIEWS",
+            "include_pr_review_comments": "INCLUDE_PR_REVIEW_COMMENTS",
             "include_sub_issues": "INCLUDE_SUB_ISSUES",
             "git_auth_method": "GIT_AUTH_METHOD",
         }

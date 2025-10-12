@@ -41,6 +41,8 @@ class ConfigFactory:
             "include_issue_comments": True,
             "include_pull_requests": True,
             "include_pull_request_comments": True,
+            "include_pr_reviews": True,
+            "include_pr_review_comments": True,
             "include_sub_issues": True,
             "git_auth_method": "token",
         }
@@ -91,6 +93,8 @@ class ConfigFactory:
             "include_issue_comments": False,
             "include_pull_requests": False,
             "include_pull_request_comments": False,
+            "include_pr_reviews": False,
+            "include_pr_review_comments": False,
             "include_sub_issues": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})
@@ -113,6 +117,8 @@ class ConfigFactory:
             "include_issue_comments": True,
             "include_pull_requests": True,
             "include_pull_request_comments": True,
+            "include_pr_reviews": True,
+            "include_pr_review_comments": True,
             "include_sub_issues": True,
         }
         return ApplicationConfig(**{**defaults, **overrides})
@@ -132,6 +138,8 @@ class ConfigFactory:
             **ConfigFactory._get_base_defaults(),
             "include_pull_requests": True,
             "include_pull_request_comments": True,
+            "include_pr_reviews": True,
+            "include_pr_review_comments": True,
         }
         return ApplicationConfig(**{**defaults, **overrides})
 
@@ -153,6 +161,8 @@ class ConfigFactory:
             "include_issue_comments": True,
             "include_pull_requests": False,
             "include_pull_request_comments": False,
+            "include_pr_reviews": False,
+            "include_pr_review_comments": False,
             "include_sub_issues": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})
@@ -175,6 +185,8 @@ class ConfigFactory:
             "include_issue_comments": False,
             "include_pull_requests": False,
             "include_pull_request_comments": False,
+            "include_pr_reviews": False,
+            "include_pr_review_comments": False,
             "include_sub_issues": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})

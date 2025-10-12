@@ -53,6 +53,15 @@ class StrategyFactory:
 
             strategies.append(PullRequestsSaveStrategy(config.include_pull_requests))
 
+            if config.include_pr_reviews:
+                from src.operations.save.strategies.pr_reviews_strategy import (
+                    PullRequestReviewsSaveStrategy,
+                )
+
+                # Determine if we're in selective mode
+                selective_mode = isinstance(config.include_pull_requests, set)
+                strategies.append(PullRequestReviewsSaveStrategy(selective_mode))
+
             if config.include_pull_request_comments:
                 from src.operations.save.strategies.pr_comments_strategy import (
                     PullRequestCommentsSaveStrategy,
@@ -61,6 +70,15 @@ class StrategyFactory:
                 # Determine if we're in selective mode
                 selective_mode = isinstance(config.include_pull_requests, set)
                 strategies.append(PullRequestCommentsSaveStrategy(selective_mode))
+
+            if config.include_pr_review_comments:
+                from src.operations.save.strategies.pr_review_comments_strategy import (
+                    PullRequestReviewCommentsSaveStrategy,
+                )
+
+                # Determine if we're in selective mode
+                selective_mode = isinstance(config.include_pull_requests, set)
+                strategies.append(PullRequestReviewCommentsSaveStrategy(selective_mode))
         elif config.include_pull_request_comments:
             # Warn if PR comments are enabled but PRs are not
             logging.warning(
@@ -150,6 +168,15 @@ class StrategyFactory:
                 )
             )
 
+            if config.include_pr_reviews:
+                from src.operations.restore.strategies.pr_reviews_strategy import (
+                    PullRequestReviewsRestoreStrategy,
+                )
+
+                strategies.append(
+                    PullRequestReviewsRestoreStrategy(include_original_metadata)
+                )
+
             if config.include_pull_request_comments:
                 from src.operations.restore.strategies.pr_comments_strategy import (
                     PullRequestCommentsRestoreStrategy,
@@ -161,6 +188,15 @@ class StrategyFactory:
                     PullRequestCommentsRestoreStrategy(
                         pr_comment_conflict_strategy, include_original_metadata
                     )
+                )
+
+            if config.include_pr_review_comments:
+                from src.operations.restore.strategies.pr_review_comments_strategy import (
+                    PullRequestReviewCommentsRestoreStrategy,
+                )
+
+                strategies.append(
+                    PullRequestReviewCommentsRestoreStrategy(include_original_metadata)
                 )
         elif config.include_pull_request_comments:
             # Warn if PR comments are enabled but PRs are not

@@ -100,6 +100,42 @@ class GitHubService(RepositoryService):
             operation=lambda: self._boundary.get_all_pull_request_comments(repo_name),
         )
 
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pr_reviews:{repo_name}:{pr_number}",
+            operation=lambda: self._boundary.get_pull_request_reviews(
+                repo_name, pr_number
+            ),
+        )
+
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_pr_reviews:{repo_name}",
+            operation=lambda: self._boundary.get_all_pull_request_reviews(repo_name),
+        )
+
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pr_review_comments:{repo_name}:{review_id}",
+            operation=lambda: self._boundary.get_pull_request_review_comments(
+                repo_name, review_id
+            ),
+        )
+
+    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request review comments with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_pr_review_comments:{repo_name}",
+            operation=lambda: self._boundary.get_all_pull_request_review_comments(repo_name),
+        )
+
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issue relationships from repository with caching."""
         return self._execute_with_cross_cutting_concerns(
