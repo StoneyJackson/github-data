@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from .strategy import SaveEntityStrategy
 from src.config.settings import ApplicationConfig
 from src.operations.strategy_factory import StrategyFactory
+from src.operations.dependency_resolver import DependencyResolver
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
@@ -26,6 +27,7 @@ class StrategyBasedSaveOrchestrator:
         self._storage_service = storage_service
         self._strategies: Dict[str, SaveEntityStrategy] = {}
         self._context: Dict[str, Any] = {}
+        self._dependency_resolver = DependencyResolver()
 
         # Auto-register strategies based on configuration
         for strategy in StrategyFactory.create_save_strategies(config, git_service):
@@ -48,7 +50,9 @@ class StrategyBasedSaveOrchestrator:
         results = []
 
         # Resolve dependency order
-        execution_order = self._resolve_execution_order(requested_entities)
+        execution_order = self._dependency_resolver.resolve_execution_order(
+            self._strategies, requested_entities
+        )
 
         # Execute strategies in dependency order
         for entity_name in execution_order:
@@ -57,30 +61,6 @@ class StrategyBasedSaveOrchestrator:
                 results.append(result)
 
         return results
-
-    def _resolve_execution_order(self, requested_entities: List[str]) -> List[str]:
-        """Resolve execution order based on dependencies."""
-        resolved = []
-        remaining = set(requested_entities)
-
-        while remaining:
-            ready = []
-            for entity in remaining:
-                if entity in self._strategies:
-                    deps = self._strategies[entity].get_dependencies()
-                    if all(
-                        dep in resolved or dep not in requested_entities for dep in deps
-                    ):
-                        ready.append(entity)
-
-            if not ready:
-                raise ValueError(f"Circular dependency detected in: {remaining}")
-
-            for entity in ready:
-                resolved.append(entity)
-                remaining.remove(entity)
-
-        return resolved
 
     def _is_selective_mode(self, entity_name: str) -> bool:
         """Check if we're in selective mode for the given entity type."""

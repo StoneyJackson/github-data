@@ -47,6 +47,20 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             }
         ]
 
+    def get_converter_name(self) -> str:
+        """Return the converter function name for this entity type."""
+        # Git repository strategy doesn't use standard converter pattern
+        raise NotImplementedError(
+            "Git repository strategy uses custom collection pattern"
+        )
+
+    def get_service_method(self) -> str:
+        """Return the GitHub service method name for this entity type."""
+        # Git repository strategy doesn't use standard service method pattern
+        raise NotImplementedError(
+            "Git repository strategy uses custom collection pattern"
+        )
+
     def process_data(
         self, entities: List[Dict[str, Any]], context: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
