@@ -1,7 +1,9 @@
 """Base strategy interfaces for entity save operations."""
 
+import time
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, TYPE_CHECKING
+from pathlib import Path
+from typing import List, Dict, Any, TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
@@ -21,11 +23,29 @@ class SaveEntityStrategy(ABC):
         """Return list of entity types this entity depends on."""
         pass
 
-    @abstractmethod
     def collect_data(
         self, github_service: "RepositoryService", repo_name: str
     ) -> List[Any]:
-        """Collect entity data from GitHub API."""
+        """Template method for standard data collection pattern."""
+        converter_name = self.get_converter_name()
+        service_method = self.get_service_method()
+
+        raw_data = getattr(github_service, service_method)(repo_name)
+
+        # Import converters dynamically to avoid circular imports
+        from src.github import converters
+
+        converter = getattr(converters, converter_name)
+        return [converter(item) for item in raw_data]
+
+    @abstractmethod
+    def get_converter_name(self) -> str:
+        """Return the converter function name for this entity type."""
+        pass
+
+    @abstractmethod
+    def get_service_method(self) -> str:
+        """Return the GitHub service method name for this entity type."""
         pass
 
     @abstractmethod
@@ -33,12 +53,62 @@ class SaveEntityStrategy(ABC):
         """Process and transform entity data."""
         pass
 
-    @abstractmethod
     def save_data(
         self,
         entities: List[Any],
         output_path: str,
         storage_service: "StorageService",
     ) -> Dict[str, Any]:
-        """Save entity data to storage."""
-        pass
+        """Template method for saving entity data with standardized timing and
+        error handling."""
+        return self._execute_with_timing(
+            lambda: self._perform_save(entities, output_path, storage_service),
+            self.get_entity_name(),
+            len(entities),
+        )
+
+    def _execute_with_timing(
+        self, operation: Callable[[], None], entity_type: str, item_count: int
+    ) -> Dict[str, Any]:
+        """Execute operation with timing and standardized result formatting."""
+        start_time = time.time()
+        try:
+            operation()
+            execution_time = time.time() - start_time
+            return self._success_result(entity_type, item_count, execution_time)
+        except Exception as e:
+            execution_time = time.time() - start_time
+            return self._error_result(entity_type, str(e), execution_time)
+
+    def _perform_save(
+        self, entities: List[Any], output_path: str, storage_service: "StorageService"
+    ) -> None:
+        """Standard save implementation using entity name."""
+        output_dir = Path(output_path)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        entity_file = output_dir / f"{self.get_entity_name()}.json"
+        storage_service.save_data(entities, entity_file)
+
+    def _success_result(
+        self, entity_type: str, item_count: int, execution_time: float
+    ) -> Dict[str, Any]:
+        """Standard success result format."""
+        return {
+            "success": True,
+            "data_type": entity_type,
+            "items_processed": item_count,
+            "execution_time_seconds": execution_time,
+        }
+
+    def _error_result(
+        self, entity_type: str, error_message: str, execution_time: float
+    ) -> Dict[str, Any]:
+        """Standard error result format."""
+        return {
+            "success": False,
+            "data_type": entity_type,
+            "items_processed": 0,
+            "error_message": error_message,
+            "execution_time_seconds": execution_time,
+        }
