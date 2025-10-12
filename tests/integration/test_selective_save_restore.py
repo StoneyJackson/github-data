@@ -452,6 +452,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -504,6 +506,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=False,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -547,6 +551,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests={10, 11, 12},  # PRs #10, #11, #12
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -628,6 +634,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -652,6 +660,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -707,6 +717,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -731,6 +743,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -773,6 +787,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -816,6 +832,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -841,6 +859,8 @@ class TestSelectiveSaveRestore:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )

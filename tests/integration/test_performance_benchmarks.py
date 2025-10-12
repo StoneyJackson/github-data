@@ -336,6 +336,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1010)},  # Only 10 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -364,6 +366,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests=True,  # All PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -429,6 +433,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1005)},  # 5 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -445,6 +451,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1050)},  # 50 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -461,6 +469,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1250)},  # 250 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -544,6 +554,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests=False,  # No PRs
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -584,6 +596,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1450)},  # 450 out of 500 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -639,6 +653,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,  # Comments enabled
             include_pull_requests={i for i in range(1000, 1100)},  # 100 PRs
             include_pull_request_comments=True,  # Comments enabled
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -664,6 +680,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=False,  # Comments disabled
             include_pull_requests={i for i in range(1000, 1100)},  # 100 PRs
             include_pull_request_comments=False,  # Comments disabled
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -712,6 +730,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests=True,
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -748,6 +768,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1005)},  # Only 5 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -788,6 +810,8 @@ class TestPerformanceBenchmarks:
             include_issue_comments=True,
             include_pull_requests={i for i in range(1000, 1050)},  # 50 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )

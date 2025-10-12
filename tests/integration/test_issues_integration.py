@@ -117,6 +117,10 @@ class TestIssuesIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary
         mock_boundary = Mock()
@@ -323,6 +327,10 @@ class TestIssuesIntegration:
 
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Test restoration
         github_service = create_github_service("fake-token")
@@ -442,6 +450,10 @@ class TestIssuesIntegration:
             json.dump([], f)
 
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Test restoration

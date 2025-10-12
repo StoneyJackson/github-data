@@ -270,6 +270,10 @@ class TestPrCommentsEdgeCasesIntegration:
         # Create corrupted pr_comments.json
         with open(temp_path / "pr_comments.json", "w") as f:
             f.write("{ invalid json content }")
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -370,6 +374,10 @@ class TestPrCommentsEdgeCasesIntegration:
                 },
             ]
             json.dump(valid_pr_comments, f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -508,6 +516,10 @@ class TestPrCommentsEdgeCasesIntegration:
             json.dump(pull_requests, f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(pr_comments, f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)

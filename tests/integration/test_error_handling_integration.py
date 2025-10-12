@@ -55,6 +55,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock to simulate GitHub API failures
         mock_boundary = Mock()
@@ -106,6 +110,10 @@ class TestErrorHandlingIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Setup mock boundary for repository access validation

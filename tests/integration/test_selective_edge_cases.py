@@ -206,6 +206,8 @@ class TestSelectiveEdgeCases:
                 include_issue_comments=True,
                 include_pull_requests=False,
                 include_pull_request_comments=False,
+                include_pr_reviews=False,
+                include_pr_review_comments=False,
                 include_sub_issues=False,
                 git_auth_method="token",
             )
@@ -231,6 +233,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={115},  # Single PR
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -295,6 +299,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={i for i in range(50, 200)},  # 50-199 range
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -342,6 +348,8 @@ class TestSelectiveEdgeCases:
                 include_issue_comments=True,
                 include_pull_requests=False,
                 include_pull_request_comments=False,
+                include_pr_reviews=False,
+                include_pr_review_comments=False,
                 include_sub_issues=False,
                 git_auth_method="token",
             )
@@ -361,6 +369,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={999, 1000},  # Non-existent PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -405,6 +415,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={100, 105, 110, 111, 112, 125},  # Mixed PR selection
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -477,6 +489,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={10, 11, 12},  # Request PRs that don't exist
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -511,6 +525,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={100, 101, 200, 300},  # 100-101 exist, 200,300 don't
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -557,6 +573,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={100, 110},  # Save only these
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -581,6 +599,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests={100, 110, 120, 130},  # 120, 130 don't exist
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -640,6 +660,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests=set(range(100, 125)),  # 25 out of 30 PRs
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -703,6 +725,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=True,
             include_pull_requests=extreme_selection,
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -738,6 +762,8 @@ class TestSelectiveEdgeCases:
             include_issue_comments=False,  # Disabled
             include_pull_requests={100, 101},
             include_pull_request_comments=False,  # Disabled
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -779,6 +805,8 @@ class TestSelectiveEdgeCases:
                 include_issue_comments=True,
                 include_pull_requests={-5, 0},  # Invalid numbers
                 include_pull_request_comments=True,
+                include_pr_reviews=False,
+                include_pr_review_comments=False,
                 include_sub_issues=False,
                 git_auth_method="invalid_auth",  # Invalid
             )

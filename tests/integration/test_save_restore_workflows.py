@@ -154,6 +154,10 @@ class TestSaveRestoreWorkflows:
             json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump(sample_github_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for creation operations
         mock_boundary = Mock()

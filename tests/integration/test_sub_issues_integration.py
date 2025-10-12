@@ -105,6 +105,10 @@ class TestSubIssuesIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -162,6 +166,10 @@ class TestSubIssuesIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Execute restore operation
@@ -318,6 +326,10 @@ class TestSubIssuesIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -383,6 +395,10 @@ class TestSubIssuesIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Execute restore operation

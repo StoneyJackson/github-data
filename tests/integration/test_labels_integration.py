@@ -69,6 +69,10 @@ class TestLabelsIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary
         mock_boundary = Mock()
@@ -160,6 +164,10 @@ class TestLabelsIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary to simulate existing labels
         mock_boundary = Mock()
@@ -230,6 +238,10 @@ class TestLabelsIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Setup mock boundary
@@ -401,6 +413,10 @@ class TestLabelsIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Setup mock boundary

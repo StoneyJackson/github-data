@@ -406,6 +406,10 @@ class TestSaveRestoreIntegration:
             json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump(sample_github_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for creation operations
         mock_boundary = Mock()
@@ -1138,6 +1142,10 @@ class TestSaveRestoreIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary
         mock_boundary = Mock()
@@ -1267,6 +1275,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock to simulate GitHub API failures
         mock_boundary = Mock()
@@ -1318,6 +1330,10 @@ class TestErrorHandlingIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Setup mock boundary for repository access validation
@@ -1540,6 +1556,10 @@ class TestErrorHandlingIntegration:
 
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Test restoration
         github_service = create_github_service("fake-token")
@@ -1663,6 +1683,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
 
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Test restoration

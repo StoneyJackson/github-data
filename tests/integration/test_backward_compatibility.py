@@ -332,6 +332,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -379,6 +381,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,  # Should be ignored with warning
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -424,6 +428,8 @@ class TestBackwardCompatibility:
             include_issue_comments=False,
             include_pull_requests=True,  # Boolean True (Phase 1 behavior)
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -466,6 +472,8 @@ class TestBackwardCompatibility:
             include_issue_comments=False,
             include_pull_requests=False,  # Boolean False (Phase 1 behavior)
             include_pull_request_comments=True,  # Should be ignored with warning
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -511,6 +519,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,  # Boolean True
             include_pull_requests=True,  # Boolean True
             include_pull_request_comments=True,  # Boolean True
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -563,6 +573,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,
             include_pull_requests={10},  # Selective (only PR 10)
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -619,6 +631,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,
             include_pull_requests=True,  # Boolean True
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -643,6 +657,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,
             include_pull_requests=True,  # Boolean True (restore all)
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -710,6 +726,8 @@ class TestBackwardCompatibility:
                     include_issue_comments=True,
                     include_pull_requests=True,
                     include_pull_request_comments=True,
+                    include_pr_reviews=False,
+                    include_pr_review_comments=False,
                     include_sub_issues=False,
                     git_auth_method="token",
                 )
@@ -757,6 +775,8 @@ class TestBackwardCompatibility:
             include_issue_comments=True,  # Should trigger warning
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -783,6 +803,8 @@ class TestBackwardCompatibility:
             include_issue_comments=False,
             include_pull_requests=False,  # Boolean False
             include_pull_request_comments=True,  # Should trigger warning
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )

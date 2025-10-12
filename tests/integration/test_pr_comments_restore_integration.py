@@ -198,6 +198,10 @@ class TestPrCommentsRestoreIntegration:
             json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -281,6 +285,10 @@ class TestPrCommentsRestoreIntegration:
             json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -340,6 +348,10 @@ class TestPrCommentsRestoreIntegration:
             json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -583,6 +595,10 @@ class TestPrCommentsRestoreIntegration:
         # Note: no pull_requests.json file
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)

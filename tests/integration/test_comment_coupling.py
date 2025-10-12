@@ -387,6 +387,8 @@ class TestCommentCoupling:
             include_issue_comments=True,  # Comments enabled
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -442,6 +444,8 @@ class TestCommentCoupling:
             include_issue_comments=False,  # Comments explicitly disabled
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -483,6 +487,8 @@ class TestCommentCoupling:
             include_issue_comments=False,
             include_pull_requests={100},  # Only PR #100
             include_pull_request_comments=True,  # Comments enabled
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -538,6 +544,8 @@ class TestCommentCoupling:
             include_issue_comments=False,
             include_pull_requests={200},  # PR #200 selected
             include_pull_request_comments=False,  # Comments explicitly disabled
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -579,6 +587,8 @@ class TestCommentCoupling:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -603,6 +613,8 @@ class TestCommentCoupling:
             include_issue_comments=True,
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -663,6 +675,8 @@ class TestCommentCoupling:
             include_issue_comments=True,
             include_pull_requests={200},  # Only PR #200
             include_pull_request_comments=True,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -731,6 +745,8 @@ class TestCommentCoupling:
             include_issue_comments=True,  # Comments enabled but should be ignored
             include_pull_requests=False,
             include_pull_request_comments=False,
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
@@ -769,6 +785,8 @@ class TestCommentCoupling:
             include_pull_requests=False,  # No PRs selected
             include_pull_request_comments=True,  # PR comments enabled but should be
             # ignored
+            include_pr_reviews=False,
+            include_pr_review_comments=False,
             include_sub_issues=False,
             git_auth_method="token",
         )
