@@ -151,14 +151,12 @@ class GitHubRestApiClient:
         self, repo_name: str, review_id: str, body: str
     ) -> Dict[str, Any]:
         """Create a new pull request review comment and return raw JSON data."""
-        repo = self._get_repository(repo_name)
         # Note: PyGithub doesn't have direct support for creating review comments
         # This would require direct API calls using requests
         # For now, we'll implement a basic version that may need enhancement
         try:
             # This is a simplified implementation - in production you'd want
             # to use the GitHub API directly for review comments
-            review = repo.get_pull_request_review(review_id)
             # PyGithub doesn't support creating review comments directly
             # This would need to be implemented using direct REST API calls
             raise NotImplementedError(
@@ -170,7 +168,7 @@ class GitHubRestApiClient:
                 "id": f"mock_{review_id}",
                 "body": body,
                 "review_id": review_id,
-                "error": str(e)
+                "error": str(e),
             }
 
     # Sub-Issues Operations (Direct REST API)

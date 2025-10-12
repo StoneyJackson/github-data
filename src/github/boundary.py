@@ -146,9 +146,13 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         self, repo_name: str, review_id: str
     ) -> List[Dict[str, Any]]:
         """Get comments for specific pull request review using GraphQL."""
-        return self._graphql_client.get_pull_request_review_comments(repo_name, review_id)
+        return self._graphql_client.get_pull_request_review_comments(
+            repo_name, review_id
+        )
 
-    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
         """Get all pull request review comments using GraphQL for performance."""
         return self._graphql_client.get_all_pull_request_review_comments(repo_name)
 
@@ -156,13 +160,17 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         self, repo_name: str, pr_number: int, body: str, state: str
     ) -> Dict[str, Any]:
         """Create a new pull request review and return raw JSON data."""
-        return self._rest_client.create_pull_request_review(repo_name, pr_number, body, state)
+        return self._rest_client.create_pull_request_review(
+            repo_name, pr_number, body, state
+        )
 
     def create_pull_request_review_comment(
         self, repo_name: str, review_id: str, body: str
     ) -> Dict[str, Any]:
         """Create a new pull request review comment and return raw JSON data."""
-        return self._rest_client.create_pull_request_review_comment(repo_name, review_id, body)
+        return self._rest_client.create_pull_request_review_comment(
+            repo_name, review_id, body
+        )
 
     # Public API - Sub-Issues Operations (GraphQL)
 

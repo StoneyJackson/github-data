@@ -406,9 +406,7 @@ class TestStrategyFactoryPullRequestReviews:
         self, config_with_prs_and_reviews
     ):
         """Test save strategy creation with PR reviews enabled."""
-        strategies = StrategyFactory.create_save_strategies(
-            config_with_prs_and_reviews
-        )
+        strategies = StrategyFactory.create_save_strategies(config_with_prs_and_reviews)
 
         strategy_types = [type(s).__name__ for s in strategies]
         assert "LabelsSaveStrategy" in strategy_types

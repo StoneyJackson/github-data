@@ -7,7 +7,14 @@ issue and comment bodies during restore operations.
 
 from datetime import datetime
 
-from ..entities import Issue, Comment, PullRequest, PullRequestComment, PullRequestReview, PullRequestReviewComment
+from ..entities import (
+    Issue,
+    Comment,
+    PullRequest,
+    PullRequestComment,
+    PullRequestReview,
+    PullRequestReviewComment,
+)
 
 
 def add_issue_metadata_footer(issue: Issue) -> str:
@@ -207,7 +214,9 @@ def add_pr_review_comment_metadata_footer(comment: PullRequestReviewComment) -> 
 def _format_pr_review_metadata(review: PullRequestReview) -> str:
     """Format PR review metadata into a readable footer."""
     author = review.user.login
-    submitted_at = _format_datetime(review.submitted_at) if review.submitted_at else "Unknown"
+    submitted_at = (
+        _format_datetime(review.submitted_at) if review.submitted_at else "Unknown"
+    )
 
     metadata_lines = [
         "",
@@ -217,7 +226,7 @@ def _format_pr_review_metadata(review: PullRequestReview) -> str:
         f"- **Original Reviewer:** @{author}",
         f"- **Original State:** {review.state}",
         f"- **Original Submitted:** {submitted_at}",
-        f"- **Original URL:** {review.html_url}"
+        f"- **Original URL:** {review.html_url}",
     ]
 
     return "\n".join(metadata_lines)
@@ -240,10 +249,12 @@ def _format_pr_review_comment_metadata(comment: PullRequestReviewComment) -> str
     if comment.line:
         metadata_lines.append(f"- **Original Line:** {comment.line}")
 
-    metadata_lines.extend([
-        f"- **Original Created:** {created_at}",
-        f"- **Original URL:** {comment.html_url}"
-    ])
+    metadata_lines.extend(
+        [
+            f"- **Original Created:** {created_at}",
+            f"- **Original URL:** {comment.html_url}",
+        ]
+    )
 
     return "\n".join(metadata_lines)
 

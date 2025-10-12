@@ -7,8 +7,7 @@ from ..mixins.entity_coupling import EntityCouplingMixin
 
 
 class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrategy):
-    """Strategy for saving repository PR review comments with selective filtering based on
-    included PR reviews and pull requests."""
+    """Strategy for saving repository PR review comments with selective filtering."""
 
     def __init__(self, selective_mode: bool = False):
         """Initialize PR review comments save strategy.
@@ -24,7 +23,10 @@ class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrat
 
     def get_dependencies(self) -> List[str]:
         """Return list of entity types this entity depends on."""
-        return ["pr_reviews", "pull_requests"]  # PR review comments depend on both reviews and PRs
+        return [
+            "pr_reviews",
+            "pull_requests",
+        ]  # PR review comments depend on both reviews and PRs
 
     def get_converter_name(self) -> str:
         """Return the converter function name for this entity type."""
@@ -39,9 +41,11 @@ class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrat
         saved_reviews = context.get("pr_reviews", [])
         # Filter by reviews first, then by PRs
         filtered_by_reviews = self.filter_children_by_reviews(entities, saved_reviews)
-        
+
         saved_prs = context.get("pull_requests", [])
-        return self.filter_children_by_parents(filtered_by_reviews, saved_prs, "pull_requests")
+        return self.filter_children_by_parents(
+            filtered_by_reviews, saved_prs, "pull_requests"
+        )
 
     def get_parent_entity_name(self) -> str:
         """Return parent entity name."""
@@ -55,17 +59,19 @@ class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrat
         """Extract pull request URL from review comment."""
         return getattr(child, "pull_request_url", "")
 
-    def filter_children_by_reviews(self, children: List[Any], saved_reviews: List[Any]) -> List[Any]:
+    def filter_children_by_reviews(
+        self, children: List[Any], saved_reviews: List[Any]
+    ) -> List[Any]:
         """Filter review comments by saved reviews."""
         if not saved_reviews:
             return []
-        
+
         saved_review_ids = {str(getattr(review, "id", "")) for review in saved_reviews}
-        
+
         filtered_children = []
         for child in children:
             review_id = str(getattr(child, "review_id", ""))
             if review_id in saved_review_ids:
                 filtered_children.append(child)
-        
+
         return filtered_children

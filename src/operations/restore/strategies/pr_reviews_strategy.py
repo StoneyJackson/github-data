@@ -69,10 +69,10 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
         entity_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         github_service.create_pull_request_review(
-            repo_name, 
-            entity_data["pr_number"], 
-            entity_data["body"], 
-            entity_data["state"]
+            repo_name,
+            entity_data["pr_number"],
+            entity_data["body"],
+            entity_data["state"],
         )
         return {"pr_number": entity_data["pr_number"]}
 

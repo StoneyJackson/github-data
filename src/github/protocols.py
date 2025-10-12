@@ -73,7 +73,9 @@ class RepositoryService(ABC):
         pass
 
     @abstractmethod
-    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
         """Get all pull request review comments."""
         pass
 
@@ -270,7 +272,9 @@ class GitHubApiBoundary(ABC):
         pass
 
     @abstractmethod
-    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
         """Get all pull request review comments from GitHub API."""
         pass
 

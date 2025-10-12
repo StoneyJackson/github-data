@@ -191,7 +191,7 @@ class StrategyFactory:
                 )
 
             if config.include_pr_review_comments:
-                from src.operations.restore.strategies.pr_review_comments_strategy import (
+                from src.operations.restore.strategies.pr_review_comments_strategy import (  # noqa: E501
                     PullRequestReviewCommentsRestoreStrategy,
                 )
 

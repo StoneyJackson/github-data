@@ -68,9 +68,7 @@ class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
         entity_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         github_service.create_pull_request_review_comment(
-            repo_name, 
-            entity_data["review_id"], 
-            entity_data["body"]
+            repo_name, entity_data["review_id"], entity_data["body"]
         )
         return {"review_id": entity_data["review_id"]}
 

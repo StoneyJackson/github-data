@@ -8,7 +8,12 @@ sub-issues, and rate limits using GraphQL for better performance.
 
 from typing import Dict, List, Any
 from .utils.graphql_paginator import GraphQLPaginator
-from .utils.data_enrichment import CommentEnricher, SubIssueRelationshipBuilder, ReviewEnricher, ReviewCommentEnricher
+from .utils.data_enrichment import (
+    CommentEnricher,
+    SubIssueRelationshipBuilder,
+    ReviewEnricher,
+    ReviewCommentEnricher,
+)
 
 # Required GraphQL imports
 from gql import Client
@@ -343,7 +348,9 @@ class GitHubGraphQLClient:
             comments_nodes: List[Dict[str, Any]],
         ) -> List[Dict[str, Any]]:
             """Post-process review comments with additional metadata."""
-            return ReviewCommentEnricher.enrich_review_comments(comments_nodes, review_id)
+            return ReviewCommentEnricher.enrich_review_comments(
+                comments_nodes, review_id
+            )
 
         paginator = GraphQLPaginator(self._gql_client)
         all_comments = paginator.paginate_all(
@@ -359,7 +366,9 @@ class GitHubGraphQLClient:
 
         return convert_graphql_review_comments_to_rest_format(all_comments)
 
-    def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
         """Get all review comments from all reviews using GraphQL for performance."""
         owner, name = self._parse_repo_name(repo_name)
 

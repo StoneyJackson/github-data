@@ -221,7 +221,7 @@ class ReviewEnricher:
 
 
 class ReviewCommentEnricher:
-    """Utility for enriching GitHub pull request review comments with additional metadata."""
+    """Utility for enriching GitHub pull request review comments."""
 
     @staticmethod
     def enrich_review_comments(

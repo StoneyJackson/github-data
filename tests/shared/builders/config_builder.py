@@ -123,9 +123,13 @@ class ConfigBuilder:
         return self
 
     def with_pr_features(
-        self, prs: bool = True, pr_comments: bool = True, pr_reviews: bool = True, pr_review_comments: bool = True
+        self,
+        prs: bool = True,
+        pr_comments: bool = True,
+        pr_reviews: bool = True,
+        pr_review_comments: bool = True,
     ) -> "ConfigBuilder":
-        """Enable pull request features (PRs, comments, reviews, and review comments)."""
+        """Enable pull request features (PRs, comments, reviews, review comments)."""
         self._config["include_pull_requests"] = prs
         self._config["include_pull_request_comments"] = pr_comments
         self._config["include_pr_reviews"] = pr_reviews

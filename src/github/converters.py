@@ -147,8 +147,12 @@ def convert_to_pr_review(api_data: Dict[str, Any]) -> PullRequestReview:
         html_url=api_data["html_url"],
         pull_request_url=api_data.get("pull_request_url", ""),
         author_association=api_data.get("author_association", ""),
-        submitted_at=_parse_datetime(api_data["submitted_at"]) if api_data.get("submitted_at") else None,
-        commit_id=api_data.get("commit_id")
+        submitted_at=(
+            _parse_datetime(api_data["submitted_at"])
+            if api_data.get("submitted_at")
+            else None
+        ),
+        commit_id=api_data.get("commit_id"),
     )
 
 
@@ -167,7 +171,7 @@ def convert_to_pr_review_comment(api_data: Dict[str, Any]) -> PullRequestReviewC
         updated_at=_parse_datetime(api_data["updated_at"]),
         html_url=api_data["html_url"],
         pull_request_url=api_data.get("pull_request_url", ""),
-        in_reply_to_id=api_data.get("in_reply_to_id")
+        in_reply_to_id=api_data.get("in_reply_to_id"),
     )
 
 
@@ -178,7 +182,7 @@ def _extract_pr_number_from_url(url: str) -> int:
     try:
         # URL format: https://github.com/owner/repo/pull/123
         # or: https://api.github.com/repos/owner/repo/pulls/123
-        parts = url.rstrip('/').split('/')
+        parts = url.rstrip("/").split("/")
         return int(parts[-1])
     except (ValueError, IndexError):
         return 0

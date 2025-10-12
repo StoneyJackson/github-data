@@ -42,9 +42,9 @@ def config_with_pr_comments_only():
 def config_with_prs_no_comments():
     """Configuration with pull requests enabled but comments disabled."""
     return ConfigFactory.create_save_config(
-        include_pull_requests=True, 
+        include_pull_requests=True,
         include_pull_request_comments=False,
-        include_pr_review_comments=False
+        include_pr_review_comments=False,
     )
 
 
@@ -58,9 +58,9 @@ def config_with_prs_and_comments():
 def config_with_prs_and_reviews():
     """Configuration with pull requests and PR reviews enabled."""
     return ConfigFactory.create_save_config(
-        include_pull_requests=True, 
+        include_pull_requests=True,
         include_pr_reviews=True,
-        include_pr_review_comments=False
+        include_pr_review_comments=False,
     )
 
 
@@ -70,7 +70,7 @@ def config_with_pr_reviews_and_comments():
     return ConfigFactory.create_save_config(
         include_pull_requests=True,
         include_pr_reviews=True,
-        include_pr_review_comments=True
+        include_pr_review_comments=True,
     )
 
 
