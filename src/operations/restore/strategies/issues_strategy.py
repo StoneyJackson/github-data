@@ -1,6 +1,6 @@
 """Issues restore strategy implementation."""
 
-from typing import List, Dict, Any, Optional, TYPE_CHECKING
+from typing import List, Dict, Any, Optional, TYPE_CHECKING, Union, Set
 from pathlib import Path
 
 from ..strategy import RestoreEntityStrategy
@@ -12,10 +12,23 @@ if TYPE_CHECKING:
 
 
 class IssuesRestoreStrategy(RestoreEntityStrategy):
-    """Strategy for restoring GitHub issues."""
+    """Strategy for restoring GitHub issues with selective filtering support."""
 
-    def __init__(self, include_original_metadata: bool = True):
+    def __init__(
+        self,
+        include_original_metadata: bool = True,
+        include_issues: Union[bool, Set[int]] = True,
+    ):
+        """Initialize issues restore strategy.
+
+        Args:
+            include_original_metadata: Whether to include original metadata in
+                restored issues
+            include_issues: Boolean for all/none or set of issue numbers for
+                selective filtering
+        """
         self._include_original_metadata = include_original_metadata
+        self._include_issues = include_issues
 
     def get_entity_name(self) -> str:
         return "issues"
@@ -26,8 +39,38 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     def load_data(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[Issue]:
+        """Load and filter issues data based on selection criteria."""
         issues_file = Path(input_path) / "issues.json"
-        return storage_service.load_data(issues_file, Issue)
+        all_issues = storage_service.load_data(issues_file, Issue)
+
+        if isinstance(self._include_issues, bool):
+            if self._include_issues:
+                # Include all issues
+                return all_issues
+            else:
+                # Skip all issues
+                return []
+        else:
+            # Selective filtering: include only specified issue numbers
+            filtered_issues = []
+            for issue in all_issues:
+                if issue.number in self._include_issues:
+                    filtered_issues.append(issue)
+
+            # Log selection results for visibility
+            found_numbers = {issue.number for issue in filtered_issues}
+            missing_numbers = self._include_issues - found_numbers
+            if missing_numbers:
+                print(
+                    f"Warning: Issues not found in saved data: "
+                    f"{sorted(missing_numbers)}"
+                )
+
+            print(
+                f"Selected {len(filtered_issues)} issues from "
+                f"{len(all_issues)} total for restoration"
+            )
+            return filtered_issues
 
     def transform_for_creation(
         self, issue: Issue, context: Dict[str, Any]

@@ -134,12 +134,15 @@ class TestIncludeIssuesFeature:
                         assert config.include_issue_comments is False
 
     def test_boolean_parsing_edge_cases(self):
-        """Test various boolean value formats for INCLUDE_ISSUES."""
-        test_cases = [
+        """Test various value formats for INCLUDE_ISSUES."""
+        base_env = ConfigBuilder().with_data_path("/tmp/test").as_env_dict()
+        base_env.pop("INCLUDE_ISSUES", None)  # Remove so we can test individual values
+
+        # Test boolean values
+        boolean_test_cases = [
             ("true", True),
             ("True", True),
             ("TRUE", True),
-            ("1", True),
             ("yes", True),
             ("YES", True),
             ("on", True),
@@ -147,24 +150,43 @@ class TestIncludeIssuesFeature:
             ("false", False),
             ("False", False),
             ("FALSE", False),
-            ("0", False),
             ("no", False),
             ("NO", False),
             ("off", False),
             ("OFF", False),
-            ("invalid", False),  # Invalid values default to False
-            ("", False),  # Empty string defaults to False
         ]
 
-        base_env = ConfigBuilder().with_data_path("/tmp/test").as_env_dict()
-        base_env.pop("INCLUDE_ISSUES", None)  # Remove so we can test individual values
-
-        for value, expected in test_cases:
+        for value, expected in boolean_test_cases:
             env_vars = {**base_env, "INCLUDE_ISSUES": value}
-
             with patch.dict(os.environ, env_vars, clear=True):
                 config = ApplicationConfig.from_environment()
-                assert config.include_issues == expected, f"Failed for value: '{value}'"
+                assert (
+                    config.include_issues == expected
+                ), f"Failed for boolean value: '{value}'"
+
+        # Test number specifications (new feature)
+        number_test_cases = [
+            ("1", {1}),
+            ("5", {5}),
+            ("1,3,5", {1, 3, 5}),
+            ("1-3", {1, 2, 3}),
+        ]
+
+        for value, expected in number_test_cases:
+            env_vars = {**base_env, "INCLUDE_ISSUES": value}
+            with patch.dict(os.environ, env_vars, clear=True):
+                config = ApplicationConfig.from_environment()
+                assert (
+                    config.include_issues == expected
+                ), f"Failed for number spec: '{value}'"
+
+        # Test invalid values (should raise errors)
+        invalid_values = ["invalid", "0", "-1", "abc"]
+        for value in invalid_values:
+            env_vars = {**base_env, "INCLUDE_ISSUES": value}
+            with patch.dict(os.environ, env_vars, clear=True):
+                with pytest.raises(ValueError):
+                    ApplicationConfig.from_environment()
 
 
 # Use shared fixtures from tests.shared instead of local fixtures

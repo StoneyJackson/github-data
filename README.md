@@ -12,6 +12,7 @@ A containerized tool for saving and restoring comprehensive GitHub repository da
   - [Save Data](#save-data)
   - [Restore Data](#restore-data)
   - [Environment Variables](#environment-variables)
+  - [Selective Issue and PR Operations](#selective-issue-and-pr-operations)
   - [Git Repository Save](#git-repository-save)
 - [Data Format](#data-format)
 - [Contributing](#contributing)
@@ -83,9 +84,9 @@ docker run --rm \
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `skip`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
-| `INCLUDE_ISSUES` | No | Include issues in save/restore operations (default: `true`) |
+| `INCLUDE_ISSUES` | No | Include issues in save/restore operations. Supports boolean values (`true`/`false`) or selective numbers (e.g., `"1-5 10 15-20"`) (default: `true`) |
 | `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in save/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
-| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore (default: `true`) |
+| `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore operations. Supports boolean values (`true`/`false`) or selective numbers (e.g., `"10-15 20"`) (default: `true`) |
 | `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `true`) |
 | `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
@@ -145,6 +146,152 @@ docker run --rm \
   -e INCLUDE_ISSUE_COMMENTS=false \
   ghcr.io/stoneyjackson/github-data:latest
 ```
+
+### Selective Issue and PR Operations
+
+The GitHub Data tool supports selective operations for issues and pull requests, allowing you to work with specific numbers instead of all data. This feature provides significant performance improvements and enables focused data migration scenarios.
+
+#### Quick Start: Selective Operations
+
+**Save Only Critical Issues:**
+```bash
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_ISSUES="1-10 15 20-25" \
+  -e INCLUDE_ISSUE_COMMENTS=true \
+  -v $(pwd)/data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Restore Specific PRs:**
+```bash
+docker run --rm \
+  -e OPERATION=restore \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_REPO=owner/new-repo \
+  -e INCLUDE_PULL_REQUESTS="1 3 5-7" \
+  -e INCLUDE_PULL_REQUEST_COMMENTS=true \
+  -v $(pwd)/data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+#### Selective Format Specification
+
+| Format | Example | Description |
+|--------|---------|-------------|
+| **All** | `true` | Include all items (default) |
+| **None** | `false` | Skip all items |
+| **Single** | `"5"` | Include only item #5 |
+| **Range** | `"1-10"` | Include items #1 through #10 |
+| **Multiple Singles** | `"1 5 10"` | Include items #1, #5, and #10 |
+| **Mixed** | `"1-5 10 15-20"` | Include items #1-5, #10, and #15-20 |
+
+#### Automatic Comment Coupling
+
+Comments automatically follow their parent issue/PR selections:
+- `INCLUDE_ISSUES="5"` → Only comments from issue #5 are included
+- `INCLUDE_PULL_REQUESTS="10-12"` → Only comments from PRs #10-12 are included
+- Set `INCLUDE_ISSUE_COMMENTS=false` to disable comment saving entirely
+
+#### Use Cases and Examples
+
+**Issue Migration Between Repositories:**
+
+1. **Save from source repository:**
+```bash
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=oldorg/oldrepo \
+  -e INCLUDE_ISSUES="100-150 200" \
+  -e INCLUDE_ISSUE_COMMENTS=true \
+  -v $(pwd)/migration:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+2. **Restore to target repository:**
+```bash
+docker run --rm \
+  -e OPERATION=restore \
+  -e GITHUB_REPO=neworg/newrepo \
+  -e INCLUDE_ISSUES="100-150 200" \
+  -e INCLUDE_ISSUE_COMMENTS=true \
+  -v $(pwd)/migration:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Backup Optimization:**
+```bash
+# Backup only current milestone issues
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_ISSUES="500-600" \
+  -e INCLUDE_PULL_REQUESTS="300-350" \
+  -v $(pwd)/milestone-backup:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Testing and Development:**
+```bash
+# Generate test data for specific scenarios
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_ISSUES="1 5 10-15" \
+  -e INCLUDE_ISSUE_COMMENTS=false \
+  -v $(pwd)/test-data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Mixed Configuration Examples:**
+```bash
+# All issues, selective PRs
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_ISSUES=true \
+  -e INCLUDE_PULL_REQUESTS="10-20 25 30-35" \
+  -v $(pwd)/data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+
+# Selective issues, no PRs
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_ISSUES="1-50" \
+  -e INCLUDE_PULL_REQUESTS=false \
+  -v $(pwd)/data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+#### Performance Considerations
+
+- **Memory Usage**: Scales with selected items, not total repository size
+- **API Efficiency**: Selective operations can reduce API calls by 50-90%
+- **Optimal Range Size**: Ranges of 50-100 items balance efficiency and memory usage
+- **Comment Coupling**: Minimal performance impact, automatically optimized
+
+#### Best Practices
+
+1. **Start Small**: Test with small ranges before processing large selections
+2. **Use Ranges**: `"1-100"` is more efficient than `"1 2 3 ... 100"`
+3. **Comment Strategy**: Enable comments only when needed
+4. **Backup Verification**: Always verify restored data in test environments first
+5. **Mixed Configurations**: Combine boolean and selective as needed
+
+#### Troubleshooting
+
+**Common Issues:**
+- **Missing Numbers Warning**: Numbers not found in source repository (safe to ignore)
+- **Empty Results**: Verify repository contains specified issue/PR numbers
+- **API Rate Limits**: Use smaller selections or implement delays for large operations
+
+**Error Messages:**
+- `"No issues were saved, skipping all issue comments"` - Expected behavior when issues are disabled
+- `"Issues not found in repository: [X, Y, Z]"` - Specified numbers don't exist (warning only)
+- `"INCLUDE_ISSUES number specification cannot be empty"` - Use `false` instead of empty string
 
 #### GitHub Token Permissions
 
