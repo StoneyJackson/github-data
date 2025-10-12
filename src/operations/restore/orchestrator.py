@@ -6,6 +6,7 @@ from .strategy import RestoreEntityStrategy
 from src.operations.restore.strategies.labels_strategy import OverwriteConflictStrategy
 from src.config.settings import ApplicationConfig
 from src.operations.strategy_factory import StrategyFactory
+from src.operations.dependency_resolver import DependencyResolver
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
@@ -29,6 +30,7 @@ class StrategyBasedRestoreOrchestrator:
         self._storage_service = storage_service
         self._strategies: Dict[str, RestoreEntityStrategy] = {}
         self._context: Dict[str, Any] = {}
+        self._dependency_resolver = DependencyResolver()
 
         # Auto-register strategies based on configuration
         for strategy in StrategyFactory.create_restore_strategies(
@@ -53,7 +55,9 @@ class StrategyBasedRestoreOrchestrator:
         results = []
 
         # Resolve dependency order
-        execution_order = self._resolve_execution_order(requested_entities)
+        execution_order = self._dependency_resolver.resolve_execution_order(
+            self._strategies, requested_entities
+        )
 
         # Execute strategies in dependency order
         for entity_name in execution_order:
@@ -62,32 +66,6 @@ class StrategyBasedRestoreOrchestrator:
                 results.append(result)
 
         return results
-
-    def _resolve_execution_order(self, requested_entities: List[str]) -> List[str]:
-        """Resolve execution order based on dependencies."""
-        resolved = []
-        remaining = set(requested_entities)
-
-        while remaining:
-            # Find entities with no unresolved dependencies
-            ready = []
-            for entity in remaining:
-                if entity in self._strategies:
-                    deps = self._strategies[entity].get_dependencies()
-                    if all(
-                        dep in resolved or dep not in requested_entities for dep in deps
-                    ):
-                        ready.append(entity)
-
-            if not ready:
-                raise ValueError(f"Circular dependency detected in: {remaining}")
-
-            # Add ready entities to resolution order
-            for entity in ready:
-                resolved.append(entity)
-                remaining.remove(entity)
-
-        return resolved
 
     def _execute_strategy(
         self, entity_name: str, repo_name: str, input_path: str
