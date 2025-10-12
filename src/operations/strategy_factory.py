@@ -240,8 +240,12 @@ class StrategyFactory:
 
         if StrategyFactory._is_enabled(config.include_pull_requests):
             entities.append("pull_requests")
+            if config.include_pr_reviews:
+                entities.append("pr_reviews")
             if config.include_pull_request_comments:
                 entities.append("pr_comments")
+            if config.include_pr_review_comments:
+                entities.append("pr_review_comments")
 
         if config.include_sub_issues:
             entities.append("sub_issues")

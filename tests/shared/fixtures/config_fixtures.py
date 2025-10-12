@@ -42,7 +42,9 @@ def config_with_pr_comments_only():
 def config_with_prs_no_comments():
     """Configuration with pull requests enabled but comments disabled."""
     return ConfigFactory.create_save_config(
-        include_pull_requests=True, include_pull_request_comments=False
+        include_pull_requests=True, 
+        include_pull_request_comments=False,
+        include_pr_review_comments=False
     )
 
 
@@ -50,6 +52,26 @@ def config_with_prs_no_comments():
 def config_with_prs_and_comments():
     """Configuration with both pull requests and PR comments enabled."""
     return ConfigFactory.create_pr_config()
+
+
+@pytest.fixture
+def config_with_prs_and_reviews():
+    """Configuration with pull requests and PR reviews enabled."""
+    return ConfigFactory.create_save_config(
+        include_pull_requests=True, 
+        include_pr_reviews=True,
+        include_pr_review_comments=False
+    )
+
+
+@pytest.fixture
+def config_with_pr_reviews_and_comments():
+    """Configuration with PR reviews and review comments enabled."""
+    return ConfigFactory.create_save_config(
+        include_pull_requests=True,
+        include_pr_reviews=True,
+        include_pr_review_comments=True
+    )
 
 
 # Environment variable fixtures have been moved to env_fixtures.py
