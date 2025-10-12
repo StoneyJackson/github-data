@@ -38,6 +38,8 @@ class TestPullRequestIntegration:
         mock_boundary.get_all_pull_request_comments.return_value = sample_pr_data[
             "pr_comments"
         ]
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
 
         # Execute save operation
         github_service = create_github_service("fake_token")

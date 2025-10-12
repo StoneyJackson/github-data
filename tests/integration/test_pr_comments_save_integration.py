@@ -228,6 +228,8 @@ class TestPrCommentsSaveIntegration:
         )
         # Add empty PR comments mock to test exclusion
         mock_boundary.get_all_pull_request_comments.return_value = []
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation

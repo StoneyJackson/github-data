@@ -28,6 +28,8 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequestReview]:
         reviews_file = Path(input_path) / "pr_reviews.json"
+        if not reviews_file.exists():
+            return []  # Return empty list if file doesn't exist
         reviews = storage_service.load_data(reviews_file, PullRequestReview)
         # Sort by submission time for chronological order
         return sorted(reviews, key=lambda r: r.submitted_at or "")

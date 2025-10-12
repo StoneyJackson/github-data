@@ -63,6 +63,30 @@ class MockGitHubService(RepositoryService):
         """Get all pull request comments."""
         return self.mock_data.get("pr_comments", [])
 
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request."""
+        pr_reviews = self.mock_data.get("pr_reviews", [])
+        return [r for r in pr_reviews if r.get("pr_number") == pr_number]
+
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews."""
+        return self.mock_data.get("pr_reviews", [])
+
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review."""
+        pr_review_comments = self.mock_data.get("pr_review_comments", [])
+        return [c for c in pr_review_comments if str(c.get("review_id")) == str(review_id)]
+
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
+        """Get all pull request review comments."""
+        return self.mock_data.get("pr_review_comments", [])
+
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issue relationships from repository."""
         return self.mock_data.get("sub_issues", [])
@@ -183,6 +207,35 @@ class MockGitHubService(RepositoryService):
             "body": body,
         }
         self.created_pr_comments.append(comment_data)
+        return comment_data
+
+    def create_pull_request_review(
+        self, repo_name: str, pr_number: int, body: str, state: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review."""
+        review_data = {
+            "id": len(getattr(self, "created_pr_reviews", [])) + 1,
+            "pr_number": pr_number,
+            "body": body,
+            "state": state,
+        }
+        if not hasattr(self, "created_pr_reviews"):
+            self.created_pr_reviews = []
+        self.created_pr_reviews.append(review_data)
+        return review_data
+
+    def create_pull_request_review_comment(
+        self, repo_name: str, review_id: str, body: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review comment."""
+        comment_data = {
+            "id": len(getattr(self, "created_pr_review_comments", [])) + 1,
+            "review_id": review_id,
+            "body": body,
+        }
+        if not hasattr(self, "created_pr_review_comments"):
+            self.created_pr_review_comments = []
+        self.created_pr_review_comments.append(comment_data)
         return comment_data
 
     def add_sub_issue(

@@ -28,6 +28,8 @@ class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequestReviewComment]:
         comments_file = Path(input_path) / "pr_review_comments.json"
+        if not comments_file.exists():
+            return []  # Return empty list if file doesn't exist
         comments = storage_service.load_data(comments_file, PullRequestReviewComment)
         # Sort by creation time for chronological order
         return sorted(comments, key=lambda c: c.created_at)

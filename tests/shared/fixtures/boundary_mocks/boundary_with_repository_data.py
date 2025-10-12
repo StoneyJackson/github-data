@@ -23,5 +23,11 @@ def boundary_with_repository_data(sample_github_data):
     boundary.get_repository_sub_issues.return_value = sample_github_data.get(
         "sub_issues", []
     )
+    boundary.get_all_pull_request_reviews.return_value = sample_github_data.get(
+        "pr_reviews", []
+    )
+    boundary.get_all_pull_request_review_comments.return_value = sample_github_data.get(
+        "pr_review_comments", []
+    )
 
     return boundary

@@ -203,6 +203,8 @@ class TestPrCommentsEdgeCasesIntegration:
         mock_boundary.get_all_issue_comments.return_value = []
         mock_boundary.get_repository_pull_requests.return_value = []
         mock_boundary.get_all_pull_request_comments.return_value = []  # Empty list
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation
@@ -633,6 +635,8 @@ class TestPrCommentsEdgeCasesIntegration:
             for i in range(1, 11)
         ]
         mock_boundary.get_all_pull_request_comments.return_value = large_pr_comments
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation

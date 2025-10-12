@@ -297,3 +297,256 @@ def test_save_with_pr_reviews(self, tmp_path):
 **Impact**: This approach would have prevented 95%+ of the 101 test failures we experienced, with most gains coming from using tools we already have.
 
 **Key Takeaway**: Sometimes the solution already exists - we need better adoption of existing abstractions, not just new ones.
+
+---
+
+## Update: Analysis of Actual Test Infrastructure Changes (Post-Fix)
+
+**Date:** 2025-10-12 Session Update  
+**Context:** Analysis of the 3 test failures we actually encountered and the infrastructure changes made
+
+### Actual Problem Scope ✅ **MUCH SMALLER THAN PREDICTED**
+
+**Reality Check**: The analysis above predicted 101 test failures based on previous schema changes, but we actually encountered **only 3 test failures** when adding PR reviews and review comments support.
+
+**Actual Failures**:
+1. `test_save_operations_use_dependency_injection` - MockGitHubService missing abstract methods
+2. `test_mock_github_service_functionality` - MockGitHubService missing abstract methods  
+3. `test_protocols_are_implemented` - MockGitHubService missing abstract methods
+
+**Root Cause**: All 3 failures were in the same category - the `MockGitHubService` class was missing implementations for new abstract methods in the `RepositoryService` protocol.
+
+### Infrastructure Changes Made ✅ **MINIMAL AND TARGETED**
+
+#### 1. **Enhanced Sample Test Data** (70 lines added)
+```python
+# tests/shared/fixtures/test_data/sample_github_data.py
+"pr_reviews": [
+    {
+        "id": 7001,
+        "state": "APPROVED", 
+        "body": "Great implementation! Ship it!",
+        # ... complete review structure with user, timestamps, URLs
+    },
+    # Second review example
+],
+"pr_review_comments": [
+    {
+        "id": 8001,
+        "body": "This rate limit value seems too low",
+        "review_id": 7001,
+        "path": "src/rate_limiter.py",
+        "position": 42,
+        # ... complete comment structure with diff context
+    },
+    # Second comment example  
+]
+```
+
+**Impact**: This addition provides realistic test data for all PR review-related tests, preventing the need for each test to create its own mock data.
+
+#### 2. **Extended Boundary Mock Configuration** (6 lines added)
+```python
+# tests/shared/fixtures/boundary_mocks/boundary_with_repository_data.py
+boundary.get_all_pull_request_reviews.return_value = sample_github_data.get("pr_reviews", [])
+boundary.get_all_pull_request_review_comments.return_value = sample_github_data.get("pr_review_comments", [])
+```
+
+**Impact**: This ensures that boundary mocks automatically support PR review methods with realistic data.
+
+#### 3. **Complete MockGitHubService Implementation** (53 lines added)
+```python
+# tests/shared/mocks/mock_github_service.py
+def get_pull_request_reviews(self, repo_name: str, pr_number: int) -> List[Dict[str, Any]]:
+def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+def get_pull_request_review_comments(self, repo_name: str, review_id: str) -> List[Dict[str, Any]]:
+def get_all_pull_request_review_comments(self, repo_name: str) -> List[Dict[str, Any]]:
+def create_pull_request_review(self, repo_name: str, pr_number: int, body: str, state: str) -> Dict[str, Any]:
+def create_pull_request_review_comment(self, repo_name: str, review_id: str, body: str) -> Dict[str, Any]:
+```
+
+**Impact**: This completes the protocol implementation, allowing `MockGitHubService` to be instantiated without abstract method errors.
+
+#### 4. **Factory Method Updates** (8 lines added)
+```python
+# tests/shared/mocks/boundary_factory.py
+mock_boundary.get_all_pull_request_reviews.return_value = sample_data.get("pr_reviews", [])
+mock_boundary.get_all_pull_request_review_comments.return_value = sample_data.get("pr_review_comments", [])
+```
+
+**Impact**: Ensures factory-created mocks include PR review methods.
+
+#### 5. **Strategic Error Handling** (4 lines across 2 files)
+```python
+# Added to restore strategies
+if not reviews_file.exists():
+    return []  # Return empty list if file doesn't exist
+```
+
+**Impact**: Graceful degradation when PR review files don't exist, preventing restore failures.
+
+#### 6. **Minimal Test Updates** (10 lines across 4 test files)
+```python
+# Pattern: Added to existing boundary mock setups
+mock_boundary.get_all_pull_request_reviews.return_value = []
+mock_boundary.get_all_pull_request_review_comments.return_value = []
+```
+
+**Impact**: Tests that explicitly configure all boundary methods now include PR review methods.
+
+### Key Insights from Actual Changes
+
+#### ✅ **Existing Infrastructure Worked Well**
+
+**What We Didn't Need**:
+- ❌ No `ApplicationConfig` constructor changes (we already have good defaults)
+- ❌ No JSON file creation issues (empty arrays are sufficient for most tests)
+- ❌ No complex fixture overhauls (existing patterns worked)
+- ❌ No `ConfigBuilder` migration needed (current tests were resilient)
+
+**What Actually Broke**:
+- ✅ Only protocol implementation gaps in mock services
+- ✅ Only explicit boundary configurations needed updates
+
+#### ✅ **Infrastructure Patterns That Prevented Failures**
+
+1. **Centralized Sample Data Pattern** 📍 `/tests/shared/fixtures/test_data/sample_github_data.py`
+   - Adding new entity types here automatically makes them available to all fixtures
+   - Default empty arrays (`sample_github_data.get("pr_reviews", [])`) prevent missing key errors
+
+2. **Factory Pattern for Boundary Mocks** 📍 `/tests/shared/mocks/boundary_factory.py`
+   - Centralized logic for adding method groups to mocks
+   - Consistent handling of sample data vs. empty responses
+
+3. **Protocol-Driven Design** 📍 `/src/github/protocols.py`
+   - Abstract base classes force implementation completeness
+   - Type checking catches missing methods at development time
+
+4. **Graceful File Handling in Strategies** 📍 `/src/operations/restore/strategies/`
+   - File existence checks prevent crashes when optional data is missing
+   - Empty list returns maintain operation continuity
+
+#### ❌ **Infrastructure Gaps Still Exposed**
+
+1. **Manual Boundary Configuration** (10 lines across 4 files)
+   ```python
+   # This pattern had to be repeated in multiple tests:
+   mock_boundary.get_all_pull_request_reviews.return_value = []
+   mock_boundary.get_all_pull_request_review_comments.return_value = []
+   ```
+   
+   **Gap**: No automatic discovery/setup of all boundary methods when creating mocks.
+
+2. **Protocol Implementation Discovery**
+   - Tests only failed at runtime when trying to instantiate `MockGitHubService`
+   - No compile-time or test-time validation that mock services implement all protocol methods
+
+### Revised Recommendations (Based on Actual Experience)
+
+#### ✅ **High-Impact, Low-Effort Improvements**
+
+1. **Automated Boundary Mock Setup** (1-2 hours)
+   ```python
+   # Enhanced boundary_factory.py
+   def setup_complete_boundary_mock(sample_data=None):
+       """Set up boundary mock with ALL protocol methods."""
+       mock_boundary = Mock()
+       
+       # Auto-discover and configure all methods from RepositoryService protocol
+       for method_name in get_protocol_methods(RepositoryService):
+           setattr(mock_boundary, method_name, Mock(return_value=[]))
+       
+       # Override with sample data where available
+       if sample_data:
+           for entity_type, data in sample_data.items():
+               method_name = f"get_all_{entity_type}"
+               if hasattr(mock_boundary, method_name):
+                   getattr(mock_boundary, method_name).return_value = data
+       
+       return mock_boundary
+   ```
+
+2. **Protocol Completeness Validation** (1-2 hours)
+   ```python
+   # Test helper in conftest.py
+   def test_mock_service_completeness():
+       """Verify mock services implement all protocol methods."""
+       from src.github.protocols import RepositoryService
+       
+       # This test would have caught our MockGitHubService gap immediately
+       mock_service = MockGitHubService({})
+       assert isinstance(mock_service, RepositoryService)
+       
+       # Verify all abstract methods are implemented
+       for method_name in get_abstract_methods(RepositoryService):
+           assert hasattr(mock_service, method_name)
+           assert callable(getattr(mock_service, method_name))
+   ```
+
+3. **Smart Sample Data Extensions** (30 minutes)
+   ```python
+   # Enhanced sample_github_data.py
+   def sample_github_data():
+       """Sample data with automatic relationship consistency."""
+       base_data = {
+           "labels": [...],
+           "issues": [...], 
+           "pull_requests": [...],
+           "pr_comments": [...],
+       }
+       
+       # Auto-generate related entities based on existing data
+       base_data["pr_reviews"] = generate_pr_reviews_for_prs(base_data["pull_requests"])
+       base_data["pr_review_comments"] = generate_review_comments_for_reviews(base_data["pr_reviews"])
+       
+       return base_data
+   ```
+
+#### ❌ **Lower Priority (Based on Actual Pain)**
+
+1. **ConfigBuilder Migration** - Not needed for this type of change
+2. **TestDataManager** - Current empty array defaults work fine
+3. **Complex Fixture Overhauls** - Existing patterns scaled well
+
+### Updated Impact Assessment
+
+#### **Actual vs. Predicted Breakage**
+
+- **Predicted**: 101 test failures across constructor and JSON file issues
+- **Actual**: 3 test failures, all in mock service protocol implementation
+- **Variance**: 97% overestimation of fragility
+
+#### **Infrastructure Resilience Validation**
+
+✅ **What Worked Well**:
+- Default empty arrays in sample data prevented missing key errors
+- Graceful file handling in restore strategies prevented crashes  
+- Centralized sample data pattern scaled to new entity types
+- Most tests didn't need any changes due to good abstractions
+
+❌ **What Exposed Gaps**:
+- Manual boundary mock configuration (repeated across 4 files)
+- No automatic validation of mock service completeness
+- Runtime discovery of missing protocol methods
+
+#### **Revised Effort Estimate**
+
+**High-Impact Improvements**: 3-4 hours total
+- Automated boundary mock setup: 1-2 hours
+- Protocol completeness validation: 1-2 hours  
+- Smart sample data generation: 30-60 minutes
+
+**Expected Failure Prevention**: 95%+ of similar protocol extension issues
+
+**ROI**: Very high - small targeted improvements based on actual failure patterns rather than theoretical concerns.
+
+### Conclusion: Infrastructure is More Resilient Than Expected
+
+**Key Finding**: Our test infrastructure proved much more resilient than initially assessed. The 3 actual failures were all in the same narrow category (mock service protocol implementation) rather than widespread breakage.
+
+**Most Valuable Insight**: Focus infrastructure improvements on **actual failure patterns** rather than theoretical worst-case scenarios. The highest-impact improvements are often the simplest ones that address the specific pain points you've actually experienced.
+
+**Action Priority**:
+1. **Immediate** (3-4 hours): Add automated boundary mock setup and protocol validation
+2. **Future**: Monitor for other protocol extension patterns and automate them
+3. **Optional**: The larger ConfigBuilder/TestDataManager initiatives remain valuable for developer experience but aren't critical for resilience
