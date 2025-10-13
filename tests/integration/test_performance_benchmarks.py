@@ -827,9 +827,7 @@ class TestPerformanceBenchmarks:
             .with_data_path(str(tmp_path))
             .with_label_strategy("skip")
             .with_git_repo(False)
-            .with_issues({
-                i for i in range(1, 101)
-            })  # 100 issues (subset for testing)
+            .with_issues({i for i in range(1, 101)})  # 100 issues (subset for testing)
             .with_issue_comments(True)
             .with_pull_requests({i for i in range(1000, 1050)})  # 50 PRs
             .with_pull_request_comments(True)

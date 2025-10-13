@@ -192,8 +192,12 @@ class TestSubIssuesIntegration:
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing repository data using shared fixture
-        mock_boundary.get_repository_labels.return_value = existing_repository_data["labels"]
-        mock_boundary.get_repository_issues.return_value = existing_repository_data["issues"]
+        mock_boundary.get_repository_labels.return_value = existing_repository_data[
+            "labels"
+        ]
+        mock_boundary.get_repository_issues.return_value = existing_repository_data[
+            "issues"
+        ]
         mock_boundary.get_all_issue_comments.return_value = []
         mock_boundary.get_repository_pull_requests.return_value = []
         mock_boundary.get_all_pull_request_comments.return_value = []

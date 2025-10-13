@@ -31,7 +31,9 @@ class TestIssuesIntegration:
         with open(data_path / "issues.json", "w") as f:
             json.dump(chronological_comments_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
-            json.dump(chronological_comments_data["comments"], f)  # Comments in reverse chronological order
+            json.dump(
+                chronological_comments_data["comments"], f
+            )  # Comments in reverse chronological order
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump(chronological_comments_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:

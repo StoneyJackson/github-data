@@ -738,9 +738,11 @@ class TestBackwardCompatibility:
                     .with_data_path("/data")
                     .with_label_strategy("skip")
                     .with_git_repo(False)
-                    .with_issues(ApplicationConfig._parse_number_or_bool_env(
-                        "INCLUDE_ISSUES", False
-                    ))
+                    .with_issues(
+                        ApplicationConfig._parse_number_or_bool_env(
+                            "INCLUDE_ISSUES", False
+                        )
+                    )
                     .with_issue_comments(True)
                     .with_pull_requests(True)
                     .with_pull_request_comments(True)
