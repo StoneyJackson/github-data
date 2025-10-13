@@ -37,9 +37,7 @@ class TestSubIssuesIntegration:
         mock_boundary.get_all_pull_request_review_comments.return_value = []
 
         # Mock sub-issues methods using shared fixture
-        mock_boundary.get_repository_issues.return_value = sample_github_data[
-            "issues"
-        ]
+        mock_boundary.get_repository_issues.return_value = sample_github_data["issues"]
         mock_boundary.get_repository_sub_issues.return_value = sample_github_data[
             "sub_issues"
         ]

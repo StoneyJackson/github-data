@@ -97,7 +97,9 @@ class ConfigBuilder:
         self._config["include_issue_comments"] = enabled
         return self
 
-    def with_pull_requests(self, enabled: Union[bool, Set[int]] = True) -> "ConfigBuilder":
+    def with_pull_requests(
+        self, enabled: Union[bool, Set[int]] = True
+    ) -> "ConfigBuilder":
         """Enable/disable pull requests inclusion or specify PR numbers."""
         self._config["include_pull_requests"] = enabled
         return self

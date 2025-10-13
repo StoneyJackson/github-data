@@ -508,7 +508,7 @@ class TestSelectiveSaveRestore:
             full_issues = json.load(f)
 
         assert len(selective_issues) == 1  # Only issue #1
-        assert len(full_issues) == 2      # All issues (#1, #2)
+        assert len(full_issues) == 2  # All issues (#1, #2)
 
         # Verify selective comments are fewer
         selective_comments_file = tmp_path / "selective" / "comments.json"
@@ -520,4 +520,4 @@ class TestSelectiveSaveRestore:
             full_comments = json.load(f)
 
         assert len(selective_comments) == 1  # Only comment for issue #1
-        assert len(full_comments) == 2      # All comments (1 for #1, 1 for #2)
+        assert len(full_comments) == 2  # All comments (1 for #1, 1 for #2)

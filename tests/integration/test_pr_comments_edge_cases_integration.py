@@ -25,7 +25,6 @@ pytestmark = [
 class TestPrCommentsEdgeCasesIntegration:
     """Integration tests for PR comments error handling and edge cases."""
 
-
     @patch("src.github.service.GitHubApiBoundary")
     def test_save_operation_handles_empty_pr_comments_list(
         self, mock_boundary_class, temp_data_dir
