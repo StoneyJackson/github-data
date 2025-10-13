@@ -1,9 +1,7 @@
 """Utilities for migrating from manual boundary mocks to MockBoundaryFactory."""
 
-import ast
 import re
 from typing import List, Dict, Tuple, Optional
-from unittest.mock import Mock
 
 
 class BoundaryMockMigrator:
@@ -140,11 +138,13 @@ class BoundaryMockMigrator:
                         if method not in common_methods:
                             if pattern["type"] == "manual_return_value":
                                 custom_configs.append(
-                                    f'{var_name}.{method}.return_value = {pattern["return_value"]}'
+                                    f"{var_name}.{method}.return_value = "
+                                    f'{pattern["return_value"]}'
                                 )
                             else:  # manual_side_effect
                                 custom_configs.append(
-                                    f'{var_name}.{method}.side_effect = {pattern["side_effect"]}'
+                                    f"{var_name}.{method}.side_effect = "
+                                    f'{pattern["side_effect"]}'
                                 )
 
                 replacement_code.extend(custom_configs)
@@ -227,7 +227,8 @@ class BoundaryMockMigrator:
                 variables[var_name].append(pattern)
 
         report.append(
-            f"🔍 Found {len(variables)} mock variables with {len(patterns)} total patterns"
+            f"🔍 Found {len(variables)} mock variables with "
+            f"{len(patterns)} total patterns"
         )
         report.append("")
 
@@ -292,7 +293,6 @@ class BoundaryMockValidator:
         Returns:
             Tuple of (is_valid, missing_methods, incorrectly_configured_methods)
         """
-        from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
         protocol_methods = []
         for name in dir(protocol_class):
@@ -359,7 +359,8 @@ class BoundaryMockValidator:
         report.append("## Recommendation")
         if not is_valid:
             report.append(
-                "Use `MockBoundaryFactory.create_auto_configured()` for guaranteed protocol completeness."
+                "Use `MockBoundaryFactory.create_auto_configured()` for "
+                "guaranteed protocol completeness."
             )
         else:
             report.append("Mock boundary is properly configured. ✅")

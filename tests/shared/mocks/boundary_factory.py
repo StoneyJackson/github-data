@@ -276,7 +276,8 @@ class MockBoundaryFactory:
 
         Args:
             sample_data: Optional sample data dict to configure return values
-            validate_completeness: If True, validates protocol completeness after creation
+            validate_completeness: If True, validates protocol completeness
+                after creation
 
         Returns:
             Mock boundary with all protocol methods automatically configured

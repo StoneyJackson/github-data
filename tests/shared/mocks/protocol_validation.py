@@ -1,11 +1,8 @@
 """Protocol validation utilities for ensuring boundary mock completeness."""
 
-from typing import List, Dict, Tuple, Any, Type
-from abc import ABC
-from unittest.mock import Mock
+from typing import List, Dict, Tuple, Any
 
 from src.github.protocols import GitHubApiBoundary
-from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 
 class ProtocolValidator:
@@ -38,7 +35,8 @@ class ProtocolValidator:
         for method_name in protocol_methods:
             try:
                 # Check if the method was explicitly configured
-                # For Mock objects, we need to check if it was set up before being accessed
+                # For Mock objects, we need to check if it was set up
+                # before being accessed
                 if (
                     hasattr(mock_boundary, "_mock_children")
                     and method_name in mock_boundary._mock_children
@@ -114,7 +112,8 @@ class ProtocolValidator:
                 [
                     "✅ **PASSED: Mock boundary is fully protocol-compliant**",
                     "",
-                    "All required protocol methods are properly configured with return_value or side_effect.",
+                    "All required protocol methods are properly configured "
+                    "with return_value or side_effect.",
                 ]
             )
         else:
@@ -137,7 +136,8 @@ class ProtocolValidator:
             if details["misconfigured_methods"]:
                 report.extend(
                     [
-                        f"## Misconfigured Methods ({len(details['misconfigured_methods'])})",
+                        f"## Misconfigured Methods "
+                        f"({len(details['misconfigured_methods'])})",
                         "These methods exist but are not properly configured:",
                         "",
                     ]
@@ -149,8 +149,9 @@ class ProtocolValidator:
         if details["properly_configured"]:
             report.extend(
                 [
-                    f"## Properly Configured Methods ({len(details['properly_configured'])})",
-                    f"These methods are correctly configured:",
+                    f"## Properly Configured Methods "
+                    f"({len(details['properly_configured'])})",
+                    "These methods are correctly configured:",
                 ]
             )
             if len(details["properly_configured"]) <= 10:
@@ -177,10 +178,12 @@ class ProtocolValidator:
                     "**Suggested fix:**",
                     "```python",
                     "# Replace manual mock setup with factory pattern",
-                    "mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)",
+                    "mock_boundary = "
+                    "MockBoundaryFactory.create_auto_configured(sample_data)",
                     "```",
                     "",
-                    "This will provide 100% protocol completeness with appropriate return values.",
+                    "This will provide 100% protocol completeness with "
+                    "appropriate return values.",
                 ]
             )
         else:
@@ -194,7 +197,8 @@ class ProtocolValidator:
     def assert_protocol_complete(
         mock_boundary, protocol_class, error_message: str = None
     ) -> None:
-        """Assert that a mock boundary is protocol-complete, raising AssertionError if not.
+        """Assert that a mock boundary is protocol-complete,
+        raising AssertionError if not.
 
         Args:
             mock_boundary: Mock boundary to validate
@@ -208,10 +212,11 @@ class ProtocolValidator:
         if not is_complete:
             if error_message is None:
                 completeness = details["completeness_percentage"]
+                extra_issues = f" and {len(issues) - 5} more" if len(issues) > 5 else ""
                 error_message = (
-                    f"Mock boundary is not protocol-complete ({completeness:.1f}% complete). "
-                    f"Issues found: {', '.join(issues[:5])}"
-                    f"{' and ' + str(len(issues) - 5) + ' more' if len(issues) > 5 else ''}"
+                    f"Mock boundary is not protocol-complete "
+                    f"({completeness:.1f}% complete). "
+                    f"Issues found: {', '.join(issues[:5])}{extra_issues}"
                 )
 
             raise AssertionError(error_message)
@@ -334,7 +339,8 @@ class BoundaryMockAuditor:
 
         if high_priority:
             report.append(
-                "1. **Migrate high-priority files** to MockBoundaryFactory.create_auto_configured()"
+                "1. **Migrate high-priority files** to "
+                "MockBoundaryFactory.create_auto_configured()"
             )
 
         if factory_adoption_rate < 50:
@@ -353,13 +359,22 @@ class BoundaryMockAuditor:
                 "- Eliminate manual mock configurations for protocol methods",
                 "- Standardize on shared sample data usage",
                 "",
-                f"### Estimated Migration Effort",
-                f"- High priority files: {len(high_priority)} × 2-3 hours = {len(high_priority) * 2.5:.1f} hours",
-                f"- Medium priority files: {len(medium_priority)} × 1-2 hours = {len(medium_priority) * 1.5:.1f} hours",
-                f"- Low priority files: {len(low_priority)} × 0.5-1 hour = {len(low_priority) * 0.75:.1f} hours",
-                f"- **Total estimated effort**: {len(high_priority) * 2.5 + len(medium_priority) * 1.5 + len(low_priority) * 0.75:.1f} hours",
+                "### Estimated Migration Effort",
+                f"- High priority files: {len(high_priority)} × 2-3 hours = "
+                f"{len(high_priority) * 2.5:.1f} hours",
+                f"- Medium priority files: {len(medium_priority)} × 1-2 hours = "
+                f"{len(medium_priority) * 1.5:.1f} hours",
+                f"- Low priority files: {len(low_priority)} × 0.5-1 hour = "
+                f"{len(low_priority) * 0.75:.1f} hours",
             ]
         )
+
+        total_effort = (
+            len(high_priority) * 2.5
+            + len(medium_priority) * 1.5
+            + len(low_priority) * 0.75
+        )
+        report.append(f"- **Total estimated effort**: {total_effort:.1f} hours")
 
         return "\n".join(report)
 
@@ -369,7 +384,8 @@ def validate_boundary_mock(mock_boundary, protocol_class=GitHubApiBoundary) -> b
 
     Args:
         mock_boundary: Mock boundary to validate
-        protocol_class: Protocol class to validate against (defaults to GitHubApiBoundary)
+        protocol_class: Protocol class to validate against
+            (defaults to GitHubApiBoundary)
 
     Returns:
         True if mock is protocol-complete, False otherwise
@@ -387,7 +403,8 @@ def assert_boundary_mock_complete(
 
     Args:
         mock_boundary: Mock boundary to validate
-        protocol_class: Protocol class to validate against (defaults to GitHubApiBoundary)
+        protocol_class: Protocol class to validate against
+            (defaults to GitHubApiBoundary)
 
     Raises:
         AssertionError: If mock is not protocol-complete

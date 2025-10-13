@@ -8,7 +8,6 @@ that already exist in the target repository.
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import Mock
 
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 from src.github import create_github_service
