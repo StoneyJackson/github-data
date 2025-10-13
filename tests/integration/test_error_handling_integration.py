@@ -22,43 +22,26 @@ class TestErrorHandlingIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_github_api_failures_gracefully(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that restore continues despite GitHub API failures."""
         # Create test data files
         data_path = Path(temp_data_dir)
 
-        test_labels = [
-            {
-                "name": "bug",
-                "color": "ff0000",
-                "description": "Bug label",
-                "url": "http://example.com",
-                "id": 1,
-            },
-            {
-                "name": "feature",
-                "color": "00ff00",
-                "description": "Feature label",
-                "url": "http://example.com",
-                "id": 2,
-            },
-        ]
-
         with open(data_path / "labels.json", "w") as f:
-            json.dump(test_labels, f)
+            json.dump(sample_github_data["labels"], f)
         with open(data_path / "issues.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["comments"], f)
         with open(data_path / "pull_requests.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pr_comments"], f)
         with open(data_path / "pr_reviews.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pr_reviews"], f)
         with open(data_path / "pr_review_comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pr_review_comments"], f)
 
         # Setup mock to simulate GitHub API failures
         mock_boundary = Mock()
@@ -72,15 +55,15 @@ class TestErrorHandlingIntegration:
             {
                 "id": 100,
                 "name": "bug",
-                "color": "ff0000",
-                "description": "Bug label",
-                "url": "http://example.com",
+                "color": "d73a4a",
+                "description": "Something isn't working",
+                "url": "https://api.github.com/repos/owner/repo/labels/bug",
             },  # Success
             Exception("API rate limit exceeded"),  # Failure
         ]
 
         # Execute restore operation - should fail on second error
-        with pytest.raises(Exception, match="Failed to create label 'feature'"):
+        with pytest.raises(Exception, match="Failed to create label 'enhancement'"):
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_strategy_pattern(

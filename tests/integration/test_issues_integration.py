@@ -490,7 +490,7 @@ class TestIssuesIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_issues_with_multiple_assignees_and_labels(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test issues with multiple assignees and labels are handled correctly."""
         # Create test data with complex issue relationships

@@ -4,7 +4,7 @@ Provides a fluent API for creating ApplicationConfig instances with sensible def
 and easy customization for specific test scenarios.
 """
 
-from typing import Dict
+from typing import Dict, Union, Set
 from src.config.settings import ApplicationConfig
 
 
@@ -87,8 +87,8 @@ class ConfigBuilder:
         self._config["include_git_repo"] = enabled
         return self
 
-    def with_issues(self, enabled: bool = True) -> "ConfigBuilder":
-        """Enable/disable issues inclusion."""
+    def with_issues(self, enabled: Union[bool, Set[int]] = True) -> "ConfigBuilder":
+        """Enable/disable issues inclusion or specify issue numbers."""
         self._config["include_issues"] = enabled
         return self
 
@@ -97,8 +97,8 @@ class ConfigBuilder:
         self._config["include_issue_comments"] = enabled
         return self
 
-    def with_pull_requests(self, enabled: bool = True) -> "ConfigBuilder":
-        """Enable/disable pull requests inclusion."""
+    def with_pull_requests(self, enabled: Union[bool, Set[int]] = True) -> "ConfigBuilder":
+        """Enable/disable pull requests inclusion or specify PR numbers."""
         self._config["include_pull_requests"] = enabled
         return self
 

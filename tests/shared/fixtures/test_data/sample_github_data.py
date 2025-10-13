@@ -324,4 +324,13 @@ def sample_github_data():
                 ),
             },
         ],
+        "sub_issues": [
+            {
+                "sub_issue_id": 2002,
+                "sub_issue_number": 2,
+                "parent_issue_id": 2001,
+                "parent_issue_number": 1,
+                "position": 1,
+            }
+        ],
     }
