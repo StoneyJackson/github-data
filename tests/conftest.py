@@ -24,6 +24,9 @@ pytest_plugins = [
     "tests.shared.fixtures.test_data.complex_hierarchy_data",
     "tests.shared.fixtures.test_data.sample_pr_data",
     "tests.shared.fixtures.test_data.sample_labels_data",
+    "tests.shared.fixtures.test_data.chronological_comments_data",
+    "tests.shared.fixtures.test_data.orphaned_sub_issues_data",
+    "tests.shared.fixtures.test_data.mixed_states_data",
     # Boundary Mock Fixtures
     "tests.shared.fixtures.boundary_mocks.boundary_with_repository_data",
     "tests.shared.fixtures.boundary_mocks.boundary_with_empty_repository",

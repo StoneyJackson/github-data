@@ -197,45 +197,16 @@ class TestSubIssuesIntegration:
     @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_backup_with_existing_data(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, existing_repository_data
     ):
         """Test sub-issues backup when repository already has mixed data."""
         # Setup mock boundary
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
 
-        # Mock existing repository data
-        mock_boundary.get_repository_labels.return_value = [
-            {
-                "name": "bug",
-                "color": "d73a4a",
-                "description": "Bug report",
-                "url": "https://api.github.com/repos/owner/repo/labels/bug",
-                "id": 1001,
-            }
-        ]
-        mock_boundary.get_repository_issues.return_value = [
-            {
-                "id": 5001,
-                "number": 50,
-                "title": "Existing Issue",
-                "body": "An existing issue",
-                "state": "OPEN",
-                "user": {
-                    "login": "existing",
-                    "id": 9001,
-                    "avatar_url": "https://github.com/existing.png",
-                    "html_url": "https://github.com/existing",
-                },
-                "assignees": [],
-                "labels": [],
-                "created_at": "2023-01-01T10:00:00Z",
-                "updated_at": "2023-01-01T16:00:00Z",
-                "closed_at": None,
-                "html_url": "https://github.com/owner/repo/issues/50",
-                "comments": 0,
-            }
-        ]
+        # Mock existing repository data using shared fixture
+        mock_boundary.get_repository_labels.return_value = existing_repository_data["labels"]
+        mock_boundary.get_repository_issues.return_value = existing_repository_data["issues"]
         mock_boundary.get_all_issue_comments.return_value = []
         mock_boundary.get_repository_pull_requests.return_value = []
         mock_boundary.get_all_pull_request_comments.return_value = []
