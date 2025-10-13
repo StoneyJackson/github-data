@@ -42,7 +42,7 @@ class MockBoundaryFactory:
         for name in dir(GitHubApiBoundary):
             if not name.startswith("_"):  # Skip private methods
                 attr = getattr(GitHubApiBoundary, name)
-                if callable(attr) and hasattr(attr, '__isabstractmethod__'):
+                if callable(attr) and hasattr(attr, "__isabstractmethod__"):
                     methods.append(name)
         return methods
 
@@ -51,7 +51,7 @@ class MockBoundaryFactory:
         """Get the method signature from the protocol."""
         try:
             method = getattr(GitHubApiBoundary, method_name)
-            return getattr(method, '__annotations__', {})
+            return getattr(method, "__annotations__", {})
         except AttributeError:
             return {}
 
@@ -62,67 +62,113 @@ class MockBoundaryFactory:
             sample_data = {}
 
         # GET methods - return sample data or empty lists
-        if method_name.startswith('get_'):
-            if 'labels' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("labels", []))
-            elif 'issues' in method_name and 'sub_issues' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("issues", []))
-            elif 'sub_issues' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("sub_issues", []))
-            elif 'comments' in method_name and 'pull_request' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("comments", []))
-            elif 'pull_requests' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pull_requests", []))
-            elif 'pull_request_comments' in method_name or 'pr_comments' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_comments", []))
-            elif 'reviews' in method_name and 'comment' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_reviews", []))
-            elif 'review_comments' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_review_comments", []))
-            elif 'parent' in method_name:
+        if method_name.startswith("get_"):
+            if "labels" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("labels", [])
+                )
+            elif "issues" in method_name and "sub_issues" not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("issues", [])
+                )
+            elif "sub_issues" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("sub_issues", [])
+                )
+            elif "comments" in method_name and "pull_request" not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("comments", [])
+                )
+            elif "pull_requests" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("pull_requests", [])
+                )
+            elif "pull_request_comments" in method_name or "pr_comments" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("pr_comments", [])
+                )
+            elif "reviews" in method_name and "comment" not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("pr_reviews", [])
+                )
+            elif "review_comments" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value=sample_data.get("pr_review_comments", [])
+                )
+            elif "parent" in method_name:
                 mock_boundary.__dict__[method_name] = Mock(return_value=None)
-            elif 'rate_limit' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"remaining": 5000, "reset": 3600})
+            elif "rate_limit" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"remaining": 5000, "reset": 3600}
+                )
             else:
                 # Default to empty list for unknown get methods
                 mock_boundary.__dict__[method_name] = Mock(return_value=[])
 
         # CREATE methods - return mock success responses
-        elif method_name.startswith('create_'):
-            if 'label' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 999, "name": "test-label", "color": "ffffff"})
-            elif 'issue' in method_name and 'comment' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"number": 999, "id": 999, "title": "test-issue"})
-            elif 'issue_comment' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 888, "body": "test-comment"})
-            elif 'pull_request' in method_name and 'comment' not in method_name and 'review' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 777, "number": 777, "title": "test-pr"})
-            elif 'pull_request_comment' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 666, "body": "test-pr-comment"})
-            elif 'pull_request_review' in method_name and 'comment' not in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 555, "body": "test-review"})
-            elif 'review_comment' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 444, "body": "test-review-comment"})
+        elif method_name.startswith("create_"):
+            if "label" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 999, "name": "test-label", "color": "ffffff"}
+                )
+            elif "issue" in method_name and "comment" not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"number": 999, "id": 999, "title": "test-issue"}
+                )
+            elif "issue_comment" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 888, "body": "test-comment"}
+                )
+            elif (
+                "pull_request" in method_name
+                and "comment" not in method_name
+                and "review" not in method_name
+            ):
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 777, "number": 777, "title": "test-pr"}
+                )
+            elif "pull_request_comment" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 666, "body": "test-pr-comment"}
+                )
+            elif "pull_request_review" in method_name and "comment" not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 555, "body": "test-review"}
+                )
+            elif "review_comment" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 444, "body": "test-review-comment"}
+                )
             else:
                 # Default create response
-                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"success": True}
+                )
 
         # UPDATE/DELETE methods
-        elif method_name.startswith('update_'):
-            if 'label' in method_name:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 999, "name": "updated-label", "color": "000000"})
+        elif method_name.startswith("update_"):
+            if "label" in method_name:
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"id": 999, "name": "updated-label", "color": "000000"}
+                )
             else:
-                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
-        elif method_name.startswith('delete_'):
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"success": True}
+                )
+        elif method_name.startswith("delete_"):
             mock_boundary.__dict__[method_name] = Mock(return_value=None)
-        elif method_name.startswith('close_'):
+        elif method_name.startswith("close_"):
             mock_boundary.__dict__[method_name] = Mock(return_value={"state": "closed"})
 
         # SUB-ISSUE management methods
-        elif 'sub_issue' in method_name:
-            if method_name.startswith('add_') or method_name.startswith('reprioritize_'):
-                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
-            elif method_name.startswith('remove_'):
+        elif "sub_issue" in method_name:
+            if method_name.startswith("add_") or method_name.startswith(
+                "reprioritize_"
+            ):
+                mock_boundary.__dict__[method_name] = Mock(
+                    return_value={"success": True}
+                )
+            elif method_name.startswith("remove_"):
                 mock_boundary.__dict__[method_name] = Mock(return_value=None)
 
         # Fallback for any unmatched methods
@@ -133,7 +179,7 @@ class MockBoundaryFactory:
     def _configure_all_methods(mock_boundary, sample_data=None):
         """Configure all protocol methods with appropriate return values."""
         protocol_methods = MockBoundaryFactory._get_protocol_methods()
-        
+
         # Configure each protocol method using pattern-based logic
         for method_name in protocol_methods:
             MockBoundaryFactory._configure_method_by_pattern(
@@ -223,34 +269,36 @@ class MockBoundaryFactory:
     @staticmethod
     def create_auto_configured(sample_data=None, validate_completeness=True):
         """Create a fully automated mock boundary with 100% protocol coverage.
-        
+
         This method automatically discovers all protocol methods and configures
         them based on naming patterns and sample data. This is the recommended
         method for new tests as it provides automatic protocol completeness.
-        
+
         Args:
             sample_data: Optional sample data dict to configure return values
             validate_completeness: If True, validates protocol completeness after creation
-        
+
         Returns:
             Mock boundary with all protocol methods automatically configured
         """
         mock_boundary = Mock()
         protocol_methods = MockBoundaryFactory._get_protocol_methods()
-        
+
         # Configure all protocol methods automatically
         for method_name in protocol_methods:
             MockBoundaryFactory._configure_method_by_pattern(
                 mock_boundary, method_name, sample_data
             )
-        
+
         if validate_completeness:
             is_complete, missing = MockBoundaryFactory.validate_protocol_completeness(
                 mock_boundary
             )
             if not is_complete:
-                raise ValueError(f"Auto-configured mock boundary missing methods: {missing}")
-        
+                raise ValueError(
+                    f"Auto-configured mock boundary missing methods: {missing}"
+                )
+
         return mock_boundary
 
     @staticmethod
