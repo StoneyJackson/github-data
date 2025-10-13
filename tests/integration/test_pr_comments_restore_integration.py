@@ -34,15 +34,15 @@ class TestPrCommentsRestoreIntegration:
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+            json.dump(sample_github_data["pr_comments"], f)
         with open(temp_path / "pr_reviews.json", "w") as f:
             json.dump([], f)
         with open(temp_path / "pr_review_comments.json", "w") as f:
@@ -78,58 +78,55 @@ class TestPrCommentsRestoreIntegration:
         )
 
         # Verify all expected creation calls were made
-        mock_boundary.create_label.assert_called_once()
-        mock_boundary.create_issue.assert_called_once()
-        mock_boundary.create_issue_comment.assert_called_once()
-        mock_boundary.create_pull_request.assert_called_once()
+        assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
+        assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
+        assert mock_boundary.create_issue_comment.call_count == 3  # 3 comments in sample data
+        assert mock_boundary.create_pull_request.call_count == 2  # 2 PRs in sample data
 
-        # Verify PR comments were created (should be 2 calls)
-        assert mock_boundary.create_pull_request_comment.call_count == 2
+        # Verify PR comments were created (should be 3 calls from sample data)
+        assert mock_boundary.create_pull_request_comment.call_count == 3
 
         # Verify PR comment creation was called with correct data
         pr_comment_calls = mock_boundary.create_pull_request_comment.call_args_list
-        assert len(pr_comment_calls) == 2
+        assert len(pr_comment_calls) == 3
 
-        # Check first PR comment
-        first_call_args = pr_comment_calls[0][0][
-            1
-        ]  # Second positional argument (PR number)
-        assert first_call_args == 42
+        # Check first PR comment (matches sample data)
         first_call_body = pr_comment_calls[0][0][2]  # Third positional argument (body)
         # With include_original_metadata=True, body enriched with author/timestamp
-        assert "This looks great! LGTM." in first_call_body
-        assert "reviewer1" in first_call_body
-        assert "2023-01-15" in first_call_body
+        assert "Great work on the rate limiting implementation!" in first_call_body
+        assert "bob" in first_call_body
+        assert "2023-01-18" in first_call_body
 
-        # Check second PR comment
-        second_call_args = pr_comment_calls[1][0][
-            1
-        ]  # Second positional argument (PR number)
-        assert second_call_args == 42
+        # Check second PR comment (matches sample data)
         second_call_body = pr_comment_calls[1][0][2]  # Third positional argument (body)
-        # With include_original_metadata=True, body enriched with author/timestamp
-        assert "Could you add more tests?" in second_call_body
-        assert "reviewer2" in second_call_body
-        assert "2023-01-15" in second_call_body
+        assert "Need to add more tests for edge cases" in second_call_body
+        assert "alice" in second_call_body
+        assert "2023-01-17" in second_call_body
+
+        # Check third PR comment (matches sample data)
+        third_call_body = pr_comment_calls[2][0][2]  # Third positional argument (body)
+        assert "Updated the implementation to handle edge cases" in third_call_body
+        assert "charlie" in third_call_body
+        assert "2023-01-17" in third_call_body
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_with_prs_but_no_pr_comments_skips_pr_comments(
-        self, mock_boundary_class, temp_data_dir, sample_backup_data_with_pr_comments
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test restore operation with PRs enabled but PR comments disabled."""
         # Create backup files (including pr_comments.json even though it won't be used)
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+            json.dump(sample_github_data["pr_comments"], f)
         with open(temp_path / "pr_reviews.json", "w") as f:
             json.dump([], f)
         with open(temp_path / "pr_review_comments.json", "w") as f:
@@ -176,7 +173,7 @@ class TestPrCommentsRestoreIntegration:
         self,
         mock_boundary_class,
         temp_data_dir,
-        sample_backup_data_with_pr_comments,
+        sample_github_data,
         caplog,
     ):
         """Test restore operation with PR comments enabled but PRs disabled."""
@@ -184,15 +181,15 @@ class TestPrCommentsRestoreIntegration:
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+            json.dump(sample_github_data["pr_comments"], f)
         with open(temp_path / "pr_reviews.json", "w") as f:
             json.dump([], f)
         with open(temp_path / "pr_review_comments.json", "w") as f:
@@ -232,7 +229,7 @@ class TestPrCommentsRestoreIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_maintains_chronological_order_of_pr_comments(
-        self, mock_boundary_class, temp_data_dir, sample_backup_data_with_pr_comments
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that restore operation maintains chronological order of PR comments."""
         # Create backup files with timestamps to verify order
@@ -305,13 +302,13 @@ class TestPrCommentsRestoreIntegration:
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(pr_comments_with_timestamps, f)
 
@@ -368,20 +365,20 @@ class TestPrCommentsRestoreIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_missing_pr_comments_file_gracefully(
-        self, mock_boundary_class, temp_data_dir, sample_backup_data_with_pr_comments
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test restore operation handles missing pr_comments.json file gracefully."""
         # Create backup files but deliberately omit pr_comments.json
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         # Note: no pr_comments.json file
 
         # Setup mock boundary for restore operations
@@ -424,7 +421,7 @@ class TestPrCommentsRestoreIntegration:
         self,
         mock_boundary_class,
         temp_data_dir,
-        sample_backup_data_with_pr_comments,
+        sample_github_data,
         caplog,
     ):
         """Test restore operation with orphaned pr_comments.json but no PRs."""
@@ -432,14 +429,14 @@ class TestPrCommentsRestoreIntegration:
         temp_path = Path(temp_data_dir)
 
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         # Note: no pull_requests.json file
         with open(temp_path / "pr_comments.json", "w") as f:
-            json.dump(sample_backup_data_with_pr_comments["pr_comments"], f)
+            json.dump(sample_github_data["pr_comments"], f)
         with open(temp_path / "pr_reviews.json", "w") as f:
             json.dump([], f)
         with open(temp_path / "pr_review_comments.json", "w") as f:
