@@ -24,7 +24,6 @@ pytestmark = [
 class TestPrCommentsRestoreIntegration:
     """Integration tests for PR comments restore operation behavior."""
 
-
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_with_pr_comments_enabled_restores_all_entities(
         self, mock_boundary_class, temp_data_dir, sample_github_data
@@ -80,7 +79,9 @@ class TestPrCommentsRestoreIntegration:
         # Verify all expected creation calls were made
         assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
         assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
-        assert mock_boundary.create_issue_comment.call_count == 3  # 3 comments in sample data
+        assert (
+            mock_boundary.create_issue_comment.call_count == 2
+        )  # 2 issue comments coupled to restored issues
         assert mock_boundary.create_pull_request.call_count == 2  # 2 PRs in sample data
 
         # Verify PR comments were created (should be 3 calls from sample data)
@@ -160,10 +161,12 @@ class TestPrCommentsRestoreIntegration:
         )
 
         # Verify expected creation calls were made
-        mock_boundary.create_label.assert_called_once()
-        mock_boundary.create_issue.assert_called_once()
-        mock_boundary.create_issue_comment.assert_called_once()
-        mock_boundary.create_pull_request.assert_called_once()
+        assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
+        assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
+        assert (
+            mock_boundary.create_issue_comment.call_count == 2
+        )  # 2 issue comments in sample data
+        assert mock_boundary.create_pull_request.call_count == 2  # 2 PRs in sample data
 
         # Verify PR comments were NOT created
         mock_boundary.create_pull_request_comment.assert_not_called()
@@ -219,9 +222,11 @@ class TestPrCommentsRestoreIntegration:
         )
 
         # Verify expected creation calls were made for allowed entities
-        mock_boundary.create_label.assert_called_once()
-        mock_boundary.create_issue.assert_called_once()
-        mock_boundary.create_issue_comment.assert_called_once()  # Issue comments
+        assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
+        assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
+        assert (
+            mock_boundary.create_issue_comment.call_count == 2
+        )  # 2 issue comments in sample data
 
         # Verify neither PR nor PR comments were created
         mock_boundary.create_pull_request.assert_not_called()
@@ -236,7 +241,7 @@ class TestPrCommentsRestoreIntegration:
         pr_comments_with_timestamps = [
             {
                 "id": 5001,
-                "pullRequestNumber": 42,
+                "pullRequestNumber": 3,
                 "body": "First comment",
                 "author": {
                     "login": "reviewer1",
@@ -252,12 +257,12 @@ class TestPrCommentsRestoreIntegration:
                 },
                 "created_at": "2025-09-29T10:00:00Z",
                 "updated_at": "2025-09-29T10:00:00Z",
-                "html_url": "https://github.com/owner/repo/pull/42#issuecomment-5001",
-                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/42",
+                "html_url": "https://github.com/owner/repo/pull/3#issuecomment-5001",
+                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/3",
             },
             {
                 "id": 5002,
-                "pullRequestNumber": 42,
+                "pullRequestNumber": 3,
                 "body": "Second comment",
                 "author": {
                     "login": "reviewer2",
@@ -273,12 +278,12 @@ class TestPrCommentsRestoreIntegration:
                 },
                 "created_at": "2025-09-29T11:00:00Z",
                 "updated_at": "2025-09-29T11:00:00Z",
-                "html_url": "https://github.com/owner/repo/pull/42#issuecomment-5002",
-                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/42",
+                "html_url": "https://github.com/owner/repo/pull/3#issuecomment-5002",
+                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/3",
             },
             {
                 "id": 5003,
-                "pullRequestNumber": 42,
+                "pullRequestNumber": 3,
                 "body": "Third comment",
                 "author": {
                     "login": "reviewer1",
@@ -294,8 +299,8 @@ class TestPrCommentsRestoreIntegration:
                 },
                 "created_at": "2025-09-29T12:00:00Z",
                 "updated_at": "2025-09-29T12:00:00Z",
-                "html_url": "https://github.com/owner/repo/pull/42#issuecomment-5003",
-                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/42",
+                "html_url": "https://github.com/owner/repo/pull/3#issuecomment-5003",
+                "pull_request_url": "https://api.github.com/repos/owner/repo/pulls/3",
             },
         ]
 
@@ -321,7 +326,7 @@ class TestPrCommentsRestoreIntegration:
         mock_boundary.create_issue.return_value = {"number": 1, "id": "new_issue_id"}
         mock_boundary.create_issue_comment.return_value = {"id": "new_comment_id"}
         mock_boundary.create_pull_request.return_value = {
-            "number": 42,
+            "number": 3,
             "id": "new_pr_id",
         }
         mock_boundary.create_pull_request_comment.return_value = {
@@ -408,10 +413,12 @@ class TestPrCommentsRestoreIntegration:
         )
 
         # Verify other entities were still created successfully
-        mock_boundary.create_label.assert_called_once()
-        mock_boundary.create_issue.assert_called_once()
-        mock_boundary.create_issue_comment.assert_called_once()
-        mock_boundary.create_pull_request.assert_called_once()
+        assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
+        assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
+        assert (
+            mock_boundary.create_issue_comment.call_count == 2
+        )  # 2 issue comments in sample data
+        assert mock_boundary.create_pull_request.call_count == 2  # 2 PRs in sample data
 
         # PR comments should not be created (file was missing)
         mock_boundary.create_pull_request_comment.assert_not_called()
@@ -466,9 +473,11 @@ class TestPrCommentsRestoreIntegration:
         )
 
         # Verify other entities were created
-        mock_boundary.create_label.assert_called_once()
-        mock_boundary.create_issue.assert_called_once()
-        mock_boundary.create_issue_comment.assert_called_once()
+        assert mock_boundary.create_label.call_count == 2  # 2 labels in sample data
+        assert mock_boundary.create_issue.call_count == 2  # 2 issues in sample data
+        assert (
+            mock_boundary.create_issue_comment.call_count == 2
+        )  # 2 issue comments in sample data
 
         # Verify PR methods were not called
         mock_boundary.create_pull_request.assert_not_called()
