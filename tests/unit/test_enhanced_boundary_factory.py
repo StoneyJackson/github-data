@@ -1,6 +1,5 @@
 """Tests for enhanced boundary factory with protocol completeness."""
 
-import pytest
 from unittest.mock import Mock
 
 from tests.shared.mocks.boundary_factory import MockBoundaryFactory

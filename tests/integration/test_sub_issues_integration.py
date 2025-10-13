@@ -64,7 +64,6 @@ class TestSubIssuesIntegration:
         # Verify issues include sub-issues references
         with open(data_path / "issues.json") as f:
             issues_data = json.load(f)
-        parent_issue = next(issue for issue in issues_data if issue["number"] == 1)
         # Note: sub_issues relationship is tracked separately in sub_issues.json
         # The shared fixture has 2 issues where issue #2 is a sub-issue of issue #1
         assert len(issues_data) == 2

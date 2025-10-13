@@ -1,6 +1,5 @@
 """Mock boundary factory for GitHub Data tests."""
 
-import inspect
 from unittest.mock import Mock
 from src.github.protocols import GitHubApiBoundary
 
@@ -168,7 +167,8 @@ class MockBoundaryFactory:
 
         for method_name in protocol_methods:
             try:
-                # Check if method exists and is configured (has return_value or side_effect)
+                # Check if method exists and is configured
+                # (has return_value or side_effect)
                 method = getattr(mock_boundary, method_name)
                 if not (
                     hasattr(method, "return_value") or hasattr(method, "side_effect")
@@ -183,7 +183,8 @@ class MockBoundaryFactory:
     def create_protocol_complete(sample_data=None):
         """Create a protocol-complete mock boundary with all methods configured.
 
-        This is the recommended method for new tests as it ensures 100% protocol coverage.
+        This is the recommended method for new tests as it ensures 100%
+        protocol coverage.
 
         Args:
             sample_data: Optional sample data dict to configure return values
