@@ -79,7 +79,9 @@ class MockGitHubService(RepositoryService):
     ) -> List[Dict[str, Any]]:
         """Get comments for specific pull request review."""
         pr_review_comments = self.mock_data.get("pr_review_comments", [])
-        return [c for c in pr_review_comments if str(c.get("review_id")) == str(review_id)]
+        return [
+            c for c in pr_review_comments if str(c.get("review_id")) == str(review_id)
+        ]
 
     def get_all_pull_request_review_comments(
         self, repo_name: str

@@ -257,7 +257,9 @@ def sample_github_data():
                     "html_url": "https://github.com/bob",
                 },
                 "submitted_at": "2023-01-18T15:00:00Z",
-                "html_url": "https://github.com/owner/repo/pull/3#pullrequestreview-7001",
+                "html_url": (
+                    "https://github.com/owner/repo/pull/3#pullrequestreview-7001"
+                ),
                 "pull_request_url": "https://github.com/owner/repo/pull/3",
             },
             {
@@ -271,7 +273,9 @@ def sample_github_data():
                     "html_url": "https://github.com/alice",
                 },
                 "submitted_at": "2023-01-17T15:00:00Z",
-                "html_url": "https://github.com/owner/repo/pull/4#pullrequestreview-7002",
+                "html_url": (
+                    "https://github.com/owner/repo/pull/4#pullrequestreview-7002"
+                ),
                 "pull_request_url": "https://github.com/owner/repo/pull/4",
             },
         ],
@@ -293,7 +297,9 @@ def sample_github_data():
                 "path": "src/rate_limiter.py",
                 "position": 42,
                 "original_position": 42,
-                "diff_hunk": "@@ -40,6 +40,7 @@ class RateLimiter:\n+    MAX_REQUESTS = 100",
+                "diff_hunk": (
+                    "@@ -40,6 +40,7 @@ class RateLimiter:\n+    MAX_REQUESTS = 100"
+                ),
             },
             {
                 "id": 8002,
@@ -312,7 +318,10 @@ def sample_github_data():
                 "path": "src/security.py",
                 "position": 15,
                 "original_position": 15,
-                "diff_hunk": "@@ -13,6 +13,8 @@ def sanitize_input(text):\n+    if not text:\n+        return ''",
+                "diff_hunk": (
+                    "@@ -13,6 +13,8 @@ def sanitize_input(text):\n"
+                    "+    if not text:\n+        return ''"
+                ),
             },
         ],
     }

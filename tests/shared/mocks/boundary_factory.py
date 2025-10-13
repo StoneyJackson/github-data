@@ -15,8 +15,8 @@ def add_pr_method_mocks(mock_boundary, sample_data=None):
         mock_boundary.get_all_pull_request_reviews.return_value = sample_data.get(
             "pr_reviews", []
         )
-        mock_boundary.get_all_pull_request_review_comments.return_value = sample_data.get(
-            "pr_review_comments", []
+        mock_boundary.get_all_pull_request_review_comments.return_value = (
+            sample_data.get("pr_review_comments", [])
         )
     else:
         mock_boundary.get_repository_pull_requests.return_value = []
