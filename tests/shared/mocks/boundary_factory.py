@@ -38,98 +38,107 @@ class MockBoundaryFactory:
     def _get_protocol_methods():
         """Discover all methods from GitHubApiBoundary protocol."""
         methods = []
-        # Get all methods defined in the protocol class
+        # Get all abstract methods from the protocol class
         for name in dir(GitHubApiBoundary):
             if not name.startswith("_"):  # Skip private methods
                 attr = getattr(GitHubApiBoundary, name)
-                if callable(attr):
+                if callable(attr) and hasattr(attr, '__isabstractmethod__'):
                     methods.append(name)
         return methods
 
     @staticmethod
-    def _configure_all_methods(mock_boundary, sample_data=None):
-        """Configure all protocol methods with appropriate return values."""
+    def _get_method_signature(method_name):
+        """Get the method signature from the protocol."""
+        try:
+            method = getattr(GitHubApiBoundary, method_name)
+            return getattr(method, '__annotations__', {})
+        except AttributeError:
+            return {}
+
+    @staticmethod
+    def _configure_method_by_pattern(mock_boundary, method_name, sample_data=None):
+        """Configure a method based on naming patterns and sample data."""
         if sample_data is None:
             sample_data = {}
 
-        # Read methods (get_*)
-        mock_boundary.get_repository_labels.return_value = sample_data.get("labels", [])
-        mock_boundary.get_repository_issues.return_value = sample_data.get("issues", [])
-        mock_boundary.get_all_issue_comments.return_value = sample_data.get(
-            "comments", []
-        )
-        mock_boundary.get_issue_comments.return_value = []
-        mock_boundary.get_repository_pull_requests.return_value = sample_data.get(
-            "pull_requests", []
-        )
-        mock_boundary.get_all_pull_request_comments.return_value = sample_data.get(
-            "pr_comments", []
-        )
-        mock_boundary.get_pull_request_comments.return_value = []
-        mock_boundary.get_all_pull_request_reviews.return_value = sample_data.get(
-            "pr_reviews", []
-        )
-        mock_boundary.get_pull_request_reviews.return_value = []
-        mock_boundary.get_all_pull_request_review_comments.return_value = (
-            sample_data.get("pr_review_comments", [])
-        )
-        mock_boundary.get_pull_request_review_comments.return_value = []
-        mock_boundary.get_repository_sub_issues.return_value = sample_data.get(
-            "sub_issues", []
-        )
-        mock_boundary.get_issue_sub_issues_graphql.return_value = []
-        mock_boundary.get_issue_parent.return_value = None
-        mock_boundary.get_rate_limit_status.return_value = {
-            "remaining": 5000,
-            "reset": 3600,
-        }
+        # GET methods - return sample data or empty lists
+        if method_name.startswith('get_'):
+            if 'labels' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("labels", []))
+            elif 'issues' in method_name and 'sub_issues' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("issues", []))
+            elif 'sub_issues' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("sub_issues", []))
+            elif 'comments' in method_name and 'pull_request' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("comments", []))
+            elif 'pull_requests' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pull_requests", []))
+            elif 'pull_request_comments' in method_name or 'pr_comments' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_comments", []))
+            elif 'reviews' in method_name and 'comment' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_reviews", []))
+            elif 'review_comments' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=sample_data.get("pr_review_comments", []))
+            elif 'parent' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value=None)
+            elif 'rate_limit' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"remaining": 5000, "reset": 3600})
+            else:
+                # Default to empty list for unknown get methods
+                mock_boundary.__dict__[method_name] = Mock(return_value=[])
 
-        # Create methods (create_*)
-        mock_boundary.create_label.return_value = {
-            "id": 999,
-            "name": "test-label",
-            "color": "ffffff",
-        }
-        mock_boundary.create_issue.return_value = {
-            "number": 999,
-            "id": 999,
-            "title": "test-issue",
-        }
-        mock_boundary.create_issue_comment.return_value = {
-            "id": 888,
-            "body": "test-comment",
-        }
-        mock_boundary.create_pull_request.return_value = {
-            "id": 777,
-            "number": 777,
-            "title": "test-pr",
-        }
-        mock_boundary.create_pull_request_comment.return_value = {
-            "id": 666,
-            "body": "test-pr-comment",
-        }
-        mock_boundary.create_pull_request_review.return_value = {
-            "id": 555,
-            "body": "test-review",
-        }
-        mock_boundary.create_pull_request_review_comment.return_value = {
-            "id": 444,
-            "body": "test-review-comment",
-        }
+        # CREATE methods - return mock success responses
+        elif method_name.startswith('create_'):
+            if 'label' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 999, "name": "test-label", "color": "ffffff"})
+            elif 'issue' in method_name and 'comment' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"number": 999, "id": 999, "title": "test-issue"})
+            elif 'issue_comment' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 888, "body": "test-comment"})
+            elif 'pull_request' in method_name and 'comment' not in method_name and 'review' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 777, "number": 777, "title": "test-pr"})
+            elif 'pull_request_comment' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 666, "body": "test-pr-comment"})
+            elif 'pull_request_review' in method_name and 'comment' not in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 555, "body": "test-review"})
+            elif 'review_comment' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 444, "body": "test-review-comment"})
+            else:
+                # Default create response
+                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
 
-        # Sub-issue management methods
-        mock_boundary.add_sub_issue.return_value = {"success": True}
-        mock_boundary.remove_sub_issue.return_value = None
-        mock_boundary.reprioritize_sub_issue.return_value = {"success": True}
+        # UPDATE/DELETE methods
+        elif method_name.startswith('update_'):
+            if 'label' in method_name:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"id": 999, "name": "updated-label", "color": "000000"})
+            else:
+                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
+        elif method_name.startswith('delete_'):
+            mock_boundary.__dict__[method_name] = Mock(return_value=None)
+        elif method_name.startswith('close_'):
+            mock_boundary.__dict__[method_name] = Mock(return_value={"state": "closed"})
 
-        # Update/delete methods
-        mock_boundary.update_label.return_value = {
-            "id": 999,
-            "name": "updated-label",
-            "color": "000000",
-        }
-        mock_boundary.delete_label.return_value = None
-        mock_boundary.close_issue.return_value = {"number": 999, "state": "closed"}
+        # SUB-ISSUE management methods
+        elif 'sub_issue' in method_name:
+            if method_name.startswith('add_') or method_name.startswith('reprioritize_'):
+                mock_boundary.__dict__[method_name] = Mock(return_value={"success": True})
+            elif method_name.startswith('remove_'):
+                mock_boundary.__dict__[method_name] = Mock(return_value=None)
+
+        # Fallback for any unmatched methods
+        else:
+            mock_boundary.__dict__[method_name] = Mock(return_value=None)
+
+    @staticmethod
+    def _configure_all_methods(mock_boundary, sample_data=None):
+        """Configure all protocol methods with appropriate return values."""
+        protocol_methods = MockBoundaryFactory._get_protocol_methods()
+        
+        # Configure each protocol method using pattern-based logic
+        for method_name in protocol_methods:
+            MockBoundaryFactory._configure_method_by_pattern(
+                mock_boundary, method_name, sample_data
+            )
 
     @staticmethod
     def create_with_data(data_type="full", **kwargs):
@@ -210,6 +219,39 @@ class MockBoundaryFactory:
     def add_sub_issues_support(mock_boundary):
         """Add sub-issues mocks to existing boundary."""
         add_sub_issues_method_mocks(mock_boundary)
+
+    @staticmethod
+    def create_auto_configured(sample_data=None, validate_completeness=True):
+        """Create a fully automated mock boundary with 100% protocol coverage.
+        
+        This method automatically discovers all protocol methods and configures
+        them based on naming patterns and sample data. This is the recommended
+        method for new tests as it provides automatic protocol completeness.
+        
+        Args:
+            sample_data: Optional sample data dict to configure return values
+            validate_completeness: If True, validates protocol completeness after creation
+        
+        Returns:
+            Mock boundary with all protocol methods automatically configured
+        """
+        mock_boundary = Mock()
+        protocol_methods = MockBoundaryFactory._get_protocol_methods()
+        
+        # Configure all protocol methods automatically
+        for method_name in protocol_methods:
+            MockBoundaryFactory._configure_method_by_pattern(
+                mock_boundary, method_name, sample_data
+            )
+        
+        if validate_completeness:
+            is_complete, missing = MockBoundaryFactory.validate_protocol_completeness(
+                mock_boundary
+            )
+            if not is_complete:
+                raise ValueError(f"Auto-configured mock boundary missing methods: {missing}")
+        
+        return mock_boundary
 
     @staticmethod
     def create_for_restore(success_responses=True):

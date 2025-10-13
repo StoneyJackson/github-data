@@ -14,6 +14,7 @@ This document provides a comprehensive guide to testing in the GitHub Data proje
 - [Continuous Integration](#continuous-integration)
 - [Debugging Tests](#debugging-tests)
 - [Advanced Testing Patterns](#advanced-testing-patterns)
+  - [Boundary Mock Standardization](#boundary-mock-standardization)
 - [Performance Optimization](#performance-optimization)
 - [Best Practices](#best-practices)
 - [Continuous Improvement](#continuous-improvement)
@@ -941,15 +942,347 @@ tests/
 | Complex | Data builders + error simulation | 50-200ms | Custom scenarios |
 | End-to-end | Workflow service fixtures | < 100ms | Complete workflows |
 
+### Boundary Mock Standardization
+
+The GitHub Data project uses an advanced **boundary mock factory system** that provides 100% protocol completeness with automatic validation. This system eliminates manual mock configuration and prevents protocol extension failures.
+
+#### MockBoundaryFactory - Enhanced Mock Creation
+
+**Location:** `tests/shared/mocks/boundary_factory.py`
+
+The MockBoundaryFactory provides automated, protocol-complete boundary mocks with intelligent configuration:
+
+##### Core Factory Methods
+
+```python
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+# ✅ RECOMMENDED: Auto-configured with 100% protocol completeness
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+
+# ✅ RECOMMENDED: Protocol-complete with validation
+mock_boundary = MockBoundaryFactory.create_protocol_complete(sample_github_data)
+
+# ✅ GOOD: For restore workflows 
+mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
+
+# ✅ ACCEPTABLE: Traditional patterns (still protocol-complete)
+mock_boundary = MockBoundaryFactory.create_with_data("full", sample_data=sample_github_data)
+```
+
+##### Before/After Comparison
+
+**❌ OLD WAY - Manual Configuration (AVOID):**
+```python
+# Manual mock setup - brittle and protocol-incomplete
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+mock_boundary.get_repository_issues.return_value = sample_data["issues"]
+mock_boundary.get_all_issue_comments.return_value = []
+mock_boundary.get_repository_pull_requests.return_value = []
+mock_boundary.get_all_pull_request_comments.return_value = []
+# Missing 20+ other required protocol methods!
+# Breaks when new protocol methods are added!
+```
+
+**✅ NEW WAY - Factory Pattern (RECOMMENDED):**
+```python
+# Factory-based setup - robust and protocol-complete
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+# All 28+ protocol methods automatically configured
+# Future-proof: new methods included automatically
+# 100% protocol completeness guaranteed
+```
+
+#### Protocol Validation System
+
+**Location:** `tests/shared/mocks/protocol_validation.py`
+
+The validation system ensures boundary mocks are protocol-complete and catches configuration issues:
+
+##### Validation in Tests
+
+```python
+from tests.shared.mocks.protocol_validation import (
+    validate_boundary_mock, assert_boundary_mock_complete
+)
+
+def test_with_boundary_validation(sample_github_data):
+    """Example test with protocol validation."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Validate protocol completeness
+    assert validate_boundary_mock(mock_boundary)
+    
+    # ✅ Or use assertion (raises detailed error if incomplete)
+    assert_boundary_mock_complete(mock_boundary)
+    
+    # Your test logic here...
+```
+
+##### Validation Reports
+
+```python
+from tests.shared.mocks.protocol_validation import ProtocolValidator
+
+# Generate detailed validation report
+report = ProtocolValidator.generate_validation_report(mock_boundary, GitHubApiBoundary)
+print(report)
+# Output:
+# ✅ **PASSED: Mock boundary is fully protocol-compliant**
+# **Protocol completeness**: 100.0%
+# **Total protocol methods**: 28
+# **Properly configured**: 28
+```
+
+#### Migration from Manual Mocks
+
+The project includes migration utilities to help convert manual boundary mocks to factory patterns:
+
+##### Migration Detection
+
+```python
+from tests.shared.mocks.migration_utils import BoundaryMockMigrator
+
+# Analyze test file for manual mock patterns
+patterns = BoundaryMockMigrator.detect_manual_mock_patterns(file_content)
+report = BoundaryMockMigrator.create_migration_report(file_path, patterns)
+```
+
+##### Quick Migration Guide
+
+1. **Identify Manual Mock Usage:**
+   ```python
+   # Look for these patterns in your tests:
+   mock_boundary = Mock()  # ❌ Manual creation
+   mock_boundary.get_*.return_value = []  # ❌ Manual configuration
+   ```
+
+2. **Replace with Factory Pattern:**
+   ```python
+   # ✅ Replace with auto-configured factory
+   mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+   ```
+
+3. **Remove Manual Configurations:**
+   ```python
+   # ❌ Delete these lines (factory handles automatically):
+   # mock_boundary.get_repository_labels.return_value = []
+   # mock_boundary.get_repository_issues.return_value = []
+   # ... (all other manual configurations)
+   ```
+
+4. **Add Custom Configurations (if needed):**
+   ```python
+   # ✅ Only add custom configs that differ from defaults
+   mock_boundary.create_issue.side_effect = [
+       {"number": 101}, {"number": 102}
+   ]
+   ```
+
+#### Best Practices for Boundary Mocks
+
+##### ✅ DO - Recommended Patterns
+
+```python
+class TestExample:
+    """Example test class using best practices."""
+    
+    def test_save_workflow(self, sample_github_data):
+        """Test with auto-configured boundary mock."""
+        # ✅ Use factory with sample data
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+        
+        # ✅ Validate protocol completeness in development
+        assert validate_boundary_mock(mock_boundary)
+        
+        # ✅ Only add custom behavior when needed
+        mock_boundary.create_issue.return_value = {"number": 999}
+        
+        # Your test logic...
+    
+    def test_restore_workflow(self):
+        """Test restore with specialized factory method."""
+        # ✅ Use specialized restore factory
+        mock_boundary = MockBoundaryFactory.create_for_restore()
+        
+        # ✅ Custom configurations for restore behavior
+        mock_boundary.create_issue.side_effect = [
+            {"number": 101}, {"number": 102}
+        ]
+        
+        # Your test logic...
+```
+
+##### ❌ DON'T - Anti-patterns to Avoid
+
+```python
+# ❌ DON'T: Manual Mock() creation
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+
+# ❌ DON'T: Incomplete protocol implementation
+mock_boundary.get_repository_issues.return_value = []
+# Missing 25+ other required methods!
+
+# ❌ DON'T: Hardcoded return values without sample data
+mock_boundary.get_repository_labels.return_value = [
+    {"name": "bug", "color": "ff0000"}  # Use sample_github_data instead
+]
+
+# ❌ DON'T: Ignoring validation failures
+# Always ensure protocol completeness
+```
+
+#### Integration Test Examples
+
+##### Complete Integration Test Structure
+
+```python
+import pytest
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+pytestmark = [pytest.mark.integration]
+
+class TestGitHubIntegration:
+    """Integration tests using enhanced boundary mocks."""
+    
+    @pytest.fixture
+    def mock_github_service(self, sample_github_data):
+        """Create protocol-complete GitHub service mock."""
+        github_service = Mock()
+        # ✅ Use auto-configured boundary with sample data
+        boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+        github_service.boundary = boundary
+        return github_service
+    
+    def test_save_workflow_integration(self, mock_github_service, temp_data_dir):
+        """Test complete save workflow with boundary mock."""
+        # Test uses protocol-complete mock automatically
+        # All GitHub API methods properly configured
+        # Uses realistic sample data
+        pass
+    
+    def test_restore_workflow_integration(self, temp_data_dir, sample_github_data):
+        """Test restore workflow with specialized boundary mock."""
+        # ✅ Use restore-specific factory
+        mock_boundary = MockBoundaryFactory.create_for_restore()
+        
+        # ✅ Custom restore responses
+        mock_boundary.create_issue.side_effect = [
+            {"number": 101, "title": "Restored Issue 1"},
+            {"number": 102, "title": "Restored Issue 2"}
+        ]
+        
+        # Test restore logic...
+```
+
+#### Advanced Configuration Patterns
+
+##### Custom Data Integration
+
+```python
+def test_with_custom_data_integration(self):
+    """Test with custom data while maintaining protocol completeness."""
+    # ✅ Create custom data that extends sample data
+    custom_data = {
+        "labels": [{"name": "custom", "color": "blue"}],
+        "issues": [{"number": 1, "title": "Custom Issue"}]
+    }
+    
+    # ✅ Use factory with custom data
+    mock_boundary = MockBoundaryFactory.create_auto_configured(custom_data)
+    
+    # ✅ Validate it's still protocol complete
+    assert validate_boundary_mock(mock_boundary)
+```
+
+##### Error Simulation with Factory
+
+```python
+def test_error_handling_with_factory(self, sample_github_data):
+    """Test error handling with protocol-complete boundary."""
+    # ✅ Start with complete boundary
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Add error simulation to specific methods
+    mock_boundary.create_issue.side_effect = Exception("API Error")
+    
+    # ✅ Verify other methods still work (protocol complete)
+    assert mock_boundary.get_repository_labels() == sample_github_data["labels"]
+```
+
+#### Troubleshooting Boundary Mocks
+
+##### Common Issues and Solutions
+
+**Issue: Protocol incomplete error**
+```python
+# ❌ Problem: Mock is missing required methods
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+
+# ✅ Solution: Use factory for completeness
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+```
+
+**Issue: New protocol method breaks tests**
+```python
+# ❌ Problem: Manual mocks don't include new methods
+# When GitHubApiBoundary gets new methods, manual mocks break
+
+# ✅ Solution: Factory automatically includes new methods
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+# Automatically includes all current and future protocol methods
+```
+
+**Issue: Custom behavior with protocol completeness**
+```python
+# ✅ Solution: Factory + custom configuration
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+# All protocol methods configured ✅
+
+# Add custom behavior only where needed
+mock_boundary.create_issue.side_effect = custom_side_effect
+# Still protocol complete ✅
+```
+
+##### Validation and Debugging
+
+```python
+from tests.shared.mocks.protocol_validation import ProtocolValidator
+
+def debug_boundary_mock(mock_boundary):
+    """Debug helper for boundary mock issues."""
+    is_complete, issues, details = ProtocolValidator.validate_protocol_completeness(
+        mock_boundary, GitHubApiBoundary
+    )
+    
+    if not is_complete:
+        print(f"❌ Protocol incomplete: {details['completeness_percentage']:.1f}%")
+        print(f"Missing methods: {issues}")
+        
+        # Generate detailed report
+        report = ProtocolValidator.generate_validation_report(
+            mock_boundary, GitHubApiBoundary
+        )
+        print(report)
+    else:
+        print("✅ Mock boundary is protocol complete!")
+```
+
 ### Usage Pattern Examples
 
 #### Simple Integration Test
 ```python
 @pytest.mark.integration
 @pytest.mark.fast
-def test_basic_operation(github_service_with_mock, temp_data_dir):
-    # Basic integration test with minimal setup
-    pass
+def test_basic_operation(sample_github_data, temp_data_dir):
+    """Basic integration test with factory-based boundary mock."""
+    # ✅ Use factory for protocol completeness
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # Your test logic here...
 ```
 
 #### Complex Scenario Test
@@ -958,7 +1291,9 @@ def test_basic_operation(github_service_with_mock, temp_data_dir):
 @pytest.mark.enhanced_fixtures
 @pytest.mark.large_dataset
 def test_large_dataset_scenario(boundary_with_large_dataset, performance_monitoring_services):
-    # Complex test with enhanced fixtures
+    """Complex test with enhanced fixtures and boundary factory."""
+    # Enhanced fixtures already use factory pattern internally
+    # Guaranteed protocol completeness
     pass
 ```
 
@@ -967,9 +1302,15 @@ def test_large_dataset_scenario(boundary_with_large_dataset, performance_monitor
 @pytest.mark.integration
 @pytest.mark.error_simulation
 @pytest.mark.api_errors
-def test_api_error_handling(boundary_with_api_errors, error_handling_workflow_services):
-    # Error simulation and handling test
-    pass
+def test_api_error_handling(sample_github_data):
+    """Error simulation test with protocol-complete boundary."""
+    # ✅ Start with complete boundary
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Add error simulation
+    mock_boundary.get_repository_issues.side_effect = Exception("API Error")
+    
+    # Test error handling logic...
 ```
 
 ## Performance Optimization
@@ -1031,6 +1372,13 @@ pytest -m "performance" --benchmark                               # Performance 
    - Proper test isolation with fixture scopes
    - Consistent test data patterns
    - Reliable error simulation patterns
+
+4. **Boundary Mock Standards** ⭐ **NEW**
+   - **Always use MockBoundaryFactory** instead of manual Mock() creation
+   - **Ensure protocol completeness** with `create_auto_configured()` method
+   - **Validate mocks in development** using protocol validation utilities
+   - **Leverage shared sample data** for consistent test scenarios
+   - See [Boundary Mock Standardization](#boundary-mock-standardization) for complete guide
 
 ### General Testing
 

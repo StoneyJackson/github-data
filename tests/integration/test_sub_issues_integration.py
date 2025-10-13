@@ -10,6 +10,7 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.sub_issues]
 
@@ -24,23 +25,9 @@ class TestSubIssuesIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that save operation creates sub-issues JSON files."""
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with auto-configuration
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
         mock_boundary_class.return_value = mock_boundary
-
-        # Mock existing methods
-        mock_boundary.get_repository_labels.return_value = []
-        mock_boundary.get_all_issue_comments.return_value = []
-        mock_boundary.get_repository_pull_requests.return_value = []
-        mock_boundary.get_all_pull_request_comments.return_value = []
-        mock_boundary.get_all_pull_request_reviews.return_value = []
-        mock_boundary.get_all_pull_request_review_comments.return_value = []
-
-        # Mock sub-issues methods using shared fixture
-        mock_boundary.get_repository_issues.return_value = sample_github_data["issues"]
-        mock_boundary.get_repository_sub_issues.return_value = sample_github_data[
-            "sub_issues"
-        ]
 
         # Execute save operation
         github_service = create_github_service("fake_token")
