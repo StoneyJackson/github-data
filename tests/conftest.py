@@ -51,6 +51,9 @@ pytest_plugins = [
     "tests.shared.fixtures.config_fixtures",
 ]
 
+for i in pytest_plugins:
+    pytest.register_assert_rewrite(i)
+
 # Global test metrics collection
 _test_metrics = {
     "fixture_usage": {},
