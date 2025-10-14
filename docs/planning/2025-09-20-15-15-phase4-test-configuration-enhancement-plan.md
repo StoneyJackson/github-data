@@ -1,8 +1,8 @@
 # Phase 4 Detailed Implementation Plan: Test Configuration Enhancement and Documentation
 
-**Date:** 2025-09-20  
-**Time:** 15:15  
-**Parent Plan:** [2025-09-20-14-00-split-test-shared-fixtures-plan.md](./2025-09-20-14-00-split-test-shared-fixtures-plan.md)  
+**Date:** 2025-09-20
+**Time:** 15:15
+**Parent Plan:** [2025-09-20-14-00-split-test-shared-fixtures-plan.md](./2025-09-20-14-00-split-test-shared-fixtures-plan.md)
 **Prerequisites:** [Phase 1 Complete](./2025-09-20-14-15-phase1-shared-fixtures-detailed-plan.md), [Phase 2 Complete](./2025-09-20-14-38-phase2-test-file-migration-plan.md), [Phase 3 Complete](./2025-09-20-15-00-phase3-enhanced-mock-fixtures-plan.md)
 
 ## Executive Summary
@@ -101,38 +101,38 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "integration: Integration tests")
     config.addinivalue_line("markers", "container: Container tests")
     config.addinivalue_line("markers", "slow: Slow running tests")
-    
+
     # Existing feature-specific markers
     config.addinivalue_line("markers", "labels: Label-related tests")
     config.addinivalue_line("markers", "issues: Issue-related tests")
     config.addinivalue_line("markers", "comments: Comment-related tests")
     config.addinivalue_line("markers", "errors: Error handling tests")
-    
+
     # NEW: Enhanced fixture category markers
     config.addinivalue_line("markers", "enhanced_fixtures: Tests using enhanced fixture patterns")
     config.addinivalue_line("markers", "data_builders: Tests using dynamic data builder fixtures")
     config.addinivalue_line("markers", "error_simulation: Tests using error simulation fixtures")
     config.addinivalue_line("markers", "workflow_services: Tests using workflow service fixtures")
     config.addinivalue_line("markers", "performance_fixtures: Tests using performance monitoring fixtures")
-    
+
     # NEW: Test complexity and performance markers
     config.addinivalue_line("markers", "fast: Fast running tests (< 100ms)")
     config.addinivalue_line("markers", "medium: Medium running tests (100ms - 1s)")
     config.addinivalue_line("markers", "performance: Performance testing and benchmarking")
     config.addinivalue_line("markers", "memory_intensive: Tests with high memory usage")
-    
+
     # NEW: GitHub API scenario markers
     config.addinivalue_line("markers", "empty_repository: Tests with empty repository scenarios")
     config.addinivalue_line("markers", "large_dataset: Tests with large dataset scenarios")
     config.addinivalue_line("markers", "rate_limiting: Tests involving rate limiting scenarios")
     config.addinivalue_line("markers", "api_errors: Tests simulating GitHub API errors")
-    
+
     # NEW: Workflow-specific markers
     config.addinivalue_line("markers", "backup_workflow: Backup workflow tests")
     config.addinivalue_line("markers", "restore_workflow: Restore workflow tests")
     config.addinivalue_line("markers", "sync_workflow: Sync workflow tests")
     config.addinivalue_line("markers", "validation_workflow: Data validation workflow tests")
-    
+
     # NEW: Data complexity markers
     config.addinivalue_line("markers", "simple_data: Tests with simple data structures")
     config.addinivalue_line("markers", "complex_hierarchy: Tests with complex hierarchical data")
@@ -155,9 +155,9 @@ python_classes = Test*
 python_functions = test_*
 
 # Enhanced output and reporting options
-addopts = 
-    --cov-report=term-missing 
-    --cov-report=html 
+addopts =
+    --cov-report=term-missing
+    --cov-report=html
     --tb=short
     --strict-markers
     --strict-config
@@ -171,38 +171,38 @@ markers =
     container: marks tests as container integration tests (deselect with '-m "not container"')
     slow: marks tests as slow (deselect with '-m "not slow"')
     docker: marks tests as requiring Docker (deselect with '-m "not docker"')
-    
+
     # Feature-specific categories
     labels: marks tests as label-related (deselect with '-m "not labels"')
     issues: marks tests as issue-related (deselect with '-m "not issues"')
     comments: marks tests as comment-related (deselect with '-m "not comments"')
     errors: marks tests as error handling (deselect with '-m "not errors"')
-    
+
     # Enhanced fixture categories
     enhanced_fixtures: marks tests using enhanced fixture patterns
     data_builders: marks tests using dynamic data builder fixtures
     error_simulation: marks tests using error simulation fixtures
     workflow_services: marks tests using workflow service fixtures
     performance_fixtures: marks tests using performance monitoring fixtures
-    
+
     # Performance and complexity markers
     fast: marks tests as fast running (< 100ms)
     medium: marks tests as medium running (100ms - 1s)
     performance: marks tests as performance testing and benchmarking
     memory_intensive: marks tests with high memory usage
-    
+
     # GitHub API scenario markers
     empty_repository: marks tests with empty repository scenarios
     large_dataset: marks tests with large dataset scenarios
     rate_limiting: marks tests involving rate limiting scenarios
     api_errors: marks tests simulating GitHub API errors
-    
+
     # Workflow-specific markers
     backup_workflow: marks backup workflow tests
     restore_workflow: marks restore workflow tests
     sync_workflow: marks sync workflow tests
     validation_workflow: marks data validation workflow tests
-    
+
     # Data complexity markers
     simple_data: marks tests with simple data structures
     complex_hierarchy: marks tests with complex hierarchical data
@@ -222,7 +222,7 @@ minversion = 6.0
 # Test collection optimization
 collect_ignore = [
     "build",
-    "dist", 
+    "dist",
     ".tox",
     "*.egg",
 ]
@@ -230,7 +230,7 @@ collect_ignore = [
 [coverage:run]
 branch = true
 source = src
-omit = 
+omit =
     */tests/*
     */test_*
     */__pycache__/*
@@ -285,28 +285,28 @@ def pytest_configure(config):
     """Configure pytest with custom markers and advanced settings."""
     # Enhanced marker registration (from Step 4.1.1)
     # ... (marker registration code from above) ...
-    
+
     # Configure test execution settings
     config.option.verbose = True if not hasattr(config.option, 'verbose') else config.option.verbose
-    
+
 
 def pytest_runtest_setup(item):
     """Track test setup and fixture usage."""
     global _test_metrics
-    
+
     # Record fixture usage for this test
     fixtures_used = [fixture for fixture in item.fixturenames if not fixture.startswith('_')]
     test_name = f"{item.nodeid}"
-    
+
     _test_metrics["fixture_usage"][test_name] = fixtures_used
-    
+
     # Track enhanced fixture usage specifically
     enhanced_fixtures = [
         'boundary_with_repository_data', 'boundary_with_large_dataset',
         'backup_workflow_services', 'github_data_builder',
         'performance_monitoring_services', 'integration_test_environment'
     ]
-    
+
     enhanced_used = [f for f in fixtures_used if f in enhanced_fixtures]
     if enhanced_used:
         # Add enhanced_fixtures marker if not already present
@@ -317,15 +317,15 @@ def pytest_runtest_setup(item):
 def pytest_runtest_call(item):
     """Monitor test execution performance."""
     global _test_metrics
-    
+
     start_time = time.time()
     yield
     end_time = time.time()
-    
+
     duration = end_time - start_time
     test_name = f"{item.nodeid}"
     _test_metrics["test_durations"][test_name] = duration
-    
+
     # Auto-categorize by duration if not already marked
     if duration < 0.1 and not any(mark.name in ['fast', 'medium', 'slow'] for mark in item.iter_markers()):
         item.add_marker(pytest.mark.fast)
@@ -338,22 +338,22 @@ def pytest_runtest_call(item):
 def pytest_sessionfinish(session, exitstatus):
     """Generate test metrics report after session completion."""
     global _test_metrics
-    
+
     if session.config.option.verbose >= 2:  # Only in very verbose mode
         print("\n" + "="*80)
         print("TEST METRICS SUMMARY")
         print("="*80)
-        
+
         # Fixture usage summary
         fixture_counts = {}
         for test, fixtures in _test_metrics["fixture_usage"].items():
             for fixture in fixtures:
                 fixture_counts[fixture] = fixture_counts.get(fixture, 0) + 1
-        
+
         print(f"\nTop 10 Most Used Fixtures:")
         for fixture, count in sorted(fixture_counts.items(), key=lambda x: x[1], reverse=True)[:10]:
             print(f"  {fixture}: {count} tests")
-        
+
         # Performance summary
         durations = list(_test_metrics["test_durations"].values())
         if durations:
@@ -363,7 +363,7 @@ def pytest_sessionfinish(session, exitstatus):
             print(f"  Medium tests (100ms-1s): {sum(1 for d in durations if 0.1 <= d < 1.0)}")
             print(f"  Slow tests (> 1s): {sum(1 for d in durations if d >= 1.0)}")
             print(f"  Average duration: {sum(durations)/len(durations):.3f}s")
-        
+
         print("="*80)
 
 
@@ -395,13 +395,13 @@ def setup_test_environment():
     """Set up test environment with proper isolation."""
     # Ensure clean environment for each test
     original_env = os.environ.copy()
-    
+
     # Set test-specific environment variables
     os.environ['TESTING'] = 'true'
     os.environ['LOG_LEVEL'] = 'WARNING'  # Reduce log noise in tests
-    
+
     yield
-    
+
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
@@ -461,7 +461,7 @@ def test_backup_workflow(backup_workflow_services, temp_data_dir):
     services = backup_workflow_services
     github_service = services["github"]
     storage_service = services["storage"]
-    
+
     # Test implementation using pre-configured services
     pass
 ```
@@ -635,7 +635,7 @@ def test_backup_workflow(backup_workflow_services):
     github_service = services["github"]
     storage_service = services["storage"]
     temp_dir = services["temp_dir"]
-    
+
     # Test complete backup workflow
     pass
 ```
@@ -652,7 +652,7 @@ def test_backup_workflow(backup_workflow_services):
 def test_restore_workflow(restore_workflow_services):
     services = restore_workflow_services
     data_files = services["data_files"]  # Pre-written JSON files
-    
+
     # Test complete restore workflow
     pass
 ```
@@ -692,7 +692,7 @@ def test_custom_hierarchy(github_data_builder):
             .with_issues(10)
             .with_sub_issue_hierarchy(depth=3, children_per_level=2)
             .build())
-    
+
     # Test with custom-built data
     assert len(data["sub_issues"]) > 0
 ```
@@ -708,7 +708,7 @@ def test_custom_hierarchy(github_data_builder):
 @pytest.mark.mixed_states
 def test_mixed_state_scenario(parametrized_data_factory):
     data = parametrized_data_factory("mixed_states")
-    
+
     # Test with mixed open/closed states
     states = [issue["state"] for issue in data["issues"]]
     assert "open" in states and "closed" in states
@@ -730,7 +730,7 @@ def test_mixed_state_scenario(parametrized_data_factory):
 def test_performance_characteristics(performance_monitoring_services):
     services = performance_monitoring_services
     timing_boundary = services["timing_boundary"]
-    
+
     # Perform operations and check timing
     # timing_boundary.call_times contains performance data
     pass
@@ -896,7 +896,7 @@ tests/
 def test_data_validation():
     pass
 
-# Integration test example  
+# Integration test example
 @pytest.mark.integration
 @pytest.mark.medium
 def test_service_interaction():
@@ -905,7 +905,6 @@ def test_service_interaction():
 # Container test example
 @pytest.mark.container
 @pytest.mark.slow
-@pytest.mark.docker
 def test_full_workflow():
     pass
 ```
@@ -971,7 +970,7 @@ pytest -m "error_simulation or api_errors"
 # Unit test stage
 pytest -m "unit" --cov=src
 
-# Integration test stage  
+# Integration test stage
 pytest -m "integration and not container" --cov=src --cov-append
 
 # Container test stage
@@ -1162,9 +1161,9 @@ def run_command(cmd: List[str], description: str) -> bool:
     """Run a command and return success status."""
     print(f"🔄 {description}")
     print(f"   Command: {' '.join(cmd)}")
-    
+
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     if result.returncode == 0:
         print(f"✅ {description} - Success")
         if result.stdout.strip():
@@ -1181,27 +1180,27 @@ def development_test_cycle():
     """Run the development test cycle (fast tests only)."""
     print("🚀 Starting Development Test Cycle")
     print("="*50)
-    
+
     commands = [
-        (["pytest", "-m", "not slow and not container", "-v", "--tb=short"], 
+        (["pytest", "-m", "not slow and not container", "-v", "--tb=short"],
          "Running fast tests (unit + integration)"),
-        (["pytest", "-m", "enhanced_fixtures and fast", "-v"], 
+        (["pytest", "-m", "enhanced_fixtures and fast", "-v"],
          "Validating enhanced fixture usage"),
-        (["make", "lint"], 
+        (["make", "lint"],
          "Running code quality checks"),
     ]
-    
+
     success = True
     for cmd, desc in commands:
         if not run_command(cmd, desc):
             success = False
             break
-    
+
     if success:
         print("🎉 Development cycle completed successfully!")
     else:
         print("💥 Development cycle failed - fix issues before proceeding")
-    
+
     return success
 
 
@@ -1209,31 +1208,31 @@ def comprehensive_test_suite():
     """Run the complete test suite including slow tests."""
     print("🔬 Starting Comprehensive Test Suite")
     print("="*50)
-    
+
     commands = [
-        (["pytest", "-m", "unit", "-v", "--cov=src"], 
+        (["pytest", "-m", "unit", "-v", "--cov=src"],
          "Running unit tests with coverage"),
-        (["pytest", "-m", "integration and not container", "-v", "--cov=src", "--cov-append"], 
+        (["pytest", "-m", "integration and not container", "-v", "--cov=src", "--cov-append"],
          "Running integration tests"),
-        (["pytest", "-m", "container", "-v", "--cov=src", "--cov-append"], 
+        (["pytest", "-m", "container", "-v", "--cov=src", "--cov-append"],
          "Running container tests"),
-        (["make", "lint"], 
+        (["make", "lint"],
          "Running linting"),
-        (["make", "type-check"], 
+        (["make", "type-check"],
          "Running type checking"),
     ]
-    
+
     success = True
     for cmd, desc in commands:
         if not run_command(cmd, desc):
             success = False
             # Continue running other tests even if one fails
-    
+
     if success:
         print("🏆 All tests passed successfully!")
     else:
         print("⚠️  Some tests failed - review results above")
-    
+
     return success
 
 
@@ -1241,23 +1240,23 @@ def enhanced_fixture_validation():
     """Validate enhanced fixture functionality."""
     print("🔧 Validating Enhanced Fixture Infrastructure")
     print("="*50)
-    
+
     commands = [
-        (["pytest", "-m", "enhanced_fixtures", "-v", "--tb=short"], 
+        (["pytest", "-m", "enhanced_fixtures", "-v", "--tb=short"],
          "Testing enhanced fixture usage"),
-        (["pytest", "-m", "data_builders", "-v"], 
+        (["pytest", "-m", "data_builders", "-v"],
          "Validating data builder patterns"),
-        (["pytest", "-m", "error_simulation", "-v"], 
+        (["pytest", "-m", "error_simulation", "-v"],
          "Testing error simulation fixtures"),
-        (["pytest", "-m", "workflow_services", "-v"], 
+        (["pytest", "-m", "workflow_services", "-v"],
          "Validating workflow service fixtures"),
     ]
-    
+
     success = True
     for cmd, desc in commands:
         if not run_command(cmd, desc):
             success = False
-    
+
     return success
 
 
@@ -1265,16 +1264,16 @@ def performance_analysis():
     """Run performance analysis of fixtures and tests."""
     print("📊 Running Performance Analysis")
     print("="*50)
-    
+
     commands = [
-        (["pytest", "-m", "performance", "-v", "--benchmark-only"], 
+        (["pytest", "-m", "performance", "-v", "--benchmark-only"],
          "Running performance benchmarks"),
-        (["pytest", "-m", "fast", "-v", "--tb=no", "--quiet"], 
+        (["pytest", "-m", "fast", "-v", "--tb=no", "--quiet"],
          "Validating fast test performance"),
-        (["pytest", "-m", "enhanced_fixtures", "-vv", "--tb=no"], 
+        (["pytest", "-m", "enhanced_fixtures", "-vv", "--tb=no"],
          "Analyzing enhanced fixture performance"),
     ]
-    
+
     for cmd, desc in commands:
         run_command(cmd, desc)  # Don't fail on performance tests
 
@@ -1283,11 +1282,11 @@ def fixture_usage_report():
     """Generate fixture usage report."""
     print("📈 Generating Fixture Usage Report")
     print("="*50)
-    
+
     # Run tests with very verbose output to capture metrics
     cmd = ["pytest", "-vv", "--tb=no", "-q"]
     result = subprocess.run(cmd, capture_output=True, text=True)
-    
+
     print("Fixture usage metrics will be displayed at the end of test runs.")
     print("Run tests with -vv flag to see detailed fixture usage statistics.")
 
@@ -1298,9 +1297,9 @@ def main():
     parser.add_argument("workflow", choices=[
         "dev", "comprehensive", "enhanced", "performance", "usage-report"
     ], help="Choose testing workflow")
-    
+
     args = parser.parse_args()
-    
+
     workflows = {
         "dev": development_test_cycle,
         "comprehensive": comprehensive_test_suite,
@@ -1308,7 +1307,7 @@ def main():
         "performance": performance_analysis,
         "usage-report": fixture_usage_report,
     }
-    
+
     success = workflows[args.workflow]()
     sys.exit(0 if success else 1)
 
@@ -1471,9 +1470,9 @@ Phase 4 completes the shared fixture infrastructure project by providing the con
 
 The implementation focuses on practical developer experience improvements while maintaining the clean architecture and quality standards established in earlier phases. The result is a professional-grade testing infrastructure that supports both current needs and future growth while providing the tools and documentation necessary for effective team collaboration.
 
-**Estimated effort:** 7-9 hours over 2 days  
-**Risk level:** Low (primarily configuration and documentation)  
-**Dependencies:** Phase 1-3 complete  
+**Estimated effort:** 7-9 hours over 2 days
+**Risk level:** Low (primarily configuration and documentation)
+**Dependencies:** Phase 1-3 complete
 **Deliverables:** Enhanced configuration, comprehensive documentation, development tooling
 
 This phase establishes the project with a mature, well-documented, and highly usable testing infrastructure that serves as a model for clean code practices and professional software development standards.

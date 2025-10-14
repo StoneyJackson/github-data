@@ -94,13 +94,13 @@ def test_dockerfile_builds_successfully(self):
     assert image_tag == DockerTestHelper.IMAGE_NAME
 ```
 
-**Location**: 
+**Location**:
 - `tests/test_container_integration.py`
 - `tests/test_docker_compose_integration.py`
 
 ### 4. Additional Markers
 
-- `@pytest.mark.docker`: All Docker-related tests
+- `@pytest.mark.container`: All Docker-related tests
 - `@pytest.mark.slow`: Tests that take significant time
 - `@pytest.mark.integration`: All integration-level tests
 
@@ -203,7 +203,7 @@ For advanced container testing options:
 ./scripts/test-containers
 
 # Run specific test types
-./scripts/test-containers container        # Container tests only  
+./scripts/test-containers container        # Container tests only
 ./scripts/test-containers docker          # All Docker tests
 ./scripts/test-containers all             # All container integration tests
 
@@ -385,11 +385,11 @@ import pytest
 # For unit tests
 pytestmark = [pytest.mark.unit]
 
-# For integration tests  
+# For integration tests
 pytestmark = [pytest.mark.integration]
 
 # For container tests
-pytestmark = [pytest.mark.container, pytest.mark.integration, pytest.mark.docker, pytest.mark.slow]
+pytestmark = [pytest.mark.container, pytest.mark.integration, pytest.mark.slow]
 ```
 
 ## Container Integration Testing
@@ -415,8 +415,8 @@ image_tag = DockerTestHelper.build_image()
 
 # Run container with configuration
 result = DockerTestHelper.run_container(
-    image_tag, 
-    environment={"VAR": "value"}, 
+    image_tag,
+    environment={"VAR": "value"},
     volumes={"/host/path": "/container/path"}
 )
 
@@ -460,16 +460,16 @@ pytestmark = [pytest.mark.unit]
 
 class TestComponentName:
     """Test cases for ComponentName."""
-    
+
     def test_specific_behavior(self):
         """Test that specific behavior works correctly."""
         # Arrange
         input_data = "test input"
         expected_result = "expected output"
-        
+
         # Act
         result = function_under_test(input_data)
-        
+
         # Assert
         assert result == expected_result
 ```
@@ -485,13 +485,13 @@ pytestmark = [pytest.mark.integration]
 
 class TestIntegrationScenario:
     """Integration tests for specific scenario."""
-    
+
     @pytest.fixture
     def temp_data_dir(self):
         """Create temporary directory for test data."""
         with TemporaryDirectory() as temp_dir:
             yield temp_dir
-    
+
     def test_end_to_end_workflow(self, temp_data_dir):
         """Test complete workflow from start to finish."""
         # Test implementation
@@ -504,18 +504,18 @@ import pytest
 import subprocess
 from pathlib import Path
 
-pytestmark = [pytest.mark.container, pytest.mark.integration, pytest.mark.docker, pytest.mark.slow]
+pytestmark = [pytest.mark.container, pytest.mark.integration, pytest.mark.slow]
 
 class TestContainerBehavior:
     """Container integration tests."""
-    
+
     @pytest.fixture
     def docker_image(self):
         """Build Docker image for tests."""
         yield DockerTestHelper.build_image()
         DockerTestHelper.cleanup_containers()
         DockerTestHelper.cleanup_images()
-    
+
     def test_container_functionality(self, docker_image):
         """Test specific container functionality."""
         # Test implementation
@@ -606,7 +606,7 @@ def test_custom_hierarchy(github_data_builder):
             .with_issues(10)
             .with_sub_issue_hierarchy(depth=3, children_per_level=2)
             .build())
-    
+
     assert len(data["sub_issues"]) > 0
 ```
 
@@ -672,8 +672,8 @@ from tests.shared import (
 @pytest.mark.sub_issues
 @pytest.mark.large_dataset
 def test_complex_hierarchy_workflow(
-    temp_data_dir, 
-    complex_hierarchy_data, 
+    temp_data_dir,
+    complex_hierarchy_data,
     github_service_with_mock
 ):
     """Test complex sub-issues hierarchy workflow."""
@@ -742,7 +742,7 @@ from tests.shared import (
 Test configuration is centralized in the [`pytest.ini`](../pytest.ini) file, which includes:
 
 - Test discovery paths and naming conventions
-- Test markers for categorization  
+- Test markers for categorization
 - Coverage reporting settings
 - Branch coverage configuration
 - Output formatting (concise with short tracebacks)
@@ -757,8 +757,8 @@ The project uses pytest-cov with branch coverage enabled by default:
 - **Source Coverage** (default): Measures coverage of `src/` files only
   - Commands: `make test`, `make test-fast`, `make test-unit`, etc.
   - Purpose: Monitor production code test coverage
-  
-- **Test Coverage** (optional): Measures coverage of test files only  
+
+- **Test Coverage** (optional): Measures coverage of test files only
   - Commands: `make test-with-test-coverage`, `make test-fast-with-test-coverage`
   - Purpose: Analyze how thoroughly test files themselves are tested
 
@@ -963,7 +963,7 @@ mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
 # ✅ RECOMMENDED: Protocol-complete with validation
 mock_boundary = MockBoundaryFactory.create_protocol_complete(sample_github_data)
 
-# ✅ GOOD: For restore workflows 
+# ✅ GOOD: For restore workflows
 mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
 
 # ✅ ACCEPTABLE: Traditional patterns (still protocol-complete)
@@ -1010,13 +1010,13 @@ from tests.shared.mocks.protocol_validation import (
 def test_with_boundary_validation(sample_github_data):
     """Example test with protocol validation."""
     mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-    
+
     # ✅ Validate protocol completeness
     assert validate_boundary_mock(mock_boundary)
-    
+
     # ✅ Or use assertion (raises detailed error if incomplete)
     assert_boundary_mock_complete(mock_boundary)
-    
+
     # Your test logic here...
 ```
 
@@ -1087,30 +1087,30 @@ report = BoundaryMockMigrator.create_migration_report(file_path, patterns)
 ```python
 class TestExample:
     """Example test class using best practices."""
-    
+
     def test_save_workflow(self, sample_github_data):
         """Test with auto-configured boundary mock."""
         # ✅ Use factory with sample data
         mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-        
+
         # ✅ Validate protocol completeness in development
         assert validate_boundary_mock(mock_boundary)
-        
+
         # ✅ Only add custom behavior when needed
         mock_boundary.create_issue.return_value = {"number": 999}
-        
+
         # Your test logic...
-    
+
     def test_restore_workflow(self):
         """Test restore with specialized factory method."""
         # ✅ Use specialized restore factory
         mock_boundary = MockBoundaryFactory.create_for_restore()
-        
+
         # ✅ Custom configurations for restore behavior
         mock_boundary.create_issue.side_effect = [
             {"number": 101}, {"number": 102}
         ]
-        
+
         # Your test logic...
 ```
 
@@ -1146,7 +1146,7 @@ pytestmark = [pytest.mark.integration]
 
 class TestGitHubIntegration:
     """Integration tests using enhanced boundary mocks."""
-    
+
     @pytest.fixture
     def mock_github_service(self, sample_github_data):
         """Create protocol-complete GitHub service mock."""
@@ -1155,25 +1155,25 @@ class TestGitHubIntegration:
         boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
         github_service.boundary = boundary
         return github_service
-    
+
     def test_save_workflow_integration(self, mock_github_service, temp_data_dir):
         """Test complete save workflow with boundary mock."""
         # Test uses protocol-complete mock automatically
         # All GitHub API methods properly configured
         # Uses realistic sample data
         pass
-    
+
     def test_restore_workflow_integration(self, temp_data_dir, sample_github_data):
         """Test restore workflow with specialized boundary mock."""
         # ✅ Use restore-specific factory
         mock_boundary = MockBoundaryFactory.create_for_restore()
-        
+
         # ✅ Custom restore responses
         mock_boundary.create_issue.side_effect = [
             {"number": 101, "title": "Restored Issue 1"},
             {"number": 102, "title": "Restored Issue 2"}
         ]
-        
+
         # Test restore logic...
 ```
 
@@ -1189,10 +1189,10 @@ def test_with_custom_data_integration(self):
         "labels": [{"name": "custom", "color": "blue"}],
         "issues": [{"number": 1, "title": "Custom Issue"}]
     }
-    
+
     # ✅ Use factory with custom data
     mock_boundary = MockBoundaryFactory.create_auto_configured(custom_data)
-    
+
     # ✅ Validate it's still protocol complete
     assert validate_boundary_mock(mock_boundary)
 ```
@@ -1204,10 +1204,10 @@ def test_error_handling_with_factory(self, sample_github_data):
     """Test error handling with protocol-complete boundary."""
     # ✅ Start with complete boundary
     mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-    
+
     # ✅ Add error simulation to specific methods
     mock_boundary.create_issue.side_effect = Exception("API Error")
-    
+
     # ✅ Verify other methods still work (protocol complete)
     assert mock_boundary.get_repository_labels() == sample_github_data["labels"]
 ```
@@ -1257,11 +1257,11 @@ def debug_boundary_mock(mock_boundary):
     is_complete, issues, details = ProtocolValidator.validate_protocol_completeness(
         mock_boundary, GitHubApiBoundary
     )
-    
+
     if not is_complete:
         print(f"❌ Protocol incomplete: {details['completeness_percentage']:.1f}%")
         print(f"Missing methods: {issues}")
-        
+
         # Generate detailed report
         report = ProtocolValidator.generate_validation_report(
             mock_boundary, GitHubApiBoundary
@@ -1281,7 +1281,7 @@ def test_basic_operation(sample_github_data, temp_data_dir):
     """Basic integration test with factory-based boundary mock."""
     # ✅ Use factory for protocol completeness
     mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-    
+
     # Your test logic here...
 ```
 
@@ -1306,10 +1306,10 @@ def test_api_error_handling(sample_github_data):
     """Error simulation test with protocol-complete boundary."""
     # ✅ Start with complete boundary
     mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-    
+
     # ✅ Add error simulation
     mock_boundary.get_repository_issues.side_effect = Exception("API Error")
-    
+
     # Test error handling logic...
 ```
 
@@ -1349,7 +1349,7 @@ def test_api_error_handling(sample_github_data):
 ```bash
 # CI/CD Pipeline stages
 pytest -m "unit" --cov=src                                    # Unit test stage
-pytest -m "integration and not container" --cov=src --cov-append  # Integration stage  
+pytest -m "integration and not container" --cov=src --cov-append  # Integration stage
 pytest -m "container" --cov=src --cov-append                      # Container stage
 pytest -m "performance" --benchmark                               # Performance validation
 ```
@@ -1474,7 +1474,7 @@ The project includes specialized scripts for enhanced testing workflows:
 
 - **[scripts/test-development.py](scripts/test-development.md)**: Development workflow automation script
   - Fast development testing cycles
-  - Enhanced fixture validation 
+  - Enhanced fixture validation
   - Performance analysis and reporting
   - Fixture usage metrics
 

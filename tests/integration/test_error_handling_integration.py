@@ -14,7 +14,7 @@ from src.operations.restore.restore import restore_repository_data_with_strategy
 from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
 from tests.shared.builders import GitHubDataBuilder
 
-pytestmark = [pytest.mark.integration, pytest.mark.errors]
+pytestmark = [pytest.mark.integration]
 
 
 class TestErrorHandlingIntegration:

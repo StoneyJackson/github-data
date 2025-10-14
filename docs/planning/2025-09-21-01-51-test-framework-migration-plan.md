@@ -1,7 +1,7 @@
 # Test Framework Migration Plan
 
-**Date**: 2025-09-21 01:51  
-**Task**: Migrate existing tests to new Advanced Testing Patterns framework  
+**Date**: 2025-09-21 01:51
+**Task**: Migrate existing tests to new Advanced Testing Patterns framework
 **Goal**: Reorganize test structure according to testing.md Advanced Testing Patterns section
 
 ## Current State Analysis
@@ -14,7 +14,7 @@ tests/
 ├── shared/                              ✅ Already migrated
 │   ├── __init__.py
 │   ├── fixtures.py                      ✅ Core and enhanced fixtures
-│   ├── enhanced_fixtures.py             ✅ Advanced testing patterns  
+│   ├── enhanced_fixtures.py             ✅ Advanced testing patterns
 │   ├── mocks.py                         ✅ Mock utilities and factories
 │   ├── builders.py                      ✅ Data builder patterns
 │   └── helpers.py
@@ -25,7 +25,7 @@ tests/
 │   ├── test_error_handling_integration.py
 │   ├── test_labels_integration.py
 │   └── test_file_operations.py
-├── github/                              
+├── github/
 │   └── utils/
 │       ├── __init__.py
 │       ├── test_graphql_paginator.py
@@ -54,7 +54,7 @@ tests/
 tests/
 ├── unit/                         # Unit tests (fast, isolated) - NEW DIRECTORY
 ├── integration/                  # Integration tests (service interactions) - EXISTS
-├── container/                    # Container integration tests - NEW DIRECTORY  
+├── container/                    # Container integration tests - NEW DIRECTORY
 └── shared/                       # Shared test infrastructure - EXISTS
     ├── fixtures.py               # Core and enhanced fixtures - EXISTS
     ├── enhanced_fixtures.py      # Advanced testing patterns - EXISTS
@@ -104,7 +104,7 @@ tests/
 8. **tests/github/utils/test_data_enrichment.py** → `tests/unit/test_data_enrichment_unit.py`
    - Action: Move from nested structure and add unit markers
 
-### Phase 3: Migrate Integration Tests  
+### Phase 3: Migrate Integration Tests
 
 **Tests to migrate to `tests/integration/`:**
 
@@ -126,7 +126,7 @@ tests/
 **Tests to migrate to `tests/container/`:**
 
 1. **test_container_integration.py** → `tests/container/test_docker_container.py`
-   - Currently: ✅ Has full container markers: `[pytest.mark.container, pytest.mark.integration, pytest.mark.docker, pytest.mark.slow]`
+   - Currently: ✅ Has full container markers: `[pytest.mark.container, pytest.mark.integration, pytest.mark.slow]`
    - Action: Move and rename
 
 2. **test_docker_compose_integration.py** → `tests/container/test_docker_compose_container.py`
@@ -167,7 +167,7 @@ touch tests/unit/__init__.py tests/container/__init__.py
 ### Step 3: Move and Rename Files
 Follow naming convention:
 - Unit tests: `test_<module>_unit.py`
-- Integration tests: `test_<feature>_integration.py`  
+- Integration tests: `test_<feature>_integration.py`
 - Container tests: `test_<feature>_container.py`
 
 ### Step 4: Update Markers and Imports
@@ -202,9 +202,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.medium]
 ### Container Tests (`tests/container/`)
 ```python
 pytestmark = [
-    pytest.mark.container, 
-    pytest.mark.integration, 
-    pytest.mark.docker, 
+    pytest.mark.container,
+    pytest.mark.integration,
     pytest.mark.slow
 ]
 ```
@@ -240,7 +239,7 @@ pytestmark = [
 
 **Estimated effort**: 4-6 hours
 - Phase 1-2: 1 hour (directory creation + unit test migration)
-- Phase 3-4: 2 hours (integration + container test migration)  
+- Phase 3-4: 2 hours (integration + container test migration)
 - Phase 5-6: 1-2 hours (cleanup + validation)
 - Testing and validation: 1 hour
 

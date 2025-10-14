@@ -11,7 +11,6 @@ import pytest
 pytestmark = [
     pytest.mark.container,
     pytest.mark.integration,
-    pytest.mark.docker,
     pytest.mark.slow,
 ]
 
