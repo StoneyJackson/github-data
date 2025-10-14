@@ -319,6 +319,7 @@ class TestPerformanceBenchmarks:
         """Create real storage service for performance testing."""
         return create_storage_service()
 
+    @pytest.mark.slow
     @pytest.mark.performance
     def test_selective_vs_full_save_performance(
         self, mock_github_service, storage_service, tmp_path

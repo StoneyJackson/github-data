@@ -33,13 +33,13 @@ test-containers: test-container
 
 # Run all tests except container tests (excludes test files from coverage)
 test-fast:
-	pdm run pytest --cov=src --cov-config=pytest.ini -m "not container"
+	pdm run pytest --durations=0 --durations-min=1 --cov=src --cov-config=pytest.ini -m "not container and not slow"
 
 # Run tests with coverage of test files only
 test-with-test-coverage:
 	pdm run pytest --cov=tests --cov-config=pytest.ini
 
-# Run fast tests with coverage of test files only  
+# Run fast tests with coverage of test files only
 test-fast-with-test-coverage:
 	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container"
 

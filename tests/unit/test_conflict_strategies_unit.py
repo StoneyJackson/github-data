@@ -198,6 +198,7 @@ class TestConflictStrategyIntegration:
                 "fail-if-existing",
             )
 
+    @pytest.mark.slow
     def test_fail_if_existing_strategy_with_empty_repository(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):

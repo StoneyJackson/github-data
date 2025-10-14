@@ -378,6 +378,7 @@ class TestSaveRestoreIntegration:
         )
         assert pr_comments_data[2]["user"]["login"] == "charlie"
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_recreates_data_from_json_files(
         self, mock_boundary_class, temp_data_dir, sample_github_data

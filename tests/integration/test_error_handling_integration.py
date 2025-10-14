@@ -262,6 +262,7 @@ class TestErrorHandlingIntegration:
         comment_call_args = comment_calls[0][0]
         assert "Привет мир! 🎉" in comment_call_args[2]  # body is 3rd positional arg
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_large_dataset_handling(self, mock_boundary_class, temp_data_dir):
         """Test handling of large datasets without performance issues."""

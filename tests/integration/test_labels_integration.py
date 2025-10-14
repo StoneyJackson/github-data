@@ -281,6 +281,7 @@ class TestLabelsIntegration:
         third_call_args = label_calls[2][0]
         assert third_call_args[2] == "FF00FF"
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_bulk_label_operations(self, mock_boundary_class, temp_data_dir):
         """Test bulk label operations with many labels."""

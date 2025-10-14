@@ -24,6 +24,7 @@ pytestmark = [
 class TestPrCommentsRestoreIntegration:
     """Integration tests for PR comments restore operation behavior."""
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_with_pr_comments_enabled_restores_all_entities(
         self, mock_boundary_class, temp_data_dir, sample_github_data
