@@ -41,7 +41,7 @@ test-with-test-coverage:
 
 # Run fast tests with coverage of test files only
 test-fast-with-test-coverage:
-	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container"
+	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container and not slow"
 
 # Test commands with markers
 .PHONY: test-fast test-unit test-integration test-container test-by-feature
