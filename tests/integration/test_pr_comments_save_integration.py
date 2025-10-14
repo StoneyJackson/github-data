@@ -2,13 +2,13 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 import pytest
 
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
-from tests.shared import add_pr_method_mocks, add_sub_issues_method_mocks
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 # Test markers for organization and selective execution
 pytestmark = [
@@ -157,20 +157,11 @@ class TestPrCommentsSaveIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data_with_pr_comments
     ):
         """Test save operation with PR comments enabled creates all expected files."""
-        # Setup mock boundary to return our sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with sample data
+        mock_boundary = MockBoundaryFactory.create_auto_configured(
+            sample_github_data_with_pr_comments
+        )
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        add_pr_method_mocks(mock_boundary, sample_github_data_with_pr_comments)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -211,26 +202,11 @@ class TestPrCommentsSaveIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data_with_pr_comments
     ):
         """Test save operation with PRs enabled but PR comments disabled."""
-        # Setup mock boundary to return our sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with empty PR comments
+        test_data = sample_github_data_with_pr_comments.copy()
+        test_data["pr_comments"] = []  # Empty PR comments to test exclusion
+        mock_boundary = MockBoundaryFactory.create_auto_configured(test_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        mock_boundary.get_repository_pull_requests.return_value = (
-            sample_github_data_with_pr_comments["pull_requests"]
-        )
-        # Add empty PR comments mock to test exclusion
-        mock_boundary.get_all_pull_request_comments.return_value = []
-        mock_boundary.get_all_pull_request_reviews.return_value = []
-        mock_boundary.get_all_pull_request_review_comments.return_value = []
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -265,19 +241,14 @@ class TestPrCommentsSaveIntegration:
         caplog,
     ):
         """Test save operation with PR comments enabled but PRs disabled."""
-        # Setup mock boundary to return our sample data but exclude PRs
-        mock_boundary = Mock()
+        # Setup mock boundary using factory without PRs
+        test_data = {
+            "labels": sample_github_data_with_pr_comments["labels"],
+            "issues": sample_github_data_with_pr_comments["issues"],
+            "comments": sample_github_data_with_pr_comments["comments"],
+        }
+        mock_boundary = MockBoundaryFactory.create_auto_configured(test_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -312,19 +283,14 @@ class TestPrCommentsSaveIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data_with_pr_comments
     ):
         """Test save operation with minimal config excludes all PR-related files."""
-        # Setup mock boundary with minimal data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with minimal data
+        minimal_data = {
+            "labels": sample_github_data_with_pr_comments["labels"],
+            "issues": sample_github_data_with_pr_comments["issues"],
+            "comments": sample_github_data_with_pr_comments["comments"],
+        }
+        mock_boundary = MockBoundaryFactory.create_auto_configured(minimal_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -354,20 +320,11 @@ class TestPrCommentsSaveIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data_with_pr_comments
     ):
         """Test that PR comments add expected API calls and processing time."""
-        # Setup mock boundary to return our sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with sample data
+        mock_boundary = MockBoundaryFactory.create_auto_configured(
+            sample_github_data_with_pr_comments
+        )
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        add_pr_method_mocks(mock_boundary, sample_github_data_with_pr_comments)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -398,20 +355,11 @@ class TestPrCommentsSaveIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data_with_pr_comments
     ):
         """Test that saved PR comments file structure matches the specification."""
-        # Setup mock boundary to return our sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with sample data
+        mock_boundary = MockBoundaryFactory.create_auto_configured(
+            sample_github_data_with_pr_comments
+        )
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = (
-            sample_github_data_with_pr_comments["labels"]
-        )
-        mock_boundary.get_repository_issues.return_value = (
-            sample_github_data_with_pr_comments["issues"]
-        )
-        mock_boundary.get_all_issue_comments.return_value = (
-            sample_github_data_with_pr_comments["comments"]
-        )
-        add_pr_method_mocks(mock_boundary, sample_github_data_with_pr_comments)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
