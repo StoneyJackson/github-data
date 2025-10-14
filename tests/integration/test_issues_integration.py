@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,6 +11,7 @@ from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
 from tests.shared.builders import GitHubDataBuilder
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.issues]
 
@@ -43,11 +44,14 @@ class TestIssuesIntegration:
         with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump(chronological_comments_data["pr_review_comments"], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured(
+            chronological_comments_data
+        )
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
+        # Override specific methods for this test scenario
+        mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_label.return_value = {
             "name": "bug",
             "id": 5001,
@@ -55,7 +59,6 @@ class TestIssuesIntegration:
             "description": "Something isn't working",
             "url": "https://api.github.com/repos/owner/target_repo/labels/bug",
         }
-
         mock_boundary.create_issue.return_value = {
             "number": 10,
             "title": "Test issue",
@@ -76,7 +79,6 @@ class TestIssuesIntegration:
             "html_url": "https://github.com/owner/target_repo/issues/10",
             "comments": 0,
         }
-
         mock_boundary.create_issue_comment.return_value = {
             "id": 7001,
             "body": "test comment",
@@ -140,9 +142,11 @@ class TestIssuesIntegration:
         from src.entities import Issue, GitHubUser
         from datetime import datetime
 
-        # Setup boundary mock
-        mock_boundary = Mock()
+        # Setup boundary mock using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
+
+        # Override specific methods for this test scenario
         mock_boundary.get_repository_labels.return_value = []
 
         # Mock raw GitHub API responses for boundary
@@ -296,9 +300,11 @@ class TestIssuesIntegration:
         from src.entities import Issue, GitHubUser
         from datetime import datetime
 
-        # Setup boundary mock
-        mock_boundary = Mock()
+        # Setup boundary mock using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
+
+        # Override specific methods for this test scenario
         mock_boundary.get_repository_labels.return_value = []
 
         # Mock raw GitHub API response
@@ -481,12 +487,12 @@ class TestIssuesIntegration:
             with open(data_path / f"{key}.json", "w") as f:
                 json.dump(data, f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
-        # Mock successful responses
+        # Override specific methods for this test scenario
+        mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}
         mock_boundary.create_issue.return_value = {"number": 10, "id": 999}
 
