@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,7 +11,7 @@ from src.storage import create_storage_service
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 from tests.shared.builders import GitHubDataBuilder
 
 pytestmark = [pytest.mark.integration, pytest.mark.labels]
@@ -74,8 +74,8 @@ class TestLabelsIntegration:
         with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -170,7 +170,7 @@ class TestLabelsIntegration:
             json.dump([], f)
 
         # Setup mock boundary to simulate existing labels
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = existing_labels
 
@@ -244,8 +244,8 @@ class TestLabelsIntegration:
         with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -294,8 +294,8 @@ class TestLabelsIntegration:
             with open(data_path / f"{key}.json", "w") as f:
                 json.dump(data, f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -335,13 +335,11 @@ class TestLabelsIntegration:
         ]
 
         # Setup mock boundary for save operation
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = comprehensive_labels
         mock_boundary.get_repository_issues.return_value = []
         mock_boundary.get_all_issue_comments.return_value = []
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -419,8 +417,8 @@ class TestLabelsIntegration:
         with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
