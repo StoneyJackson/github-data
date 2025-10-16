@@ -15,6 +15,7 @@ This document provides a comprehensive guide to testing in the GitHub Data proje
 - [Debugging Tests](#debugging-tests)
 - [Advanced Testing Patterns](#advanced-testing-patterns)
   - [Boundary Mock Standardization](#boundary-mock-standardization)
+  - [Error Testing and Error Handling Integration](#error-testing-and-error-handling-integration)
 - [Performance Optimization](#performance-optimization)
 - [Best Practices](#best-practices)
 - [Continuous Improvement](#continuous-improvement)
@@ -519,6 +520,71 @@ class TestContainerBehavior:
     def test_container_functionality(self, docker_image):
         """Test specific container functionality."""
         # Test implementation
+```
+
+### Error Simulation Test Structure ⭐ **NEW**
+
+```python
+import pytest
+import requests
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+pytestmark = [pytest.mark.integration, pytest.mark.error_simulation]
+
+class TestErrorHandling:
+    """Error handling and resilience tests."""
+
+    def test_api_failure_resilience(self, sample_github_data):
+        """Test system resilience to API failures."""
+        # ✅ Hybrid factory pattern for error testing
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+        
+        # ✅ Configure specific error scenarios
+        mock_boundary.create_label.side_effect = [
+            {"id": 100, "name": "success"},      # Success
+            Exception("API rate limit exceeded"), # Failure
+        ]
+        
+        # Test error handling logic
+        with pytest.raises(Exception, match="Failed to create label"):
+            # Your error handling test implementation
+            pass
+
+    def test_network_timeout_handling(self, sample_github_data):
+        """Test handling of network timeouts."""
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+        
+        # ✅ Timeout simulation
+        mock_boundary.create_issue.side_effect = requests.exceptions.Timeout("Request timed out")
+        
+        # Test timeout handling logic
+        pass
+
+    def test_malformed_data_handling(self):
+        """Test handling of malformed API responses."""
+        # ✅ Use factory with edge case data
+        mock_boundary = MockBoundaryFactory.create_auto_configured({})
+        
+        # ✅ Simulate malformed responses
+        mock_boundary.get_repository_issues.return_value = [
+            {"id": None, "title": "", "body": None}  # Malformed data
+        ]
+        
+        # Test malformed data handling
+        pass
+
+    @pytest.mark.parametrize("error_type,error_instance", [
+        ("connection", ConnectionError("Network down")),
+        ("timeout", requests.exceptions.Timeout("Request timeout")),
+        ("rate_limit", Exception("Rate limit exceeded")),
+    ])
+    def test_various_error_scenarios(self, sample_github_data, error_type, error_instance):
+        """Test various error scenarios with parameterized data."""
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+        mock_boundary.create_label.side_effect = error_instance
+        
+        # Test each error scenario
+        pass
 ```
 
 ### Comprehensive Shared Fixture System
@@ -1212,6 +1278,58 @@ def test_error_handling_with_factory(self, sample_github_data):
     assert mock_boundary.get_repository_labels() == sample_github_data["labels"]
 ```
 
+##### Hybrid Factory + Custom Override Pattern ⭐ **RECOMMENDED FOR ERROR TESTING**
+
+The hybrid pattern is the recommended approach for error testing, combining factory protocol completeness with custom error simulation:
+
+```python
+@pytest.mark.integration
+@pytest.mark.error_simulation
+def test_hybrid_error_pattern(self, sample_github_data):
+    """Demonstrate the hybrid factory + custom override pattern."""
+    # ✅ Step 1: Factory provides protocol completeness
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Step 2: Custom error simulation via side_effect
+    mock_boundary.create_label.side_effect = [
+        {"id": 100, "name": "bug"},           # Success
+        Exception("Rate limit exceeded"),     # Error
+        {"id": 101, "name": "enhancement"}    # Recovery
+    ]
+    
+    # ✅ Step 3: Complex error scenarios
+    mock_boundary.create_issue.side_effect = [
+        {"number": 1, "id": 999},
+        ConnectionError("Network failure"),
+        {"number": 2, "id": 998}
+    ]
+    
+    # ✅ All other methods remain protocol-complete and functional
+    assert len(mock_boundary.get_repository_issues()) > 0
+    assert mock_boundary.get_repository_labels() == sample_github_data["labels"]
+```
+
+**Benefits of Hybrid Pattern:**
+- **Protocol Completeness**: All GitHub API methods automatically configured
+- **Error Flexibility**: Custom error simulation via `side_effect` and `return_value`
+- **Future-Proof**: New protocol methods included automatically  
+- **Performance**: Factory-generated mocks are efficient
+- **Maintainability**: Centralized base configuration with targeted customization
+
+**Migration Pattern:**
+```python
+# ❌ BEFORE: Manual incomplete mock
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+mock_boundary.create_label.side_effect = Exception("Error")
+# Missing 25+ protocol methods!
+
+# ✅ AFTER: Hybrid factory pattern  
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+mock_boundary.create_label.side_effect = Exception("Error")
+# All protocol methods complete ✅
+```
+
 #### Troubleshooting Boundary Mocks
 
 ##### Common Issues and Solutions
@@ -1378,7 +1496,17 @@ pytest -m "performance" --benchmark                               # Performance 
    - **Ensure protocol completeness** with `create_auto_configured()` method
    - **Validate mocks in development** using protocol validation utilities
    - **Leverage shared sample data** for consistent test scenarios
+   - **Use hybrid factory pattern for error testing** - combine protocol completeness with custom error simulation
    - See [Boundary Mock Standardization](#boundary-mock-standardization) for complete guide
+
+5. **Error Testing Standards** ⭐ **NEW**
+   - **Use hybrid factory + custom override pattern** for error simulation
+   - **Start with protocol-complete boundary** via `MockBoundaryFactory.create_auto_configured()`
+   - **Add custom error behavior** using `side_effect` and `return_value` overrides
+   - **Test error recovery mechanisms** and graceful degradation
+   - **Use error markers** (`@pytest.mark.error_simulation`) for test organization
+   - **Cover multiple error scenarios** (timeouts, rate limits, malformed data, connection failures)
+   - See [Error Testing and Error Handling Integration](#error-testing-and-error-handling-integration) for detailed guide
 
 ### General Testing
 
@@ -1390,13 +1518,48 @@ pytest -m "performance" --benchmark                               # Performance 
 
 ### Mock Usage
 
+#### Standard Mock Usage with Factory Pattern ⭐ **RECOMMENDED**
+
 ```python
-# Mock external dependencies
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+# ✅ Mock external dependencies with protocol completeness
 @patch('src.github.service.GitHubApiBoundary')
-def test_with_mocked_github(mock_boundary_class):
-    mock_boundary = Mock()
+def test_with_mocked_github(mock_boundary_class, sample_github_data):
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
     mock_boundary_class.return_value = mock_boundary
-    # Test implementation
+    # All protocol methods automatically configured ✅
+```
+
+#### Hybrid Pattern for Error Testing ⭐ **RECOMMENDED FOR ERROR SCENARIOS**
+
+```python
+# ✅ Hybrid pattern: Factory + custom error simulation
+@patch('src.github.service.GitHubApiBoundary')
+def test_error_handling(mock_boundary_class, sample_github_data):
+    # Step 1: Protocol-complete foundation
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # Step 2: Custom error behavior
+    mock_boundary.create_issue.side_effect = [
+        {"number": 1, "id": 999},           # Success
+        Exception("API rate limit exceeded") # Error
+    ]
+    
+    mock_boundary_class.return_value = mock_boundary
+    # Test error handling implementation...
+```
+
+#### Legacy Pattern (Avoid for New Tests)
+
+```python
+# ❌ Avoid: Manual mock creation (incomplete protocol)
+@patch('src.github.service.GitHubApiBoundary')
+def test_with_manual_mock(mock_boundary_class):
+    mock_boundary = Mock()  # Missing most protocol methods!
+    mock_boundary.get_repository_labels.return_value = []
+    mock_boundary_class.return_value = mock_boundary
+    # Brittle and protocol-incomplete ❌
 ```
 
 ### Container Testing
@@ -1414,12 +1577,209 @@ def test_with_mocked_github(mock_boundary_class):
 3. **Cleanup**: Clean up test resources after use
 4. **Realistic Data**: Use realistic test data that matches production
 
-### Error Testing
+### Error Testing and Error Handling Integration
 
-1. **Use error simulation fixtures** for resilience testing
-2. **Test both partial and complete failures**
-3. **Verify error recovery mechanisms**
-4. **Use appropriate error markers** for test selection
+#### Overview
+
+Error handling tests validate system resilience and failure recovery mechanisms. The GitHub Data project uses a hybrid approach combining MockBoundaryFactory protocol completeness with custom error simulation patterns.
+
+#### Error Testing Best Practices
+
+1. **Use Hybrid Factory + Custom Override Pattern** for error simulation
+2. **Test both partial and complete failures** with realistic error scenarios
+3. **Verify error recovery mechanisms** and graceful degradation
+4. **Use appropriate error markers** for test selection (`@pytest.mark.error_simulation`)
+
+#### Hybrid Factory Pattern for Error Testing ⭐ **RECOMMENDED**
+
+The hybrid pattern provides the benefits of protocol completeness while preserving the flexibility needed for complex error simulation:
+
+```python
+import pytest
+import requests
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+@pytest.mark.integration
+@pytest.mark.error_simulation
+def test_api_failure_handling(sample_github_data):
+    """Test handling of GitHub API failures with hybrid pattern."""
+    # ✅ Step 1: Start with protocol-complete boundary
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Step 2: Add specific error simulation via side_effect
+    mock_boundary.create_label.side_effect = [
+        {"id": 100, "name": "bug", "color": "d73a4a"},  # First succeeds
+        Exception("API rate limit exceeded"),            # Second fails
+    ]
+    
+    # ✅ Step 3: Test error handling logic
+    with pytest.raises(Exception, match="Failed to create label"):
+        # Your error handling test logic here
+        pass
+    
+    # ✅ Step 4: Verify error state and recovery
+    assert mock_boundary.create_label.call_count == 2
+```
+
+#### Error Simulation Patterns
+
+##### Network Timeout Simulation
+```python
+def test_network_timeout_handling(sample_github_data):
+    """Test handling of network timeouts during API calls."""
+    # ✅ Factory provides protocol completeness
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Custom timeout simulation
+    mock_boundary.create_issue.side_effect = [
+        {"number": 101, "id": 999},                    # First succeeds
+        requests.exceptions.Timeout("Request timed out"), # Second times out
+    ]
+    
+    # Test timeout handling logic...
+```
+
+##### API Rate Limiting Simulation
+```python
+def test_rate_limiting_handling(sample_github_data):
+    """Test handling of API rate limiting scenarios."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Simulate rate limiting with custom responses
+    mock_boundary.get_rate_limit_status.return_value = {
+        "remaining": 0, "reset": 3600
+    }
+    mock_boundary.create_label.side_effect = Exception("Rate limit exceeded")
+    
+    # Test rate limiting logic...
+```
+
+##### Malformed Data Handling
+```python
+def test_malformed_data_handling():
+    """Test handling of malformed or unexpected API responses."""
+    # ✅ Use empty data factory for edge cases
+    mock_boundary = MockBoundaryFactory.create_auto_configured({})
+    
+    # ✅ Simulate malformed responses
+    mock_boundary.get_repository_issues.return_value = [
+        {"id": None, "title": "", "body": None}  # Malformed issue data
+    ]
+    
+    # Test malformed data handling...
+```
+
+#### Complex Error Scenarios
+
+##### Multi-Stage Error Testing
+```python
+@pytest.mark.slow
+@pytest.mark.error_simulation
+def test_complex_error_recovery(sample_github_data):
+    """Test complex error scenarios with partial failures."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Configure multiple error points
+    mock_boundary.create_label.side_effect = [
+        {"id": 100}, Exception("Temp failure"), {"id": 101}  # Mixed success/failure
+    ]
+    mock_boundary.create_issue.side_effect = [
+        {"number": 1}, {"number": 2}  # All succeed
+    ]
+    
+    # Test partial failure recovery logic...
+```
+
+##### Error State Validation
+```python
+def test_error_state_preservation(sample_github_data):
+    """Test that error states are properly preserved and reported."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Error simulation with state tracking
+    mock_boundary.create_issue_comment.side_effect = Exception("Connection lost")
+    
+    # Test error state tracking...
+    # Verify error reporting...
+    # Validate recovery mechanisms...
+```
+
+#### Error Testing Migration Guidelines
+
+When migrating existing error tests to the hybrid factory pattern:
+
+##### Before Migration (Manual Mock Pattern)
+```python
+# ❌ OLD: Manual mock with incomplete protocol
+def test_error_handling_old():
+    mock_boundary = Mock()
+    mock_boundary.get_repository_labels.return_value = []
+    mock_boundary.create_label.side_effect = Exception("API Error")
+    # Missing 25+ other protocol methods!
+```
+
+##### After Migration (Hybrid Factory Pattern)  
+```python
+# ✅ NEW: Factory + custom error simulation
+def test_error_handling_new(sample_github_data):
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    # All protocol methods configured ✅
+    mock_boundary.create_label.side_effect = Exception("API Error")
+    # Custom error behavior preserved ✅
+```
+
+#### Error Testing Checklist
+
+✅ **Migration Checklist for Error Tests:**
+- [ ] Replace `Mock()` with `MockBoundaryFactory.create_auto_configured()`
+- [ ] Preserve all `side_effect` error simulation patterns
+- [ ] Maintain custom error response validation
+- [ ] Verify protocol completeness with validation utilities
+- [ ] Test both error conditions and recovery paths
+- [ ] Use appropriate error markers (`@pytest.mark.error_simulation`)
+
+✅ **Error Scenario Coverage:**
+- [ ] API failures (rate limiting, timeouts, connection errors)
+- [ ] Malformed data handling (None values, empty fields, invalid formats)
+- [ ] Partial failure scenarios (some operations succeed, others fail)
+- [ ] Recovery mechanisms (retry logic, graceful degradation)
+- [ ] Error reporting and logging validation
+
+#### Advanced Error Testing Patterns
+
+##### Data-Driven Error Testing
+```python
+@pytest.mark.parametrize("error_scenario", [
+    {"method": "create_label", "error": Exception("Rate limit")},
+    {"method": "create_issue", "error": ConnectionError("Network down")},
+    {"method": "create_comment", "error": TimeoutError("Request timeout")},
+])
+def test_various_api_errors(sample_github_data, error_scenario):
+    """Test various API error scenarios with parameterized data."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Apply error to specific method
+    getattr(mock_boundary, error_scenario["method"]).side_effect = error_scenario["error"]
+    
+    # Test error handling for each scenario...
+```
+
+##### Performance Impact Testing with Errors
+```python
+@pytest.mark.performance  
+@pytest.mark.error_simulation
+def test_error_performance_impact(sample_github_data):
+    """Test that error handling doesn't significantly impact performance."""
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    
+    # ✅ Simulate intermittent errors
+    mock_boundary.create_issue.side_effect = [
+        {"number": i} if i % 3 != 0 else Exception("Intermittent error")
+        for i in range(100)
+    ]
+    
+    # Measure performance with error conditions...
+```
 
 ### Workflow Testing
 

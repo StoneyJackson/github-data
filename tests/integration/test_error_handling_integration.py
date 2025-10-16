@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,7 +11,7 @@ from src.storage import create_storage_service
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 from tests.shared.builders import GitHubDataBuilder
 
 pytestmark = [pytest.mark.integration]
@@ -44,11 +44,8 @@ class TestErrorHandlingIntegration:
             json.dump(sample_github_data["pr_review_comments"], f)
 
         # Setup mock to simulate GitHub API failures
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-
-        # Mock get_repository_labels for conflict detection (default: empty repository)
-        mock_boundary.get_repository_labels.return_value = []
 
         # First label succeeds, second fails
         mock_boundary.create_label.side_effect = [
@@ -100,7 +97,7 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
 
         # Setup mock boundary for repository access validation
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock successful repository access check
@@ -162,15 +159,8 @@ class TestErrorHandlingIntegration:
         }
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured(complex_github_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = complex_github_data["labels"]
-        mock_boundary.get_repository_issues.return_value = complex_github_data["issues"]
-        mock_boundary.get_all_issue_comments.return_value = complex_github_data[
-            "comments"
-        ]
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -228,9 +218,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f, ensure_ascii=False)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses
         mock_boundary.create_issue.return_value = {"number": 10, "id": 999}
@@ -284,9 +273,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses for all operations
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}
@@ -329,9 +317,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary to simulate timeout
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # First call succeeds, second times out
         mock_boundary.create_label.side_effect = [
@@ -409,9 +396,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}
