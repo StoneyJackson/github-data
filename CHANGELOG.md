@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/StoneyJackson/github-data/compare/v1.7.0...v1.8.0) (2025-10-16)
+
+
+### Features
+
+* implement comprehensive PR reviews and comments feature with enhanced testing infrastructure ([715ce66](https://github.com/StoneyJackson/github-data/commit/715ce667afa9a2001ee158b94f27964bec1fbfdb))
+
 # [1.7.0](https://github.com/StoneyJackson/github-data/compare/v1.6.0...v1.7.0) (2025-10-12)
 
 
