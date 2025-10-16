@@ -290,6 +290,139 @@ Add appropriate feature markers based on the functionality being tested:
 
 ## Writing Tests
 
+### ⭐ **RECOMMENDED TEST PATTERN** - Modern Infrastructure Pattern
+
+The GitHub Data project has evolved to use a **modern test infrastructure pattern** that combines ConfigBuilder, MockBoundaryFactory, and Protocol Validation for maximum resilience and maintainability.
+
+#### Standard Modern Test Pattern
+
+```python
+"""
+Modern test pattern combining ConfigBuilder + MockBoundaryFactory + Validation.
+This pattern provides 100% schema resilience and protocol completeness.
+"""
+
+import pytest
+from tests.shared.builders.config_builder import ConfigBuilder
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+from tests.shared.mocks.protocol_validation import assert_boundary_mock_complete
+
+@pytest.mark.integration
+def test_example_operation(tmp_path, sample_github_data):
+    """Test with complete infrastructure pattern."""
+    
+    # ✅ Step 1: Configuration with fluent API (schema-resilient)
+    config = (
+        ConfigBuilder()
+        .with_operation("save")
+        .with_data_path(str(tmp_path))
+        .with_pr_features()
+        .build()
+    )
+    
+    # ✅ Step 2: Protocol-complete mock with validation
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    assert_boundary_mock_complete(mock_boundary)
+    
+    # ✅ Step 3: Test logic with confidence in infrastructure
+    result = perform_operation(config, mock_boundary)
+    assert result.success
+```
+
+#### Benefits of Modern Pattern
+
+1. **Schema Change Resilience**: ConfigBuilder handles new ApplicationConfig fields automatically
+2. **Protocol Completeness**: MockBoundaryFactory ensures 100% protocol coverage
+3. **Automatic Validation**: Protocol validation catches implementation gaps immediately
+4. **Future-Proof**: Automatically adapts to protocol and schema changes
+5. **Developer Experience**: Fluent APIs reduce boilerplate and improve readability
+
+#### Pattern Variations
+
+**For Unit Tests:**
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+def test_unit_operation(sample_github_data):
+    """Unit test with minimal configuration."""
+    config = ConfigBuilder().with_minimal_features().build()
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    assert_boundary_mock_complete(mock_boundary)
+    # Test logic...
+```
+
+**For Restore Operations:**
+```python
+@pytest.mark.integration
+@pytest.mark.restore_workflow
+def test_restore_operation(tmp_path):
+    """Restore test with specialized mock."""
+    config = (
+        ConfigBuilder()
+        .with_operation("restore")
+        .with_data_path(str(tmp_path))
+        .with_all_features()
+        .build()
+    )
+    mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
+    assert_boundary_mock_complete(mock_boundary)
+    # Test logic...
+```
+
+**For Error Testing:**
+```python
+@pytest.mark.integration
+@pytest.mark.error_simulation
+def test_error_handling(sample_github_data):
+    """Error test with hybrid factory pattern."""
+    config = ConfigBuilder().with_pr_features().build()
+    
+    # Start with protocol-complete foundation
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    assert_boundary_mock_complete(mock_boundary)
+    
+    # Add specific error simulation
+    mock_boundary.create_label.side_effect = [
+        {"id": 100, "name": "success"},
+        Exception("API rate limit exceeded"),
+    ]
+    # Test error handling logic...
+```
+
+### ⚠️ **AVOID** - Legacy Patterns
+
+These patterns should be avoided in new tests as they lack resilience to schema changes:
+
+```python
+# ❌ DON'T: Manual ApplicationConfig constructors (brittle)
+config = ApplicationConfig(
+    operation="save",
+    github_token="test_token",
+    # Missing fields will break when schema changes
+)
+
+# ❌ DON'T: Manual Mock() creation (protocol incomplete)
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+# Missing 20+ other required protocol methods!
+
+# ❌ DON'T: No validation (catches errors too late)
+# Missing: assert_boundary_mock_complete(mock_boundary)
+```
+
+### Migration Guidelines
+
+**When writing new tests:**
+- ALWAYS use `ConfigBuilder` for configuration
+- ALWAYS use `MockBoundaryFactory.create_auto_configured()` for boundary mocks
+- ALWAYS validate protocol completeness with `assert_boundary_mock_complete()`
+- LEVERAGE existing sample data fixtures rather than creating custom data
+
+**When modifying existing tests:**
+- MIGRATE manual ApplicationConfig constructors to ConfigBuilder when touching the test
+- REPLACE manual Mock() boundary creation with MockBoundaryFactory patterns
+- ADD protocol validation to catch implementation gaps
+
 ### Basic Test Structure
 
 ```python
@@ -1097,20 +1230,32 @@ tests/
    - Consistent test data patterns
    - Reliable error simulation patterns
 
-4. **Boundary Mock Standards** ⭐ **NEW**
-   - **Always use MockBoundaryFactory** instead of manual Mock() creation
-   - **Ensure protocol completeness** with `create_auto_configured()` method
-   - **Validate mocks in development** using protocol validation utilities
-   - **Leverage shared sample data** for consistent test scenarios
-   - **Use hybrid factory pattern for error testing** - combine protocol completeness with custom error simulation
+4. **Modern Infrastructure Standards** ⭐ **REQUIRED FOR NEW TESTS**
+   - **ALWAYS use ConfigBuilder** for ApplicationConfig creation - prevents schema change brittleness
+   - **ALWAYS use MockBoundaryFactory.create_auto_configured()** - ensures 100% protocol completeness
+   - **ALWAYS validate protocol completeness** with `assert_boundary_mock_complete()` - catches implementation gaps immediately
+   - **LEVERAGE existing sample data fixtures** for consistent, realistic test scenarios
+   - **FOLLOW the ConfigBuilder + MockBoundaryFactory + Validation pattern** for maximum resilience
 
-5. **Error Testing Standards** ⭐ **NEW**
+5. **Boundary Mock Standards** ⭐ **CRITICAL**
+   - **Never use manual Mock() creation** for boundary objects - protocol incomplete and brittle
+   - **Always start with factory methods** that guarantee protocol completeness
+   - **Use hybrid factory pattern for error testing** - combine protocol completeness with custom error simulation
+   - **Validate mock completeness during development** to catch missing protocol methods early
+
+6. **Error Testing Standards** ⭐ **ENHANCED**
    - **Use hybrid factory + custom override pattern** for error simulation
    - **Start with protocol-complete boundary** via `MockBoundaryFactory.create_auto_configured()`
-   - **Add custom error behavior** using `side_effect` and `return_value` overrides
+   - **Add custom error behavior** using `side_effect` and `return_value` overrides after factory creation
    - **Test error recovery mechanisms** and graceful degradation
    - **Use error markers** (`@pytest.mark.error_simulation`) for test organization
    - **Cover multiple error scenarios** (timeouts, rate limits, malformed data, connection failures)
+
+7. **Configuration Standards** ⭐ **MANDATORY**
+   - **Never use manual ApplicationConfig() constructors** in new tests - breaks with schema changes
+   - **Always use ConfigBuilder fluent API** for configuration creation
+   - **Leverage preset methods** like `with_pr_features()`, `with_minimal_features()`, `with_all_features()`
+   - **Use environment variable mapping** (`as_env_dict()`) for container tests
 
 ### General Testing
 
