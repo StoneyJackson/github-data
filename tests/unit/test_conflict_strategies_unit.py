@@ -8,7 +8,6 @@ that already exist in the target repository.
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import Mock
 
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 from src.github import create_github_service
@@ -20,6 +19,7 @@ from src.conflict_strategies import (
     detect_label_conflicts,
 )
 from src.entities import Label
+from tests.shared.mocks import MockBoundaryFactory
 
 pytestmark = [
     pytest.mark.unit,
@@ -172,7 +172,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing labels in repository
@@ -198,6 +198,7 @@ class TestConflictStrategyIntegration:
                 "fail-if-existing",
             )
 
+    @pytest.mark.slow
     def test_fail_if_existing_strategy_with_empty_repository(
         self, mock_boundary_class, temp_data_dir, sample_labels_data
     ):
@@ -206,7 +207,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock empty repository
@@ -240,7 +241,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing labels that conflict with restore data
@@ -274,7 +275,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing labels that don't conflict
@@ -316,7 +317,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing labels
@@ -365,7 +366,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing label that conflicts with first restore label
@@ -410,7 +411,7 @@ class TestConflictStrategyIntegration:
         labels_only = sample_labels_data["labels"]
         self._create_test_files(temp_data_dir, labels_only)
 
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock existing label that conflicts with first restore label
@@ -460,6 +461,17 @@ class TestConflictStrategyIntegration:
 
 class TestConflictStrategyWithSharedInfrastructure:
     """Test conflict strategies using enhanced shared infrastructure."""
+
+    def test_mock_boundary_protocol_completeness(self):
+        """Test that factory-created boundaries are protocol complete."""
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
+
+        # Validate 100% protocol completeness
+        is_complete, missing = MockBoundaryFactory.validate_protocol_completeness(
+            mock_boundary
+        )
+        assert is_complete, f"Mock boundary missing methods: {missing}"
+        assert missing == [], "Mock boundary should have no missing methods"
 
     def test_conflict_resolution_with_mock_boundary_factory(self, temp_data_dir):
         """Test conflict resolution using MockBoundaryFactory for cleaner setup."""

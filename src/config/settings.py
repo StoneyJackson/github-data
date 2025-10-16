@@ -19,6 +19,8 @@ class ApplicationConfig:
     include_issue_comments: bool
     include_pull_requests: Union[bool, Set[int]]
     include_pull_request_comments: bool
+    include_pr_reviews: bool
+    include_pr_review_comments: bool
     include_sub_issues: bool
     git_auth_method: str
 
@@ -47,6 +49,12 @@ class ApplicationConfig:
             ),
             include_pull_request_comments=cls._parse_enhanced_bool_env(
                 "INCLUDE_PULL_REQUEST_COMMENTS", default=True
+            ),
+            include_pr_reviews=cls._parse_enhanced_bool_env(
+                "INCLUDE_PR_REVIEWS", default=True
+            ),
+            include_pr_review_comments=cls._parse_enhanced_bool_env(
+                "INCLUDE_PR_REVIEW_COMMENTS", default=True
             ),
             include_sub_issues=cls._parse_enhanced_bool_env(
                 "INCLUDE_SUB_ISSUES", default=True
@@ -226,3 +234,57 @@ class ApplicationConfig:
                     "INCLUDE_PULL_REQUESTS to specify PRs. Ignoring PR comments."
                 )
                 self.include_pull_request_comments = False
+
+        # Enhanced PR reviews dependency validation
+        if self.include_pr_reviews:
+            if (
+                isinstance(self.include_pull_requests, bool)
+                and not self.include_pull_requests
+            ):
+                # Boolean false for PRs
+                logging.warning(
+                    "Warning: INCLUDE_PR_REVIEWS=true requires "
+                    "INCLUDE_PULL_REQUESTS=true. Ignoring PR reviews."
+                )
+                self.include_pr_reviews = False
+            elif (
+                isinstance(self.include_pull_requests, set)
+                and not self.include_pull_requests
+            ):
+                # Empty number specification for PRs
+                logging.warning(
+                    "Warning: INCLUDE_PR_REVIEWS=true requires "
+                    "INCLUDE_PULL_REQUESTS to specify PRs. Ignoring PR reviews."
+                )
+                self.include_pr_reviews = False
+
+        # Enhanced PR review comments dependency validation
+        if self.include_pr_review_comments:
+            # First check PR reviews dependency
+            if not self.include_pr_reviews:
+                logging.warning(
+                    "Warning: INCLUDE_PR_REVIEW_COMMENTS=true requires "
+                    "INCLUDE_PR_REVIEWS=true. Ignoring PR review comments."
+                )
+                self.include_pr_review_comments = False
+            # Then check pull requests dependency
+            elif (
+                isinstance(self.include_pull_requests, bool)
+                and not self.include_pull_requests
+            ):
+                # Boolean false for PRs
+                logging.warning(
+                    "Warning: INCLUDE_PR_REVIEW_COMMENTS=true requires "
+                    "INCLUDE_PULL_REQUESTS=true. Ignoring PR review comments."
+                )
+                self.include_pr_review_comments = False
+            elif (
+                isinstance(self.include_pull_requests, set)
+                and not self.include_pull_requests
+            ):
+                # Empty number specification for PRs
+                logging.warning(
+                    "Warning: INCLUDE_PR_REVIEW_COMMENTS=true requires "
+                    "INCLUDE_PULL_REQUESTS to specify PRs. Ignoring PR review comments."
+                )
+                self.include_pr_review_comments = False

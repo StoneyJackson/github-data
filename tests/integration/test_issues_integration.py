@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,6 +11,7 @@ from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
 from tests.shared.builders import GitHubDataBuilder
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.issues]
 
@@ -20,109 +21,37 @@ class TestIssuesIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_comments_restored_in_chronological_order(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, chronological_comments_data
     ):
         """Test comments restored in chronological order regardless of JSON order."""
         data_path = Path(temp_data_dir)
 
-        # Create test data with comments in REVERSE chronological order in JSON
-        # but they should be restored in correct chronological order
-        labels_data = [
-            {
-                "name": "bug",
-                "id": 1001,
-                "color": "d73a4a",
-                "description": "Something isn't working",
-                "url": "https://api.github.com/repos/owner/repo/labels/bug",
-            }
-        ]
-
-        issues_data = [
-            {
-                "number": 1,
-                "title": "Test issue",
-                "id": 2001,
-                "body": "Test issue body",
-                "state": "open",
-                "user": {
-                    "login": "testuser",
-                    "id": 1,
-                    "avatar_url": "https://github.com/testuser.png",
-                    "html_url": "https://github.com/testuser",
-                },
-                "assignees": [],
-                "labels": [],
-                "created_at": "2023-01-10T10:00:00Z",
-                "updated_at": "2023-01-10T10:00:00Z",
-                "closed_at": None,
-                "html_url": "https://github.com/owner/repo/issues/1",
-                "comments": 3,
-            }
-        ]
-
-        # Comments in REVERSE chronological order (latest first)
-        comments_data = [
-            {
-                "id": 4003,
-                "body": "Third comment (latest)",
-                "user": {
-                    "login": "user3",
-                    "id": 3003,
-                    "avatar_url": "https://github.com/user3.png",
-                    "html_url": "https://github.com/user3",
-                },
-                "created_at": "2023-01-10T14:00:00Z",  # Latest timestamp
-                "updated_at": "2023-01-10T14:00:00Z",
-                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4003",
-                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
-            },
-            {
-                "id": 4002,
-                "body": "Second comment (middle)",
-                "user": {
-                    "login": "user2",
-                    "id": 3002,
-                    "avatar_url": "https://github.com/user2.png",
-                    "html_url": "https://github.com/user2",
-                },
-                "created_at": "2023-01-10T12:00:00Z",  # Middle timestamp
-                "updated_at": "2023-01-10T12:00:00Z",
-                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4002",
-                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
-            },
-            {
-                "id": 4001,
-                "body": "First comment (earliest)",
-                "user": {
-                    "login": "user1",
-                    "id": 3001,
-                    "avatar_url": "https://github.com/user1.png",
-                    "html_url": "https://github.com/user1",
-                },
-                "created_at": "2023-01-10T10:30:00Z",  # Earliest timestamp
-                "updated_at": "2023-01-10T10:30:00Z",
-                "html_url": "https://github.com/owner/repo/issues/1#issuecomment-4001",
-                "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
-            },
-        ]
-
-        # Write test data to JSON files
+        # Write shared test data to JSON files
         with open(data_path / "labels.json", "w") as f:
-            json.dump(labels_data, f)
+            json.dump(chronological_comments_data["labels"], f)
         with open(data_path / "issues.json", "w") as f:
-            json.dump(issues_data, f)
+            json.dump(chronological_comments_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
-            json.dump(comments_data, f)  # Comments in reverse chronological order
+            json.dump(
+                chronological_comments_data["comments"], f
+            )  # Comments in reverse chronological order
         with open(data_path / "pull_requests.json", "w") as f:
-            json.dump([], f)
+            json.dump(chronological_comments_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(chronological_comments_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump(chronological_comments_data["pr_reviews"], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump(chronological_comments_data["pr_review_comments"], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured(
+            chronological_comments_data
+        )
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
+        # Override specific methods for this test scenario
+        mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_label.return_value = {
             "name": "bug",
             "id": 5001,
@@ -130,7 +59,6 @@ class TestIssuesIntegration:
             "description": "Something isn't working",
             "url": "https://api.github.com/repos/owner/target_repo/labels/bug",
         }
-
         mock_boundary.create_issue.return_value = {
             "number": 10,
             "title": "Test issue",
@@ -151,7 +79,6 @@ class TestIssuesIntegration:
             "html_url": "https://github.com/owner/target_repo/issues/10",
             "comments": 0,
         }
-
         mock_boundary.create_issue_comment.return_value = {
             "id": 7001,
             "body": "test comment",
@@ -185,7 +112,7 @@ class TestIssuesIntegration:
         comment_calls = mock_boundary.create_issue_comment.call_args_list
         assert len(comment_calls) == 3
 
-        # First call should be the earliest comment (2023-01-10T10:30:00Z)
+        # First call should be the earliest comment (2023-01-10T11:00:00Z)
         first_call = comment_calls[0][
             0
         ]  # positional arguments: (repo_name, issue_number, body)
@@ -215,9 +142,11 @@ class TestIssuesIntegration:
         from src.entities import Issue, GitHubUser
         from datetime import datetime
 
-        # Setup boundary mock
-        mock_boundary = Mock()
+        # Setup boundary mock using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
+
+        # Override specific methods for this test scenario
         mock_boundary.get_repository_labels.return_value = []
 
         # Mock raw GitHub API responses for boundary
@@ -323,6 +252,10 @@ class TestIssuesIntegration:
 
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Test restoration
         github_service = create_github_service("fake-token")
@@ -367,9 +300,11 @@ class TestIssuesIntegration:
         from src.entities import Issue, GitHubUser
         from datetime import datetime
 
-        # Setup boundary mock
-        mock_boundary = Mock()
+        # Setup boundary mock using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
+
+        # Override specific methods for this test scenario
         mock_boundary.get_repository_labels.return_value = []
 
         # Mock raw GitHub API response
@@ -443,6 +378,10 @@ class TestIssuesIntegration:
 
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Test restoration
         github_service = create_github_service("fake-token")
@@ -478,7 +417,7 @@ class TestIssuesIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_issues_with_multiple_assignees_and_labels(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test issues with multiple assignees and labels are handled correctly."""
         # Create test data with complex issue relationships
@@ -548,12 +487,12 @@ class TestIssuesIntegration:
             with open(data_path / f"{key}.json", "w") as f:
                 json.dump(data, f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
-        # Mock successful responses
+        # Override specific methods for this test scenario
+        mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}
         mock_boundary.create_issue.return_value = {"number": 10, "id": 999}
 

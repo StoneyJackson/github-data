@@ -132,6 +132,46 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         """Create a new comment on a pull request and return raw JSON data."""
         return self._rest_client.create_pull_request_comment(repo_name, pr_number, body)
 
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request using GraphQL."""
+        return self._graphql_client.get_pull_request_reviews(repo_name, pr_number)
+
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews using GraphQL for performance."""
+        return self._graphql_client.get_all_pull_request_reviews(repo_name)
+
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review using GraphQL."""
+        return self._graphql_client.get_pull_request_review_comments(
+            repo_name, review_id
+        )
+
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
+        """Get all pull request review comments using GraphQL for performance."""
+        return self._graphql_client.get_all_pull_request_review_comments(repo_name)
+
+    def create_pull_request_review(
+        self, repo_name: str, pr_number: int, body: str, state: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review and return raw JSON data."""
+        return self._rest_client.create_pull_request_review(
+            repo_name, pr_number, body, state
+        )
+
+    def create_pull_request_review_comment(
+        self, repo_name: str, review_id: str, body: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review comment and return raw JSON data."""
+        return self._rest_client.create_pull_request_review_comment(
+            repo_name, review_id, body
+        )
+
     # Public API - Sub-Issues Operations (GraphQL)
 
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:

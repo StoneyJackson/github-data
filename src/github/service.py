@@ -100,6 +100,46 @@ class GitHubService(RepositoryService):
             operation=lambda: self._boundary.get_all_pull_request_comments(repo_name),
         )
 
+    def get_pull_request_reviews(
+        self, repo_name: str, pr_number: int
+    ) -> List[Dict[str, Any]]:
+        """Get reviews for specific pull request with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pr_reviews:{repo_name}:{pr_number}",
+            operation=lambda: self._boundary.get_pull_request_reviews(
+                repo_name, pr_number
+            ),
+        )
+
+    def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all pull request reviews with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_pr_reviews:{repo_name}",
+            operation=lambda: self._boundary.get_all_pull_request_reviews(repo_name),
+        )
+
+    def get_pull_request_review_comments(
+        self, repo_name: str, review_id: str
+    ) -> List[Dict[str, Any]]:
+        """Get comments for specific pull request review with rate limiting."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"pr_review_comments:{repo_name}:{review_id}",
+            operation=lambda: self._boundary.get_pull_request_review_comments(
+                repo_name, review_id
+            ),
+        )
+
+    def get_all_pull_request_review_comments(
+        self, repo_name: str
+    ) -> List[Dict[str, Any]]:
+        """Get all pull request review comments with rate limiting and caching."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"all_pr_review_comments:{repo_name}",
+            operation=lambda: self._boundary.get_all_pull_request_review_comments(
+                repo_name
+            ),
+        )
+
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issue relationships from repository with caching."""
         return self._execute_with_cross_cutting_concerns(
@@ -288,6 +328,32 @@ class GitHubService(RepositoryService):
             # In the future, we can implement more granular invalidation
             logger.info(f"Clearing cache after {data_type} modification in {repo_name}")
             clear_cache()
+
+    def create_pull_request_review(
+        self, repo_name: str, pr_number: int, body: str, state: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_pull_request_review(
+                repo_name, pr_number, body, state
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "pr_reviews")
+        return result
+
+    def create_pull_request_review_comment(
+        self, repo_name: str, review_id: str, body: str
+    ) -> Dict[str, Any]:
+        """Create a new pull request review comment with rate limiting."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_pull_request_review_comment(
+                repo_name, review_id, body
+            ),
+            self._boundary._github,
+        )
+        self._invalidate_cache_for_repository(repo_name, "pr_review_comments")
+        return result
 
 
 def create_github_service(

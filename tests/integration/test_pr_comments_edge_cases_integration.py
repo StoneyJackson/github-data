@@ -25,169 +25,6 @@ pytestmark = [
 class TestPrCommentsEdgeCasesIntegration:
     """Integration tests for PR comments error handling and edge cases."""
 
-    @pytest.fixture
-    def sample_backup_data_edge_cases(self):
-        """Sample backup data with edge case scenarios."""
-
-        return {
-            "labels": [
-                {
-                    "name": "bug",
-                    "color": "d73a4a",
-                    "description": "Bug label",
-                    "url": "https://api.github.com/repos/owner/repo/labels/bug",
-                    "id": 1000,
-                }
-            ],
-            "issues": [
-                {
-                    "id": 2001,
-                    "number": 1,
-                    "title": "Sample issue",
-                    "body": "Sample body",
-                    "state": "open",
-                    "user": {
-                        "login": "dev1",
-                        "id": 1001,
-                        "avatar_url": "https://github.com/dev1.png",
-                        "html_url": "https://github.com/dev1",
-                    },
-                    "assignees": [],
-                    "labels": [],
-                    "created_at": "2023-01-15T10:30:00Z",
-                    "updated_at": "2023-01-15T10:30:00Z",
-                    "html_url": "https://github.com/owner/repo/issues/1",
-                    "comments": 0,
-                }
-            ],
-            "comments": [
-                {
-                    "id": 4001,
-                    "issueNumber": 1,
-                    "body": "Sample comment",
-                    "author": {
-                        "login": "commenter1",
-                        "id": 1002,
-                        "avatar_url": "https://github.com/commenter1.png",
-                        "html_url": "https://github.com/commenter1",
-                    },
-                    "user": {
-                        "login": "commenter1",
-                        "id": 1002,
-                        "avatar_url": "https://github.com/commenter1.png",
-                        "html_url": "https://github.com/commenter1",
-                    },
-                    "created_at": "2023-01-15T12:00:00Z",
-                    "updated_at": "2023-01-15T12:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/issues/1#issuecomment-4001"
-                    ),
-                    "issue_url": "https://api.github.com/repos/owner/repo/issues/1",
-                }
-            ],
-            "pull_requests": [
-                {
-                    "id": 3001,
-                    "number": 100,
-                    "title": "Sample PR",
-                    "body": "Sample PR body",
-                    "state": "OPEN",
-                    "user": {
-                        "login": "dev1",
-                        "id": 1001,
-                        "avatar_url": "https://github.com/dev1.png",
-                        "html_url": "https://github.com/dev1",
-                    },
-                    "assignees": [],
-                    "labels": [],
-                    "created_at": "2023-01-15T10:30:00Z",
-                    "updated_at": "2023-01-15T10:30:00Z",
-                    "base_ref": "main",
-                    "head_ref": "feature/test",
-                    "html_url": "https://github.com/owner/repo/pull/100",
-                    "comments": 0,
-                    "merged": False,
-                }
-            ],
-            "pr_comments": [
-                {
-                    "id": 5001,
-                    "pullRequestNumber": 999,  # Non-existent PR
-                    "body": "Orphaned comment",
-                    "author": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "user": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "created_at": "2023-01-15T14:00:00Z",
-                    "updated_at": "2023-01-15T14:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/pull/999#issuecomment-5001"
-                    ),
-                    "pull_request_url": (
-                        "https://api.github.com/repos/owner/repo/pulls/999"
-                    ),
-                },
-                {
-                    "id": 5002,
-                    "pullRequestNumber": 100,
-                    "body": "",  # Empty comment body
-                    "author": {
-                        "login": "reviewer2",
-                        "id": 1004,
-                        "avatar_url": "https://github.com/reviewer2.png",
-                        "html_url": "https://github.com/reviewer2",
-                    },
-                    "user": {
-                        "login": "reviewer2",
-                        "id": 1004,
-                        "avatar_url": "https://github.com/reviewer2.png",
-                        "html_url": "https://github.com/reviewer2",
-                    },
-                    "created_at": "2023-01-15T15:00:00Z",
-                    "updated_at": "2023-01-15T15:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/pull/100#issuecomment-5002"
-                    ),
-                    "pull_request_url": (
-                        "https://api.github.com/repos/owner/repo/pulls/100"
-                    ),
-                },
-                {
-                    "id": 5003,
-                    "pullRequestNumber": 100,
-                    "body": "Valid comment",
-                    "author": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "user": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "created_at": "2023-01-15T16:00:00Z",
-                    "updated_at": "2023-01-15T16:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/pull/100#issuecomment-5003"
-                    ),
-                    "pull_request_url": (
-                        "https://api.github.com/repos/owner/repo/pulls/100"
-                    ),
-                },
-            ],
-        }
-
     @patch("src.github.service.GitHubApiBoundary")
     def test_save_operation_handles_empty_pr_comments_list(
         self, mock_boundary_class, temp_data_dir
@@ -203,6 +40,8 @@ class TestPrCommentsEdgeCasesIntegration:
         mock_boundary.get_all_issue_comments.return_value = []
         mock_boundary.get_repository_pull_requests.return_value = []
         mock_boundary.get_all_pull_request_comments.return_value = []  # Empty list
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation
@@ -252,24 +91,28 @@ class TestPrCommentsEdgeCasesIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_corrupted_pr_comments_file(
-        self, mock_boundary_class, temp_data_dir, sample_backup_data_edge_cases, caplog
+        self, mock_boundary_class, temp_data_dir, sample_github_data, caplog
     ):
         """Test restore operation handles corrupted pr_comments.json file."""
         temp_path = Path(temp_data_dir)
 
         # Create valid backup files
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
 
         # Create corrupted pr_comments.json
         with open(temp_path / "pr_comments.json", "w") as f:
             f.write("{ invalid json content }")
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -301,75 +144,27 @@ class TestPrCommentsEdgeCasesIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_pr_comment_creation_failures_gracefully(
-        self, mock_boundary_class, temp_data_dir, sample_backup_data_edge_cases, caplog
+        self, mock_boundary_class, temp_data_dir, sample_github_data, caplog
     ):
         """Test restore handles individual PR comment creation failures."""
         temp_path = Path(temp_data_dir)
 
         # Create valid backup files
         with open(temp_path / "labels.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["labels"], f)
+            json.dump(sample_github_data["labels"], f)
         with open(temp_path / "issues.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(temp_path / "comments.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["comments"], f)
+            json.dump(sample_github_data["comments"], f)
         with open(temp_path / "pull_requests.json", "w") as f:
-            json.dump(sample_backup_data_edge_cases["pull_requests"], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(temp_path / "pr_comments.json", "w") as f:
-            # Use only valid comments for this test
-            valid_pr_comments = [
-                {
-                    "id": 5001,
-                    "pullRequestNumber": 100,
-                    "body": "First comment",
-                    "author": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "user": {
-                        "login": "reviewer1",
-                        "id": 1003,
-                        "avatar_url": "https://github.com/reviewer1.png",
-                        "html_url": "https://github.com/reviewer1",
-                    },
-                    "created_at": "2023-01-15T14:00:00Z",
-                    "updated_at": "2023-01-15T14:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/pull/100#issuecomment-5001"
-                    ),
-                    "pull_request_url": (
-                        "https://api.github.com/repos/owner/repo/pulls/100"
-                    ),
-                },
-                {
-                    "id": 5002,
-                    "pullRequestNumber": 100,
-                    "body": "Second comment",
-                    "author": {
-                        "login": "reviewer2",
-                        "id": 1004,
-                        "avatar_url": "https://github.com/reviewer2.png",
-                        "html_url": "https://github.com/reviewer2",
-                    },
-                    "user": {
-                        "login": "reviewer2",
-                        "id": 1004,
-                        "avatar_url": "https://github.com/reviewer2.png",
-                        "html_url": "https://github.com/reviewer2",
-                    },
-                    "created_at": "2023-01-15T15:00:00Z",
-                    "updated_at": "2023-01-15T15:00:00Z",
-                    "html_url": (
-                        "https://github.com/owner/repo/pull/100#issuecomment-5002"
-                    ),
-                    "pull_request_url": (
-                        "https://api.github.com/repos/owner/repo/pulls/100"
-                    ),
-                },
-            ]
-            json.dump(valid_pr_comments, f)
+            # Use the PR comments from shared fixture (just 3 comments)
+            json.dump(sample_github_data["pr_comments"], f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -387,6 +182,7 @@ class TestPrCommentsEdgeCasesIntegration:
         mock_boundary.create_pull_request_comment.side_effect = [
             {"id": "pr_comment_1"},  # First succeeds
             Exception("API error"),  # Second fails
+            {"id": "pr_comment_3"},  # Third succeeds (if we get there)
         ]
 
         # Execute restore operation - should handle partial failure gracefully
@@ -508,6 +304,10 @@ class TestPrCommentsEdgeCasesIntegration:
             json.dump(pull_requests, f)
         with open(temp_path / "pr_comments.json", "w") as f:
             json.dump(pr_comments, f)
+        with open(temp_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(temp_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for restore operations
         mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
@@ -621,6 +421,8 @@ class TestPrCommentsEdgeCasesIntegration:
             for i in range(1, 11)
         ]
         mock_boundary.get_all_pull_request_comments.return_value = large_pr_comments
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation

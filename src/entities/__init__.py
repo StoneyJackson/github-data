@@ -12,6 +12,8 @@ from .issues import Issue
 from .sub_issues import SubIssue
 from .pull_requests import PullRequest
 from .pr_comments import PullRequestComment
+from .pr_reviews import PullRequestReview
+from .pr_review_comments import PullRequestReviewComment
 from .repository import RepositoryData
 
 __all__ = [
@@ -22,5 +24,7 @@ __all__ = [
     "SubIssue",
     "PullRequest",
     "PullRequestComment",
+    "PullRequestReview",
+    "PullRequestReviewComment",
     "RepositoryData",
 ]

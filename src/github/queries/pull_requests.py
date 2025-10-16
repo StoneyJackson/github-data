@@ -68,6 +68,44 @@ REPOSITORY_PULL_REQUESTS_QUERY = gql(
                     comments {
                         totalCount
                     }
+                    reviews(first: 100) {
+                        nodes {
+                            id
+                            author {
+                                login
+                                ... on User {
+                                    id
+                                    avatarUrl
+                                    url
+                                }
+                            }
+                            body
+                            state
+                            submittedAt
+                            authorAssociation
+                            url
+                            comments(first: 100) {
+                                nodes {
+                                    id
+                                    body
+                                    author {
+                                        login
+                                        ... on User {
+                                            id
+                                            avatarUrl
+                                            url
+                                        }
+                                    }
+                                    createdAt
+                                    updatedAt
+                                    diffHunk
+                                    path
+                                    line
+                                    url
+                                }
+                            }
+                        }
+                    }
                 }
                 pageInfo {
                     hasNextPage

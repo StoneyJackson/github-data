@@ -13,7 +13,6 @@ from .test_docker_container import DockerTestHelper
 pytestmark = [
     pytest.mark.container,
     pytest.mark.integration,
-    pytest.mark.docker,
     pytest.mark.slow,
 ]
 

@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -10,10 +10,7 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
-from tests.shared import (
-    add_pr_method_mocks,
-    add_sub_issues_method_mocks,
-)
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
@@ -276,16 +273,9 @@ class TestSaveRestoreIntegration:
         self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that save operation creates properly structured JSON files."""
-        # Setup mock boundary to return our sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = sample_github_data["labels"]
-        mock_boundary.get_repository_issues.return_value = sample_github_data["issues"]
-        mock_boundary.get_all_issue_comments.return_value = sample_github_data[
-            "comments"
-        ]
-        add_pr_method_mocks(mock_boundary, sample_github_data)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -388,6 +378,7 @@ class TestSaveRestoreIntegration:
         )
         assert pr_comments_data[2]["user"]["login"] == "charlie"
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_recreates_data_from_json_files(
         self, mock_boundary_class, temp_data_dir, sample_github_data
@@ -406,9 +397,13 @@ class TestSaveRestoreIntegration:
             json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump(sample_github_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
-        # Setup mock boundary for creation operations
-        mock_boundary = Mock()
+        # Setup mock boundary for restore operations using factory
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock get_repository_labels for conflict detection (default: empty repository)
@@ -734,16 +729,9 @@ class TestSaveRestoreIntegration:
     ):
         """Test that complete save → restore cycle preserves all data correctly."""
 
-        # Phase 1: Save operation
-        save_boundary = Mock()
+        # Phase 1: Save operation with specialized factory
+        save_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
         mock_boundary_class.return_value = save_boundary
-        save_boundary.get_repository_labels.return_value = sample_github_data["labels"]
-        save_boundary.get_repository_issues.return_value = sample_github_data["issues"]
-        save_boundary.get_all_issue_comments.return_value = sample_github_data[
-            "comments"
-        ]
-        add_pr_method_mocks(save_boundary, sample_github_data)
-        add_sub_issues_method_mocks(save_boundary)
 
         github_service = create_github_service("fake_token")
         storage_service = create_storage_service("json")
@@ -751,8 +739,8 @@ class TestSaveRestoreIntegration:
             github_service, storage_service, "owner/source_repo", temp_data_dir
         )
 
-        # Phase 2: Restore operation with fresh mock
-        restore_boundary = Mock()
+        # Phase 2: Restore operation with specialized factory
+        restore_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = restore_boundary
 
         # Mock get_repository_labels for conflict detection (default: empty repository)
@@ -916,14 +904,9 @@ class TestSaveRestoreIntegration:
     @patch("src.github.service.GitHubApiBoundary")
     def test_save_handles_empty_repository(self, mock_boundary_class, temp_data_dir):
         """Test save operation with repository that has no data."""
-        # Setup mock for empty repository
-        mock_boundary = Mock()
+        # Setup mock for empty repository using factory
+        mock_boundary = MockBoundaryFactory.create_with_data("empty")
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
-        mock_boundary.get_repository_issues.return_value = []
-        mock_boundary.get_all_issue_comments.return_value = []
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -965,8 +948,8 @@ class TestSaveRestoreIntegration:
             with open(data_path / filename, "w") as f:
                 json.dump([], f)
 
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary for restore operations
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock get_repository_labels for conflict detection (default: empty repository)
@@ -1009,14 +992,9 @@ class TestSaveRestoreIntegration:
         self, mock_boundary_class, temp_data_dir
     ):
         """Test that save operation creates output directory structure."""
-        # Setup mock
-        mock_boundary = Mock()
+        # Setup mock using factory
+        mock_boundary = MockBoundaryFactory.create_with_data("empty")
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
-        mock_boundary.get_repository_issues.return_value = []
-        mock_boundary.get_all_issue_comments.return_value = []
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Use nested directory that doesn't exist
         nested_path = Path(temp_data_dir) / "backup" / "github-data"
@@ -1138,9 +1116,13 @@ class TestSaveRestoreIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -1267,9 +1249,13 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock to simulate GitHub API failures
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock get_repository_labels for conflict detection (default: empty repository)
@@ -1319,9 +1305,13 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for repository access validation
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock successful repository access check
@@ -1383,15 +1373,13 @@ class TestErrorHandlingIntegration:
         }
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured(complex_github_data)
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = complex_github_data["labels"]
         mock_boundary.get_repository_issues.return_value = complex_github_data["issues"]
         mock_boundary.get_all_issue_comments.return_value = complex_github_data[
             "comments"
         ]
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -1433,7 +1421,7 @@ class TestErrorHandlingIntegration:
         import json
 
         # Setup boundary mock
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -1540,6 +1528,10 @@ class TestErrorHandlingIntegration:
 
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Test restoration
         github_service = create_github_service("fake-token")
@@ -1589,7 +1581,7 @@ class TestErrorHandlingIntegration:
         import json
 
         # Setup boundary mock
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_for_restore()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = []
 
@@ -1663,6 +1655,10 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
 
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Test restoration

@@ -24,6 +24,9 @@ pytest_plugins = [
     "tests.shared.fixtures.test_data.complex_hierarchy_data",
     "tests.shared.fixtures.test_data.sample_pr_data",
     "tests.shared.fixtures.test_data.sample_labels_data",
+    "tests.shared.fixtures.test_data.chronological_comments_data",
+    "tests.shared.fixtures.test_data.orphaned_sub_issues_data",
+    "tests.shared.fixtures.test_data.mixed_states_data",
     # Boundary Mock Fixtures
     "tests.shared.fixtures.boundary_mocks.boundary_with_repository_data",
     "tests.shared.fixtures.boundary_mocks.boundary_with_empty_repository",
@@ -48,6 +51,9 @@ pytest_plugins = [
     "tests.shared.fixtures.config_fixtures",
 ]
 
+for i in pytest_plugins:
+    pytest.register_assert_rewrite(i)
+
 # Global test metrics collection
 _test_metrics = {
     "fixture_usage": {},
@@ -55,132 +61,6 @@ _test_metrics = {
     "memory_usage": {},
     "fixture_setup_times": {},
 }
-
-
-def pytest_configure(config):
-    """Configure pytest with custom markers and settings."""
-
-    # Performance markers
-    config.addinivalue_line(
-        "markers", "fast: marks tests as fast (< 1 second) - suitable for TDD cycles"
-    )
-    config.addinivalue_line(
-        "markers",
-        "medium: marks tests as medium speed (1-10 seconds) - integration tests",
-    )
-    config.addinivalue_line(
-        "markers",
-        "slow: marks tests as slow (> 10 seconds) - container/end-to-end tests",
-    )
-
-    # Test type markers
-    config.addinivalue_line(
-        "markers", "unit: marks tests as unit tests - isolated component testing"
-    )
-    config.addinivalue_line(
-        "markers",
-        "integration: marks tests as integration tests - component interactions",
-    )
-    config.addinivalue_line(
-        "markers", "container: marks tests as container tests - full Docker workflows"
-    )
-
-    # Feature area markers
-    config.addinivalue_line(
-        "markers", "labels: marks tests related to label management functionality"
-    )
-    config.addinivalue_line(
-        "markers", "issues: marks tests related to issue management functionality"
-    )
-    config.addinivalue_line(
-        "markers", "comments: marks tests related to comment management functionality"
-    )
-    config.addinivalue_line(
-        "markers",
-        "sub_issues: marks tests related to sub-issues workflow functionality",
-    )
-    config.addinivalue_line(
-        "markers",
-        "pull_requests: marks tests related to pull request workflow functionality",
-    )
-    config.addinivalue_line(
-        "markers",
-        "git_repositories: "
-        "marks tests related to Git repository backup/restore functionality",
-    )
-
-    # Infrastructure markers
-    config.addinivalue_line(
-        "markers",
-        "github_api: marks tests that interact with GitHub API (real or mocked)",
-    )
-    config.addinivalue_line(
-        "markers", "storage: marks tests related to data storage and persistence"
-    )
-    config.addinivalue_line(
-        "markers", "save_workflow: marks tests for save operation workflows"
-    )
-    config.addinivalue_line(
-        "markers", "restore_workflow: marks tests for restore operation workflows"
-    )
-
-    # Special scenario markers
-    config.addinivalue_line(
-        "markers", "empty_repository: marks tests using empty repository scenarios"
-    )
-    config.addinivalue_line(
-        "markers", "large_dataset: marks tests using large dataset scenarios"
-    )
-    config.addinivalue_line(
-        "markers", "rate_limiting: marks tests that verify rate limiting behavior"
-    )
-    config.addinivalue_line(
-        "markers", "error_simulation: marks tests that simulate error conditions"
-    )
-
-    # Enhanced fixture category markers (existing)
-    config.addinivalue_line(
-        "markers", "enhanced_fixtures: Tests using enhanced fixture patterns"
-    )
-    config.addinivalue_line(
-        "markers", "data_builders: Tests using dynamic data builder fixtures"
-    )
-    config.addinivalue_line(
-        "markers", "workflow_services: Tests using workflow service fixtures"
-    )
-    config.addinivalue_line(
-        "markers", "performance_fixtures: Tests using performance monitoring fixtures"
-    )
-
-    # Additional performance and complexity markers
-    config.addinivalue_line(
-        "markers", "performance: Performance testing and benchmarking"
-    )
-    config.addinivalue_line("markers", "memory_intensive: Tests with high memory usage")
-    config.addinivalue_line("markers", "simple_data: Tests with simple data structures")
-    config.addinivalue_line(
-        "markers", "complex_hierarchy: Tests with complex hierarchical data"
-    )
-    config.addinivalue_line(
-        "markers", "temporal_data: Tests with time-sensitive data patterns"
-    )
-    config.addinivalue_line(
-        "markers", "mixed_states: Tests with mixed state data (open/closed, etc.)"
-    )
-    config.addinivalue_line(
-        "markers",
-        "cross_component_interaction: "
-        "Tests validating interactions between multiple components",
-    )
-    config.addinivalue_line(
-        "markers", "data_enrichment: Tests for data enrichment utilities"
-    )
-
-    # Additional compatibility markers
-    config.addinivalue_line("markers", "errors: Error handling tests (legacy marker)")
-    config.addinivalue_line(
-        "markers", "docker: Docker-related tests (legacy marker, use container instead)"
-    )
 
 
 def pytest_collection_modifyitems(config, items):

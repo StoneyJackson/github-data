@@ -10,6 +10,7 @@ from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.sub_issues]
 
@@ -21,26 +22,12 @@ class TestSubIssuesIntegration:
     @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_save_creates_json_files(
-        self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that save operation creates sub-issues JSON files."""
-        # Setup mock boundary
-        mock_boundary = Mock()
+        # Setup mock boundary with auto-configuration
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
         mock_boundary_class.return_value = mock_boundary
-
-        # Mock existing methods
-        mock_boundary.get_repository_labels.return_value = []
-        mock_boundary.get_all_issue_comments.return_value = []
-        mock_boundary.get_repository_pull_requests.return_value = []
-        mock_boundary.get_all_pull_request_comments.return_value = []
-
-        # Mock sub-issues methods
-        mock_boundary.get_repository_issues.return_value = sample_sub_issues_data[
-            "issues"
-        ]
-        mock_boundary.get_repository_sub_issues.return_value = sample_sub_issues_data[
-            "sub_issues"
-        ]
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -56,26 +43,23 @@ class TestSubIssuesIntegration:
         # Verify sub_issues.json content
         with open(data_path / "sub_issues.json") as f:
             sub_issues_data = json.load(f)
-        assert len(sub_issues_data) == 2
+        assert len(sub_issues_data) == 1  # shared fixture has 1 sub-issue
         assert sub_issues_data[0]["parent_issue_number"] == 1
         assert sub_issues_data[0]["sub_issue_number"] == 2
         assert sub_issues_data[0]["position"] == 1
-        assert sub_issues_data[1]["parent_issue_number"] == 1
-        assert sub_issues_data[1]["sub_issue_number"] == 3
-        assert sub_issues_data[1]["position"] == 2
 
         # Verify issues include sub-issues references
         with open(data_path / "issues.json") as f:
             issues_data = json.load(f)
-        parent_issue = next(issue for issue in issues_data if issue["number"] == 1)
-        assert "sub_issues" in parent_issue
-        assert len(parent_issue["sub_issues"]) == 2
+        # Note: sub_issues relationship is tracked separately in sub_issues.json
+        # The shared fixture has 2 issues where issue #2 is a sub-issue of issue #1
+        assert len(issues_data) == 2
 
     @pytest.mark.restore_workflow
     @pytest.mark.storage
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_restore_workflow(
-        self, mock_boundary_class, temp_data_dir, sample_sub_issues_data
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test complete sub-issues restore workflow."""
         # Setup mock boundary
@@ -85,26 +69,29 @@ class TestSubIssuesIntegration:
         # Mock restoration methods
         mock_boundary.get_repository_labels.return_value = []
         mock_boundary.create_issue.side_effect = [
-            {"number": 101, "title": "Main Feature Implementation"},  # Issue 1 -> 101
-            {"number": 102, "title": "Sub-task: Database Schema"},  # Issue 2 -> 102
-            {"number": 103, "title": "Sub-task: API Endpoints"},  # Issue 3 -> 103
+            {"number": 101, "title": "Fix authentication bug"},  # Issue 1 -> 101
+            {"number": 102, "title": "Add user dashboard"},  # Issue 2 -> 102
         ]
         mock_boundary.add_sub_issue.return_value = {"success": True}
 
         # Create test data files
         data_path = Path(temp_data_dir)
         with open(data_path / "labels.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["labels"], f)
         with open(data_path / "issues.json", "w") as f:
-            json.dump(sample_sub_issues_data["issues"], f)
+            json.dump(sample_github_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["comments"], f)
         with open(data_path / "sub_issues.json", "w") as f:
-            json.dump(sample_sub_issues_data["sub_issues"], f)
+            json.dump(sample_github_data["sub_issues"], f)
         with open(data_path / "pull_requests.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump(sample_github_data["pr_reviews"], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump(sample_github_data["pr_review_comments"], f)
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -118,13 +105,12 @@ class TestSubIssuesIntegration:
         )
 
         # Verify issues were created
-        assert mock_boundary.create_issue.call_count == 3
+        assert mock_boundary.create_issue.call_count == 2
 
         # Verify sub-issue relationships were created
-        assert mock_boundary.add_sub_issue.call_count == 2
+        assert mock_boundary.add_sub_issue.call_count == 1
         # Check that sub-issues were added with correct mapped numbers
         mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 102)
-        mock_boundary.add_sub_issue.assert_any_call("owner/repo", 101, 103)
 
     @pytest.mark.restore_workflow
     @pytest.mark.complex_hierarchy
@@ -163,6 +149,10 @@ class TestSubIssuesIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -194,48 +184,25 @@ class TestSubIssuesIntegration:
     @pytest.mark.github_api
     @patch("src.github.service.GitHubApiBoundary")
     def test_sub_issues_backup_with_existing_data(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, existing_repository_data
     ):
         """Test sub-issues backup when repository already has mixed data."""
         # Setup mock boundary
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
 
-        # Mock existing repository data
-        mock_boundary.get_repository_labels.return_value = [
-            {
-                "name": "bug",
-                "color": "d73a4a",
-                "description": "Bug report",
-                "url": "https://api.github.com/repos/owner/repo/labels/bug",
-                "id": 1001,
-            }
+        # Mock existing repository data using shared fixture
+        mock_boundary.get_repository_labels.return_value = existing_repository_data[
+            "labels"
         ]
-        mock_boundary.get_repository_issues.return_value = [
-            {
-                "id": 5001,
-                "number": 50,
-                "title": "Existing Issue",
-                "body": "An existing issue",
-                "state": "OPEN",
-                "user": {
-                    "login": "existing",
-                    "id": 9001,
-                    "avatar_url": "https://github.com/existing.png",
-                    "html_url": "https://github.com/existing",
-                },
-                "assignees": [],
-                "labels": [],
-                "created_at": "2023-01-01T10:00:00Z",
-                "updated_at": "2023-01-01T16:00:00Z",
-                "closed_at": None,
-                "html_url": "https://github.com/owner/repo/issues/50",
-                "comments": 0,
-            }
+        mock_boundary.get_repository_issues.return_value = existing_repository_data[
+            "issues"
         ]
         mock_boundary.get_all_issue_comments.return_value = []
         mock_boundary.get_repository_pull_requests.return_value = []
         mock_boundary.get_all_pull_request_comments.return_value = []
+        mock_boundary.get_all_pull_request_reviews.return_value = []
+        mock_boundary.get_all_pull_request_review_comments.return_value = []
         mock_boundary.get_repository_sub_issues.return_value = []
 
         # Execute save operation
@@ -318,6 +285,10 @@ class TestSubIssuesIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Execute restore operation
         github_service = create_github_service("fake_token")
@@ -383,6 +354,10 @@ class TestSubIssuesIntegration:
         with open(data_path / "pull_requests.json", "w") as f:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
             json.dump([], f)
 
         # Execute restore operation

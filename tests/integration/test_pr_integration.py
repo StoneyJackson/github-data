@@ -2,13 +2,14 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.github import create_github_service
 from src.storage import create_storage_service
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
@@ -21,23 +22,9 @@ class TestPullRequestIntegration:
         self, mock_boundary_class, temp_data_dir, sample_pr_data
     ):
         """Test that save operation creates PR-related JSON files."""
-        # Setup mock boundary to return sample data
-        mock_boundary = Mock()
+        # Setup mock boundary using factory with sample PR data
+        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_pr_data)
         mock_boundary_class.return_value = mock_boundary
-
-        # Mock existing methods (empty data for this test)
-        mock_boundary.get_repository_labels.return_value = []
-        mock_boundary.get_repository_issues.return_value = []
-        mock_boundary.get_all_issue_comments.return_value = []
-        mock_boundary.get_repository_sub_issues.return_value = []
-
-        # Mock new PR methods
-        mock_boundary.get_repository_pull_requests.return_value = sample_pr_data[
-            "pull_requests"
-        ]
-        mock_boundary.get_all_pull_request_comments.return_value = sample_pr_data[
-            "pr_comments"
-        ]
 
         # Execute save operation
         github_service = create_github_service("fake_token")

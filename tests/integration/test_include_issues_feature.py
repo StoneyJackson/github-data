@@ -9,7 +9,7 @@ from tests.shared.builders import ConfigBuilder
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.medium,
-    pytest.mark.include_issues,
+    pytest.mark.issues,
 ]
 
 

@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,10 +11,10 @@ from src.storage import create_storage_service
 from src.operations.save import save_repository_data_with_strategy_pattern
 from src.operations.restore.restore import restore_repository_data_with_strategy_pattern
 
-from tests.shared.mocks import add_pr_method_mocks, add_sub_issues_method_mocks
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 from tests.shared.builders import GitHubDataBuilder
 
-pytestmark = [pytest.mark.integration, pytest.mark.errors]
+pytestmark = [pytest.mark.integration]
 
 
 class TestErrorHandlingIntegration:
@@ -22,61 +22,45 @@ class TestErrorHandlingIntegration:
 
     @patch("src.github.service.GitHubApiBoundary")
     def test_restore_handles_github_api_failures_gracefully(
-        self, mock_boundary_class, temp_data_dir
+        self, mock_boundary_class, temp_data_dir, sample_github_data
     ):
         """Test that restore continues despite GitHub API failures."""
         # Create test data files
         data_path = Path(temp_data_dir)
 
-        test_labels = [
-            {
-                "name": "bug",
-                "color": "ff0000",
-                "description": "Bug label",
-                "url": "http://example.com",
-                "id": 1,
-            },
-            {
-                "name": "feature",
-                "color": "00ff00",
-                "description": "Feature label",
-                "url": "http://example.com",
-                "id": 2,
-            },
-        ]
-
         with open(data_path / "labels.json", "w") as f:
-            json.dump(test_labels, f)
+            json.dump(sample_github_data["labels"], f)
         with open(data_path / "issues.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["issues"], f)
         with open(data_path / "comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["comments"], f)
         with open(data_path / "pull_requests.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pull_requests"], f)
         with open(data_path / "pr_comments.json", "w") as f:
-            json.dump([], f)
+            json.dump(sample_github_data["pr_comments"], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump(sample_github_data["pr_reviews"], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump(sample_github_data["pr_review_comments"], f)
 
         # Setup mock to simulate GitHub API failures
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-
-        # Mock get_repository_labels for conflict detection (default: empty repository)
-        mock_boundary.get_repository_labels.return_value = []
 
         # First label succeeds, second fails
         mock_boundary.create_label.side_effect = [
             {
                 "id": 100,
                 "name": "bug",
-                "color": "ff0000",
-                "description": "Bug label",
-                "url": "http://example.com",
+                "color": "d73a4a",
+                "description": "Something isn't working",
+                "url": "https://api.github.com/repos/owner/repo/labels/bug",
             },  # Success
             Exception("API rate limit exceeded"),  # Failure
         ]
 
         # Execute restore operation - should fail on second error
-        with pytest.raises(Exception, match="Failed to create label 'feature'"):
+        with pytest.raises(Exception, match="Failed to create label 'enhancement'"):
             github_service = create_github_service("fake_token")
             storage_service = create_storage_service("json")
             restore_repository_data_with_strategy_pattern(
@@ -107,9 +91,13 @@ class TestErrorHandlingIntegration:
             json.dump([], f)
         with open(data_path / "pr_comments.json", "w") as f:
             json.dump([], f)
+        with open(data_path / "pr_reviews.json", "w") as f:
+            json.dump([], f)
+        with open(data_path / "pr_review_comments.json", "w") as f:
+            json.dump([], f)
 
         # Setup mock boundary for repository access validation
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
 
         # Mock successful repository access check
@@ -171,15 +159,8 @@ class TestErrorHandlingIntegration:
         }
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured(complex_github_data)
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = complex_github_data["labels"]
-        mock_boundary.get_repository_issues.return_value = complex_github_data["issues"]
-        mock_boundary.get_all_issue_comments.return_value = complex_github_data[
-            "comments"
-        ]
-        add_pr_method_mocks(mock_boundary)
-        add_sub_issues_method_mocks(mock_boundary)
 
         # Execute save operation
         github_service = create_github_service("fake_token")
@@ -237,9 +218,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f, ensure_ascii=False)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses
         mock_boundary.create_issue.return_value = {"number": 10, "id": 999}
@@ -271,6 +251,7 @@ class TestErrorHandlingIntegration:
         comment_call_args = comment_calls[0][0]
         assert "Привет мир! 🎉" in comment_call_args[2]  # body is 3rd positional arg
 
+    @pytest.mark.slow
     @patch("src.github.service.GitHubApiBoundary")
     def test_large_dataset_handling(self, mock_boundary_class, temp_data_dir):
         """Test handling of large datasets without performance issues."""
@@ -292,9 +273,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses for all operations
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}
@@ -337,9 +317,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary to simulate timeout
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # First call succeeds, second times out
         mock_boundary.create_label.side_effect = [
@@ -417,9 +396,8 @@ class TestErrorHandlingIntegration:
                 json.dump(data, f)
 
         # Setup mock boundary
-        mock_boundary = Mock()
+        mock_boundary = MockBoundaryFactory.create_auto_configured()
         mock_boundary_class.return_value = mock_boundary
-        mock_boundary.get_repository_labels.return_value = []
 
         # Mock successful responses
         mock_boundary.create_label.return_value = {"id": 999, "name": "test"}

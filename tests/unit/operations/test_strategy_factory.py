@@ -89,7 +89,9 @@ class TestStrategyFactory:
             "issues",
             "comments",
             "pull_requests",
+            "pr_reviews",
             "pr_comments",
+            "pr_review_comments",
             "git_repository",
         ]
         assert entities == expected_entities
@@ -104,7 +106,9 @@ class TestStrategyFactory:
             "labels",
             "issues",
             "pull_requests",
+            "pr_reviews",
             "pr_comments",
+            "pr_review_comments",
             "git_repository",
         ]
         assert entities == expected_entities
@@ -334,7 +338,9 @@ class TestStrategyFactoryPullRequestComments:
             "issues",
             "comments",
             "pull_requests",
+            "pr_reviews",
             "pr_comments",
+            "pr_review_comments",
             "sub_issues",
             "git_repository",
         ]
@@ -351,6 +357,7 @@ class TestStrategyFactoryPullRequestComments:
             "issues",
             "comments",
             "pull_requests",
+            "pr_reviews",
             "sub_issues",
             "git_repository",
         ]
@@ -390,3 +397,75 @@ class TestStrategyFactoryPullRequestComments:
         assert "issues" in entities
         assert "comments" in entities
         assert "git_repository" in entities
+
+
+class TestStrategyFactoryPullRequestReviews:
+    """Test cases for StrategyFactory PR reviews functionality."""
+
+    def test_create_save_strategies_with_pr_reviews_enabled(
+        self, config_with_prs_and_reviews
+    ):
+        """Test save strategy creation with PR reviews enabled."""
+        strategies = StrategyFactory.create_save_strategies(config_with_prs_and_reviews)
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsSaveStrategy" in strategy_types
+        assert "IssuesSaveStrategy" in strategy_types
+        assert "CommentsSaveStrategy" in strategy_types
+        assert "PullRequestsSaveStrategy" in strategy_types
+        assert "PullRequestReviewsSaveStrategy" in strategy_types
+
+    def test_create_save_strategies_with_pr_review_comments_enabled(
+        self, config_with_pr_reviews_and_comments
+    ):
+        """Test save strategy creation with PR review comments enabled."""
+        strategies = StrategyFactory.create_save_strategies(
+            config_with_pr_reviews_and_comments
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsSaveStrategy" in strategy_types
+        assert "IssuesSaveStrategy" in strategy_types
+        assert "CommentsSaveStrategy" in strategy_types
+        assert "PullRequestsSaveStrategy" in strategy_types
+        assert "PullRequestReviewsSaveStrategy" in strategy_types
+        assert "PullRequestReviewCommentsSaveStrategy" in strategy_types
+
+    def test_create_restore_strategies_with_pr_reviews_enabled(
+        self, config_with_prs_and_reviews
+    ):
+        """Test restore strategy creation with PR reviews enabled."""
+        mock_github_service = Mock()
+
+        strategies = StrategyFactory.create_restore_strategies(
+            config_with_prs_and_reviews,
+            github_service=mock_github_service,
+            include_original_metadata=True,
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsRestoreStrategy" in strategy_types
+        assert "IssuesRestoreStrategy" in strategy_types
+        assert "CommentsRestoreStrategy" in strategy_types
+        assert "PullRequestsRestoreStrategy" in strategy_types
+        assert "PullRequestReviewsRestoreStrategy" in strategy_types
+
+    def test_create_restore_strategies_with_pr_review_comments_enabled(
+        self, config_with_pr_reviews_and_comments
+    ):
+        """Test restore strategy creation with PR review comments enabled."""
+        mock_github_service = Mock()
+
+        strategies = StrategyFactory.create_restore_strategies(
+            config_with_pr_reviews_and_comments,
+            github_service=mock_github_service,
+            include_original_metadata=True,
+        )
+
+        strategy_types = [type(s).__name__ for s in strategies]
+        assert "LabelsRestoreStrategy" in strategy_types
+        assert "IssuesRestoreStrategy" in strategy_types
+        assert "CommentsRestoreStrategy" in strategy_types
+        assert "PullRequestsRestoreStrategy" in strategy_types
+        assert "PullRequestReviewsRestoreStrategy" in strategy_types
+        assert "PullRequestReviewCommentsRestoreStrategy" in strategy_types

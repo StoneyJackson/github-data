@@ -5,11 +5,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.config.settings import ApplicationConfig
 from src.operations.save.save import save_repository_data_with_config
 from src.operations.restore.restore import restore_repository_data_with_config
 from src.storage import create_storage_service
 from tests.shared import add_pr_method_mocks
+from tests.shared.builders.config_builder import ConfigBuilder
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
@@ -376,19 +376,23 @@ class TestCommentCoupling:
     ):
         """Verify issue comments are automatically coupled to issue selection."""
         # Configure to save only issue #20 with comments enabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={20},  # Only issue #20
-            include_issue_comments=True,  # Comments enabled
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({20})  # Only issue #20
+            .with_issue_comments(True)  # Comments enabled
+            .with_pull_requests(False)
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -431,19 +435,23 @@ class TestCommentCoupling:
         selection.
         """
         # Configure to save issue #10 but with comments disabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={10},  # Issue #10 selected
-            include_issue_comments=False,  # Comments explicitly disabled
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({10})  # Issue #10 selected
+            .with_issue_comments(False)  # Comments explicitly disabled
+            .with_pull_requests(False)
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -472,19 +480,23 @@ class TestCommentCoupling:
     ):
         """Verify PR comments are automatically coupled to PR selection."""
         # Configure to save only PR #100 with comments enabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=False,
-            include_issue_comments=False,
-            include_pull_requests={100},  # Only PR #100
-            include_pull_request_comments=True,  # Comments enabled
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(False)
+            .with_issue_comments(False)
+            .with_pull_requests({100})  # Only PR #100
+            .with_pull_request_comments(True)  # Comments enabled
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -527,19 +539,23 @@ class TestCommentCoupling:
         PR selection.
         """
         # Configure to save PR #200 but with comments disabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=False,
-            include_issue_comments=False,
-            include_pull_requests={200},  # PR #200 selected
-            include_pull_request_comments=False,  # Comments explicitly disabled
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(False)
+            .with_issue_comments(False)
+            .with_pull_requests({200})  # PR #200 selected
+            .with_pull_request_comments(False)  # Comments explicitly disabled
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -568,19 +584,23 @@ class TestCommentCoupling:
     ):
         """Test that comments are only restored for restored issues."""
         # First save all issues and comments
-        save_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=True,  # All issues
-            include_issue_comments=True,
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        save_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(True)  # All issues
+            .with_issue_comments(True)
+            .with_pull_requests(False)
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -592,19 +612,23 @@ class TestCommentCoupling:
         )
 
         # Now restore only issues #10 and #30
-        restore_config = ApplicationConfig(
-            operation="restore",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={10, 30},  # Only these issues
-            include_issue_comments=True,
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        restore_config = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({10, 30})  # Only these issues
+            .with_issue_comments(True)
+            .with_pull_requests(False)
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Mock GitHub API for restore operation
@@ -652,19 +676,23 @@ class TestCommentCoupling:
         """Test comment coupling with both issues and PRs selected."""
         # Configure to save mixed selection: issue #20, PR #200, with both comment
         # types enabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={20},  # Only issue #20
-            include_issue_comments=True,
-            include_pull_requests={200},  # Only PR #200
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({20})  # Only issue #20
+            .with_issue_comments(True)
+            .with_pull_requests({200})  # Only PR #200
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -720,19 +748,23 @@ class TestCommentCoupling:
     ):
         """Test that no comments are saved when no issues are selected."""
         # Configure to save no issues but with comments enabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=False,  # No issues selected
-            include_issue_comments=True,  # Comments enabled but should be ignored
-            include_pull_requests=False,
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(False)  # No issues selected
+            .with_issue_comments(True)  # Comments enabled but should be ignored
+            .with_pull_requests(False)
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation
@@ -757,20 +789,25 @@ class TestCommentCoupling:
     ):
         """Test that no PR comments are saved when no PRs are selected."""
         # Configure to save no PRs but with PR comments enabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=False,
-            include_issue_comments=False,
-            include_pull_requests=False,  # No PRs selected
-            include_pull_request_comments=True,  # PR comments enabled but should be
-            # ignored
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(False)
+            .with_issue_comments(False)
+            .with_pull_requests(False)  # No PRs selected
+            .with_pull_request_comments(
+                True
+            )  # PR comments enabled but should be ignored
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Execute save operation

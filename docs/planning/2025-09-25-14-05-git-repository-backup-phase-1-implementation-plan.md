@@ -1,9 +1,9 @@
 # Git Repository Backup - Phase 1 Implementation Plan
 
-**Date:** September 25, 2025  
-**Author:** Claude Code Implementation Planning  
-**Status:** Implementation Ready  
-**Phase:** Phase 1 - Foundation (4-6 weeks)  
+**Date:** September 25, 2025
+**Author:** Claude Code Implementation Planning
+**Status:** Implementation Ready
+**Phase:** Phase 1 - Foundation (4-6 weeks)
 
 ## Executive Summary
 
@@ -109,7 +109,7 @@ class GitRepositoryInfo:
     commit_count: Optional[int] = None
     branch_count: Optional[int] = None
     tag_count: Optional[int] = None
-    
+
 @dataclass
 class GitOperationResult:
     """Result of a Git operation."""
@@ -136,40 +136,40 @@ from src.entities.git_repositories.models import GitBackupFormat, GitOperationRe
 
 class GitRepositoryService(ABC):
     """Abstract interface for Git repository operations."""
-    
+
     @abstractmethod
     def clone_repository(
-        self, 
-        repo_url: str, 
+        self,
+        repo_url: str,
         destination: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> GitOperationResult:
         """Clone repository to destination path."""
         pass
-    
+
     @abstractmethod
     def update_repository(
-        self, 
-        repo_path: Path, 
+        self,
+        repo_path: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> GitOperationResult:
         """Update existing repository backup."""
         pass
-    
+
     @abstractmethod
     def validate_repository(self, repo_path: Path) -> Dict[str, Any]:
         """Validate repository integrity."""
         pass
-    
+
     @abstractmethod
     def get_repository_info(self, repo_path: Path) -> GitRepositoryInfo:
         """Get repository metadata and statistics."""
         pass
-    
+
     @abstractmethod
     def restore_repository(
-        self, 
-        backup_path: Path, 
+        self,
+        backup_path: Path,
         destination: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> GitOperationResult:
@@ -178,27 +178,27 @@ class GitRepositoryService(ABC):
 
 class GitCommandExecutor(ABC):
     """Abstract interface for low-level Git command execution."""
-    
+
     @abstractmethod
     def execute_clone_mirror(self, repo_url: str, destination: Path) -> Dict[str, Any]:
         """Execute git clone --mirror command."""
         pass
-        
+
     @abstractmethod
     def execute_clone_bundle(self, repo_url: str, bundle_path: Path) -> Dict[str, Any]:
         """Execute git bundle create command."""
         pass
-        
+
     @abstractmethod
     def execute_remote_update(self, repo_path: Path) -> Dict[str, Any]:
         """Execute git remote update command."""
         pass
-        
+
     @abstractmethod
     def execute_fsck(self, repo_path: Path) -> Dict[str, Any]:
         """Execute git fsck command."""
         pass
-        
+
     @abstractmethod
     def get_repository_stats(self, repo_path: Path) -> Dict[str, Any]:
         """Get repository statistics via Git commands."""
@@ -223,13 +223,13 @@ from src.entities.git_repositories.models import GitBackupFormat, GitOperationRe
 
 class GitRepositoryServiceImpl(GitRepositoryService):
     """High-level Git repository operations orchestration."""
-    
+
     def __init__(self, command_executor: GitCommandExecutor = None, auth_token: str = None):
         self._command_executor = command_executor or GitCommandExecutorImpl(auth_token)
-    
+
     def clone_repository(
-        self, 
-        repo_url: str, 
+        self,
+        repo_url: str,
         destination: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> Dict[str, Any]:
@@ -237,10 +237,10 @@ class GitRepositoryServiceImpl(GitRepositoryService):
         try:
             # Ensure destination parent exists
             destination.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Prepare authenticated URL if token provided
             auth_url = self._prepare_authenticated_url(repo_url)
-            
+
             if backup_format == GitBackupFormat.MIRROR:
                 return self._clone_mirror(auth_url, destination)
             elif backup_format == GitBackupFormat.BUNDLE:
@@ -250,7 +250,7 @@ class GitRepositoryServiceImpl(GitRepositoryService):
                 mirror_result = self._clone_mirror(auth_url, destination)
                 bundle_path = destination.with_suffix('.bundle')
                 bundle_result = self._create_bundle(auth_url, bundle_path)
-                
+
                 return {
                     "success": True,
                     "backup_format": backup_format.value,
@@ -259,31 +259,31 @@ class GitRepositoryServiceImpl(GitRepositoryService):
                 }
             else:
                 raise ValueError(f"Unsupported backup format: {backup_format}")
-                
+
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
                 "backup_format": backup_format.value
             }
-    
+
     def _clone_mirror(self, repo_url: str, destination: Path) -> Dict[str, Any]:
         """Create mirror clone of repository."""
         cmd = ["git", "clone", "--mirror", repo_url, str(destination)]
-        
+
         result = subprocess.run(
-            cmd, 
-            capture_output=True, 
-            text=True, 
+            cmd,
+            capture_output=True,
+            text=True,
             timeout=self._git_timeout
         )
-        
+
         if result.returncode != 0:
             raise RuntimeError(f"Git clone failed: {result.stderr}")
-        
+
         # Get repository statistics
         repo_info = self._get_mirror_info(destination)
-        
+
         return {
             "success": True,
             "method": "mirror",
@@ -291,56 +291,56 @@ class GitRepositoryServiceImpl(GitRepositoryService):
             "size_bytes": self._get_directory_size(destination),
             **repo_info
         }
-    
+
     def _create_bundle(self, repo_url: str, bundle_path: Path) -> Dict[str, Any]:
         """Create bundle backup of repository."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_clone = Path(temp_dir) / "temp_clone"
-            
+
             # First clone the repository
             clone_cmd = ["git", "clone", repo_url, str(temp_clone)]
             result = subprocess.run(
-                clone_cmd, 
-                capture_output=True, 
-                text=True, 
+                clone_cmd,
+                capture_output=True,
+                text=True,
                 timeout=self._git_timeout
             )
-            
+
             if result.returncode != 0:
                 raise RuntimeError(f"Git clone for bundle failed: {result.stderr}")
-            
+
             # Create bundle
             bundle_cmd = [
-                "git", "-C", str(temp_clone), 
+                "git", "-C", str(temp_clone),
                 "bundle", "create", str(bundle_path), "--all"
             ]
-            
+
             result = subprocess.run(
                 bundle_cmd,
                 capture_output=True,
                 text=True,
                 timeout=self._git_timeout
             )
-            
+
             if result.returncode != 0:
                 raise RuntimeError(f"Git bundle failed: {result.stderr}")
-        
+
         return {
             "success": True,
             "method": "bundle",
             "destination": str(bundle_path),
             "size_bytes": bundle_path.stat().st_size
         }
-    
+
     def update_repository(
-        self, 
-        repo_path: Path, 
+        self,
+        repo_path: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> Dict[str, Any]:
         """Update existing repository backup."""
         if not repo_path.exists():
             raise FileNotFoundError(f"Repository backup not found: {repo_path}")
-        
+
         try:
             if backup_format == GitBackupFormat.MIRROR:
                 return self._update_mirror(repo_path)
@@ -350,30 +350,30 @@ class GitRepositoryServiceImpl(GitRepositoryService):
                 raise NotImplementedError("Bundle updates require original URL")
             else:
                 raise ValueError(f"Unsupported backup format: {backup_format}")
-                
+
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
                 "backup_format": backup_format.value
             }
-    
+
     def _update_mirror(self, mirror_path: Path) -> Dict[str, Any]:
         """Update mirror clone."""
         cmd = ["git", "-C", str(mirror_path), "remote", "update"]
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=self._git_timeout
         )
-        
+
         if result.returncode != 0:
             raise RuntimeError(f"Git mirror update failed: {result.stderr}")
-        
+
         repo_info = self._get_mirror_info(mirror_path)
-        
+
         return {
             "success": True,
             "method": "mirror_update",
@@ -381,165 +381,165 @@ class GitRepositoryServiceImpl(GitRepositoryService):
             "size_bytes": self._get_directory_size(mirror_path),
             **repo_info
         }
-    
+
     def validate_repository(self, repo_path: Path) -> Dict[str, Any]:
         """Validate repository integrity."""
         try:
             if not repo_path.exists():
                 return {"valid": False, "error": "Repository path does not exist"}
-            
+
             if repo_path.suffix == '.bundle':
                 return self._validate_bundle(repo_path)
             else:
                 return self._validate_mirror(repo_path)
-                
+
         except Exception as e:
             return {"valid": False, "error": str(e)}
-    
+
     def _validate_mirror(self, mirror_path: Path) -> Dict[str, Any]:
         """Validate mirror repository."""
         # Check if it's a valid git repository
         cmd = ["git", "-C", str(mirror_path), "rev-parse", "--git-dir"]
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=30
         )
-        
+
         if result.returncode != 0:
             return {"valid": False, "error": "Not a valid git repository"}
-        
+
         # Run git fsck for integrity check
         fsck_cmd = ["git", "-C", str(mirror_path), "fsck", "--full"]
-        
+
         fsck_result = subprocess.run(
             fsck_cmd,
             capture_output=True,
             text=True,
             timeout=120
         )
-        
+
         return {
             "valid": fsck_result.returncode == 0,
             "fsck_output": fsck_result.stdout if fsck_result.returncode == 0 else fsck_result.stderr
         }
-    
+
     def _validate_bundle(self, bundle_path: Path) -> Dict[str, Any]:
         """Validate bundle file."""
         cmd = ["git", "bundle", "verify", str(bundle_path)]
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=60
         )
-        
+
         return {
             "valid": result.returncode == 0,
             "verify_output": result.stdout if result.returncode == 0 else result.stderr
         }
-    
+
     def get_repository_info(self, repo_path: Path) -> Dict[str, Any]:
         """Get repository metadata and statistics."""
         if repo_path.suffix == '.bundle':
             return self._get_bundle_info(repo_path)
         else:
             return self._get_mirror_info(repo_path)
-    
+
     def _get_mirror_info(self, mirror_path: Path) -> Dict[str, Any]:
         """Get mirror repository information."""
         info = {}
-        
+
         try:
             # Get commit count
             count_cmd = ["git", "-C", str(mirror_path), "rev-list", "--all", "--count"]
             count_result = subprocess.run(count_cmd, capture_output=True, text=True, timeout=30)
             if count_result.returncode == 0:
                 info["commit_count"] = int(count_result.stdout.strip())
-            
+
             # Get branch count
             branch_cmd = ["git", "-C", str(mirror_path), "branch", "-r"]
             branch_result = subprocess.run(branch_cmd, capture_output=True, text=True, timeout=30)
             if branch_result.returncode == 0:
                 info["branch_count"] = len(branch_result.stdout.strip().split('\n'))
-            
+
             # Get tag count
             tag_cmd = ["git", "-C", str(mirror_path), "tag"]
             tag_result = subprocess.run(tag_cmd, capture_output=True, text=True, timeout=30)
             if tag_result.returncode == 0:
                 tags = tag_result.stdout.strip()
                 info["tag_count"] = len(tags.split('\n')) if tags else 0
-            
+
         except Exception as e:
             info["info_error"] = str(e)
-        
+
         return info
-    
+
     def _get_bundle_info(self, bundle_path: Path) -> Dict[str, Any]:
         """Get bundle file information."""
         return {
             "file_size": bundle_path.stat().st_size,
             "is_bundle": True
         }
-    
+
     def restore_repository(
-        self, 
-        backup_path: Path, 
+        self,
+        backup_path: Path,
         destination: Path,
         backup_format: GitBackupFormat = GitBackupFormat.MIRROR
     ) -> Dict[str, Any]:
         """Restore repository from backup."""
         try:
             destination.parent.mkdir(parents=True, exist_ok=True)
-            
+
             if backup_format == GitBackupFormat.MIRROR:
                 return self._restore_from_mirror(backup_path, destination)
             elif backup_format == GitBackupFormat.BUNDLE:
                 return self._restore_from_bundle(backup_path, destination)
             else:
                 raise ValueError(f"Unsupported backup format: {backup_format}")
-                
+
         except Exception as e:
             return {
                 "success": False,
                 "error": str(e),
                 "backup_format": backup_format.value
             }
-    
+
     def _restore_from_mirror(self, mirror_path: Path, destination: Path) -> Dict[str, Any]:
         """Restore from mirror backup."""
         # Clone from local mirror
         cmd = ["git", "clone", str(mirror_path), str(destination)]
-        
+
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             timeout=self._git_timeout
         )
-        
+
         if result.returncode != 0:
             raise RuntimeError(f"Git restore from mirror failed: {result.stderr}")
-        
+
         return {
             "success": True,
             "method": "restore_from_mirror",
             "destination": str(destination),
             "size_bytes": self._get_directory_size(destination)
         }
-    
+
     def _restore_from_bundle(self, bundle_path: Path, destination: Path) -> Dict[str, Any]:
         """Restore from bundle backup."""
         # Initialize new repository
         init_cmd = ["git", "init", str(destination)]
         init_result = subprocess.run(init_cmd, capture_output=True, text=True, timeout=30)
-        
+
         if init_result.returncode != 0:
             raise RuntimeError(f"Git init failed: {init_result.stderr}")
-        
+
         # Pull from bundle
         pull_cmd = ["git", "-C", str(destination), "pull", str(bundle_path), "main"]
         pull_result = subprocess.run(
@@ -548,22 +548,22 @@ class GitRepositoryServiceImpl(GitRepositoryService):
             text=True,
             timeout=self._git_timeout
         )
-        
+
         if pull_result.returncode != 0:
             raise RuntimeError(f"Git restore from bundle failed: {pull_result.stderr}")
-        
+
         return {
             "success": True,
             "method": "restore_from_bundle",
             "destination": str(destination),
             "size_bytes": self._get_directory_size(destination)
         }
-    
+
     def _prepare_authenticated_url(self, repo_url: str) -> str:
         """Prepare repository URL with authentication if token provided."""
         if not self._auth_token:
             return repo_url
-        
+
         # Handle GitHub URLs
         if "github.com" in repo_url:
             if repo_url.startswith("https://"):
@@ -572,9 +572,9 @@ class GitRepositoryServiceImpl(GitRepositoryService):
                 # Convert SSH to HTTPS with token
                 repo_path = repo_url.replace("git@github.com:", "")
                 return f"https://{self._auth_token}@github.com/{repo_path}"
-        
+
         return repo_url
-    
+
     def _get_directory_size(self, path: Path) -> int:
         """Get total size of directory in bytes."""
         total_size = 0
@@ -606,72 +606,72 @@ from src.storage.protocols import StorageService
 
 class GitRepositoryStrategy(SaveEntityStrategy):
     """Strategy for saving Git repository data."""
-    
+
     def __init__(self, git_service: GitRepositoryService, backup_format: GitBackupFormat = GitBackupFormat.MIRROR):
         self._git_service = git_service
         self._backup_format = backup_format
-    
+
     def get_entity_name(self) -> str:
         """Return entity name for this strategy."""
         return "git_repository"
-    
+
     def get_dependencies(self) -> List[str]:
         """Return list of entity dependencies."""
         return []  # Git repository has no dependencies
-    
+
     def collect_data(self, github_service: Any, repo_name: str) -> List[Dict[str, Any]]:
         """Collect Git repository data."""
         # For Git repositories, we don't collect data through GitHub API
         # Instead, we prepare repository URL
         repo_url = f"https://github.com/{repo_name}.git"
-        
+
         return [{
             "repo_name": repo_name,
             "repo_url": repo_url,
             "backup_format": self._backup_format.value
         }]
-    
+
     def process_data(self, entities: List[Dict[str, Any]], context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Process Git repository data."""
         # No processing needed for Git repositories
         return entities
-    
+
     def save_data(self, entities: List[Dict[str, Any]], output_path: str, storage_service: StorageService) -> Dict[str, Any]:
         """Save Git repository data."""
         if not entities:
             return {"saved_repositories": 0}
-        
+
         results = []
-        
+
         for entity in entities:
             repo_name = entity["repo_name"]
             repo_url = entity["repo_url"]
-            
+
             # Create Git data directory using simple filesystem operations
             git_data_dir = Path(output_path) / "git-data"
             git_data_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Determine backup destination
             if self._backup_format == GitBackupFormat.BUNDLE:
                 backup_path = git_data_dir / f"{repo_name.replace('/', '_')}.bundle"
             else:
                 backup_path = git_data_dir / repo_name.replace('/', '_')
-            
+
             # Perform Git backup
             result = self._git_service.clone_repository(
                 repo_url,
                 backup_path,
                 self._backup_format
             )
-            
+
             results.append({
                 "repo_name": repo_name,
                 "backup_path": str(backup_path),
                 **result
             })
-        
+
         successful_backups = sum(1 for r in results if r.get("success", False))
-        
+
         return {
             "saved_repositories": successful_backups,
             "total_repositories": len(entities),
@@ -695,27 +695,27 @@ from src.storage.protocols import StorageService
 
 class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
     """Strategy for restoring Git repository data."""
-    
+
     def __init__(self, git_service: GitRepositoryService):
         self._git_service = git_service
-    
+
     def get_entity_name(self) -> str:
         """Return entity name for this strategy."""
         return "git_repository"
-    
+
     def get_dependencies(self) -> List[str]:
         """Return list of entity dependencies."""
         return []  # Git repository has no dependencies
-    
+
     def load_data(self, input_path: str, storage_service: StorageService) -> List[Dict[str, Any]]:
         """Load Git repository backup data."""
         git_data_dir = Path(input_path) / "git-data"
-        
+
         if not git_data_dir.exists():
             return []
-        
+
         repositories = []
-        
+
         # Find all Git repositories (directories and bundle files)
         for item in git_data_dir.iterdir():
             if item.is_dir():
@@ -731,44 +731,44 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
                     "backup_format": GitBackupFormat.BUNDLE.value,
                     "repo_name": repo_name
                 })
-        
+
         return repositories
-    
+
     def process_data(self, entities: List[Dict[str, Any]], context: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Process Git repository restoration data."""
         # No processing needed for Git repositories
         return entities
-    
+
     def restore_data(self, entities: List[Dict[str, Any]], destination_path: str) -> Dict[str, Any]:
         """Restore Git repository data."""
         if not entities:
             return {"restored_repositories": 0}
-        
+
         results = []
-        
+
         for entity in entities:
             backup_path = Path(entity["backup_path"])
             repo_name = entity["repo_name"]
             backup_format = GitBackupFormat(entity["backup_format"])
-            
+
             # Create restore destination
             restore_path = Path(destination_path) / "restored-repositories" / repo_name.replace('/', '_')
-            
+
             # Perform Git restore
             result = self._git_service.restore_repository(
                 backup_path,
                 restore_path,
                 backup_format
             )
-            
+
             results.append({
                 "repo_name": repo_name,
                 "restore_path": str(restore_path),
                 **result
             })
-        
+
         successful_restores = sum(1 for r in results if r.get("success", False))
-        
+
         return {
             "restored_repositories": successful_restores,
             "total_repositories": len(entities),
@@ -846,7 +846,7 @@ def create_git_repository_service(config: Dict[str, str]) -> GitRepositoryServic
 def register_git_strategies(save_orchestrator, restore_orchestrator, git_service, config):
     """Register Git repository strategies if enabled."""
     include_git_repo = config.get("INCLUDE_GIT_REPO", "true").lower() == "true"
-    
+
     if include_git_repo:
         # Parse backup format
         backup_format_str = config.get("GIT_BACKUP_FORMAT", "mirror").lower()
@@ -855,39 +855,39 @@ def register_git_strategies(save_orchestrator, restore_orchestrator, git_service
         except ValueError:
             print(f"Invalid Git backup format: {backup_format_str}, using mirror")
             backup_format = GitBackupFormat.MIRROR
-        
+
         # Register save strategy
         git_save_strategy = GitRepositoryStrategy(git_service, backup_format)
         save_orchestrator.register_strategy(git_save_strategy)
-        
-        # Register restore strategy  
+
+        # Register restore strategy
         git_restore_strategy = GitRepositoryRestoreStrategy(git_service)
         restore_orchestrator.register_strategy(git_restore_strategy)
-        
+
         print(f"Git repository backup enabled with format: {backup_format.value}")
 
 def main() -> None:
     """Enhanced main function with Git support."""
     config = get_environment_config()
-    
+
     # Create services
     github_service = create_github_service(config)
     storage_service = create_storage_service(config)
     git_service = create_git_repository_service(config)
-    
+
     # Create orchestrators
     save_orchestrator = create_save_orchestrator(github_service, storage_service)
     restore_orchestrator = create_restore_orchestrator(github_service, storage_service)
-    
+
     # Register existing strategies
     register_existing_strategies(save_orchestrator, restore_orchestrator)
-    
+
     # Register Git strategies
     register_git_strategies(save_orchestrator, restore_orchestrator, git_service, config)
-    
+
     # Continue with existing main logic...
     operation = config.get("OPERATION", "save").lower()
-    
+
     if operation == "save":
         execute_save_operation(save_orchestrator, config)
     elif operation == "restore":
@@ -921,17 +921,17 @@ pytestmark = [pytest.mark.unit, pytest.mark.fast]
 
 class TestGitRepositoryService:
     """Test suite for Git repository service."""
-    
+
     @pytest.fixture
     def mock_command_executor(self):
         """Create mock command executor."""
         return Mock(spec=GitCommandExecutorImpl)
-    
+
     @pytest.fixture
     def git_service(self, mock_command_executor):
         """Create Git repository service instance with mocked executor."""
         return GitRepositoryServiceImpl(command_executor=mock_command_executor)
-    
+
     def test_clone_repository_success_mirror(self, git_service, mock_command_executor, temp_data_dir):
         """Test successful mirror repository clone."""
         # Arrange
@@ -944,31 +944,31 @@ class TestGitRepositoryService:
             "size_bytes": 1024
         }
         mock_command_executor.execute_clone_mirror.return_value = expected_result
-        
+
         # Act
         result = git_service.clone_repository(repo_url, destination, GitBackupFormat.MIRROR)
-        
+
         # Assert
         assert result.success is True
         assert result.backup_format == "mirror"
         assert result.destination == str(destination)
         mock_command_executor.execute_clone_mirror.assert_called_once_with(repo_url, destination)
-    
+
     def test_clone_repository_failure_returns_error_result(self, git_service, mock_command_executor, temp_data_dir):
         """Test clone repository failure handling."""
         # Arrange
         repo_url = "https://github.com/test/repo.git"
         destination = Path(temp_data_dir) / "test_repo"
         mock_command_executor.execute_clone_mirror.side_effect = RuntimeError("Clone failed")
-        
+
         # Act
         result = git_service.clone_repository(repo_url, destination, GitBackupFormat.MIRROR)
-        
+
         # Assert
         assert result.success is False
         assert "Clone failed" in result.error
         assert result.backup_format == "mirror"
-    
+
     def test_validate_repository_delegates_to_executor(self, git_service, mock_command_executor, temp_data_dir):
         """Test repository validation delegates to command executor."""
         # Arrange
@@ -976,41 +976,41 @@ class TestGitRepositoryService:
         repo_path.mkdir()
         expected_validation = {"valid": True, "fsck_output": "ok"}
         mock_command_executor.execute_fsck.return_value = expected_validation
-        
+
         # Act
         result = git_service.validate_repository(repo_path)
-        
+
         # Assert
         assert result == expected_validation
         mock_command_executor.execute_fsck.assert_called_once_with(repo_path)
-    
+
     def test_validate_repository_nonexistent_path(self, git_service, mock_command_executor, temp_data_dir):
         """Test validation of nonexistent repository path."""
         # Arrange
         nonexistent_path = Path(temp_data_dir) / "nonexistent"
-        
+
         # Act
         result = git_service.validate_repository(nonexistent_path)
-        
+
         # Assert
         assert result["valid"] is False
         assert "does not exist" in result["error"]
-    
+
     def test_update_repository_mirror_format(self, git_service, mock_command_executor, temp_data_dir):
         """Test updating mirror repository."""
         # Arrange
         repo_path = Path(temp_data_dir) / "test_repo.git"
         repo_path.mkdir()
-        
+
         update_result = {"success": True, "method": "remote_update", "path": str(repo_path)}
         stats_result = {"commit_count": 150, "branch_count": 5}
-        
+
         mock_command_executor.execute_remote_update.return_value = update_result
         mock_command_executor.get_repository_stats.return_value = stats_result
-        
+
         # Act
         result = git_service.update_repository(repo_path, GitBackupFormat.MIRROR)
-        
+
         # Assert
         assert result.success is True
         assert result.backup_format == "mirror"
@@ -1020,12 +1020,12 @@ class TestGitRepositoryService:
 
 class TestGitCommandExecutor:
     """Test suite for Git command executor."""
-    
+
     @pytest.fixture
     def git_executor(self):
         """Create Git command executor instance."""
         return GitCommandExecutorImpl(auth_token="test_token")
-    
+
     @patch('src.git.command_executor.subprocess.run')
     def test_execute_clone_mirror_success(self, mock_subprocess, git_executor, temp_data_dir):
         """Test successful git clone --mirror execution."""
@@ -1035,21 +1035,21 @@ class TestGitCommandExecutor:
         mock_result.returncode = 0
         mock_result.stderr = ""
         mock_subprocess.return_value = mock_result
-        
+
         # Act
         with patch.object(git_executor, '_get_directory_size', return_value=2048):
             result = git_executor.execute_clone_mirror(
-                "https://github.com/test/repo.git", 
+                "https://github.com/test/repo.git",
                 destination
             )
-        
+
         # Assert
         assert result["success"] is True
         assert result["method"] == "mirror"
         assert result["destination"] == str(destination)
         assert result["size_bytes"] == 2048
         mock_subprocess.assert_called_once()
-    
+
     @patch('src.git.command_executor.subprocess.run')
     def test_execute_clone_mirror_failure(self, mock_subprocess, git_executor, temp_data_dir):
         """Test git clone --mirror execution failure."""
@@ -1059,34 +1059,34 @@ class TestGitCommandExecutor:
         mock_result.returncode = 1
         mock_result.stderr = "Authentication failed"
         mock_subprocess.return_value = mock_result
-        
+
         # Act & Assert
         with pytest.raises(RuntimeError, match="Git clone failed"):
             git_executor.execute_clone_mirror(
-                "https://github.com/test/repo.git", 
+                "https://github.com/test/repo.git",
                 destination
             )
-    
+
     def test_prepare_authenticated_url_https(self, git_executor):
         """Test HTTPS URL authentication preparation."""
         original_url = "https://github.com/test/repo.git"
         auth_url = git_executor._prepare_authenticated_url(original_url)
-        
+
         assert auth_url == "https://test_token@github.com/test/repo.git"
-    
+
     def test_prepare_authenticated_url_ssh_conversion(self, git_executor):
         """Test SSH URL conversion to authenticated HTTPS."""
         ssh_url = "git@github.com:test/repo.git"
         auth_url = git_executor._prepare_authenticated_url(ssh_url)
-        
+
         assert auth_url == "https://test_token@github.com/test/repo.git"
-    
+
     def test_prepare_authenticated_url_no_token(self):
         """Test URL preparation without authentication token."""
         executor = GitCommandExecutorImpl(auth_token=None)
         original_url = "https://github.com/test/repo.git"
         auth_url = executor._prepare_authenticated_url(original_url)
-        
+
         assert auth_url == original_url
 ```
 
@@ -1104,8 +1104,8 @@ from src.git.service import GitRepositoryServiceImpl
 from src.entities.git_repositories.models import GitBackupFormat
 from src.operations.save.strategies.git_repository_strategy import GitRepositoryStrategy
 from tests.shared import (
-    temp_data_dir, 
-    storage_service_mock, 
+    temp_data_dir,
+    storage_service_mock,
     sample_github_data,
     github_service_with_mock
 )
@@ -1115,17 +1115,17 @@ pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.github_ap
 
 class TestGitRepositoryIntegration:
     """Integration test suite for Git repository operations."""
-    
+
     @pytest.fixture
     def git_service(self):
         """Create Git repository service."""
         return GitRepositoryServiceImpl()
-    
+
     @pytest.fixture
     def git_strategy(self, git_service):
         """Create Git repository strategy."""
         return GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
-    
+
     @pytest.mark.skipif(
         not pytest.config.getoption("--run-git-integration", default=False),
         reason="Git integration tests require --run-git-integration flag"
@@ -1135,31 +1135,31 @@ class TestGitRepositoryIntegration:
     def test_public_repository_clone_real(self, git_service, temp_data_dir):
         """Test cloning public repository from GitHub."""
         destination = Path(temp_data_dir) / "test_repo"
-        
+
         result = git_service.clone_repository(
             "https://github.com/octocat/Hello-World.git",
             destination,
             GitBackupFormat.MIRROR
         )
-        
+
         assert result.success is True
         assert destination.exists()
         assert (destination / "HEAD").exists()
-    
+
     def test_git_strategy_collect_data_structure(self, git_strategy):
         """Test Git strategy data collection creates proper structure."""
         entities = git_strategy.collect_data(None, "test/repo")
-        
+
         assert len(entities) == 1
         entity = entities[0]
         assert entity["repo_name"] == "test/repo"
         assert entity["repo_url"] == "https://github.com/test/repo.git"
         assert entity["backup_format"] == GitBackupFormat.MIRROR.value
-    
+
     def test_git_strategy_save_data_integration(
-        self, 
-        git_strategy, 
-        storage_service_mock, 
+        self,
+        git_strategy,
+        storage_service_mock,
         temp_data_dir
     ):
         """Test Git strategy save data with mocked Git operations."""
@@ -1168,7 +1168,7 @@ class TestGitRepositoryIntegration:
             "repo_url": "https://github.com/test/repo.git",
             "backup_format": GitBackupFormat.MIRROR.value
         }]
-        
+
         # Mock the git service to avoid actual cloning
         with patch.object(git_strategy._git_service, 'clone_repository') as mock_clone:
             mock_result = GitOperationResult(
@@ -1178,23 +1178,23 @@ class TestGitRepositoryIntegration:
                 size_bytes=1024
             )
             mock_clone.return_value = mock_result
-            
+
             result = git_strategy.save_data(entities, temp_data_dir, storage_service_mock)
-        
+
         assert result["total_repositories"] == 1
         assert result["saved_repositories"] == 1
         assert (Path(temp_data_dir) / "git-data").exists()
         mock_clone.assert_called_once()
-    
+
     def test_git_service_and_strategy_integration(
-        self, 
-        git_service, 
-        storage_service_mock, 
+        self,
+        git_service,
+        storage_service_mock,
         temp_data_dir
     ):
         """Test integration between GitRepositoryService and GitRepositoryStrategy."""
         strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
-        
+
         # Mock the command executor to avoid actual Git operations
         with patch.object(git_service._command_executor, 'execute_clone_mirror') as mock_execute:
             mock_execute.return_value = {
@@ -1203,10 +1203,10 @@ class TestGitRepositoryIntegration:
                 "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
                 "size_bytes": 2048
             }
-            
+
             entities = strategy.collect_data(None, "test/repo")
             result = strategy.save_data(entities, temp_data_dir, storage_service_mock)
-            
+
             assert result["saved_repositories"] == 1
             mock_execute.assert_called_once()
 
@@ -1215,28 +1215,28 @@ class TestGitRepositoryIntegration:
 @pytest.mark.storage
 class TestGitRepositoryStorageIntegration:
     """Integration tests for Git repository storage operations."""
-    
+
     def test_git_data_directory_creation(self, temp_data_dir, storage_service_mock):
         """Test that git-data directory is created properly."""
         git_service = GitRepositoryServiceImpl()
         strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
-        
+
         entities = [{
             "repo_name": "test/repo",
             "repo_url": "https://github.com/test/repo.git",
             "backup_format": GitBackupFormat.MIRROR.value
         }]
-        
+
         with patch.object(git_service._command_executor, 'execute_clone_mirror') as mock_execute:
             mock_execute.return_value = {
                 "success": True,
-                "method": "mirror", 
+                "method": "mirror",
                 "destination": str(Path(temp_data_dir) / "git-data" / "test_repo"),
                 "size_bytes": 512
             }
-            
+
             strategy.save_data(entities, temp_data_dir, storage_service_mock)
-            
+
             git_data_dir = Path(temp_data_dir) / "git-data"
             assert git_data_dir.exists()
             assert git_data_dir.is_dir()
@@ -1252,32 +1252,31 @@ class TestGitRepositoryStorageIntegration:
 import pytest
 from tests.shared.helpers import ContainerTestHelper
 
-# Test markers following project standards  
+# Test markers following project standards
 pytestmark = [
-    pytest.mark.container, 
-    pytest.mark.integration, 
-    pytest.mark.docker, 
+    pytest.mark.container,
+    pytest.mark.integration,
     pytest.mark.slow
 ]
 
 class TestGitRepositoryContainer:
     """Container test suite for Git repository operations."""
-    
+
     @pytest.fixture
     def container_helper(self):
         """Create container test helper following project pattern."""
         return ContainerTestHelper()
-    
+
     def test_container_git_installation(self, container_helper):
         """Test that container has Git installed and accessible."""
         result = container_helper.run_command_in_container(["git", "--version"])
-        
+
         assert result.returncode == 0
         output = result.stdout.decode()
         assert "git version" in output
         # Verify it's a recent Git version (2.x)
         assert "git version 2." in output
-    
+
     def test_git_backup_environment_variables(self, container_helper):
         """Test Git-related environment variables are properly set."""
         env_vars = {
@@ -1286,28 +1285,28 @@ class TestGitRepositoryContainer:
             "GIT_AUTH_METHOD": "token",
             "GITHUB_TOKEN": "test_token_value"
         }
-        
+
         # Test each environment variable
         for env_var, expected_value in env_vars.items():
             result = container_helper.run_container_with_env(
                 {env_var: expected_value},
                 ["python", "-c", f"import os; print(os.environ.get('{env_var}', 'NOT_SET'))"]
             )
-            
+
             assert result.returncode == 0
             output = result.stdout.decode().strip()
             assert output == expected_value
-    
+
     def test_container_git_configuration_defaults(self, container_helper):
         """Test that container has proper Git configuration defaults."""
         # Test Git config access
         result = container_helper.run_command_in_container([
             "git", "config", "--global", "--get-regexp", ".*"
         ])
-        
+
         # Git config should be accessible (even if empty, should not error)
         assert result.returncode in [0, 1]  # 1 is OK for empty config
-    
+
     def test_container_python_git_access(self, container_helper):
         """Test that Python can execute Git commands within container."""
         python_script = '''
@@ -1325,28 +1324,28 @@ except Exception as e:
     print(f"Exception: {e}")
     sys.exit(1)
 '''
-        
+
         result = container_helper.run_command_in_container([
             "python", "-c", python_script
         ])
-        
+
         assert result.returncode == 0
         output = result.stdout.decode()
         assert "returncode: 0" in output
         assert "git version" in output
-    
+
     @pytest.mark.performance
     def test_container_startup_performance(self, container_helper):
         """Test that container starts within acceptable time limits."""
         import time
-        
+
         start_time = time.time()
-        
+
         # Simple command to test startup time
         result = container_helper.run_command_in_container(["echo", "startup_test"])
-        
+
         startup_time = time.time() - start_time
-        
+
         assert result.returncode == 0
         assert "startup_test" in result.stdout.decode()
         # Container should start within 30 seconds
@@ -1354,37 +1353,37 @@ except Exception as e:
 
 class TestGitContainerIntegration:
     """Container integration tests for complete Git workflows."""
-    
+
     @pytest.fixture
     def container_helper(self):
         """Create container test helper."""
         return ContainerTestHelper()
-    
+
     def test_container_git_directory_operations(self, container_helper):
         """Test Git directory operations within container."""
         commands = [
             "mkdir -p /tmp/git-test",
             "cd /tmp/git-test && git init",
-            "cd /tmp/git-test && echo 'test' > README.md", 
+            "cd /tmp/git-test && echo 'test' > README.md",
             "cd /tmp/git-test && git add README.md",
             "cd /tmp/git-test && git -c user.name='Test' -c user.email='test@example.com' commit -m 'Initial commit'",
             "ls -la /tmp/git-test/.git"
         ]
-        
+
         for cmd in commands:
             result = container_helper.run_command_in_container(["bash", "-c", cmd])
             assert result.returncode == 0, f"Command failed: {cmd}"
-    
+
     def test_container_volume_mount_git_operations(self, container_helper):
         """Test Git operations with volume mounts work correctly."""
         # This test would verify that Git operations work with mounted volumes
         # Implementation depends on ContainerTestHelper volume mounting capabilities
-        
+
         result = container_helper.run_command_in_container([
-            "bash", "-c", 
+            "bash", "-c",
             "mkdir -p /data/git-test && cd /data/git-test && git init && echo 'Volume mount test' > test.txt"
         ])
-        
+
         assert result.returncode == 0
 ```
 
@@ -1470,7 +1469,7 @@ git_repositories: Git repository backup/restore functionality tests
 
 ### Week 1: Foundation Setup
 - **Days 1-2**: Git repository service implementation with Clean Code principles (Step-Down Rule compliance)
-- **Days 3-4**: Git strategy implementation and shared fixture integration  
+- **Days 3-4**: Git strategy implementation and shared fixture integration
 - **Day 5**: Initial unit tests following project testing standards and code review
 
 ### Week 2: Core Git Operations

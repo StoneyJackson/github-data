@@ -9,11 +9,11 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.config.settings import ApplicationConfig
 from src.operations.save.save import save_repository_data_with_config
 from src.operations.restore.restore import restore_repository_data_with_config
 from src.storage import create_storage_service
 from tests.shared import add_pr_method_mocks
+from tests.shared.builders.config_builder import ConfigBuilder
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.edge_cases]
 
@@ -195,19 +195,23 @@ class TestSelectiveEdgeCases:
         """Test behavior with include_issues=set()."""
         # Empty set should be caught by validation
         with pytest.raises(ValueError) as exc_info:
-            config = ApplicationConfig(
-                operation="save",
-                github_token="test_token",
-                github_repo="owner/repo",
-                data_path=str(tmp_path),
-                label_conflict_strategy="skip",
-                include_git_repo=False,
-                include_issues=set(),  # Empty set should fail validation
-                include_issue_comments=True,
-                include_pull_requests=False,
-                include_pull_request_comments=False,
-                include_sub_issues=False,
-                git_auth_method="token",
+            config = (
+                ConfigBuilder()
+                .with_operation("save")
+                .with_token("test_token")
+                .with_repo("owner/repo")
+                .with_data_path(str(tmp_path))
+                .with_label_strategy("skip")
+                .with_git_repo(False)
+                .with_issues(set())  # Empty set should fail validation
+                .with_issue_comments(True)
+                .with_pull_requests(False)
+                .with_pull_request_comments(False)
+                .with_pr_reviews(False)
+                .with_pr_review_comments(False)
+                .with_sub_issues(False)
+                .with_git_auth_method("token")
+                .build()
             )
             config.validate()
 
@@ -220,19 +224,23 @@ class TestSelectiveEdgeCases:
     ):
         """Test single issue/PR number selection."""
         # Test single issue
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={25},  # Single issue
-            include_issue_comments=True,
-            include_pull_requests={115},  # Single PR
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({25})  # Single issue
+            .with_issue_comments(True)
+            .with_pull_requests({115})  # Single PR
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -284,19 +292,23 @@ class TestSelectiveEdgeCases:
     ):
         """Test very large ranges like '1-10000'."""
         # Test large range that exceeds available data
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 10001)},  # 1-10000 range
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(50, 200)},  # 50-199 range
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 10001)})  # 1-10000 range
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(50, 200)})  # 50-199 range
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -331,38 +343,46 @@ class TestSelectiveEdgeCases:
         """Test negative numbers, zero, non-existent issues."""
         # Test that negative numbers fail validation
         with pytest.raises(ValueError) as exc_info:
-            config = ApplicationConfig(
-                operation="save",
-                github_token="test_token",
-                github_repo="owner/repo",
-                data_path=str(tmp_path),
-                label_conflict_strategy="skip",
-                include_git_repo=False,
-                include_issues={-1, 0, 1},  # Negative and zero should fail
-                include_issue_comments=True,
-                include_pull_requests=False,
-                include_pull_request_comments=False,
-                include_sub_issues=False,
-                git_auth_method="token",
+            config = (
+                ConfigBuilder()
+                .with_operation("save")
+                .with_token("test_token")
+                .with_repo("owner/repo")
+                .with_data_path(str(tmp_path))
+                .with_label_strategy("skip")
+                .with_git_repo(False)
+                .with_issues({-1, 0, 1})  # Negative and zero should fail
+                .with_issue_comments(True)
+                .with_pull_requests(False)
+                .with_pull_request_comments(False)
+                .with_pr_reviews(False)
+                .with_pr_review_comments(False)
+                .with_sub_issues(False)
+                .with_git_auth_method("token")
+                .build()
             )
             config.validate()
 
         assert "INCLUDE_ISSUES numbers must be positive integers" in str(exc_info.value)
 
         # Test non-existent issues (should not fail, but will save nothing)
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={999, 1000, 1001},  # Non-existent issues
-            include_issue_comments=True,
-            include_pull_requests={999, 1000},  # Non-existent PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({999, 1000, 1001})  # Non-existent issues
+            .with_issue_comments(True)
+            .with_pull_requests({999, 1000})  # Non-existent PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -394,19 +414,23 @@ class TestSelectiveEdgeCases:
         """Test complex specifications like '1-5 10 15-20 25'."""
         # Test complex mixed selection
         complex_selection = {1, 2, 3, 4, 5, 10, 15, 16, 17, 18, 19, 20, 25}
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=complex_selection,
-            include_issue_comments=True,
-            include_pull_requests={100, 105, 110, 111, 112, 125},  # Mixed PR selection
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(complex_selection)
+            .with_issue_comments(True)
+            .with_pull_requests({100, 105, 110, 111, 112, 125})  # Mixed PR selection
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -466,19 +490,23 @@ class TestSelectiveEdgeCases:
 
         add_pr_method_mocks(empty_github_service)
 
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/empty-repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={1, 2, 3, 4, 5},  # Request issues that don't exist
-            include_issue_comments=True,
-            include_pull_requests={10, 11, 12},  # Request PRs that don't exist
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/empty-repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({1, 2, 3, 4, 5})  # Request issues that don't exist
+            .with_issue_comments(True)
+            .with_pull_requests({10, 11, 12})  # Request PRs that don't exist
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -500,19 +528,23 @@ class TestSelectiveEdgeCases:
     ):
         """Test when some specified numbers don't exist."""
         # Request mix of existing and non-existing items
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={1, 2, 3, 999, 1000},  # 1-3 exist, 999-1000 don't
-            include_issue_comments=True,
-            include_pull_requests={100, 101, 200, 300},  # 100-101 exist, 200,300 don't
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({1, 2, 3, 999, 1000})  # 1-3 exist, 999-1000 don't
+            .with_issue_comments(True)
+            .with_pull_requests({100, 101, 200, 300})  # 100-101 exist, 200,300 don't
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -546,19 +578,23 @@ class TestSelectiveEdgeCases:
     ):
         """Test restore when requested numbers don't exist in backup."""
         # First save only a subset of issues
-        save_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={10, 20, 30},  # Save only these
-            include_issue_comments=True,
-            include_pull_requests={100, 110},  # Save only these
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        save_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({10, 20, 30})  # Save only these
+            .with_issue_comments(True)
+            .with_pull_requests({100, 110})  # Save only these
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -570,19 +606,23 @@ class TestSelectiveEdgeCases:
         )
 
         # Now try to restore more than what was saved
-        restore_config = ApplicationConfig(
-            operation="restore",
-            github_token="test_token",
-            github_repo="owner/new-repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={10, 20, 30, 40, 50},  # 40, 50 don't exist in backup
-            include_issue_comments=True,
-            include_pull_requests={100, 110, 120, 130},  # 120, 130 don't exist
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        restore_config = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_token("test_token")
+            .with_repo("owner/new-repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({10, 20, 30, 40, 50})  # 40, 50 don't exist in backup
+            .with_issue_comments(True)
+            .with_pull_requests({100, 110, 120, 130})  # 120, 130 don't exist
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Mock GitHub API for restore
@@ -629,19 +669,23 @@ class TestSelectiveEdgeCases:
         # Test large selection to ensure it doesn't load unnecessary data
         large_selection = set(range(1, 45))  # 44 out of 50 issues
 
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=large_selection,
-            include_issue_comments=True,
-            include_pull_requests=set(range(100, 125)),  # 25 out of 30 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(large_selection)
+            .with_issue_comments(True)
+            .with_pull_requests(set(range(100, 125)))  # 25 out of 30 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -692,19 +736,23 @@ class TestSelectiveEdgeCases:
         # Test with very high numbers
         extreme_selection = {999999, 1000000, 1000001}
 
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=extreme_selection,
-            include_issue_comments=True,
-            include_pull_requests=extreme_selection,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(extreme_selection)
+            .with_issue_comments(True)
+            .with_pull_requests(extreme_selection)
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Should not raise errors, just save nothing
@@ -727,19 +775,23 @@ class TestSelectiveEdgeCases:
     ):
         """Test edge cases in comment coupling logic."""
         # Test when issues are selected but comments disabled
-        config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={1, 2, 3},
-            include_issue_comments=False,  # Disabled
-            include_pull_requests={100, 101},
-            include_pull_request_comments=False,  # Disabled
-            include_sub_issues=False,
-            git_auth_method="token",
+        config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({1, 2, 3})
+            .with_issue_comments(False)  # Disabled
+            .with_pull_requests({100, 101})
+            .with_pull_request_comments(False)  # Disabled
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -768,19 +820,23 @@ class TestSelectiveEdgeCases:
         """Test that validation provides comprehensive error messages."""
         # Test multiple validation errors at once
         with pytest.raises(ValueError) as exc_info:
-            config = ApplicationConfig(
-                operation="invalid_operation",  # Invalid
-                github_token="test_token",
-                github_repo="owner/repo",
-                data_path="/data",
-                label_conflict_strategy="invalid_strategy",  # Invalid
-                include_git_repo=False,
-                include_issues={-1, 0},  # Invalid numbers
-                include_issue_comments=True,
-                include_pull_requests={-5, 0},  # Invalid numbers
-                include_pull_request_comments=True,
-                include_sub_issues=False,
-                git_auth_method="invalid_auth",  # Invalid
+            config = (
+                ConfigBuilder()
+                .with_operation("invalid_operation")  # Invalid
+                .with_token("test_token")
+                .with_repo("owner/repo")
+                .with_data_path("/data")
+                .with_label_strategy("invalid_strategy")  # Invalid
+                .with_git_repo(False)
+                .with_issues({-1, 0})  # Invalid numbers
+                .with_issue_comments(True)
+                .with_pull_requests({-5, 0})  # Invalid numbers
+                .with_pull_request_comments(True)
+                .with_pr_reviews(False)
+                .with_pr_review_comments(False)
+                .with_sub_issues(False)
+                .with_git_auth_method("invalid_auth")  # Invalid
+                .build()
             )
             config.validate()
 

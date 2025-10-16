@@ -13,11 +13,11 @@ from collections import defaultdict
 
 import pytest
 
-from src.config.settings import ApplicationConfig
 from src.operations.save.save import save_repository_data_with_config
 from src.operations.restore.restore import restore_repository_data_with_config
 from src.storage import create_storage_service
 from tests.shared import add_pr_method_mocks
+from tests.shared.builders.config_builder import ConfigBuilder
 
 pytestmark = [
     pytest.mark.integration,
@@ -319,25 +319,30 @@ class TestPerformanceBenchmarks:
         """Create real storage service for performance testing."""
         return create_storage_service()
 
+    @pytest.mark.slow
     @pytest.mark.performance
     def test_selective_vs_full_save_performance(
         self, mock_github_service, storage_service, tmp_path
     ):
         """Measure performance improvement of selective save."""
         # Test selective save (small selection)
-        selective_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "selective"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 11)},  # Only 10 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1010)},  # Only 10 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        selective_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "selective"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 11)})  # Only 10 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1010)})  # Only 10 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Measure selective save time
@@ -353,19 +358,23 @@ class TestPerformanceBenchmarks:
                 selective_memory.update_peak()
 
         # Test full save
-        full_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "full"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=True,  # All issues
-            include_issue_comments=True,
-            include_pull_requests=True,  # All PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        full_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "full"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(True)  # All issues
+            .with_issue_comments(True)
+            .with_pull_requests(True)  # All PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Measure full save time
@@ -418,51 +427,63 @@ class TestPerformanceBenchmarks:
     ):
         """Test memory efficiency with selective operations."""
         # Small selective operation
-        small_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "small"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 6)},  # 5 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1005)},  # 5 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        small_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "small"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 6)})  # 5 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1005)})  # 5 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Medium selective operation
-        medium_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "medium"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 51)},  # 50 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1050)},  # 50 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        medium_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "medium"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 51)})  # 50 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1050)})  # 50 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         # Large selective operation
-        large_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "large"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 501)},  # 500 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1250)},  # 250 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        large_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "large"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 501)})  # 500 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1250)})  # 250 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         memories = {}
@@ -533,19 +554,23 @@ class TestPerformanceBenchmarks:
         add_pr_method_mocks(mock_github_service)
 
         # Test selective operation
-        selective_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "selective"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={1, 2, 3},  # Selective issues
-            include_issue_comments=True,
-            include_pull_requests=False,  # No PRs
-            include_pull_request_comments=False,
-            include_sub_issues=False,
-            git_auth_method="token",
+        selective_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "selective"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({1, 2, 3})  # Selective issues
+            .with_issue_comments(True)
+            .with_pull_requests(False)  # No PRs
+            .with_pull_request_comments(False)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -573,19 +598,23 @@ class TestPerformanceBenchmarks:
     ):
         """Test performance with large selective ranges."""
         # Test with large range selection
-        large_range_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "large_range"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 901)},  # 900 out of 1000 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1450)},  # 450 out of 500 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        large_range_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "large_range"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 901)})  # 900 out of 1000 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1450)})  # 450 out of 500 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         with PerformanceTimer() as timer:
@@ -628,19 +657,23 @@ class TestPerformanceBenchmarks:
     ):
         """Measure performance impact of comment coupling."""
         # Test with comments enabled
-        with_comments_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "with_comments"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 101)},  # 100 issues
-            include_issue_comments=True,  # Comments enabled
-            include_pull_requests={i for i in range(1000, 1100)},  # 100 PRs
-            include_pull_request_comments=True,  # Comments enabled
-            include_sub_issues=False,
-            git_auth_method="token",
+        with_comments_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "with_comments"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 101)})  # 100 issues
+            .with_issue_comments(True)  # Comments enabled
+            .with_pull_requests({i for i in range(1000, 1100)})  # 100 PRs
+            .with_pull_request_comments(True)  # Comments enabled
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         with PerformanceTimer() as comments_timer:
@@ -653,19 +686,23 @@ class TestPerformanceBenchmarks:
             )
 
         # Test without comments
-        without_comments_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path / "without_comments"),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 101)},  # 100 issues
-            include_issue_comments=False,  # Comments disabled
-            include_pull_requests={i for i in range(1000, 1100)},  # 100 PRs
-            include_pull_request_comments=False,  # Comments disabled
-            include_sub_issues=False,
-            git_auth_method="token",
+        without_comments_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path / "without_comments"))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 101)})  # 100 issues
+            .with_issue_comments(False)  # Comments disabled
+            .with_pull_requests({i for i in range(1000, 1100)})  # 100 PRs
+            .with_pull_request_comments(False)  # Comments disabled
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         with PerformanceTimer() as no_comments_timer:
@@ -701,19 +738,23 @@ class TestPerformanceBenchmarks:
     ):
         """Test restore performance with selective vs full operations."""
         # First save all data
-        save_config = ApplicationConfig(
-            operation="save",
-            github_token="test_token",
-            github_repo="owner/repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues=True,
-            include_issue_comments=True,
-            include_pull_requests=True,
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        save_config = (
+            ConfigBuilder()
+            .with_operation("save")
+            .with_token("test_token")
+            .with_repo("owner/repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues(True)
+            .with_issue_comments(True)
+            .with_pull_requests(True)
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         save_repository_data_with_config(
@@ -737,19 +778,23 @@ class TestPerformanceBenchmarks:
         mock_github_service.create_pull_request_comment.return_value = {"id": 9002}
 
         # Test selective restore
-        selective_restore_config = ApplicationConfig(
-            operation="restore",
-            github_token="test_token",
-            github_repo="owner/new-repo",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={i for i in range(1, 11)},  # Only 10 issues
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1005)},  # Only 5 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        selective_restore_config = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_token("test_token")
+            .with_repo("owner/new-repo")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 11)})  # Only 10 issues
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1005)})  # Only 5 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         with PerformanceTimer() as selective_restore_timer:
@@ -775,21 +820,23 @@ class TestPerformanceBenchmarks:
         mock_github_service.create_pull_request_comment.return_value = {"id": 9002}
 
         # Test full restore (with reduced dataset for test performance)
-        full_restore_config = ApplicationConfig(
-            operation="restore",
-            github_token="test_token",
-            github_repo="owner/new-repo-full",
-            data_path=str(tmp_path),
-            label_conflict_strategy="skip",
-            include_git_repo=False,
-            include_issues={
-                i for i in range(1, 101)
-            },  # 100 issues (subset for testing)
-            include_issue_comments=True,
-            include_pull_requests={i for i in range(1000, 1050)},  # 50 PRs
-            include_pull_request_comments=True,
-            include_sub_issues=False,
-            git_auth_method="token",
+        full_restore_config = (
+            ConfigBuilder()
+            .with_operation("restore")
+            .with_token("test_token")
+            .with_repo("owner/new-repo-full")
+            .with_data_path(str(tmp_path))
+            .with_label_strategy("skip")
+            .with_git_repo(False)
+            .with_issues({i for i in range(1, 101)})  # 100 issues (subset for testing)
+            .with_issue_comments(True)
+            .with_pull_requests({i for i in range(1000, 1050)})  # 50 PRs
+            .with_pull_request_comments(True)
+            .with_pr_reviews(False)
+            .with_pr_review_comments(False)
+            .with_sub_issues(False)
+            .with_git_auth_method("token")
+            .build()
         )
 
         with PerformanceTimer() as full_restore_timer:
