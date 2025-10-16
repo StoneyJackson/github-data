@@ -137,6 +137,53 @@ make check-all   # All quality checks including container tests
 
 For complete testing documentation, test categories, and best practices, see **[docs/testing.md](docs/testing.md)**.
 
+#### Mock Boundary Factory Guidelines
+
+When writing tests that interact with the GitHub API, use the standardized MockBoundaryFactory patterns to ensure maintainable, protocol-complete mocks:
+
+**Use MockBoundaryFactory for GitHub API mocking:**
+```python
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+# Preferred: Auto-configured factory with sample data
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+
+# For restore operations
+mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
+
+# For protocol-complete mocks without data
+mock_boundary = MockBoundaryFactory.create_protocol_complete()
+```
+
+**Avoid manual mock configuration:**
+```python
+# ❌ Avoid: Manual mock setup (brittle, incomplete)
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+mock_boundary.get_repository_issues.return_value = []
+mock_boundary.get_all_issue_comments.return_value = []
+# ... many more manual configurations
+```
+
+**Custom behavior with factory patterns:**
+```python
+# ✅ Good: Factory with custom overrides
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_data)
+mock_boundary.create_issue.side_effect = Exception("API Error")  # Only override what's needed
+```
+
+**Benefits of using MockBoundaryFactory:**
+- **Protocol Complete**: 100% coverage of all GitHub API boundary methods
+- **Maintainable**: Automatically adapts to protocol changes
+- **Consistent**: Standardized mock behavior across all tests
+- **Future-proof**: New methods automatically included
+- **Reliable**: Eliminates mock-related test failures
+
+**When to use manual mocks:**
+- Testing the boundary factory itself
+- Testing specific error conditions that require precise mock control
+- Legacy tests during migration (should be converted to factory patterns)
+
 #### Configuration Testing Guidelines
 
 When writing tests that involve configuration or environment variables, use the standardized patterns to ensure maintainability:

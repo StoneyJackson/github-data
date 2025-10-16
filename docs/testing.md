@@ -1531,6 +1531,73 @@ def test_with_mocked_github(mock_boundary_class, sample_github_data):
     # All protocol methods automatically configured ✅
 ```
 
+### MockBoundaryFactory Quick Reference
+
+Following the successful completion of the boundary mock migration plan, all tests should use MockBoundaryFactory for GitHub API boundary mocking. This ensures 100% protocol completeness and future-proofing.
+
+#### Essential Factory Methods
+
+```python
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+
+# ✅ RECOMMENDED: Auto-configured with sample data
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+
+# ✅ RECOMMENDED: Protocol-complete with validation 
+mock_boundary = MockBoundaryFactory.create_protocol_complete(sample_github_data)
+
+# ✅ GOOD: For restore operations
+mock_boundary = MockBoundaryFactory.create_for_restore(success_responses=True)
+```
+
+#### Migration Pattern from Manual Mocks
+
+**Before (Manual - Avoid):**
+```python
+# ❌ Manual mock setup - brittle and incomplete
+mock_boundary = Mock()
+mock_boundary.get_repository_labels.return_value = []
+mock_boundary.get_repository_issues.return_value = sample_data["issues"]
+mock_boundary.get_all_issue_comments.return_value = []
+# Missing 20+ other protocol methods!
+```
+
+**After (Factory - Use):**
+```python
+# ✅ Factory-based setup - robust and complete
+mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+# All 28+ protocol methods automatically configured
+# Custom behavior only where needed
+mock_boundary.create_issue.side_effect = Exception("API Error")
+```
+
+#### Common Usage Patterns
+
+**Basic Integration Test:**
+```python
+@pytest.mark.integration
+def test_save_workflow(sample_github_data, temp_data_dir):
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    # Test logic using complete protocol mock
+```
+
+**Error Testing with Factory:**
+```python
+@pytest.mark.error_simulation
+def test_api_error_handling(sample_github_data):
+    # Start with complete protocol
+    mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    # Add specific error behavior
+    mock_boundary.create_label.side_effect = Exception("Rate limit exceeded")
+```
+
+**Custom Data Integration:**
+```python
+def test_with_custom_data():
+    custom_data = {"labels": [{"name": "custom", "color": "blue"}]}
+    mock_boundary = MockBoundaryFactory.create_auto_configured(custom_data)
+```
+
 #### Hybrid Pattern for Error Testing ⭐ **RECOMMENDED FOR ERROR SCENARIOS**
 
 ```python
