@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 # Install system dependencies including Git
 RUN apt-get update && apt-get install -y \
@@ -28,11 +28,6 @@ RUN pdm info --env > /tmp/venv_path
 ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
-ENV DATA_PATH=/data
-
-# Git-specific environment variables with defaults
-ENV INCLUDE_GIT_REPO=true
-ENV GIT_AUTH_METHOD=token
 
 # Run the application using PDM
 CMD ["pdm", "run", "python", "-m", "src.main"]
