@@ -131,8 +131,8 @@ def convert_to_user(raw_data: Dict[str, Any]) -> GitHubUser:
     return GitHubUser(
         login=raw_data["login"],
         id=raw_data["id"],
-        avatar_url=raw_data["avatar_url"],
-        html_url=raw_data["html_url"],
+        avatar_url=raw_data.get("avatarUrl") or raw_data.get("avatar_url") or "",
+        html_url=raw_data.get("htmlUrl") or raw_data.get("html_url") or "",
     )
 
 

@@ -200,7 +200,6 @@ class TestGraphQLMilestoneIntegration:
         for field in expected_fields:
             assert field in milestone_node
 
-    @pytest.mark.skip(reason="Temporarily disabled during Phase 3 fixes")
     @pytest.mark.asyncio
     async def test_milestone_data_conversion_accuracy(
         self, sample_milestone_graphql_response
@@ -313,7 +312,6 @@ class TestGraphQLMilestoneIntegration:
         assert milestone_data["title"] == "Version 1.0"
         assert milestone_data["state"] == "OPEN"
 
-    @pytest.mark.skip(reason="Temporarily disabled during Phase 3 fixes")
     def test_milestone_field_presence_validation(
         self, sample_milestone_graphql_response
     ):
@@ -363,7 +361,6 @@ class TestGraphQLMilestoneIntegration:
         expected_with_cursor = {"owner": "owner", "name": "repo", "after": "cursor123"}
         assert variables_with_cursor == expected_with_cursor
 
-    @pytest.mark.skip(reason="Temporarily disabled during Phase 3 fixes")
     @pytest.mark.asyncio
     async def test_performance_impact_assessment(self, mock_graphql_client):
         """Test performance impact of milestone GraphQL enhancements."""
