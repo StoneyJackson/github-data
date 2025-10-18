@@ -65,6 +65,18 @@ REPOSITORY_PULL_REQUESTS_QUERY = gql(
                             description
                         }
                     }
+                    milestone {
+                        id
+                        number
+                        title
+                        description
+                        state
+                        createdAt
+                        updatedAt
+                        dueOn
+                        closedAt
+                        url
+                    }
                     comments {
                         totalCount
                     }

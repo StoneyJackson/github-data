@@ -388,6 +388,7 @@ class TestBackwardCompatibility:
             .with_pr_reviews(False)
             .with_pr_review_comments(False)
             .with_sub_issues(False)
+            .with_milestones(False)  # Avoid milestone warning
             .with_git_auth_method("token")
             .build()
         )
@@ -437,6 +438,7 @@ class TestBackwardCompatibility:
             .with_pr_reviews(False)
             .with_pr_review_comments(False)
             .with_sub_issues(False)
+            .with_milestones(False)  # Avoid milestone warning
             .with_git_auth_method("token")
             .build()
         )
@@ -483,6 +485,7 @@ class TestBackwardCompatibility:
             .with_pr_reviews(False)
             .with_pr_review_comments(False)
             .with_sub_issues(False)
+            .with_milestones(False)  # Avoid milestone warning
             .with_git_auth_method("token")
             .build()
         )

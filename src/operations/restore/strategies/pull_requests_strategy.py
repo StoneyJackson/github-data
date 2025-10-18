@@ -40,7 +40,10 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         return "pull_requests"
 
     def get_dependencies(self) -> List[str]:
-        return ["labels"]  # Pull requests may reference labels
+        return [
+            "labels",
+            "milestones",
+        ]  # Pull requests may reference labels and milestones
 
     def load_data(
         self, input_path: str, storage_service: "StorageService"
@@ -83,7 +86,9 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
     ) -> Optional[Dict[str, Any]]:
         # Prepare PR body with metadata if requested
         pr_body = self._prepare_pr_body(pull_request)
-        return {
+
+        # Prepare basic PR data
+        pr_data = {
             "title": pull_request.title,
             "body": pr_body,
             "head_ref": pull_request.head_ref,
@@ -92,18 +97,36 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             "original_state": pull_request.state,
         }
 
+        # Map milestone relationship if present
+        if pull_request.milestone:
+            milestone_mapping = context.get("milestone_mapping", {})
+            original_milestone_number = pull_request.milestone.number
+            if original_milestone_number in milestone_mapping:
+                new_milestone_number = milestone_mapping[original_milestone_number]
+                pr_data["milestone"] = new_milestone_number
+            else:
+                print(
+                    f"Warning: Milestone #{original_milestone_number} not found "
+                    f"in mapping for PR #{pull_request.number}"
+                )
+
+        return pr_data
+
     def create_entity(
         self,
         github_service: "RepositoryService",
         repo_name: str,
         entity_data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        # Prepare create pull request parameters
+        title = entity_data["title"]
+        body = entity_data["body"]
+        head_ref = entity_data["head_ref"]
+        base_ref = entity_data["base_ref"]
+        milestone = entity_data.get("milestone")
+
         created_pr = github_service.create_pull_request(
-            repo_name,
-            entity_data["title"],
-            entity_data["body"],
-            entity_data["head_ref"],
-            entity_data["base_ref"],
+            repo_name, title, body, head_ref, base_ref, milestone=milestone
         )
         return {
             "number": created_pr["number"],

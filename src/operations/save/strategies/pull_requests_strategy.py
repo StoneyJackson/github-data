@@ -24,7 +24,10 @@ class PullRequestsSaveStrategy(SelectiveFilteringMixin, SaveEntityStrategy):
 
     def get_dependencies(self) -> List[str]:
         """Return list of entity types this entity depends on."""
-        return ["labels"]  # Pull requests depend on labels being saved first
+        return [
+            "labels",
+            "milestones",
+        ]  # Pull requests depend on labels and milestones being saved first
 
     def get_converter_name(self) -> str:
         """Return the converter function name for this entity type."""

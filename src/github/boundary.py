@@ -6,6 +6,7 @@ This creates a true API boundary that's not coupled to PyGithub types.
 Focused solely on API access - no rate limiting, caching, or retry logic.
 """
 
+import logging
 from typing import Dict, List, Any, Optional
 from .protocols import GitHubApiBoundary as GitHubApiBoundaryProtocol
 from .graphql_client import GitHubGraphQLClient
@@ -75,10 +76,17 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         )
 
     def create_issue(
-        self, repo_name: str, title: str, body: str, labels: List[str]
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        labels: List[str],
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new issue and return raw JSON data."""
-        return self._rest_client.create_issue(repo_name, title, body, labels)
+        return self._rest_client.create_issue(
+            repo_name, title, body, labels, milestone=milestone
+        )
 
     def create_issue_comment(
         self, repo_name: str, issue_number: int, body: str
@@ -91,6 +99,33 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
     ) -> Dict[str, Any]:
         """Close an issue with optional state reason and return raw JSON data."""
         return self._rest_client.close_issue(repo_name, issue_number, state_reason)
+
+    # Public API - Milestone Operations
+
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get milestones via GraphQL with pagination."""
+        try:
+            return self._graphql_client.get_repository_milestones(repo_name)
+        except Exception as e:
+            logging.error(f"Failed to get milestones for {repo_name}: {e}")
+            raise
+
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create milestone via REST API."""
+        try:
+            return self._rest_client.create_milestone(
+                repo_name, title, description, due_on, state
+            )
+        except Exception as e:
+            logging.error(f"Failed to create milestone '{title}' for {repo_name}: {e}")
+            raise
 
     # Public API - Rate Limit Monitoring
 
@@ -121,10 +156,18 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         return self._graphql_client.get_all_pull_request_comments(repo_name)
 
     def create_pull_request(
-        self, repo_name: str, title: str, body: str, head: str, base: str
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str,
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new pull request and return raw JSON data."""
-        return self._rest_client.create_pull_request(repo_name, title, body, head, base)
+        return self._rest_client.create_pull_request(
+            repo_name, title, body, head, base, milestone=milestone
+        )
 
     def create_pull_request_comment(
         self, repo_name: str, pr_number: int, body: str

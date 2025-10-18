@@ -44,6 +44,7 @@ class ConfigFactory:
             "include_pr_reviews": True,
             "include_pr_review_comments": True,
             "include_sub_issues": True,
+            "include_milestones": True,
             "git_auth_method": "token",
         }
 
@@ -96,6 +97,7 @@ class ConfigFactory:
             "include_pr_reviews": False,
             "include_pr_review_comments": False,
             "include_sub_issues": False,
+            "include_milestones": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})
 
@@ -120,6 +122,7 @@ class ConfigFactory:
             "include_pr_reviews": True,
             "include_pr_review_comments": True,
             "include_sub_issues": True,
+            "include_milestones": True,
         }
         return ApplicationConfig(**{**defaults, **overrides})
 
@@ -164,6 +167,7 @@ class ConfigFactory:
             "include_pr_reviews": False,
             "include_pr_review_comments": False,
             "include_sub_issues": False,
+            "include_milestones": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})
 
@@ -188,5 +192,6 @@ class ConfigFactory:
             "include_pr_reviews": False,
             "include_pr_review_comments": False,
             "include_sub_issues": False,
+            "include_milestones": False,
         }
         return ApplicationConfig(**{**defaults, **overrides})

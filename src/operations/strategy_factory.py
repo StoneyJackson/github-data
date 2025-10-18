@@ -18,6 +18,9 @@ class StrategyFactory:
     ) -> List["SaveEntityStrategy"]:
         """Create save strategies based on configuration."""
         from src.operations.save.strategies.labels_strategy import LabelsSaveStrategy
+        from src.operations.save.strategies.milestones_strategy import (
+            MilestonesSaveStrategy,
+        )
         from src.operations.save.strategies.issues_strategy import IssuesSaveStrategy
         from src.operations.save.strategies.comments_strategy import (
             CommentsSaveStrategy,
@@ -26,6 +29,10 @@ class StrategyFactory:
         strategies: List["SaveEntityStrategy"] = [
             LabelsSaveStrategy(),
         ]
+
+        # Add milestone strategy before issues (dependency order)
+        if config.include_milestones:
+            strategies.append(MilestonesSaveStrategy())
 
         if StrategyFactory._is_enabled(config.include_issues):
             strategies.append(IssuesSaveStrategy(config.include_issues))
@@ -114,6 +121,9 @@ class StrategyFactory:
             LabelsRestoreStrategy,
             create_conflict_strategy,
         )
+        from src.operations.restore.strategies.milestones_strategy import (
+            MilestonesRestoreStrategy,
+        )
         from src.operations.restore.strategies.issues_strategy import (
             IssuesRestoreStrategy,
         )
@@ -129,6 +139,10 @@ class StrategyFactory:
                 config.label_conflict_strategy, github_service
             )
             strategies.append(LabelsRestoreStrategy(conflict_strategy))
+
+        # Add milestone strategy before issues (dependency order)
+        if config.include_milestones:
+            strategies.append(MilestonesRestoreStrategy())
 
         # Create issues strategy if enabled
         if StrategyFactory._is_enabled(config.include_issues):

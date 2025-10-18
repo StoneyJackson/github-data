@@ -15,6 +15,7 @@ from .pr_comments import PullRequestComment
 from .pr_reviews import PullRequestReview
 from .pr_review_comments import PullRequestReviewComment
 from .repository import RepositoryData
+from .milestones import Milestone
 
 __all__ = [
     "GitHubUser",
@@ -27,4 +28,5 @@ __all__ = [
     "PullRequestReview",
     "PullRequestReviewComment",
     "RepositoryData",
+    "Milestone",
 ]

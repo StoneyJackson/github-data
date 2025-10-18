@@ -147,6 +147,13 @@ class GitHubService(RepositoryService):
             operation=lambda: self._boundary.get_repository_sub_issues(repo_name),
         )
 
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get milestones via GraphQL with caching and rate limiting."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"milestones:{repo_name}",
+            operation=lambda: self._boundary.get_repository_milestones(repo_name),
+        )
+
     def get_issue_sub_issues(
         self, repo_name: str, issue_number: int
     ) -> List[Dict[str, Any]]:
@@ -211,11 +218,18 @@ class GitHubService(RepositoryService):
         return result
 
     def create_issue(
-        self, repo_name: str, title: str, body: str, labels: List[str]
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        labels: List[str],
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new issue with rate limiting."""
         result = self._rate_limiter.execute_with_retry(
-            lambda: self._boundary.create_issue(repo_name, title, body, labels),
+            lambda: self._boundary.create_issue(
+                repo_name, title, body, labels, milestone=milestone
+            ),
             self._boundary._github,
         )
         self._invalidate_cache_for_repository(repo_name, "issues")
@@ -244,12 +258,18 @@ class GitHubService(RepositoryService):
         return result
 
     def create_pull_request(
-        self, repo_name: str, title: str, body: str, head: str, base: str
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str,
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new pull request with rate limiting."""
         result = self._rate_limiter.execute_with_retry(
             lambda: self._boundary.create_pull_request(
-                repo_name, title, body, head, base
+                repo_name, title, body, head, base, milestone=milestone
             ),
             self._boundary._github,
         )
@@ -353,6 +373,27 @@ class GitHubService(RepositoryService):
             self._boundary._github,
         )
         self._invalidate_cache_for_repository(repo_name, "pr_review_comments")
+        return result
+
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create milestone via REST API with cache invalidation."""
+        result = self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_milestone(
+                repo_name, title, description, due_on, state
+            ),
+            self._boundary._github,
+        )
+
+        # Invalidate relevant caches
+        self._invalidate_cache_for_repository(repo_name, "milestones")
+
         return result
 
 

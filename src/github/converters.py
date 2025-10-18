@@ -17,6 +17,7 @@ from ..entities import (
     PullRequestReview,
     PullRequestReviewComment,
     SubIssue,
+    Milestone,
 )
 
 
@@ -44,6 +45,11 @@ def convert_to_issue(raw_data: Dict[str, Any]) -> Issue:
             convert_to_user(assignee) for assignee in raw_data.get("assignees", [])
         ],
         labels=[convert_to_label(label) for label in raw_data.get("labels", [])],
+        milestone=(
+            convert_to_milestone(raw_data["milestone"])
+            if raw_data.get("milestone")
+            else None
+        ),
         created_at=_parse_datetime(raw_data["created_at"]),
         updated_at=_parse_datetime(raw_data["updated_at"]),
         closed_at=(
@@ -82,6 +88,11 @@ def convert_to_pull_request(raw_data: Dict[str, Any]) -> PullRequest:
             convert_to_user(assignee) for assignee in raw_data.get("assignees", [])
         ],
         labels=[convert_to_label(label) for label in raw_data.get("labels", [])],
+        milestone=(
+            convert_to_milestone(raw_data["milestone"])
+            if raw_data.get("milestone")
+            else None
+        ),
         created_at=_parse_datetime(raw_data["created_at"]),
         updated_at=_parse_datetime(raw_data["updated_at"]),
         closed_at=(
@@ -172,6 +183,48 @@ def convert_to_pr_review_comment(api_data: Dict[str, Any]) -> PullRequestReviewC
         html_url=api_data["html_url"],
         pull_request_url=api_data.get("pull_request_url", ""),
         in_reply_to_id=api_data.get("in_reply_to_id"),
+    )
+
+
+def convert_to_milestone(raw_data: Dict[str, Any]) -> Milestone:
+    """Convert raw GitHub API milestone data to Milestone model."""
+    # Handle GraphQL vs REST API differences
+    issues_count = raw_data.get("issues", {})
+    if isinstance(issues_count, dict):
+        # GraphQL format
+        open_issues = issues_count.get("totalCount", 0)
+        closed_issues = 0  # GraphQL doesn't provide this directly
+    else:
+        # REST API format
+        open_issues = raw_data.get("open_issues", 0)
+        closed_issues = raw_data.get("closed_issues", 0)
+
+    return Milestone(
+        id=raw_data["id"],
+        number=raw_data["number"],
+        title=raw_data["title"],
+        description=raw_data.get("description"),
+        state=raw_data["state"].lower(),
+        creator=convert_to_user(raw_data["creator"]),
+        created_at=_parse_datetime(
+            raw_data.get("createdAt") or raw_data.get("created_at") or ""
+        ),
+        updated_at=_parse_datetime(
+            raw_data.get("updatedAt") or raw_data.get("updated_at") or ""
+        ),
+        due_on=(
+            _parse_datetime(raw_data.get("dueOn") or raw_data.get("due_on") or "")
+            if raw_data.get("dueOn") or raw_data.get("due_on")
+            else None
+        ),
+        closed_at=(
+            _parse_datetime(raw_data.get("closedAt") or raw_data.get("closed_at") or "")
+            if raw_data.get("closedAt") or raw_data.get("closed_at")
+            else None
+        ),
+        open_issues=open_issues,
+        closed_issues=closed_issues,
+        html_url=raw_data.get("url") or raw_data.get("html_url") or "",
     )
 
 

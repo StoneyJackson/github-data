@@ -99,6 +99,18 @@ class RepositoryService(ABC):
         pass
 
     @abstractmethod
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all milestones from the repository.
+
+        Args:
+            repo_name: The repository name in format 'owner/repo'
+
+        Returns:
+            List of milestone dictionaries from GitHub API
+        """
+        pass
+
+    @abstractmethod
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get current rate limit status."""
         pass
@@ -126,7 +138,12 @@ class RepositoryService(ABC):
 
     @abstractmethod
     def create_issue(
-        self, repo_name: str, title: str, body: str, labels: List[str]
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        labels: List[str],
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new issue."""
         pass
@@ -147,7 +164,13 @@ class RepositoryService(ABC):
 
     @abstractmethod
     def create_pull_request(
-        self, repo_name: str, title: str, body: str, head: str, base: str
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str,
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new pull request."""
         pass
@@ -196,6 +219,29 @@ class RepositoryService(ABC):
         position: int,
     ) -> Dict[str, Any]:
         """Change sub-issue order/position."""
+        pass
+
+    @abstractmethod
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create a new milestone in the repository.
+
+        Args:
+            repo_name: The repository name in format 'owner/repo'
+            title: Milestone title
+            description: Optional milestone description
+            due_on: Optional due date in ISO format
+            state: Milestone state ("open" or "closed")
+
+        Returns:
+            Created milestone dictionary from GitHub API
+        """
         pass
 
 
@@ -298,6 +344,11 @@ class GitHubApiBoundary(ABC):
         pass
 
     @abstractmethod
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get milestones via GraphQL with pagination."""
+        pass
+
+    @abstractmethod
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get rate limit status from GitHub API."""
         pass
@@ -323,7 +374,12 @@ class GitHubApiBoundary(ABC):
 
     @abstractmethod
     def create_issue(
-        self, repo_name: str, title: str, body: str, labels: List[str]
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        labels: List[str],
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create issue via GitHub API."""
         pass
@@ -344,7 +400,13 @@ class GitHubApiBoundary(ABC):
 
     @abstractmethod
     def create_pull_request(
-        self, repo_name: str, title: str, body: str, head: str, base: str
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str,
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create pull request via GitHub API."""
         pass
@@ -393,4 +455,16 @@ class GitHubApiBoundary(ABC):
         position: int,
     ) -> Dict[str, Any]:
         """Reprioritize sub-issue via GitHub API."""
+        pass
+
+    @abstractmethod
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create milestone via REST API."""
         pass
