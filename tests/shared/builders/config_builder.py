@@ -49,6 +49,7 @@ class ConfigBuilder:
             "include_pr_reviews": True,
             "include_pr_review_comments": True,
             "include_sub_issues": True,
+            "include_milestones": True,
             "git_auth_method": "token",
         }
 
@@ -124,6 +125,11 @@ class ConfigBuilder:
         self._config["include_sub_issues"] = enabled
         return self
 
+    def with_milestones(self, enabled: bool = True) -> "ConfigBuilder":
+        """Enable/disable milestones inclusion."""
+        self._config["include_milestones"] = enabled
+        return self
+
     def with_pr_features(
         self,
         prs: bool = True,
@@ -150,6 +156,7 @@ class ConfigBuilder:
                 "include_pr_reviews": False,
                 "include_pr_review_comments": False,
                 "include_sub_issues": False,
+                "include_milestones": False,
             }
         )
         return self
@@ -166,6 +173,7 @@ class ConfigBuilder:
                 "include_pr_reviews": True,
                 "include_pr_review_comments": True,
                 "include_sub_issues": True,
+                "include_milestones": True,
             }
         )
         return self
@@ -195,6 +203,7 @@ class ConfigBuilder:
             "include_pr_reviews": "INCLUDE_PR_REVIEWS",
             "include_pr_review_comments": "INCLUDE_PR_REVIEW_COMMENTS",
             "include_sub_issues": "INCLUDE_SUB_ISSUES",
+            "include_milestones": "INCLUDE_MILESTONES",
             "git_auth_method": "GIT_AUTH_METHOD",
         }
 

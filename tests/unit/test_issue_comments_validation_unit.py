@@ -92,6 +92,7 @@ class TestIssueCommentsValidationUnit:
             "INCLUDE_ISSUES": "false",
             "INCLUDE_ISSUE_COMMENTS": "true",
             "INCLUDE_PULL_REQUEST_COMMENTS": "false",  # Avoid second warning
+            "INCLUDE_MILESTONES": "false",  # Avoid milestone warning
         }
 
         with patch.dict("os.environ", env_vars, clear=True):

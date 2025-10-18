@@ -29,6 +29,10 @@ from .queries import (
     ISSUE_SUB_ISSUES_QUERY,
     RATE_LIMIT_QUERY,
 )
+from .queries.milestones import (
+    REPOSITORY_MILESTONES_QUERY,
+    build_milestones_query_variables,
+)
 from .queries.pr_reviews import (
     PULL_REQUEST_REVIEWS_QUERY,
     REPOSITORY_PR_REVIEWS_QUERY,
@@ -413,3 +417,30 @@ class GitHubGraphQLClient:
             }
         }
         return convert_graphql_rate_limit_to_rest_format(rate_limit_response)
+
+    # Milestone Operations
+
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all repository milestones with pagination."""
+
+        owner, name = repo_name.split("/", 1)
+        milestones = []
+        after = None
+
+        from gql import gql
+
+        while True:
+            variables = build_milestones_query_variables(owner, name, after)
+            response = self._gql_client.execute(
+                gql(REPOSITORY_MILESTONES_QUERY), variable_values=variables
+            )
+
+            milestone_data = response["repository"]["milestones"]
+            milestones.extend(milestone_data["nodes"])
+
+            if not milestone_data["pageInfo"]["hasNextPage"]:
+                break
+
+            after = milestone_data["pageInfo"]["endCursor"]
+
+        return milestones

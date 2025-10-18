@@ -110,6 +110,10 @@ class MockGitHubService(RepositoryService):
                 return {"number": sub_issue.get("parent_issue_number")}
         return None
 
+    def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all milestones from the repository."""
+        return self.mock_data.get("milestones", [])
+
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get current rate limit status."""
         return self.mock_data.get("rate_limit", {"remaining": 5000, "limit": 5000})
@@ -276,3 +280,24 @@ class MockGitHubService(RepositoryService):
         }
         self.reprioritized_sub_issues.append(reprioritize_data)
         return reprioritize_data
+
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create a new milestone."""
+        milestone_data = {
+            "number": len(getattr(self, "created_milestones", [])) + 1,
+            "title": title,
+            "description": description,
+            "due_on": due_on,
+            "state": state,
+        }
+        if not hasattr(self, "created_milestones"):
+            self.created_milestones = []
+        self.created_milestones.append(milestone_data)
+        return milestone_data

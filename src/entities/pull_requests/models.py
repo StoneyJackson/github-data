@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 from ..users.models import GitHubUser
 from ..labels.models import Label
+from ..milestones.models import Milestone
 
 
 class PullRequest(BaseModel):
@@ -19,6 +20,7 @@ class PullRequest(BaseModel):
     user: GitHubUser  # author
     assignees: List[GitHubUser] = Field(default_factory=list)
     labels: List[Label] = Field(default_factory=list)
+    milestone: Optional[Milestone] = None
     created_at: datetime
     updated_at: datetime
     closed_at: Optional[datetime] = None

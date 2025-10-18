@@ -22,6 +22,7 @@ class ApplicationConfig:
     include_pr_reviews: bool
     include_pr_review_comments: bool
     include_sub_issues: bool
+    include_milestones: bool
     git_auth_method: str
 
     @classmethod
@@ -58,6 +59,9 @@ class ApplicationConfig:
             ),
             include_sub_issues=cls._parse_enhanced_bool_env(
                 "INCLUDE_SUB_ISSUES", default=True
+            ),
+            include_milestones=cls._parse_enhanced_bool_env(
+                "INCLUDE_MILESTONES", default=True
             ),
             git_auth_method=cls._get_env_with_default("GIT_AUTH_METHOD", "token"),
         )
@@ -288,3 +292,12 @@ class ApplicationConfig:
                     "INCLUDE_PULL_REQUESTS to specify PRs. Ignoring PR review comments."
                 )
                 self.include_pr_review_comments = False
+
+        # Add milestone-specific validation
+        if isinstance(self.include_issues, bool) and not self.include_issues:
+            if self.include_milestones:
+                logging.warning(
+                    "Milestones may have limited utility without issues enabled. "
+                    "Consider setting INCLUDE_ISSUES=true for full milestone "
+                    "functionality."
+                )

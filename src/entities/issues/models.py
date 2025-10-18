@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from ..users.models import GitHubUser
 from ..labels.models import Label
 from ..sub_issues.models import SubIssue
+from ..milestones.models import Milestone
 
 
 class Issue(BaseModel):
@@ -20,6 +21,7 @@ class Issue(BaseModel):
     user: GitHubUser
     assignees: List[GitHubUser] = Field(default_factory=list)
     labels: List[Label] = Field(default_factory=list)
+    milestone: Optional[Milestone] = None
     created_at: datetime
     updated_at: datetime
     closed_at: Optional[datetime] = None

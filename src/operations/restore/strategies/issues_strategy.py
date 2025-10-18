@@ -34,7 +34,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         return "issues"
 
     def get_dependencies(self) -> List[str]:
-        return ["labels"]  # Issues depend on labels
+        return ["labels", "milestones"]  # Issues depend on labels and milestones
 
     def load_data(
         self, input_path: str, storage_service: "StorageService"
@@ -86,7 +86,8 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         # Convert label objects to names
         label_names = [label.name for label in issue.labels]
 
-        return {
+        # Prepare basic issue data
+        issue_data = {
             "title": issue.title,
             "body": issue_body,
             "labels": label_names,
@@ -95,14 +96,35 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
             "state_reason": issue.state_reason,
         }
 
+        # Map milestone relationship if present
+        if issue.milestone:
+            milestone_mapping = context.get("milestone_mapping", {})
+            original_milestone_number = issue.milestone.number
+            if original_milestone_number in milestone_mapping:
+                new_milestone_number = milestone_mapping[original_milestone_number]
+                issue_data["milestone"] = new_milestone_number
+            else:
+                print(
+                    f"Warning: Milestone #{original_milestone_number} not found "
+                    f"in mapping for issue #{issue.number}"
+                )
+
+        return issue_data
+
     def create_entity(
         self,
         github_service: "RepositoryService",
         repo_name: str,
         entity_data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        # Prepare create issue parameters
+        title = entity_data["title"]
+        body = entity_data["body"]
+        labels = entity_data["labels"]
+        milestone = entity_data.get("milestone")
+
         created_issue = github_service.create_issue(
-            repo_name, entity_data["title"], entity_data["body"], entity_data["labels"]
+            repo_name, title, body, labels, milestone=milestone
         )
         return {
             "number": created_issue["number"],

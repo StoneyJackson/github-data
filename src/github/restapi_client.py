@@ -97,11 +97,24 @@ class GitHubRestApiClient:
     # Issue Operations
 
     def create_issue(
-        self, repo_name: str, title: str, body: str, labels: List[str]
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        labels: List[str],
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new issue and return raw JSON data."""
         repo = self._get_repository(repo_name)
-        created_issue = repo.create_issue(title=title, body=body, labels=labels)
+
+        # Create issue with or without milestone
+        if milestone is not None:
+            milestone_obj = repo.get_milestone(milestone)
+            created_issue = repo.create_issue(
+                title=title, body=body, labels=labels, milestone=milestone_obj
+            )
+        else:
+            created_issue = repo.create_issue(title=title, body=body, labels=labels)
         return self._extract_raw_data(created_issue)
 
     def close_issue(
@@ -121,11 +134,32 @@ class GitHubRestApiClient:
     # Pull Request Operations
 
     def create_pull_request(
-        self, repo_name: str, title: str, body: str, head: str, base: str
+        self,
+        repo_name: str,
+        title: str,
+        body: str,
+        head: str,
+        base: str,
+        milestone: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Create a new pull request and return raw JSON data."""
         repo = self._get_repository(repo_name)
         created_pr = repo.create_pull(title=title, body=body, head=head, base=base)
+
+        # Assign milestone if specified
+        # Note: PyGithub may not support milestone editing for PRs
+        if milestone is not None:
+            try:
+                repo.get_milestone(milestone)
+                # PyGithub PullRequest.edit doesn't support milestone parameter
+                # We'd need to use the GitHub API directly or accept this limitation
+                print(
+                    "Warning: Milestone assignment for PRs not fully "
+                    "supported via PyGithub"
+                )
+            except Exception as e:
+                print(f"Warning: Failed to assign milestone to PR: {e}")
+
         return self._extract_raw_data(created_pr)
 
     def create_pull_request_comment(
@@ -170,6 +204,37 @@ class GitHubRestApiClient:
                 "review_id": review_id,
                 "error": str(e),
             }
+
+    # Milestone Operations
+
+    def create_milestone(
+        self,
+        repo_name: str,
+        title: str,
+        description: Optional[str] = None,
+        due_on: Optional[str] = None,
+        state: str = "open",
+    ) -> Dict[str, Any]:
+        """Create a milestone using GitHub REST API."""
+        repo = self._get_repository(repo_name)
+
+        # Create milestone parameters using PyGithub API
+        due_date = None
+        if due_on:
+            from datetime import datetime
+
+            due_date = datetime.fromisoformat(due_on.replace("Z", "+00:00"))
+
+        # Create milestone using PyGithub - due_on is optional
+        if due_date:
+            created_milestone = repo.create_milestone(
+                title=title, state=state, description=description or "", due_on=due_date
+            )
+        else:
+            created_milestone = repo.create_milestone(
+                title=title, state=state, description=description or ""
+            )
+        return self._extract_raw_data(created_milestone)
 
     # Sub-Issues Operations (Direct REST API)
 

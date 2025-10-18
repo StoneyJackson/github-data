@@ -47,6 +47,18 @@ REPOSITORY_ISSUES_QUERY = gql(
                             description
                         }
                     }
+                    milestone {
+                        id
+                        number
+                        title
+                        description
+                        state
+                        createdAt
+                        updatedAt
+                        dueOn
+                        closedAt
+                        url
+                    }
                 }
                 pageInfo {
                     hasNextPage

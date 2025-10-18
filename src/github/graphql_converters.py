@@ -6,6 +6,7 @@ the existing REST-based data processing pipeline.
 """
 
 from typing import Dict, List, Any
+from .converters import convert_to_milestone
 
 
 def convert_graphql_labels_to_rest_format(
@@ -57,6 +58,11 @@ def convert_graphql_issues_to_rest_format(
                 "html_url": issue["author"].get("url"),
             }
 
+        # Convert milestone
+        milestone = None
+        if issue.get("milestone"):
+            milestone = convert_to_milestone(issue["milestone"])
+
         rest_issue = {
             "id": issue["id"],
             "number": issue["number"],
@@ -72,7 +78,7 @@ def convert_graphql_issues_to_rest_format(
             "labels": labels,
             "assignee": None,  # Not requested in current query
             "assignees": [],  # Not requested in current query
-            "milestone": None,  # Not requested in current query
+            "milestone": milestone,
             "comments": 0,  # Could be enhanced to include comment count
             "pull_request": None,  # Issues don't have pull_request field
         }
@@ -156,6 +162,11 @@ def convert_graphql_pull_requests_to_rest_format(
             for assignee in pr.get("assignees", {}).get("nodes", [])
         ]
 
+        # Convert milestone
+        milestone = None
+        if pr.get("milestone"):
+            milestone = convert_to_milestone(pr["milestone"])
+
         # Extract merge commit SHA
         merge_commit_sha = None
         if pr.get("mergeCommit"):
@@ -185,6 +196,7 @@ def convert_graphql_pull_requests_to_rest_format(
             "user": author,
             "assignees": assignees,
             "labels": labels,
+            "milestone": milestone,
             "comments": comments_count,
         }
         rest_prs.append(rest_pr)
