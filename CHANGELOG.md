@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/StoneyJackson/github-data/compare/v1.8.0...v1.9.0) (2025-10-18)
+
+
+### Features
+
+* implement comprehensive GitHub milestones support ([#32](https://github.com/StoneyJackson/github-data/issues/32)) ([91e2449](https://github.com/StoneyJackson/github-data/commit/91e244935354ee5f2645ecea15cf3d88f0ceae02))
+
 # [1.8.0](https://github.com/StoneyJackson/github-data/compare/v1.7.0...v1.8.0) (2025-10-16)
 
 
