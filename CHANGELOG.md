@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/StoneyJackson/github-data/compare/v1.9.0...v1.10.0) (2025-10-18)
+
+
+### Features
+
+* **milestones:** complete technical debt paydown with comprehensive quality fixes ([#33](https://github.com/StoneyJackson/github-data/issues/33)) ([b8a175d](https://github.com/StoneyJackson/github-data/commit/b8a175d6bcc000d56596bf4c389342485073373b))
+
 # [1.9.0](https://github.com/StoneyJackson/github-data/compare/v1.8.0...v1.9.0) (2025-10-18)
 
 
