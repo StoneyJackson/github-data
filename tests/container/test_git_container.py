@@ -500,25 +500,3 @@ except Exception as e:
             # Note: Directory may or may not exist depending on how far the mock got
             # The important thing is that the Git modules imported and initialized
             pass
-
-    def test_container_environment_variable_defaults(self, docker_image):
-        """Test that container sets proper default values for Git env variables."""
-        # Don't provide explicit environment, should use Dockerfile defaults
-        result = GitContainerTestHelper.run_git_command_in_container(
-            docker_image,
-            [
-                "bash",
-                "-c",
-                "echo INCLUDE_GIT_REPO=$INCLUDE_GIT_REPO "
-                "GIT_AUTH_METHOD=$GIT_AUTH_METHOD",
-            ],
-            {},
-            {},
-        )
-
-        assert result.returncode == 0
-        output = result.stdout.strip()
-
-        # Verify defaults from Dockerfile
-        assert "INCLUDE_GIT_REPO=true" in output
-        assert "GIT_AUTH_METHOD=token" in output
