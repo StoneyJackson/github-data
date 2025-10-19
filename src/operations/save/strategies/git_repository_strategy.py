@@ -47,6 +47,12 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             }
         ]
 
+    def read(
+        self, github_service: "RepositoryService", repo_name: str
+    ) -> List[Dict[str, Any]]:
+        """Override read method to use custom collection pattern."""
+        return self.collect_data(github_service, repo_name)
+
     def get_converter_name(self) -> str:
         """Return the converter function name for this entity type."""
         # Git repository strategy doesn't use standard converter pattern
@@ -61,12 +67,21 @@ class GitRepositoryStrategy(SaveEntityStrategy):
             "Git repository strategy uses custom collection pattern"
         )
 
-    def process_data(
+    def transform(
         self, entities: List[Dict[str, Any]], context: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Process Git repository data."""
         # No processing needed for Git repositories
         return entities
+
+    def write(
+        self,
+        entities: List[Dict[str, Any]],
+        output_path: str,
+        storage_service: "StorageService",
+    ) -> Dict[str, Any]:
+        """Override write method to use custom save logic."""
+        return self.save_data(entities, output_path, storage_service)
 
     def save_data(
         self,

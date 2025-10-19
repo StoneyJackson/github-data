@@ -18,12 +18,12 @@ T = TypeVar("T", bound=BaseModel)
 class JsonStorageService(StorageService):
     """JSON file storage implementation."""
 
-    def save_data(
+    def write(
         self, data: Union[Sequence[BaseModel], BaseModel], file_path: Path
     ) -> None:
-        """Save model data to JSON file."""
+        """Write model data to JSON file."""
         return save_json_data(data, file_path)
 
-    def load_data(self, file_path: Path, model_class: Type[T]) -> List[T]:
-        """Load data from JSON file into model instances."""
+    def read(self, file_path: Path, model_class: Type[T]) -> List[T]:
+        """Read data from JSON file into model instances."""
         return load_json_data(file_path, model_class)

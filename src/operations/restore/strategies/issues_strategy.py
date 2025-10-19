@@ -36,9 +36,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return ["labels", "milestones"]  # Issues depend on labels and milestones
 
-    def load_data(
-        self, input_path: str, storage_service: "StorageService"
-    ) -> List[Issue]:
+    def read(self, input_path: str, storage_service: "StorageService") -> List[Issue]:
         """Load and filter issues data based on selection criteria."""
         issues_file = Path(input_path) / "issues.json"
         all_issues = storage_service.load_data(issues_file, Issue)
@@ -72,7 +70,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
             )
             return filtered_issues
 
-    def transform_for_creation(
+    def transform(
         self, issue: Issue, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Prepare issue body with metadata if needed
@@ -111,7 +109,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
 
         return issue_data
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

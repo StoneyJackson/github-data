@@ -133,10 +133,10 @@ class TestDependencyInjection:
         from pathlib import Path
 
         labels_file = Path(storage_service._base_path) / "test_labels.json"
-        storage_service.save_data(test_labels, labels_file)
+        storage_service.write(test_labels, labels_file)
 
         # Act - load data
-        loaded_labels = storage_service.load_data(labels_file, Label)
+        loaded_labels = storage_service.read(labels_file, Label)
 
         # Assert
         assert len(loaded_labels) == 2
@@ -208,5 +208,5 @@ class TestDependencyInjection:
             if filename == "labels.json":
                 from src.entities import Label
 
-                labels = services["storage"].load_data(file_path, Label)
+                labels = services["storage"].read(file_path, Label)
                 assert len(labels) > 0

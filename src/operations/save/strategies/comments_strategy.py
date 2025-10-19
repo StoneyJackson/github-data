@@ -34,8 +34,8 @@ class CommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrategy):
         """Return the GitHub service method name for this entity type."""
         return "get_all_issue_comments"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform comments data with issue coupling."""
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+        """Transform comments data with issue coupling."""
         saved_issues = context.get("issues", [])
         return self.filter_children_by_parents(entities, saved_issues, "issues")
 

@@ -23,10 +23,10 @@ class MockStorageService(StorageService):
         self.save_calls: List[Dict[str, Any]] = []
         self.load_calls: List[Dict[str, Any]] = []
 
-    def save_data(
+    def write(
         self, data: Union[Sequence[BaseModel], BaseModel], file_path: Path
     ) -> None:
-        """Save model data to in-memory storage."""
+        """Write model data to in-memory storage."""
         # Record the call for test verification
         call_info = {
             "file_path": str(file_path),
@@ -43,8 +43,8 @@ class MockStorageService(StorageService):
         else:
             self.stored_data[str(file_path)] = [item.model_dump() for item in data]
 
-    def load_data(self, file_path: Path, model_class: Type[T]) -> List[T]:
-        """Load data from in-memory storage into model instances."""
+    def read(self, file_path: Path, model_class: Type[T]) -> List[T]:
+        """Read data from in-memory storage into model instances."""
         # Record the call for test verification
         call_info = {
             "file_path": str(file_path),

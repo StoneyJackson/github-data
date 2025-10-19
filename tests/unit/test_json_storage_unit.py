@@ -325,7 +325,7 @@ class TestJsonStorageIntegration:
 
         # Use storage service to save data
         labels_file = Path(service._base_path) / "labels.json"
-        service.save_data(test_data, labels_file)
+        service.write(test_data, labels_file)
 
         # Verify file was created in temp directory
         temp_dir = Path(service._base_path)
@@ -333,7 +333,7 @@ class TestJsonStorageIntegration:
         assert labels_file.exists()
 
         # Load using storage service to verify integration
-        loaded_data = service.load_data(labels_file, SampleModel)
+        loaded_data = service.read(labels_file, SampleModel)
         assert len(loaded_data) == 1
         assert loaded_data[0].name == "service_test"
         assert loaded_data[0].value == 99
@@ -350,7 +350,7 @@ class TestJsonStorageIntegration:
 
         with pytest.raises(Exception):
             invalid_file = Path(temp_data_dir) / "invalid.json"
-            service.save_data(invalid_data, invalid_file)
+            service.write(invalid_data, invalid_file)
 
     def test_performance_monitoring_integration(self, performance_monitoring_services):
         """Test storage performance with monitoring services."""
@@ -363,7 +363,7 @@ class TestJsonStorageIntegration:
         # Use monitored storage service
         labels_file = Path(services["temp_dir"]) / "labels.json"
         start_time = time.time()
-        storage_service.save_data(test_data, labels_file)
+        storage_service.write(test_data, labels_file)
         operation_time = time.time() - start_time
 
         # Verify storage worked
@@ -373,7 +373,7 @@ class TestJsonStorageIntegration:
         assert operation_time < 1.0, f"Storage operation took {operation_time:.3f}s"
 
         # Load and verify data integrity
-        loaded_data = storage_service.load_data(labels_file, SampleModel)
+        loaded_data = storage_service.read(labels_file, SampleModel)
         assert len(loaded_data) == 50
         assert loaded_data[0].name == "monitor_0"
 
@@ -399,13 +399,13 @@ class TestJsonStorageValidation:
 
         # Save using storage service
         labels_file = Path(temp_data_dir) / "test_labels.json"
-        storage_service.save_data(sample_labels, labels_file)
+        storage_service.write(sample_labels, labels_file)
 
         # Verify file was created
         assert labels_file.exists()
 
         # Load and validate data integrity
-        loaded_data = storage_service.load_data(labels_file, SampleModel)
+        loaded_data = storage_service.read(labels_file, SampleModel)
         assert len(loaded_data) == len(sample_labels)
 
         # Verify all data matches

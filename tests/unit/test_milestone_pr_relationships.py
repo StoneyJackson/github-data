@@ -48,9 +48,7 @@ class TestMilestonePullRequestRelationships:
         assert "labels" in dependencies
         assert "milestones" in dependencies
 
-    def test_pr_transform_for_creation_with_milestone(
-        self, sample_milestone, pr_restore_strategy
-    ):
+    def test_pr_transform_with_milestone(self, sample_milestone, pr_restore_strategy):
         """Test that PR transformation includes milestone mapping."""
         strategy = pr_restore_strategy
 
@@ -83,13 +81,13 @@ class TestMilestonePullRequestRelationships:
         context = {"milestone_mapping": {1: 101}}
 
         # Transform for creation
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert result["title"] == "Test PR"
         assert result["milestone"] == 101  # Mapped milestone number
 
-    def test_pr_transform_for_creation_without_milestone(self, pr_restore_strategy):
+    def test_pr_transform_without_milestone(self, pr_restore_strategy):
         """Test that PR transformation works without milestone."""
         strategy = pr_restore_strategy
 
@@ -121,13 +119,13 @@ class TestMilestonePullRequestRelationships:
         context = {}
 
         # Transform for creation
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert result["title"] == "Test PR"
         assert "milestone" not in result
 
-    def test_pr_transform_for_creation_with_missing_milestone_mapping(
+    def test_pr_transform_with_missing_milestone_mapping(
         self, sample_milestone, capsys, pr_restore_strategy
     ):
         """Test warning when milestone mapping is missing for PR."""
@@ -162,7 +160,7 @@ class TestMilestonePullRequestRelationships:
         context = {"milestone_mapping": {}}
 
         # Transform for creation
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert "milestone" not in result
@@ -205,7 +203,7 @@ class TestMilestonePullRequestRelationships:
         context = {"milestone_mapping": {1: "invalid_milestone_number"}}
 
         # Transform for creation should handle this gracefully
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert result["title"] == "Test PR"
@@ -284,7 +282,7 @@ class TestMilestonePullRequestRelationships:
         # Context with multiple milestone mappings
         context = {"milestone_mapping": {1: 101, 5: 105, 10: 110}}
 
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert result["milestone"] == 105  # Correctly mapped milestone 5 -> 105
@@ -333,7 +331,7 @@ class TestMilestonePullRequestRelationships:
 
         context = {"milestone_mapping": {0: 200}}
 
-        result = strategy.transform_for_creation(pr, context)
+        result = strategy.transform(pr, context)
 
         assert result is not None
         assert result["milestone"] == 200
@@ -366,7 +364,7 @@ class TestMilestonePullRequestRelationships:
         }
 
         # Create entity via API
-        result = strategy.create_entity(mock_github_service, "test/repo", entity_data)
+        result = strategy.write(mock_github_service, "test/repo", entity_data)
 
         # Verify API call included milestone
         mock_github_service.create_pull_request.assert_called_once_with(

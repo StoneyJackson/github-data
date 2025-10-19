@@ -34,7 +34,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return ["pull_requests"]  # Comments depend on pull requests existing
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequestComment]:
         pr_comments_file = Path(input_path) / "pr_comments.json"
@@ -44,7 +44,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
             logger.info(f"PR comments file not found: {pr_comments_file}")
             return []  # Return empty list if file doesn't exist
 
-    def transform_for_creation(
+    def transform(
         self, comment: PullRequestComment, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Get the new PR number from the mapping created during PR restoration
@@ -68,7 +68,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
             "original_pr_number": original_pr_number,
         }
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

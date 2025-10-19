@@ -286,7 +286,7 @@ class TestMilestoneEdgeCases:
 
         # Measure save performance using temporary directory
         start_time = time.time()
-        result = milestone_save_strategy.save_data(
+        result = milestone_save_strategy.write(
             large_milestone_dataset, str(tmp_path), mock_storage_service
         )
         end_time = time.time()

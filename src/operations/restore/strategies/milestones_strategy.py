@@ -24,7 +24,7 @@ class MilestonesRestoreStrategy(RestoreEntityStrategy):
         """Milestones have no dependencies."""
         return []
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[Milestone]:
         """Load milestone data from JSON storage."""
@@ -36,7 +36,7 @@ class MilestonesRestoreStrategy(RestoreEntityStrategy):
 
         return storage_service.load_data(milestone_file, Milestone)
 
-    def transform_for_creation(
+    def transform(
         self, milestone: Milestone, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """Transform milestone for creation via API."""
@@ -53,7 +53,7 @@ class MilestonesRestoreStrategy(RestoreEntityStrategy):
 
         return creation_data
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

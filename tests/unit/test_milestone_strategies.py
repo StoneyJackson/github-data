@@ -60,7 +60,7 @@ class TestMilestonesSaveStrategy:
         ]
         context = {"repo": "test/repo"}
 
-        result = strategy.process_data(sample_entities, context)
+        result = strategy.transform(sample_entities, context)
 
         assert result == sample_entities
         assert result is sample_entities  # Same object reference
@@ -141,8 +141,8 @@ class TestMilestonesRestoreStrategy:
         mock_storage = Mock()
         mock_storage.load_data.return_value = [Milestone(**test_data[0])]
 
-        # Test load_data
-        result = strategy.load_data(str(tmp_path), mock_storage)
+        # Test read
+        result = strategy.read(str(tmp_path), mock_storage)
 
         # Verify storage service was called correctly
         mock_storage.load_data.assert_called_once_with(milestone_file, Milestone)
@@ -157,8 +157,8 @@ class TestMilestonesRestoreStrategy:
         # Mock storage service (shouldn't be called)
         mock_storage = Mock()
 
-        # Test load_data with non-existent file
-        result = strategy.load_data(str(tmp_path), mock_storage)
+        # Test read with non-existent file
+        result = strategy.read(str(tmp_path), mock_storage)
 
         # Should return empty list without calling storage service
         assert result == []
@@ -185,7 +185,7 @@ class TestMilestonesRestoreStrategy:
         )
 
         context = {}
-        result = strategy.transform_for_creation(milestone, context)
+        result = strategy.transform(milestone, context)
 
         assert result is not None
         assert result["title"] == "v1.0 Release"
@@ -200,7 +200,7 @@ class TestMilestonesRestoreStrategy:
         strategy = MilestonesRestoreStrategy()
 
         context = {}
-        result = strategy.transform_for_creation(sample_milestone, context)
+        result = strategy.transform(sample_milestone, context)
 
         assert result is not None
         assert result["title"] == "v1.0"
@@ -229,7 +229,7 @@ class TestMilestonesRestoreStrategy:
             "due_on": "2023-12-31T23:59:59",
         }
 
-        result = strategy.create_entity(mock_github_service, "test/repo", entity_data)
+        result = strategy.write(mock_github_service, "test/repo", entity_data)
 
         # Verify API call
         mock_github_service.create_milestone.assert_called_once_with(
@@ -259,9 +259,7 @@ class TestMilestonesRestoreStrategy:
         with patch(
             "src.operations.restore.strategies.milestones_strategy.logger"
         ) as mock_logger:
-            result = strategy.create_entity(
-                mock_github_service, "test/repo", entity_data
-            )
+            result = strategy.write(mock_github_service, "test/repo", entity_data)
 
             # Should log warning and return mock response
             mock_logger.warning.assert_called_once()
@@ -284,7 +282,7 @@ class TestMilestonesRestoreStrategy:
         entity_data = {"title": "Test Milestone", "state": "open"}
 
         with pytest.raises(Exception) as exc_info:
-            strategy.create_entity(mock_github_service, "test/repo", entity_data)
+            strategy.write(mock_github_service, "test/repo", entity_data)
 
         assert "Network error" in str(exc_info.value)
 
