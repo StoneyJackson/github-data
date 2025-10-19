@@ -23,10 +23,8 @@ class SaveEntityStrategy(ABC):
         """Return list of entity types this entity depends on."""
         pass
 
-    def collect_data(
-        self, github_service: "RepositoryService", repo_name: str
-    ) -> List[Any]:
-        """Template method for standard data collection pattern."""
+    def read(self, github_service: "RepositoryService", repo_name: str) -> List[Any]:
+        """Template method for reading data from external source."""
         converter_name = self.get_converter_name()
         service_method = self.get_service_method()
 
@@ -37,6 +35,15 @@ class SaveEntityStrategy(ABC):
 
         converter = getattr(converters, converter_name)
         return [converter(item) for item in raw_data]
+
+    def collect_data(
+        self, github_service: "RepositoryService", repo_name: str
+    ) -> List[Any]:
+        """Template method for standard data collection pattern.
+
+        Deprecated: Use read() instead. This method is kept for backward compatibility.
+        """
+        return self.read(github_service, repo_name)
 
     @abstractmethod
     def get_converter_name(self) -> str:
@@ -49,9 +56,31 @@ class SaveEntityStrategy(ABC):
         pass
 
     @abstractmethod
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform entity data."""
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+        """Transform entity data for processing."""
         pass
+
+    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+        """Process and transform entity data.
+
+        Deprecated: Use transform() instead. This method is kept for backward
+        compatibility.
+        """
+        return self.transform(entities, context)
+
+    def write(
+        self,
+        entities: List[Any],
+        output_path: str,
+        storage_service: "StorageService",
+    ) -> Dict[str, Any]:
+        """Template method for writing entity data with standardized timing and
+        error handling."""
+        return self._execute_with_timing(
+            lambda: self._perform_save(entities, output_path, storage_service),
+            self.get_entity_name(),
+            len(entities),
+        )
 
     def save_data(
         self,
@@ -60,12 +89,11 @@ class SaveEntityStrategy(ABC):
         storage_service: "StorageService",
     ) -> Dict[str, Any]:
         """Template method for saving entity data with standardized timing and
-        error handling."""
-        return self._execute_with_timing(
-            lambda: self._perform_save(entities, output_path, storage_service),
-            self.get_entity_name(),
-            len(entities),
-        )
+        error handling.
+
+        Deprecated: Use write() instead. This method is kept for backward compatibility.
+        """
+        return self.write(entities, output_path, storage_service)
 
     def _execute_with_timing(
         self, operation: Callable[[], None], entity_type: str, item_count: int

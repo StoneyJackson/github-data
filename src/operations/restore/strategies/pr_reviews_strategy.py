@@ -24,7 +24,7 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return ["pull_requests"]  # PR reviews depend on pull requests
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequestReview]:
         reviews_file = Path(input_path) / "pr_reviews.json"
@@ -34,7 +34,7 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
         # Sort by submission time for chronological order
         return sorted(reviews, key=lambda r: r.submitted_at or "")
 
-    def transform_for_creation(
+    def transform(
         self, review: PullRequestReview, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Get pull request number mapping from context
@@ -64,7 +64,7 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
             "original_pr_number": original_pr_number,
         }
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

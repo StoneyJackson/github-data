@@ -26,7 +26,7 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
         """Return list of entity dependencies."""
         return []  # Git repository has no dependencies
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[Dict[str, Any]]:
         """Load Git repository backup data."""
@@ -50,7 +50,7 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
 
         return repositories
 
-    def transform_for_creation(
+    def transform(
         self, entity: Dict[str, Any], context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """Transform entity for GitHub API creation."""
@@ -58,7 +58,7 @@ class GitRepositoryRestoreStrategy(RestoreEntityStrategy):
         # They are restored directly to filesystem
         return entity
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

@@ -24,7 +24,7 @@ class SubIssuesSaveStrategy(SaveEntityStrategy):
         """Return the GitHub service method name for this entity type."""
         return "get_repository_sub_issues"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
         """Process and transform sub-issues data."""
         # Get issues from context (saved by issues strategy)
         issues = context.get("issues", [])

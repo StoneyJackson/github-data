@@ -23,13 +23,13 @@ class SubIssuesRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return ["issues"]  # Sub-issues depend on issues
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[SubIssue]:
         sub_issues_file = Path(input_path) / "sub_issues.json"
         return storage_service.load_data(sub_issues_file, SubIssue)
 
-    def transform_for_creation(
+    def transform(
         self, sub_issue: SubIssue, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Get issue number mapping from context
@@ -60,7 +60,7 @@ class SubIssuesRestoreStrategy(RestoreEntityStrategy):
             "original_child_number": sub_issue.sub_issue_number,
         }
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

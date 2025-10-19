@@ -34,7 +34,7 @@ class PullRequestReviewsSaveStrategy(EntityCouplingMixin, SaveEntityStrategy):
         """Return the GitHub service method name for this entity type."""
         return "get_all_pull_request_reviews"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
         """Process and transform PR reviews data with pull request coupling."""
         saved_prs = context.get("pull_requests", [])
         return self.filter_children_by_parents(entities, saved_prs, "pull_requests")

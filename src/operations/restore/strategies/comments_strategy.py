@@ -24,15 +24,13 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return ["issues"]  # Comments depend on issues
 
-    def load_data(
-        self, input_path: str, storage_service: "StorageService"
-    ) -> List[Comment]:
+    def read(self, input_path: str, storage_service: "StorageService") -> List[Comment]:
         comments_file = Path(input_path) / "comments.json"
         comments = storage_service.load_data(comments_file, Comment)
         # Sort by creation time for chronological order
         return sorted(comments, key=lambda c: c.created_at)
 
-    def transform_for_creation(
+    def transform(
         self, comment: Comment, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Get issue number mapping from context
@@ -61,7 +59,7 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
             "original_issue_number": original_issue_number,
         }
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

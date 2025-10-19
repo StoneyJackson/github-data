@@ -385,12 +385,12 @@ try:
     strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
     print("SUCCESS: Strategy created")
 
-    # Test collect_data
-    entities = strategy.collect_data(None, "test/repo")
+    # Test read
+    entities = strategy.read(None, "test/repo")
     print(f"SUCCESS: Collected {len(entities)} entities")
 
-    # Test process_data
-    processed = strategy.process_data(entities, {})
+    # Test transform
+    processed = strategy.transform(entities, {})
     print(f"SUCCESS: Processed {len(processed)} entities")
 
     # Test directory creation (part of save_data)

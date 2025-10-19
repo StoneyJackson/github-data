@@ -36,7 +36,7 @@ class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrat
         """Return the GitHub service method name for this entity type."""
         return "get_all_pull_request_review_comments"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
         """Process and transform PR review comments data with review coupling."""
         saved_reviews = context.get("pr_reviews", [])
         # Filter by reviews first, then by PRs

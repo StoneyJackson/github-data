@@ -45,7 +45,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             "milestones",
         ]  # Pull requests may reference labels and milestones
 
-    def load_data(
+    def read(
         self, input_path: str, storage_service: "StorageService"
     ) -> List[PullRequest]:
         """Load and filter pull requests data based on selection criteria."""
@@ -81,7 +81,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
             )
             return filtered_prs
 
-    def transform_for_creation(
+    def transform(
         self, pull_request: PullRequest, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Prepare PR body with metadata if requested
@@ -112,7 +112,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
 
         return pr_data
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

@@ -248,8 +248,8 @@ class TestModernizedDataProcessing:
         github_service._boundary.get_repository_issues(repo)
 
         # Use correct storage interface
-        storage_service.save_data([], Path(temp_dir) / "labels.json")
-        storage_service.save_data([], Path(temp_dir) / "issues.json")
+        storage_service.write([], Path(temp_dir) / "labels.json")
+        storage_service.write([], Path(temp_dir) / "issues.json")
 
         return {"success": True, "repo": repo}
 

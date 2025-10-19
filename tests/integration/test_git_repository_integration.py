@@ -54,7 +54,7 @@ class TestGitRepositoryIntegration:
 
     def test_git_strategy_collect_data_structure(self, git_strategy):
         """Test Git strategy data collection creates proper structure."""
-        entities = git_strategy.collect_data(None, "test/repo")
+        entities = git_strategy.read(None, "test/repo")
 
         assert len(entities) == 1
         entity = entities[0]
@@ -84,9 +84,7 @@ class TestGitRepositoryIntegration:
             )
             mock_clone.return_value = mock_result
 
-            result = git_strategy.save_data(
-                entities, temp_data_dir, storage_service_mock
-            )
+            result = git_strategy.write(entities, temp_data_dir, storage_service_mock)
 
         assert result["total_repositories"] == 1
         assert result["saved_repositories"] == 1
@@ -112,9 +110,7 @@ class TestGitRepositoryIntegration:
             )
             mock_clone.return_value = mock_result
 
-            result = git_strategy.save_data(
-                entities, temp_data_dir, storage_service_mock
-            )
+            result = git_strategy.write(entities, temp_data_dir, storage_service_mock)
 
         assert result["total_repositories"] == 1
         assert result["saved_repositories"] == 0
@@ -139,8 +135,8 @@ class TestGitRepositoryIntegration:
                 "size_bytes": 2048,
             }
 
-            entities = strategy.collect_data(None, "test/repo")
-            result = strategy.save_data(entities, temp_data_dir, storage_service_mock)
+            entities = strategy.read(None, "test/repo")
+            result = strategy.write(entities, temp_data_dir, storage_service_mock)
 
             assert result["saved_repositories"] == 1
             mock_execute.assert_called_once()
@@ -158,9 +154,7 @@ class TestGitRepositoryIntegration:
         git_dir.mkdir()
 
         # Act
-        repositories = git_restore_strategy.load_data(
-            temp_data_dir, storage_service_mock
-        )
+        repositories = git_restore_strategy.read(temp_data_dir, storage_service_mock)
 
         # Assert - only one repository should be found (the flattened one)
         assert len(repositories) == 1
@@ -274,7 +268,7 @@ class TestGitRepositoryStorageIntegration:
                 "size_bytes": 512,
             }
 
-            strategy.save_data(entities, temp_data_dir, storage_service_mock)
+            strategy.write(entities, temp_data_dir, storage_service_mock)
 
             git_data_dir = Path(temp_data_dir) / "git-repo"
             assert git_data_dir.exists()
@@ -303,7 +297,7 @@ class TestGitRepositoryStorageIntegration:
                 "size_bytes": 1024,
             }
 
-            strategy.save_data(entities, temp_data_dir, storage_service_mock)
+            strategy.write(entities, temp_data_dir, storage_service_mock)
 
             # Verify the path goes directly to git-repo (flattened structure)
             expected_path = Path(temp_data_dir) / "git-repo"
@@ -335,9 +329,7 @@ class TestGitRepositoryStorageIntegration:
                 "size_bytes": 1024,
             }
 
-            mirror_strategy.save_data(
-                mirror_entities, temp_data_dir, storage_service_mock
-            )
+            mirror_strategy.write(mirror_entities, temp_data_dir, storage_service_mock)
 
             # Verify mirror path (directory)
             args, kwargs = mock_mirror.call_args
@@ -374,7 +366,7 @@ class TestGitRepositoryWorkflow:
                 "size_bytes": 1024,
             }
 
-            save_result = save_strategy.save_data(
+            save_result = save_strategy.write(
                 entities, temp_data_dir, storage_service_mock
             )
 
@@ -402,7 +394,7 @@ class TestGitRepositoryWorkflow:
             )
 
             restore_result = restore_strategy.restore_data(
-                restore_strategy.load_data(temp_data_dir, storage_service_mock),
+                restore_strategy.read(temp_data_dir, storage_service_mock),
                 temp_data_dir,
             )
 
@@ -417,12 +409,12 @@ class TestGitRepositoryWorkflow:
         restore_strategy = GitRepositoryRestoreStrategy(git_service)
 
         # No git-repo directory exists
-        repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
+        repositories = restore_strategy.read(temp_data_dir, storage_service_mock)
         assert repositories == []
 
         # Empty git-repo directory
         git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir()
 
-        repositories = restore_strategy.load_data(temp_data_dir, storage_service_mock)
+        repositories = restore_strategy.read(temp_data_dir, storage_service_mock)
         assert repositories == []

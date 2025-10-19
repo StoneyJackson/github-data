@@ -37,6 +37,6 @@ class IssuesSaveStrategy(SelectiveFilteringMixin, SaveEntityStrategy):
         """Return the GitHub service method name for this entity type."""
         return "get_repository_issues"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform issues data with selective filtering."""
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+        """Transform issues data with selective filtering."""
         return self.apply_selective_filtering(entities, context)

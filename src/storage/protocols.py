@@ -18,13 +18,29 @@ class StorageService(ABC):
     """Abstract interface for data persistence operations."""
 
     @abstractmethod
-    def save_data(
+    def write(
         self, data: Union[Sequence[BaseModel], BaseModel], file_path: Path
     ) -> None:
-        """Save model data to storage."""
+        """Write model data to storage."""
         pass
 
     @abstractmethod
-    def load_data(self, file_path: Path, model_class: Type[T]) -> List[T]:
-        """Load data from storage into model instances."""
+    def read(self, file_path: Path, model_class: Type[T]) -> List[T]:
+        """Read data from storage into model instances."""
         pass
+
+    def save_data(
+        self, data: Union[Sequence[BaseModel], BaseModel], file_path: Path
+    ) -> None:
+        """Save model data to storage.
+
+        Deprecated: Use write() instead. This method is kept for backward compatibility.
+        """
+        return self.write(data, file_path)
+
+    def load_data(self, file_path: Path, model_class: Type[T]) -> List[T]:
+        """Load data from storage into model instances.
+
+        Deprecated: Use read() instead. This method is kept for backward compatibility.
+        """
+        return self.read(file_path, model_class)

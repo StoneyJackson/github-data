@@ -96,9 +96,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect graceful handling
         with pytest.raises(RateLimitExceededException):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         # Verify the exception was properly propagated
         mock_github_service.get_repository_milestones.assert_called_once_with(
@@ -116,9 +114,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect graceful handling
         with pytest.raises(ConnectionError):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         # Verify the exception was properly propagated
         mock_github_service.get_repository_milestones.assert_called_once_with(
@@ -140,7 +136,7 @@ class TestMilestoneErrorHandling:
 
         # Execute restore and expect validation error handling
         with pytest.raises(ValueError):
-            milestone_restore_strategy.load_data(str(tmp_path), mock_storage_service)
+            milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
         mock_storage_service.load_data.assert_called_once()
 
@@ -157,9 +153,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect graceful handling
         with pytest.raises(BadCredentialsException):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         # Verify the exception was properly propagated
         mock_github_service.get_repository_milestones.assert_called_once_with(
@@ -179,9 +173,9 @@ class TestMilestoneErrorHandling:
             side_effect=UnknownObjectException(404, "Repository not found")
         )
 
-        # Execute create_entity and expect graceful handling
+        # Execute write and expect graceful handling
         with pytest.raises(UnknownObjectException):
-            milestone_restore_strategy.create_entity(
+            milestone_restore_strategy.write(
                 mock_github_service,
                 "test-owner/test-repo",
                 {"title": "Test Milestone", "state": "open"},
@@ -201,9 +195,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect graceful handling
         with pytest.raises(asyncio.TimeoutError):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         # Verify the exception was properly propagated
         mock_github_service.get_repository_milestones.assert_called_once_with(
@@ -225,7 +217,7 @@ class TestMilestoneErrorHandling:
 
         # Execute load_data and expect graceful handling
         with pytest.raises(json.JSONDecodeError):
-            milestone_restore_strategy.load_data(str(tmp_path), mock_storage_service)
+            milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
         mock_storage_service.load_data.assert_called_once()
 
@@ -242,9 +234,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect graceful handling
         with pytest.raises(GithubException):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         # Verify the exception was properly propagated
         mock_github_service.get_repository_milestones.assert_called_once_with(
@@ -263,9 +253,7 @@ class TestMilestoneErrorHandling:
         milestone_file.write_text("[]")
 
         # Execute load_data - should handle empty list gracefully
-        result = milestone_restore_strategy.load_data(
-            str(tmp_path), mock_storage_service
-        )
+        result = milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
         # Verify empty data is handled correctly
         assert result == []
@@ -279,7 +267,7 @@ class TestMilestoneErrorHandling:
         non_existent_path = tmp_path / "nonexistent"
 
         # Execute load_data - should handle missing file gracefully
-        result = milestone_restore_strategy.load_data(
+        result = milestone_restore_strategy.read(
             str(non_existent_path), mock_storage_service
         )
 
@@ -338,7 +326,7 @@ class TestMilestoneErrorHandling:
         """Test handling of milestone creation conflicts during restore."""
         from github import GithubException
 
-        # Test will be performed with create_entity method
+        # Test will be performed with write method
 
         # Configure service to raise conflict error (milestone already exists)
         mock_github_service.create_milestone = Mock(
@@ -348,7 +336,7 @@ class TestMilestoneErrorHandling:
         # The strategy catches "already exists" errors and logs a warning
         # instead of raising
         # So we expect it to return a mock response, not raise an exception
-        result = milestone_restore_strategy.create_entity(
+        result = milestone_restore_strategy.write(
             mock_github_service,
             "test-owner/test-repo",
             {"title": "Test Milestone", "state": "open"},
@@ -436,10 +424,10 @@ class TestMilestoneErrorHandling:
         mock_storage_service.save_data.side_effect = IOError("Failed to save")
 
         # Execute save_data operation and expect storage error to be handled gracefully
-        milestones_data = milestone_save_strategy.collect_data(
+        milestones_data = milestone_save_strategy.read(
             mock_github_service, "test-owner/test-repo"
         )
-        result = milestone_save_strategy.save_data(
+        result = milestone_save_strategy.write(
             milestones_data, str(tmp_path), mock_storage_service
         )
 
@@ -471,9 +459,7 @@ class TestMilestoneErrorHandling:
 
         # Execute collect_data operation and expect parsing to handle errors gracefully
         with pytest.raises((AttributeError, TypeError, ValueError)):
-            milestone_save_strategy.collect_data(
-                mock_github_service, "test-owner/test-repo"
-            )
+            milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
         mock_github_service.get_repository_milestones.assert_called_once_with(
             "test-owner/test-repo"

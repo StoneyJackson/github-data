@@ -70,7 +70,7 @@ class TestMilestoneIssueRelationships:
         context = {"milestone_mapping": {1: 101}}
 
         # Transform for creation
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["title"] == "Test Issue"
@@ -106,7 +106,7 @@ class TestMilestoneIssueRelationships:
         context = {}
 
         # Transform for creation
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["title"] == "Test Issue"
@@ -145,7 +145,7 @@ class TestMilestoneIssueRelationships:
         context = {"milestone_mapping": {}}
 
         # Transform for creation
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert "milestone" not in result
@@ -184,7 +184,7 @@ class TestMilestoneIssueRelationships:
         context = {"milestone_mapping": {1: "invalid_milestone_number"}}
 
         # Transform for creation should handle this gracefully
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["title"] == "Test Issue"
@@ -261,7 +261,7 @@ class TestMilestoneIssueRelationships:
         # Context with multiple milestone mappings
         context = {"milestone_mapping": {1: 101, 5: 105, 10: 110}}
 
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["milestone"] == 105  # Correctly mapped milestone 5 -> 105
@@ -308,7 +308,7 @@ class TestMilestoneIssueRelationships:
 
         context = {"milestone_mapping": {0: 200}}
 
-        result = strategy.transform_for_creation(issue, context)
+        result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["milestone"] == 200

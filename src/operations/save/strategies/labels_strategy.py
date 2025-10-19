@@ -24,7 +24,7 @@ class LabelsSaveStrategy(SaveEntityStrategy):
         """Return the GitHub service method name for this entity type."""
         return "get_repository_labels"
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform labels data."""
+    def transform(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
+        """Transform labels data."""
         # Labels don't require any processing
         return entities

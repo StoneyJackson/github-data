@@ -31,13 +31,11 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
     def get_dependencies(self) -> List[str]:
         return []  # Labels have no dependencies
 
-    def load_data(
-        self, input_path: str, storage_service: "StorageService"
-    ) -> List[Label]:
+    def read(self, input_path: str, storage_service: "StorageService") -> List[Label]:
         labels_file = Path(input_path) / "labels.json"
         return storage_service.load_data(labels_file, Label)
 
-    def transform_for_creation(
+    def transform(
         self, label: Label, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         return {
@@ -46,7 +44,7 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
             "description": label.description or "",
         }
 
-    def create_entity(
+    def write(
         self,
         github_service: "RepositoryService",
         repo_name: str,

@@ -64,7 +64,7 @@ class TestMilestoneSaveRestoreIntegration:
         save_strategy = MilestonesSaveStrategy()
 
         # Simulate save operation
-        save_strategy.process_data(sample_milestones, {})
+        save_strategy.transform(sample_milestones, {})
         milestone_file = save_path / "milestones.json"
         mock_save_data(milestone_file, sample_milestones)
 
@@ -82,13 +82,13 @@ class TestMilestoneSaveRestoreIntegration:
         ]
 
         # Load data
-        loaded_milestones = restore_strategy.load_data(str(save_path), mock_storage)
+        loaded_milestones = restore_strategy.read(str(save_path), mock_storage)
 
         # Restore milestones
         context = {}
         for i, milestone in enumerate(loaded_milestones):
-            transform_data = restore_strategy.transform_for_creation(milestone, context)
-            created_data = restore_strategy.create_entity(
+            transform_data = restore_strategy.transform(milestone, context)
+            created_data = restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
             restore_strategy.post_create_actions(
@@ -206,14 +206,12 @@ class TestMilestoneSaveRestoreIntegration:
         context = {}
 
         # Restore milestones first (dependency order)
-        loaded_milestones = milestone_restore_strategy.load_data(
+        loaded_milestones = milestone_restore_strategy.read(
             str(save_path), mock_storage
         )
         for milestone in loaded_milestones:
-            transform_data = milestone_restore_strategy.transform_for_creation(
-                milestone, context
-            )
-            created_data = milestone_restore_strategy.create_entity(
+            transform_data = milestone_restore_strategy.transform(milestone, context)
+            created_data = milestone_restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
             milestone_restore_strategy.post_create_actions(
@@ -221,12 +219,10 @@ class TestMilestoneSaveRestoreIntegration:
             )
 
         # Restore issues with milestone relationships
-        loaded_issues = issue_restore_strategy.load_data(str(save_path), mock_storage)
+        loaded_issues = issue_restore_strategy.read(str(save_path), mock_storage)
         for issue in loaded_issues:
-            transform_data = issue_restore_strategy.transform_for_creation(
-                issue, context
-            )
-            created_data = issue_restore_strategy.create_entity(
+            transform_data = issue_restore_strategy.transform(issue, context)
+            created_data = issue_restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
 
@@ -349,14 +345,12 @@ class TestMilestoneSaveRestoreIntegration:
         context = {}
 
         # Restore milestones first
-        loaded_milestones = milestone_restore_strategy.load_data(
+        loaded_milestones = milestone_restore_strategy.read(
             str(save_path), mock_storage
         )
         for milestone in loaded_milestones:
-            transform_data = milestone_restore_strategy.transform_for_creation(
-                milestone, context
-            )
-            created_data = milestone_restore_strategy.create_entity(
+            transform_data = milestone_restore_strategy.transform(milestone, context)
+            created_data = milestone_restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
             milestone_restore_strategy.post_create_actions(
@@ -364,10 +358,10 @@ class TestMilestoneSaveRestoreIntegration:
             )
 
         # Restore PRs with milestone relationships
-        loaded_prs = pr_restore_strategy.load_data(str(save_path), mock_storage)
+        loaded_prs = pr_restore_strategy.read(str(save_path), mock_storage)
         for pr in loaded_prs:
-            transform_data = pr_restore_strategy.transform_for_creation(pr, context)
-            created_data = pr_restore_strategy.create_entity(
+            transform_data = pr_restore_strategy.transform(pr, context)
+            created_data = pr_restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
 
@@ -435,7 +429,7 @@ class TestMilestoneSaveRestoreIntegration:
             ),
         ]
 
-        # Create the milestones file so load_data doesn't return empty list
+        # Create the milestones file so read doesn't return empty list
         save_path = tmp_path / "save"
         save_path.mkdir()
         milestones_file = save_path / "milestones.json"
@@ -459,11 +453,11 @@ class TestMilestoneSaveRestoreIntegration:
         # Test restore with mixed milestone states
         restore_strategy = MilestonesRestoreStrategy()
 
-        loaded_milestones = restore_strategy.load_data(str(save_path), mock_storage)
+        loaded_milestones = restore_strategy.read(str(save_path), mock_storage)
         context = {}
 
         for milestone in loaded_milestones:
-            transform_data = restore_strategy.transform_for_creation(milestone, context)
+            transform_data = restore_strategy.transform(milestone, context)
 
             # Verify transform includes appropriate fields based on milestone state
             assert transform_data["title"] == milestone.title
@@ -480,7 +474,7 @@ class TestMilestoneSaveRestoreIntegration:
                 assert "due_on" not in transform_data
 
             # Create milestone
-            created_data = restore_strategy.create_entity(
+            created_data = restore_strategy.write(
                 mock_github_service, "test/repo", transform_data
             )
             restore_strategy.post_create_actions(
@@ -524,7 +518,7 @@ class TestMilestoneSaveRestoreIntegration:
 
         # Test data integrity through restore
         restore_strategy = MilestonesRestoreStrategy()
-        loaded_milestones = restore_strategy.load_data(str(save_path), mock_storage)
+        loaded_milestones = restore_strategy.read(str(save_path), mock_storage)
 
         # Verify loaded data matches original
         assert len(loaded_milestones) == 2
