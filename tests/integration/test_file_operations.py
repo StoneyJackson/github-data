@@ -102,6 +102,7 @@ class TestFileOperations:
         mock_boundary = Mock()
         mock_boundary_class.return_value = mock_boundary
         mock_boundary.get_repository_labels.return_value = test_data["labels"]
+        mock_boundary.get_repository_milestones.return_value = test_data["milestones"]
         mock_boundary.get_repository_issues.return_value = test_data["issues"]
         mock_boundary.get_all_issue_comments.return_value = test_data["comments"]
         add_pr_method_mocks(mock_boundary, test_data)
