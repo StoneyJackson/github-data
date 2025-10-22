@@ -26,31 +26,12 @@ class RestoreEntityStrategy(ABC):
         """Read entity data from storage."""
         pass
 
-    def load_data(
-        self, input_path: str, storage_service: "StorageService"
-    ) -> List[Any]:
-        """Load entity data from storage.
-
-        Deprecated: Use read() instead. This method is kept for backward compatibility.
-        """
-        return self.read(input_path, storage_service)
-
     @abstractmethod
     def transform(
         self, entity: Any, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         """Transform entity for GitHub API creation."""
         pass
-
-    def transform_for_creation(
-        self, entity: Any, context: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
-        """Transform entity for GitHub API creation.
-
-        Deprecated: Use transform() instead. This method is kept for backward
-        compatibility.
-        """
-        return self.transform(entity, context)
 
     @abstractmethod
     def write(
@@ -61,18 +42,6 @@ class RestoreEntityStrategy(ABC):
     ) -> Dict[str, Any]:
         """Write entity via GitHub API."""
         pass
-
-    def create_entity(
-        self,
-        github_service: "RepositoryService",
-        repo_name: str,
-        entity_data: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        """Create entity via GitHub API.
-
-        Deprecated: Use write() instead. This method is kept for backward compatibility.
-        """
-        return self.write(github_service, repo_name, entity_data)
 
     @abstractmethod
     def post_create_actions(

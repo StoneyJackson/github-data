@@ -33,7 +33,7 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
 
     def read(self, input_path: str, storage_service: "StorageService") -> List[Label]:
         labels_file = Path(input_path) / "labels.json"
-        return storage_service.load_data(labels_file, Label)
+        return storage_service.read(labels_file, Label)
 
     def transform(
         self, label: Label, context: Dict[str, Any]

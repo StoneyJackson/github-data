@@ -183,9 +183,9 @@ class TestStrategyFactory:
         for strategy in save_strategies:
             assert hasattr(strategy, "get_entity_name")
             assert hasattr(strategy, "get_dependencies")
-            assert hasattr(strategy, "collect_data")
-            assert hasattr(strategy, "process_data")
-            assert hasattr(strategy, "save_data")
+            assert hasattr(strategy, "read")
+            assert hasattr(strategy, "transform")
+            assert hasattr(strategy, "write")
 
         # Test restore strategies
         mock_github_service = Mock()
@@ -198,9 +198,9 @@ class TestStrategyFactory:
         for strategy in restore_strategies:
             assert hasattr(strategy, "get_entity_name")
             assert hasattr(strategy, "get_dependencies")
-            assert hasattr(strategy, "load_data")
-            assert hasattr(strategy, "transform_for_creation")
-            assert hasattr(strategy, "create_entity")
+            assert hasattr(strategy, "read")
+            assert hasattr(strategy, "transform")
+            assert hasattr(strategy, "write")
             assert hasattr(strategy, "post_create_actions")
 
 

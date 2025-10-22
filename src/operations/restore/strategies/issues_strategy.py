@@ -39,7 +39,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     def read(self, input_path: str, storage_service: "StorageService") -> List[Issue]:
         """Load and filter issues data based on selection criteria."""
         issues_file = Path(input_path) / "issues.json"
-        all_issues = storage_service.load_data(issues_file, Issue)
+        all_issues = storage_service.read(issues_file, Issue)
 
         if isinstance(self._include_issues, bool):
             if self._include_issues:

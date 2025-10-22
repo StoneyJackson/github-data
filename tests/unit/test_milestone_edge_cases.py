@@ -43,8 +43,8 @@ class TestMilestoneEdgeCases:
     def mock_storage_service(self):
         """Create a mock storage service."""
         storage = Mock()
-        storage.save_data = Mock()
-        storage.load_data = Mock()
+        storage.write = Mock()
+        storage.read = Mock()
         storage.file_exists = Mock()
         return storage
 
@@ -282,7 +282,7 @@ class TestMilestoneEdgeCases:
         mock_github_service.get_repository_milestones = AsyncMock(
             return_value=large_milestone_dataset
         )
-        mock_storage_service.save_data = Mock(return_value=None)  # Successful save
+        mock_storage_service.write = Mock(return_value=None)  # Successful save
 
         # Measure save performance using temporary directory
         start_time = time.time()
@@ -303,8 +303,8 @@ class TestMilestoneEdgeCases:
         assert result["execution_time_seconds"] < 5.0
 
         # Verify storage service was called correctly
-        mock_storage_service.save_data.assert_called_once()
-        call_args = mock_storage_service.save_data.call_args
+        mock_storage_service.write.assert_called_once()
+        call_args = mock_storage_service.write.call_args
         saved_data = call_args[0][0]  # First positional argument
         assert len(saved_data) == 150
 

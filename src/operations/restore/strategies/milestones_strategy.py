@@ -34,7 +34,7 @@ class MilestonesRestoreStrategy(RestoreEntityStrategy):
             logger.info(f"No {self.get_entity_name()} file found at {milestone_file}")
             return []
 
-        return storage_service.load_data(milestone_file, Milestone)
+        return storage_service.read(milestone_file, Milestone)
 
     def transform(
         self, milestone: Milestone, context: Dict[str, Any]

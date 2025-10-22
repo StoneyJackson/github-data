@@ -26,7 +26,7 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
 
     def read(self, input_path: str, storage_service: "StorageService") -> List[Comment]:
         comments_file = Path(input_path) / "comments.json"
-        comments = storage_service.load_data(comments_file, Comment)
+        comments = storage_service.read(comments_file, Comment)
         # Sort by creation time for chronological order
         return sorted(comments, key=lambda c: c.created_at)
 

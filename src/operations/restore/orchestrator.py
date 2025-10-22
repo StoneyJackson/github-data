@@ -74,8 +74,8 @@ class StrategyBasedRestoreOrchestrator:
         strategy = self._strategies[entity_name]
 
         try:
-            # Load data
-            entities = strategy.load_data(input_path, self._storage_service)
+            # Read data
+            entities = strategy.read(input_path, self._storage_service)
             print(f"Loaded {len(entities)} {entity_name} to restore")
 
             # Handle conflicts if applicable (specifically for labels)
@@ -120,11 +120,11 @@ class StrategyBasedRestoreOrchestrator:
             # Create entities
             created_count = 0
             for entity in entities:
-                entity_data = strategy.transform_for_creation(entity, self._context)
+                entity_data = strategy.transform(entity, self._context)
                 if entity_data is None:
                     continue  # Skip entity (e.g., missing dependency)
 
-                created_data = strategy.create_entity(
+                created_data = strategy.write(
                     self._github_service, repo_name, entity_data
                 )
                 strategy.post_create_actions(
