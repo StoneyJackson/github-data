@@ -49,7 +49,7 @@ class TestMilestoneSaveRestoreIntegration:
         mock_storage = Mock()
         saved_data = []
 
-        def mock_save_data(file_path, data):
+        def mock_write_data(file_path, data):
             saved_data.extend(data)
             # Simulate actual file creation
             with open(file_path, "w") as f:
@@ -57,8 +57,8 @@ class TestMilestoneSaveRestoreIntegration:
                     [milestone.model_dump() for milestone in data], f, default=str
                 )
 
-        mock_storage.save_data.side_effect = mock_save_data
-        mock_storage.load_data.return_value = sample_milestones
+        mock_storage.write.side_effect = mock_write_data
+        mock_storage.read.return_value = sample_milestones
 
         # SAVE PHASE
         save_strategy = MilestonesSaveStrategy()
@@ -66,7 +66,7 @@ class TestMilestoneSaveRestoreIntegration:
         # Simulate save operation
         save_strategy.transform(sample_milestones, {})
         milestone_file = save_path / "milestones.json"
-        mock_save_data(milestone_file, sample_milestones)
+        mock_write_data(milestone_file, sample_milestones)
 
         # Verify file was created
         assert milestone_file.exists()
@@ -163,20 +163,20 @@ class TestMilestoneSaveRestoreIntegration:
         mock_github_service = Mock()
 
         # Setup storage mocks
-        def mock_save_data(file_path, data):
+        def mock_write_data(file_path, data):
             with open(file_path, "w") as f:
                 json.dump([item.model_dump() for item in data], f, default=str)
 
-        mock_storage.save_data.side_effect = mock_save_data
+        mock_storage.write.side_effect = mock_write_data
 
-        def mock_load_data(file_path, model_class):
+        def mock_read_data(file_path, model_class):
             if "milestones.json" in str(file_path):
                 return sample_milestones
             elif "issues.json" in str(file_path):
                 return issues_with_milestones
             return []
 
-        mock_storage.load_data.side_effect = mock_load_data
+        mock_storage.read.side_effect = mock_read_data
 
         # Setup GitHub service mocks
         mock_github_service.create_milestone.side_effect = [
@@ -193,11 +193,11 @@ class TestMilestoneSaveRestoreIntegration:
 
         # Save milestones first (dependency order)
         milestone_file = save_path / "milestones.json"
-        mock_save_data(milestone_file, sample_milestones)
+        mock_write_data(milestone_file, sample_milestones)
 
         # Save issues
         issue_file = save_path / "issues.json"
-        mock_save_data(issue_file, issues_with_milestones)
+        mock_write_data(issue_file, issues_with_milestones)
 
         # RESTORE PHASE
         milestone_restore_strategy = MilestonesRestoreStrategy()
@@ -301,11 +301,11 @@ class TestMilestoneSaveRestoreIntegration:
         mock_github_service = Mock()
 
         # Setup mocks
-        def mock_save_data(file_path, data):
+        def mock_write_data(file_path, data):
             with open(file_path, "w") as f:
                 json.dump([item.model_dump() for item in data], f, default=str)
 
-        mock_storage.save_data.side_effect = mock_save_data
+        mock_storage.write.side_effect = mock_write_data
 
         # Create the actual files so they exist
         milestones_file = save_path / "milestones.json"
@@ -316,14 +316,14 @@ class TestMilestoneSaveRestoreIntegration:
         with open(prs_file, "w") as f:
             json.dump([pr.model_dump() for pr in prs_with_milestones], f, default=str)
 
-        def mock_load_data(file_path, model_class):
+        def mock_read_data(file_path, model_class):
             if "milestones.json" in str(file_path):
                 return sample_milestones
             elif "pull_requests.json" in str(file_path):
                 return prs_with_milestones
             return []
 
-        mock_storage.load_data.side_effect = mock_load_data
+        mock_storage.read.side_effect = mock_read_data
 
         mock_github_service.create_milestone.side_effect = [
             {"number": 101, "title": "v1.0"},
@@ -437,7 +437,7 @@ class TestMilestoneSaveRestoreIntegration:
         # Mock services
         mock_storage = Mock()
         mock_github_service = Mock()
-        mock_storage.load_data.return_value = complex_milestones
+        mock_storage.read.return_value = complex_milestones
 
         # Create the actual file so it exists
         with open(milestones_file, "w") as f:
@@ -514,7 +514,7 @@ class TestMilestoneSaveRestoreIntegration:
 
         # Mock storage service for restore
         mock_storage = Mock()
-        mock_storage.load_data.return_value = sample_milestones
+        mock_storage.read.return_value = sample_milestones
 
         # Test data integrity through restore
         restore_strategy = MilestonesRestoreStrategy()

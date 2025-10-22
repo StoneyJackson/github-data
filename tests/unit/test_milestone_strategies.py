@@ -51,7 +51,7 @@ class TestMilestonesSaveStrategy:
         assert strategy.get_service_method() == "get_repository_milestones"
 
     def test_save_strategy_process_data_no_modification(self):
-        """Test save strategy process_data returns entities unchanged."""
+        """Test save strategy transform returns entities unchanged."""
         strategy = MilestonesSaveStrategy()
 
         sample_entities = [
@@ -107,8 +107,8 @@ class TestMilestonesRestoreStrategy:
         dependencies = strategy.get_dependencies()
         assert dependencies == []
 
-    def test_restore_strategy_load_data_file_exists(self, tmp_path):
-        """Test restore strategy loads data when file exists."""
+    def test_restore_strategy_read_file_exists(self, tmp_path):
+        """Test restore strategy reads data when file exists."""
         strategy = MilestonesRestoreStrategy()
 
         # Create actual test data file
@@ -139,18 +139,18 @@ class TestMilestonesRestoreStrategy:
 
         # Mock storage service
         mock_storage = Mock()
-        mock_storage.load_data.return_value = [Milestone(**test_data[0])]
+        mock_storage.read.return_value = [Milestone(**test_data[0])]
 
         # Test read
         result = strategy.read(str(tmp_path), mock_storage)
 
         # Verify storage service was called correctly
-        mock_storage.load_data.assert_called_once_with(milestone_file, Milestone)
+        mock_storage.read.assert_called_once_with(milestone_file, Milestone)
 
         assert len(result) == 1
         assert isinstance(result[0], Milestone)
 
-    def test_restore_strategy_load_data_file_not_exists(self, tmp_path):
+    def test_restore_strategy_read_file_not_exists(self, tmp_path):
         """Test restore strategy returns empty list when file doesn't exist."""
         strategy = MilestonesRestoreStrategy()
 
@@ -162,12 +162,10 @@ class TestMilestonesRestoreStrategy:
 
         # Should return empty list without calling storage service
         assert result == []
-        mock_storage.load_data.assert_not_called()
+        mock_storage.read.assert_not_called()
 
-    def test_restore_strategy_transform_for_creation_full_milestone(
-        self, sample_milestone
-    ):
-        """Test transform_for_creation with full milestone data."""
+    def test_restore_strategy_transform_full_milestone(self, sample_milestone):
+        """Test transform with full milestone data."""
         strategy = MilestonesRestoreStrategy()
 
         # Create milestone with all fields
@@ -193,10 +191,8 @@ class TestMilestonesRestoreStrategy:
         assert result["state"] == "open"
         assert result["due_on"] == "2023-12-31T00:00:00"
 
-    def test_restore_strategy_transform_for_creation_minimal_milestone(
-        self, sample_milestone
-    ):
-        """Test transform_for_creation with minimal milestone data."""
+    def test_restore_strategy_transform_minimal_milestone(self, sample_milestone):
+        """Test transform with minimal milestone data."""
         strategy = MilestonesRestoreStrategy()
 
         context = {}
@@ -208,8 +204,8 @@ class TestMilestonesRestoreStrategy:
         assert "description" not in result  # None description should be omitted
         assert "due_on" not in result  # None due_on should be omitted
 
-    def test_restore_strategy_create_entity_success(self, sample_github_data):
-        """Test create_entity successful API call."""
+    def test_restore_strategy_write_success(self, sample_github_data):
+        """Test write successful API call."""
         strategy = MilestonesRestoreStrategy()
 
         # Use MockBoundaryFactory for protocol completeness
@@ -242,8 +238,8 @@ class TestMilestonesRestoreStrategy:
 
         assert result["number"] == 101
 
-    def test_restore_strategy_create_entity_already_exists(self, sample_github_data):
-        """Test create_entity handles 'already exists' error gracefully."""
+    def test_restore_strategy_write_already_exists(self, sample_github_data):
+        """Test write handles 'already exists' error gracefully."""
         strategy = MilestonesRestoreStrategy()
 
         # Use MockBoundaryFactory and add specific error behavior
@@ -269,8 +265,8 @@ class TestMilestonesRestoreStrategy:
             assert result["title"] == "Existing Milestone"
             assert result["number"] == -1
 
-    def test_restore_strategy_create_entity_other_error(self, sample_github_data):
-        """Test create_entity re-raises non-'already exists' errors."""
+    def test_restore_strategy_write_other_error(self, sample_github_data):
+        """Test write re-raises non-'already exists' errors."""
         strategy = MilestonesRestoreStrategy()
 
         # Use MockBoundaryFactory and add specific error behavior

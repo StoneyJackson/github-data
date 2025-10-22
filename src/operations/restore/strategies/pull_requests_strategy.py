@@ -50,7 +50,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
     ) -> List[PullRequest]:
         """Load and filter pull requests data based on selection criteria."""
         pull_requests_file = Path(input_path) / "pull_requests.json"
-        all_prs = storage_service.load_data(pull_requests_file, PullRequest)
+        all_prs = storage_service.read(pull_requests_file, PullRequest)
 
         if isinstance(self._include_pull_requests, bool):
             if self._include_pull_requests:

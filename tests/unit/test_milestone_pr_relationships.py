@@ -336,10 +336,10 @@ class TestMilestonePullRequestRelationships:
         assert result is not None
         assert result["milestone"] == 200
 
-    def test_pr_create_entity_api_call(
+    def test_pr_write_api_call(
         self, sample_milestone, pr_restore_strategy, sample_github_data
     ):
-        """Test that PR creation includes milestone parameter in API call."""
+        """Test that PR write includes milestone parameter in API call."""
         strategy = pr_restore_strategy
 
         # Use MockBoundaryFactory for protocol completeness

@@ -219,8 +219,8 @@ class MockHelper:
         mock_storage = Mock()
 
         # Set up common mock methods (using actual interface)
-        mock_storage.save_data.return_value = None
-        mock_storage.load_data.return_value = []
+        mock_storage.write.return_value = None
+        mock_storage.read.return_value = []
 
         return mock_storage
 

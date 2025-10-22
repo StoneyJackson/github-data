@@ -288,8 +288,8 @@ def mock_github_service():
 def mock_storage_service():
     """Create a mock storage service for milestone operations."""
     storage = Mock()
-    storage.save_data = Mock()
-    storage.load_data = Mock()
+    storage.write = Mock()
+    storage.read = Mock()
     storage.file_exists = Mock()
     storage.ensure_directory = Mock()
     return storage

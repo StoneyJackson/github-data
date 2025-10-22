@@ -164,8 +164,8 @@ class TestDependencyInjection:
         # Test all required methods exist
         assert hasattr(github_service, "get_repository_labels")
         assert hasattr(github_service, "create_label")
-        assert hasattr(storage_service, "save_data")
-        assert hasattr(storage_service, "load_data")
+        assert hasattr(storage_service, "write")
+        assert hasattr(storage_service, "read")
 
     def test_enhanced_boundary_mock_factory_integration(self, github_service_with_mock):
         """Test integration with enhanced boundary mock patterns."""

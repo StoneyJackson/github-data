@@ -83,15 +83,15 @@ class StrategyBasedSaveOrchestrator:
         strategy = self._strategies[entity_name]
 
         try:
-            # Collect data
-            entities = strategy.collect_data(self._github_service, repo_name)
+            # Read data
+            entities = strategy.read(self._github_service, repo_name)
             print(f"Collected {len(entities)} {entity_name}")
 
             # Store original context to detect changes
             original_context = self._context.copy()
 
-            # Process data
-            processed_entities = strategy.process_data(entities, self._context)
+            # Transform data
+            processed_entities = strategy.transform(entities, self._context)
 
             # In selective mode, skip saving if no entities remain after processing
             if self._is_selective_mode(entity_name) and not processed_entities:
@@ -105,8 +105,8 @@ class StrategyBasedSaveOrchestrator:
                     "execution_time_seconds": 0,
                 }
 
-            # Save data
-            result = strategy.save_data(
+            # Write data
+            result = strategy.write(
                 processed_entities, output_path, self._storage_service
             )
 
@@ -124,7 +124,7 @@ class StrategyBasedSaveOrchestrator:
 
                         output_dir = Path(output_path)
                         entity_file = output_dir / f"{key}.json"
-                        self._storage_service.save_data(value, entity_file)
+                        self._storage_service.write(value, entity_file)
 
             return {
                 "entity_name": entity_name,

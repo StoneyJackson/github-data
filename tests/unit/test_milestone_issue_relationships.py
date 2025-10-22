@@ -39,7 +39,7 @@ class TestMilestoneIssueRelationships:
         assert "labels" in dependencies
         assert "milestones" in dependencies
 
-    def test_issue_transform_for_creation_with_milestone(self, sample_milestone):
+    def test_issue_transform_with_milestone(self, sample_milestone):
         """Test that issue transformation includes milestone mapping."""
         strategy = IssuesRestoreStrategy()
 
@@ -69,14 +69,14 @@ class TestMilestoneIssueRelationships:
         # Mock milestone mapping context
         context = {"milestone_mapping": {1: 101}}
 
-        # Transform for creation
+        # Transform
         result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["title"] == "Test Issue"
         assert result["milestone"] == 101  # Mapped milestone number
 
-    def test_issue_transform_for_creation_without_milestone(self):
+    def test_issue_transform_without_milestone(self):
         """Test that issue transformation works without milestone."""
         strategy = IssuesRestoreStrategy()
 
@@ -105,14 +105,14 @@ class TestMilestoneIssueRelationships:
 
         context = {}
 
-        # Transform for creation
+        # Transform
         result = strategy.transform(issue, context)
 
         assert result is not None
         assert result["title"] == "Test Issue"
         assert "milestone" not in result
 
-    def test_issue_transform_for_creation_with_missing_milestone_mapping(
+    def test_issue_transform_with_missing_milestone_mapping(
         self, sample_milestone, capsys
     ):
         """Test warning when milestone mapping is missing."""
@@ -144,7 +144,7 @@ class TestMilestoneIssueRelationships:
         # Empty milestone mapping context
         context = {"milestone_mapping": {}}
 
-        # Transform for creation
+        # Transform
         result = strategy.transform(issue, context)
 
         assert result is not None
@@ -183,7 +183,7 @@ class TestMilestoneIssueRelationships:
         # Invalid milestone mapping context (non-integer milestone number)
         context = {"milestone_mapping": {1: "invalid_milestone_number"}}
 
-        # Transform for creation should handle this gracefully
+        # Transform should handle this gracefully
         result = strategy.transform(issue, context)
 
         assert result is not None

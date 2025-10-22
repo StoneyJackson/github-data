@@ -39,7 +39,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
     ) -> List[PullRequestComment]:
         pr_comments_file = Path(input_path) / "pr_comments.json"
         try:
-            return storage_service.load_data(pr_comments_file, PullRequestComment)
+            return storage_service.read(pr_comments_file, PullRequestComment)
         except FileNotFoundError:
             logger.info(f"PR comments file not found: {pr_comments_file}")
             return []  # Return empty list if file doesn't exist

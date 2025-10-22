@@ -52,8 +52,8 @@ class TestGitRepositoryIntegration:
         assert destination.exists()
         assert (destination / "HEAD").exists()
 
-    def test_git_strategy_collect_data_structure(self, git_strategy):
-        """Test Git strategy data collection creates proper structure."""
+    def test_git_strategy_read_structure(self, git_strategy):
+        """Test Git strategy data read creates proper structure."""
         entities = git_strategy.read(None, "test/repo")
 
         assert len(entities) == 1
@@ -62,10 +62,10 @@ class TestGitRepositoryIntegration:
         assert entity["repo_url"] == "https://github.com/test/repo.git"
         assert entity["backup_format"] == GitBackupFormat.MIRROR.value
 
-    def test_git_strategy_save_data_integration(
+    def test_git_strategy_write_integration(
         self, git_strategy, storage_service_mock, temp_data_dir
     ):
-        """Test Git strategy save data with mocked Git operations."""
+        """Test Git strategy write with mocked Git operations."""
         entities = [
             {
                 "repo_name": "test/repo",
@@ -91,10 +91,10 @@ class TestGitRepositoryIntegration:
         assert (Path(temp_data_dir) / "git-repo").exists()
         mock_clone.assert_called_once()
 
-    def test_git_strategy_save_data_error_handling(
+    def test_git_strategy_write_error_handling(
         self, git_strategy, storage_service_mock, temp_data_dir
     ):
-        """Test Git strategy error handling during save."""
+        """Test Git strategy error handling during write."""
         entities = [
             {
                 "repo_name": "test/repo",
@@ -141,10 +141,10 @@ class TestGitRepositoryIntegration:
             assert result["saved_repositories"] == 1
             mock_execute.assert_called_once()
 
-    def test_git_restore_strategy_load_data(
+    def test_git_restore_strategy_read(
         self, git_restore_strategy, storage_service_mock, temp_data_dir
     ):
-        """Test Git restore strategy load data functionality."""
+        """Test Git restore strategy read functionality."""
         # Create mock git-repo directory structure with flattened layout
         git_data_dir = Path(temp_data_dir) / "git-repo"
         git_data_dir.mkdir(parents=True)

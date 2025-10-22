@@ -36,15 +36,6 @@ class SaveEntityStrategy(ABC):
         converter = getattr(converters, converter_name)
         return [converter(item) for item in raw_data]
 
-    def collect_data(
-        self, github_service: "RepositoryService", repo_name: str
-    ) -> List[Any]:
-        """Template method for standard data collection pattern.
-
-        Deprecated: Use read() instead. This method is kept for backward compatibility.
-        """
-        return self.read(github_service, repo_name)
-
     @abstractmethod
     def get_converter_name(self) -> str:
         """Return the converter function name for this entity type."""
@@ -60,14 +51,6 @@ class SaveEntityStrategy(ABC):
         """Transform entity data for processing."""
         pass
 
-    def process_data(self, entities: List[Any], context: Dict[str, Any]) -> List[Any]:
-        """Process and transform entity data.
-
-        Deprecated: Use transform() instead. This method is kept for backward
-        compatibility.
-        """
-        return self.transform(entities, context)
-
     def write(
         self,
         entities: List[Any],
@@ -81,19 +64,6 @@ class SaveEntityStrategy(ABC):
             self.get_entity_name(),
             len(entities),
         )
-
-    def save_data(
-        self,
-        entities: List[Any],
-        output_path: str,
-        storage_service: "StorageService",
-    ) -> Dict[str, Any]:
-        """Template method for saving entity data with standardized timing and
-        error handling.
-
-        Deprecated: Use write() instead. This method is kept for backward compatibility.
-        """
-        return self.write(entities, output_path, storage_service)
 
     def _execute_with_timing(
         self, operation: Callable[[], None], entity_type: str, item_count: int
@@ -116,7 +86,7 @@ class SaveEntityStrategy(ABC):
         output_dir.mkdir(parents=True, exist_ok=True)
 
         entity_file = output_dir / f"{self.get_entity_name()}.json"
-        storage_service.save_data(entities, entity_file)
+        storage_service.write(entities, entity_file)
 
     def _success_result(
         self, entity_type: str, item_count: int, execution_time: float

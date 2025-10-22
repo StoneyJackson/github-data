@@ -31,10 +31,10 @@ class GitRepositoryStrategy(SaveEntityStrategy):
         """Return list of entity dependencies."""
         return []  # Git repository has no dependencies
 
-    def collect_data(
+    def read(
         self, github_service: "RepositoryService", repo_name: str
     ) -> List[Dict[str, Any]]:
-        """Collect Git repository data."""
+        """Read Git repository data."""
         # For Git repositories, we don't collect data through GitHub API
         # Instead, we prepare repository URL
         repo_url = f"https://github.com/{repo_name}.git"
@@ -46,12 +46,6 @@ class GitRepositoryStrategy(SaveEntityStrategy):
                 "backup_format": self._backup_format.value,
             }
         ]
-
-    def read(
-        self, github_service: "RepositoryService", repo_name: str
-    ) -> List[Dict[str, Any]]:
-        """Override read method to use custom collection pattern."""
-        return self.collect_data(github_service, repo_name)
 
     def get_converter_name(self) -> str:
         """Return the converter function name for this entity type."""
@@ -75,15 +69,6 @@ class GitRepositoryStrategy(SaveEntityStrategy):
         return entities
 
     def write(
-        self,
-        entities: List[Dict[str, Any]],
-        output_path: str,
-        storage_service: "StorageService",
-    ) -> Dict[str, Any]:
-        """Override write method to use custom save logic."""
-        return self.save_data(entities, output_path, storage_service)
-
-    def save_data(
         self,
         entities: List[Dict[str, Any]],
         output_path: str,

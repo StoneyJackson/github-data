@@ -44,8 +44,8 @@ class TestMilestoneErrorHandling:
     def mock_storage_service(self):
         """Create a mock storage service."""
         storage = Mock()
-        storage.save_data = Mock()
-        storage.load_data = Mock()
+        storage.write = Mock()
+        storage.read = Mock()
         storage.file_exists = Mock()
         return storage
 
@@ -94,7 +94,7 @@ class TestMilestoneErrorHandling:
             side_effect=RateLimitExceededException(403, "rate limit exceeded")
         )
 
-        # Execute collect_data operation and expect graceful handling
+        # Execute read operation and expect graceful handling
         with pytest.raises(RateLimitExceededException):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
@@ -112,7 +112,7 @@ class TestMilestoneErrorHandling:
             side_effect=ConnectionError("Network error")
         )
 
-        # Execute collect_data operation and expect graceful handling
+        # Execute read operation and expect graceful handling
         with pytest.raises(ConnectionError):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
@@ -126,9 +126,7 @@ class TestMilestoneErrorHandling:
     ):
         """Test handling of invalid milestone data during restore operations."""
         # Configure storage to raise validation error when loading invalid data
-        mock_storage_service.load_data.side_effect = ValueError(
-            "Invalid milestone data"
-        )
+        mock_storage_service.read.side_effect = ValueError("Invalid milestone data")
 
         # Create an actual file for the test
         milestone_file = tmp_path / "milestones.json"
@@ -138,7 +136,7 @@ class TestMilestoneErrorHandling:
         with pytest.raises(ValueError):
             milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
-        mock_storage_service.load_data.assert_called_once()
+        mock_storage_service.read.assert_called_once()
 
     def test_authentication_failure_scenarios(
         self, milestone_save_strategy, mock_github_service
@@ -151,7 +149,7 @@ class TestMilestoneErrorHandling:
             side_effect=BadCredentialsException(401, "Bad credentials")
         )
 
-        # Execute collect_data operation and expect graceful handling
+        # Execute read operation and expect graceful handling
         with pytest.raises(BadCredentialsException):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
@@ -193,7 +191,7 @@ class TestMilestoneErrorHandling:
             side_effect=asyncio.TimeoutError("Request timeout")
         )
 
-        # Execute collect_data operation and expect graceful handling
+        # Execute read operation and expect graceful handling
         with pytest.raises(asyncio.TimeoutError):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
@@ -207,7 +205,7 @@ class TestMilestoneErrorHandling:
     ):
         """Test handling of corrupted milestone JSON data."""
         # Configure storage to raise JSON decode error
-        mock_storage_service.load_data.side_effect = json.JSONDecodeError(
+        mock_storage_service.read.side_effect = json.JSONDecodeError(
             "Invalid JSON", "doc", 0
         )
 
@@ -215,11 +213,11 @@ class TestMilestoneErrorHandling:
         milestone_file = tmp_path / "milestones.json"
         milestone_file.write_text("invalid json")
 
-        # Execute load_data and expect graceful handling
+        # Execute read and expect graceful handling
         with pytest.raises(json.JSONDecodeError):
             milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
-        mock_storage_service.load_data.assert_called_once()
+        mock_storage_service.read.assert_called_once()
 
     def test_github_api_server_error(
         self, milestone_save_strategy, mock_github_service
@@ -232,7 +230,7 @@ class TestMilestoneErrorHandling:
             side_effect=GithubException(500, "Internal server error")
         )
 
-        # Execute collect_data operation and expect graceful handling
+        # Execute read operation and expect graceful handling
         with pytest.raises(GithubException):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 
@@ -246,18 +244,18 @@ class TestMilestoneErrorHandling:
     ):
         """Test handling of empty milestone files during restore."""
         # Configure storage to return empty data
-        mock_storage_service.load_data.return_value = []
+        mock_storage_service.read.return_value = []
 
         # Create an actual empty file for the test
         milestone_file = tmp_path / "milestones.json"
         milestone_file.write_text("[]")
 
-        # Execute load_data - should handle empty list gracefully
+        # Execute read - should handle empty list gracefully
         result = milestone_restore_strategy.read(str(tmp_path), mock_storage_service)
 
         # Verify empty data is handled correctly
         assert result == []
-        mock_storage_service.load_data.assert_called_once()
+        mock_storage_service.read.assert_called_once()
 
     def test_missing_milestone_file_handling(
         self, milestone_restore_strategy, mock_storage_service, tmp_path
@@ -266,15 +264,15 @@ class TestMilestoneErrorHandling:
         # Use a path where no milestones.json file exists
         non_existent_path = tmp_path / "nonexistent"
 
-        # Execute load_data - should handle missing file gracefully
+        # Execute read - should handle missing file gracefully
         result = milestone_restore_strategy.read(
             str(non_existent_path), mock_storage_service
         )
 
         # Verify missing file is handled correctly
         assert result == []
-        # storage_service.load_data should not be called when file doesn't exist
-        mock_storage_service.load_data.assert_not_called()
+        # storage_service.read should not be called when file doesn't exist
+        mock_storage_service.read.assert_not_called()
 
     def test_milestone_field_validation_errors(self, milestone_restore_strategy):
         """Test handling of milestone field validation errors."""
@@ -421,9 +419,9 @@ class TestMilestoneErrorHandling:
         mock_github_service.get_repository_milestones = Mock(
             return_value=mock_milestones
         )
-        mock_storage_service.save_data.side_effect = IOError("Failed to save")
+        mock_storage_service.write.side_effect = IOError("Failed to save")
 
-        # Execute save_data operation and expect storage error to be handled gracefully
+        # Execute write operation and expect storage error to be handled gracefully
         milestones_data = milestone_save_strategy.read(
             mock_github_service, "test-owner/test-repo"
         )
@@ -441,7 +439,7 @@ class TestMilestoneErrorHandling:
         mock_github_service.get_repository_milestones.assert_called_once_with(
             "test-owner/test-repo"
         )
-        mock_storage_service.save_data.assert_called_once()
+        mock_storage_service.write.assert_called_once()
 
     def test_api_response_parsing_errors(
         self, milestone_save_strategy, mock_github_service
@@ -457,7 +455,7 @@ class TestMilestoneErrorHandling:
             return_value=[malformed_response]
         )
 
-        # Execute collect_data operation and expect parsing to handle errors gracefully
+        # Execute read operation and expect parsing to handle errors gracefully
         with pytest.raises((AttributeError, TypeError, ValueError)):
             milestone_save_strategy.read(mock_github_service, "test-owner/test-repo")
 

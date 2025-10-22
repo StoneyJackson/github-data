@@ -27,7 +27,7 @@ class SubIssuesRestoreStrategy(RestoreEntityStrategy):
         self, input_path: str, storage_service: "StorageService"
     ) -> List[SubIssue]:
         sub_issues_file = Path(input_path) / "sub_issues.json"
-        return storage_service.load_data(sub_issues_file, SubIssue)
+        return storage_service.read(sub_issues_file, SubIssue)
 
     def transform(
         self, sub_issue: SubIssue, context: Dict[str, Any]

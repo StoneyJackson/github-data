@@ -393,7 +393,7 @@ try:
     processed = strategy.transform(entities, {})
     print(f"SUCCESS: Processed {len(processed)} entities")
 
-    # Test directory creation (part of save_data)
+    # Test directory creation (part of write)
     output_path = "/data"
     git_data_dir = Path(output_path) / "git-repo"
     git_data_dir.mkdir(parents=True, exist_ok=True)
