@@ -1,3 +1,11 @@
+# [1.11.0](https://github.com/StoneyJackson/github-data/compare/v1.10.0...v1.11.0) (2025-10-23)
+
+
+### Features
+
+* implement comprehensive GitHubDataBuilder extensions and architecture improvements ([de719fc](https://github.com/StoneyJackson/github-data/commit/de719fcd3eef5dde8b8280b4e404e41c6c4d0cbf))
+* implement Phase 1 strategy method naming unification ([39e3973](https://github.com/StoneyJackson/github-data/commit/39e3973db51a11db318dde6ae3b64c48df6cbc71))
+
 # [1.10.0](https://github.com/StoneyJackson/github-data/compare/v1.9.0...v1.10.0) (2025-10-18)
 
 
