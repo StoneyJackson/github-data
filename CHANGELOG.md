@@ -1,3 +1,10 @@
+# [1.12.0](https://github.com/StoneyJackson/github-data/compare/v1.11.0...v1.12.0) (2025-10-23)
+
+
+### Features
+
+* implement comprehensive ConfigFactory extensions and testing architecture improvements ([8eb5d77](https://github.com/StoneyJackson/github-data/commit/8eb5d77ed2e6b2e23ac1ae31ba300ba7f4a34b9b))
+
 # [1.11.0](https://github.com/StoneyJackson/github-data/compare/v1.10.0...v1.11.0) (2025-10-23)
 
 
