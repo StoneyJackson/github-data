@@ -33,7 +33,7 @@ class TestMain:
         mock_save,
     ):
         """Test main function with save operation."""
-        mock_config = ConfigFactory.create_save_config(
+        mock_config = ConfigFactory.create_save_config_direct(
             github_token="token123",
             github_repo="owner/repo",
             data_path="/data",
@@ -70,7 +70,7 @@ class TestMain:
         mock_restore,
     ):
         """Test main function with restore operation."""
-        mock_config = ConfigFactory.create_restore_config(
+        mock_config = ConfigFactory.create_restore_config_direct(
             github_token="token123",
             github_repo="owner/repo",
             data_path="/data",
@@ -96,7 +96,7 @@ class TestMain:
     @patch("src.config.settings.ApplicationConfig.from_environment")
     def test_main_invalid_operation_exits(self, mock_config_from_env):
         """Test that invalid operation causes exit."""
-        mock_config = ConfigFactory.create_save_config(
+        mock_config = ConfigFactory.create_save_config_direct(
             operation="invalid",
             github_token="token123",
             github_repo="owner/repo",
