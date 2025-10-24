@@ -5,7 +5,7 @@ import importlib.util
 from pathlib import Path
 import inspect
 import os
-from typing import Dict
+from typing import Dict, Set
 from src.entities.base import RegisteredEntity
 from src.config.number_parser import NumberSpecificationParser
 import logging
@@ -33,6 +33,7 @@ class EntityRegistry:
     def __init__(self) -> None:
         """Initialize registry and discover entities."""
         self._entities: Dict[str, RegisteredEntity] = {}
+        self._explicitly_set: Set[str] = set()  # Track user-set entities
         self._discover_entities()
 
     @classmethod
@@ -110,9 +111,12 @@ class EntityRegistry:
             value = os.getenv(env_var)
 
             if value is None:
-                # Use default value
+                # Use default value (not explicitly set)
                 entity.enabled = entity.config.default_value
                 continue
+
+            # Mark as explicitly set by user
+            self._explicitly_set.add(entity_name)
 
             # Parse based on value_type
             if entity.config.value_type == bool:
@@ -148,5 +152,36 @@ class EntityRegistry:
         Raises:
             ValueError: If strict=True and explicit conflict detected
         """
-        # TODO: Implement dependency validation in next task
-        pass
+        for entity_name, entity in self._entities.items():
+            if not entity.is_enabled():
+                continue
+
+            # Check all dependencies
+            for dep_name in entity.get_dependencies():
+                if dep_name not in self._entities:
+                    logger.warning(
+                        f"Entity {entity_name} depends on unknown entity: {dep_name}"
+                    )
+                    continue
+
+                dep_entity = self._entities[dep_name]
+
+                if not dep_entity.is_enabled():
+                    # Dependency is disabled
+                    is_explicit = entity_name in self._explicitly_set
+
+                    if is_explicit and strict:
+                        # User explicitly enabled this but dependency is disabled
+                        raise ValueError(
+                            f"{entity.config.env_var}=true requires "
+                            f"{dep_entity.config.env_var}=true. "
+                            f"Cannot enable {entity_name} without {dep_name}."
+                        )
+                    else:
+                        # Auto-disable with warning
+                        logger.warning(
+                            f"Warning: {entity.config.env_var} requires "
+                            f"{dep_entity.config.env_var}. Disabling {entity_name}."
+                        )
+                        entity.enabled = False
+                        break  # Stop checking other deps for this entity
