@@ -5,7 +5,7 @@ import importlib.util
 from pathlib import Path
 import inspect
 import os
-from typing import Dict, Set
+from typing import Dict, Set, List
 from src.entities.base import RegisteredEntity
 from src.config.number_parser import NumberSpecificationParser
 import logging
@@ -185,3 +185,55 @@ class EntityRegistry:
                         )
                         entity.enabled = False
                         break  # Stop checking other deps for this entity
+
+    def _topological_sort(
+        self, entities: List[RegisteredEntity]
+    ) -> List[RegisteredEntity]:
+        """Sort entities by dependency order using topological sort.
+
+        Args:
+            entities: List of entities to sort
+
+        Returns:
+            Entities sorted so dependencies come before dependents
+
+        Raises:
+            ValueError: If circular dependency detected
+        """
+        # Build name -> entity mapping
+        entity_map = {e.config.name: e for e in entities}
+
+        # Build adjacency list (dependency graph)
+        graph: Dict[str, List[str]] = {name: [] for name in entity_map}
+        in_degree: Dict[str, int] = {name: 0 for name in entity_map}
+
+        for name, entity in entity_map.items():
+            for dep in entity.get_dependencies():
+                if dep in entity_map:
+                    graph[dep].append(name)
+                    in_degree[name] += 1
+
+        # Kahn's algorithm for topological sort
+        queue = [name for name, degree in in_degree.items() if degree == 0]
+        sorted_names = []
+
+        while queue:
+            # Sort queue for deterministic output
+            queue.sort()
+            current = queue.pop(0)
+            sorted_names.append(current)
+
+            for neighbor in graph[current]:
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        # Check for cycles
+        if len(sorted_names) != len(entity_map):
+            remaining = set(entity_map.keys()) - set(sorted_names)
+            raise ValueError(
+                f"circular dependency detected among entities: {remaining}"
+            )
+
+        # Return entities in sorted order
+        return [entity_map[name] for name in sorted_names]
