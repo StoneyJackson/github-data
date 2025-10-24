@@ -1,6 +1,7 @@
 """Base protocols and types for entity system."""
 
 from typing import Protocol, Optional, List, Union, Set, Type, Any
+from dataclasses import dataclass
 
 
 class EntityConfig(Protocol):
@@ -34,3 +35,54 @@ class BaseRestoreStrategy(Protocol):
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the restore operation."""
         ...
+
+
+@dataclass
+class RegisteredEntity:
+    """Represents a registered entity with runtime state.
+
+    Combines entity configuration with runtime enabled state
+    and lazily-loaded strategies.
+    """
+
+    config: EntityConfig
+    enabled: Union[bool, Set[int]]
+    save_strategy: Optional[BaseSaveStrategy] = None
+    restore_strategy: Optional[BaseRestoreStrategy] = None
+
+    def is_enabled(self) -> bool:
+        """Check if entity is enabled.
+
+        Returns:
+            True if enabled (bool=True or non-empty set), False otherwise
+        """
+        if isinstance(self.enabled, bool):
+            return self.enabled
+        else:  # Set[int]
+            return len(self.enabled) > 0
+
+    def get_dependencies(self) -> List[str]:
+        """Get list of dependency entity names.
+
+        Returns:
+            List of entity names this entity depends on
+        """
+        return self.config.dependencies
+
+    def get_save_strategy(self) -> Optional[BaseSaveStrategy]:
+        """Get save strategy (lazy load if needed).
+
+        Returns:
+            Save strategy instance or None
+        """
+        # TODO: Implement lazy loading in future task
+        return self.save_strategy
+
+    def get_restore_strategy(self) -> Optional[BaseRestoreStrategy]:
+        """Get restore strategy (lazy load if needed).
+
+        Returns:
+            Restore strategy instance or None
+        """
+        # TODO: Implement lazy loading in future task
+        return self.restore_strategy
