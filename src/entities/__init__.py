@@ -17,6 +17,10 @@ from .pr_review_comments import PullRequestReviewComment
 from .repository import RepositoryData
 from .milestones import Milestone
 
+# Import entity system components
+from src.entities.base import EntityConfig, BaseSaveStrategy, BaseRestoreStrategy, RegisteredEntity
+from src.entities.registry import EntityRegistry
+
 __all__ = [
     "GitHubUser",
     "Label",
@@ -29,4 +33,9 @@ __all__ = [
     "PullRequestReviewComment",
     "RepositoryData",
     "Milestone",
+    "EntityConfig",
+    "BaseSaveStrategy",
+    "BaseRestoreStrategy",
+    "RegisteredEntity",
+    "EntityRegistry",
 ]
