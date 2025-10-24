@@ -4,8 +4,10 @@ import importlib
 import importlib.util
 from pathlib import Path
 import inspect
+import os
 from typing import Dict
 from src.entities.base import RegisteredEntity
+from src.config.number_parser import NumberSpecificationParser
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ class EntityRegistry:
         for entity_dir in entities_path.iterdir():
             if not entity_dir.is_dir():
                 continue
-            if entity_dir.name.startswith('_'):
+            if entity_dir.name.startswith("_"):
                 continue
 
             # Look for entity_config.py
@@ -84,12 +86,11 @@ class EntityRegistry:
 
                 # Find EntityConfig classes (classes ending with EntityConfig)
                 for name, obj in inspect.getmembers(module, inspect.isclass):
-                    if name.endswith('EntityConfig'):
+                    if name.endswith("EntityConfig"):
                         # Create RegisteredEntity with default state
                         config = obj()
                         entity = RegisteredEntity(
-                            config=config,
-                            enabled=config.default_value
+                            config=config, enabled=config.default_value
                         )
                         self._entities[config.name] = entity
                         logger.info(f"Discovered entity: {config.name}")
@@ -104,5 +105,48 @@ class EntityRegistry:
         Args:
             strict: If True, fail on violations. If False, warn and correct.
         """
-        # TODO: Implement environment loading in future task
+        for entity_name, entity in self._entities.items():
+            env_var = entity.config.env_var
+            value = os.getenv(env_var)
+
+            if value is None:
+                # Use default value
+                entity.enabled = entity.config.default_value
+                continue
+
+            # Parse based on value_type
+            if entity.config.value_type == bool:
+                # Parse as boolean
+                try:
+                    entity.enabled = NumberSpecificationParser.parse_boolean_value(
+                        value
+                    )
+                except ValueError as e:
+                    raise ValueError(f"Environment variable {env_var}: {str(e)}")
+            else:
+                # Parse as Union[bool, Set[int]]
+                if NumberSpecificationParser.is_boolean_value(value):
+                    entity.enabled = NumberSpecificationParser.parse_boolean_value(
+                        value
+                    )
+                else:
+                    try:
+                        entity.enabled = NumberSpecificationParser.parse(value)
+                    except ValueError as e:
+                        raise ValueError(f"Environment variable {env_var}: {str(e)}")
+
+        # Validate dependencies after loading all values
+        self._validate_dependencies(strict)
+
+    def _validate_dependencies(self, strict: bool) -> None:
+        """Validate entity dependencies.
+
+        Args:
+            strict: If True, fail on explicit conflicts.
+                If False, warn and auto-disable.
+
+        Raises:
+            ValueError: If strict=True and explicit conflict detected
+        """
+        # TODO: Implement dependency validation in next task
         pass
