@@ -237,3 +237,36 @@ class EntityRegistry:
 
         # Return entities in sorted order
         return [entity_map[name] for name in sorted_names]
+
+    def get_entity(self, name: str) -> RegisteredEntity:
+        """Get entity by name.
+
+        Args:
+            name: Entity name
+
+        Returns:
+            RegisteredEntity instance
+
+        Raises:
+            ValueError: If entity not found
+        """
+        if name not in self._entities:
+            raise ValueError(f"Unknown entity: {name}")
+        return self._entities[name]
+
+    def get_enabled_entities(self) -> List[RegisteredEntity]:
+        """Get all enabled entities in dependency order.
+
+        Returns:
+            List of enabled entities sorted by dependencies
+        """
+        enabled = [e for e in self._entities.values() if e.is_enabled()]
+        return self._topological_sort(enabled)
+
+    def get_all_entity_names(self) -> List[str]:
+        """Get names of all registered entities.
+
+        Returns:
+            List of entity names
+        """
+        return list(self._entities.keys())
