@@ -18,7 +18,12 @@ from .repository import RepositoryData
 from .milestones import Milestone
 
 # Import entity system components
-from src.entities.base import EntityConfig, BaseSaveStrategy, BaseRestoreStrategy, RegisteredEntity
+from src.entities.base import (
+    EntityConfig,
+    BaseSaveStrategy,
+    BaseRestoreStrategy,
+    RegisteredEntity,
+)
 from src.entities.registry import EntityRegistry
 
 __all__ = [
