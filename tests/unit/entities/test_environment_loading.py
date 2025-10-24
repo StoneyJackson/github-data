@@ -22,6 +22,7 @@ def mock_entity_registry(monkeypatch):
     registry._entities = {
         "test_entity": RegisteredEntity(config=MockConfig(), enabled=True)  # default
     }
+    registry._explicitly_set = set()
     return registry
 
 
