@@ -1,10 +1,24 @@
 """Entity registry for auto-discovery and configuration."""
 
+import importlib
+import importlib.util
+from pathlib import Path
+import inspect
 from typing import Dict
 from src.entities.base import RegisteredEntity
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _get_entities_path() -> Path:
+    """Get path to entities directory.
+
+    Returns:
+        Path to src/entities directory
+    """
+    # Get the directory containing this file (src/entities/)
+    return Path(__file__).parent
 
 
 class EntityRegistry:
@@ -38,9 +52,51 @@ class EntityRegistry:
         """Auto-discover entities by scanning entities/ directory.
 
         Looks for *EntityConfig classes in entity_config.py files.
+        Registers each discovered entity with default enabled state.
         """
-        # TODO: Implement discovery in next task
-        pass
+        entities_path = _get_entities_path()
+
+        if not entities_path.exists():
+            logger.warning(f"Entities directory not found: {entities_path}")
+            return
+
+        # Scan for entity directories
+        for entity_dir in entities_path.iterdir():
+            if not entity_dir.is_dir():
+                continue
+            if entity_dir.name.startswith('_'):
+                continue
+
+            # Look for entity_config.py
+            config_file = entity_dir / "entity_config.py"
+            if not config_file.exists():
+                continue
+
+            # Import the module
+            module_name = f"src.entities.{entity_dir.name}.entity_config"
+            try:
+                spec = importlib.util.spec_from_file_location(module_name, config_file)
+                if spec is None or spec.loader is None:
+                    continue
+
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+
+                # Find EntityConfig classes (classes ending with EntityConfig)
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    if name.endswith('EntityConfig'):
+                        # Create RegisteredEntity with default state
+                        config = obj()
+                        entity = RegisteredEntity(
+                            config=config,
+                            enabled=config.default_value
+                        )
+                        self._entities[config.name] = entity
+                        logger.info(f"Discovered entity: {config.name}")
+
+            except Exception as e:
+                logger.error(f"Failed to load entity from {entity_dir.name}: {e}")
+                continue
 
     def _load_from_environment(self, strict: bool) -> None:
         """Load entity enabled values from environment variables.
