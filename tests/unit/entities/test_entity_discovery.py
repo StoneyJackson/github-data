@@ -10,7 +10,8 @@ def test_discover_entities_finds_entity_configs(tmp_path, monkeypatch):
 
     # Write entity_config.py
     config_file = entity_dir / "entity_config.py"
-    config_file.write_text("""
+    config_file.write_text(
+        """
 class TestEntityEntityConfig:
     name = "test_entity"
     env_var = "INCLUDE_TEST_ENTITY"
@@ -21,7 +22,8 @@ class TestEntityEntityConfig:
     restore_strategy_class = None
     storage_filename = None
     description = "Test"
-""")
+"""
+    )
 
     # Write __init__.py
     (entity_dir / "__init__.py").write_text("")
@@ -32,7 +34,7 @@ class TestEntityEntityConfig:
     def mock_get_entities_path():
         return tmp_path / "entities"
 
-    monkeypatch.setattr(registry_module, '_get_entities_path', mock_get_entities_path)
+    monkeypatch.setattr(registry_module, "_get_entities_path", mock_get_entities_path)
 
     # Add temp path to sys.path for imports
     sys.path.insert(0, str(tmp_path))

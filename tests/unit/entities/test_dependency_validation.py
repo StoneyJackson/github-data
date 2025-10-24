@@ -7,6 +7,7 @@ from src.entities.base import RegisteredEntity
 @pytest.fixture
 def registry_with_dependencies():
     """Create registry with dependent entities."""
+
     class IssuesConfig:
         name = "issues"
         env_var = "INCLUDE_ISSUES"
@@ -57,7 +58,7 @@ def test_validate_dependencies_auto_disables_when_parent_disabled(
 
 
 def test_validate_dependencies_explicit_conflict_fails_strict(
-    registry_with_dependencies
+    registry_with_dependencies,
 ):
     """Test explicit conflict fails in strict mode."""
     # Disable parent

@@ -11,14 +11,14 @@ class EntityConfig(Protocol):
     """
 
     name: str  # Entity identifier (e.g., "comment_attachments")
-    env_var: str                        # Environment variable name
+    env_var: str  # Environment variable name
     default_value: Union[bool, Set[int]]  # Default enabled state
-    value_type: Type                    # bool or Union[bool, Set[int]]
-    dependencies: List[str] = []        # List of entity names this depends on
+    value_type: Type  # bool or Union[bool, Set[int]]
+    dependencies: List[str] = []  # List of entity names this depends on
     save_strategy_class: Optional[Type] = None  # Override auto-discovery
     restore_strategy_class: Optional[Type] = None  # Override auto-discovery
-    storage_filename: Optional[str] = None        # Override convention
-    description: str = ""               # Documentation
+    storage_filename: Optional[str] = None  # Override convention
+    description: str = ""  # Documentation
 
 
 class BaseSaveStrategy(Protocol):
