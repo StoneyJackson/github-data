@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 from datetime import datetime
 
 from src.entities.milestones.save_strategy import MilestonesSaveStrategy
-from src.operations.restore.strategies.milestones_strategy import (
+from src.entities.milestones.restore_strategy import (
     MilestonesRestoreStrategy,
 )
 from src.entities.milestones.models import Milestone

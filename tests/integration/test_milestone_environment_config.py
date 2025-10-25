@@ -8,7 +8,7 @@ import os
 from unittest.mock import patch
 
 from src.entities.milestones.save_strategy import MilestonesSaveStrategy
-from src.operations.restore.strategies.milestones_strategy import (
+from src.entities.milestones.restore_strategy import (
     MilestonesRestoreStrategy,
 )
 from tests.shared.builders.config_builder import ConfigBuilder

@@ -13,10 +13,10 @@ from src.entities.issues.models import Issue
 from src.entities.pull_requests.models import PullRequest
 from src.entities.users.models import GitHubUser
 from src.entities.milestones.save_strategy import MilestonesSaveStrategy
-from src.operations.restore.strategies.milestones_strategy import (
+from src.entities.milestones.restore_strategy import (
     MilestonesRestoreStrategy,
 )
-from src.operations.restore.strategies.issues_strategy import IssuesRestoreStrategy
+from src.entities.issues.restore_strategy import IssuesRestoreStrategy
 from src.operations.restore.strategies.pull_requests_strategy import (
     PullRequestsRestoreStrategy,
 )
