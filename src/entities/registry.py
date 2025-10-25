@@ -152,39 +152,44 @@ class EntityRegistry:
         Raises:
             ValueError: If strict=True and explicit conflict detected
         """
-        for entity_name, entity in self._entities.items():
-            if not entity.is_enabled():
-                continue
-
-            # Check all dependencies
-            for dep_name in entity.get_dependencies():
-                if dep_name not in self._entities:
-                    logger.warning(
-                        f"Entity {entity_name} depends on unknown entity: {dep_name}"
-                    )
+        # Iterate until no more changes (for transitive dependencies)
+        changes_made = True
+        while changes_made:
+            changes_made = False
+            for entity_name, entity in self._entities.items():
+                if not entity.is_enabled():
                     continue
 
-                dep_entity = self._entities[dep_name]
-
-                if not dep_entity.is_enabled():
-                    # Dependency is disabled
-                    is_explicit = entity_name in self._explicitly_set
-
-                    if is_explicit and strict:
-                        # User explicitly enabled this but dependency is disabled
-                        raise ValueError(
-                            f"{entity.config.env_var}=true requires "
-                            f"{dep_entity.config.env_var}=true. "
-                            f"Cannot enable {entity_name} without {dep_name}."
-                        )
-                    else:
-                        # Auto-disable with warning
+                # Check all dependencies
+                for dep_name in entity.get_dependencies():
+                    if dep_name not in self._entities:
                         logger.warning(
-                            f"Warning: {entity.config.env_var} requires "
-                            f"{dep_entity.config.env_var}. Disabling {entity_name}."
+                            f"Entity {entity_name} depends on unknown entity: {dep_name}"
                         )
-                        entity.enabled = False
-                        break  # Stop checking other deps for this entity
+                        continue
+
+                    dep_entity = self._entities[dep_name]
+
+                    if not dep_entity.is_enabled():
+                        # Dependency is disabled
+                        is_explicit = entity_name in self._explicitly_set
+
+                        if is_explicit and strict:
+                            # User explicitly enabled this but dependency is disabled
+                            raise ValueError(
+                                f"{entity.config.env_var}=true requires "
+                                f"{dep_entity.config.env_var}=true. "
+                                f"Cannot enable {entity_name} without {dep_name}."
+                            )
+                        else:
+                            # Auto-disable with warning
+                            logger.warning(
+                                f"Warning: {entity.config.env_var} requires "
+                                f"{dep_entity.config.env_var}. Disabling {entity_name}."
+                            )
+                            entity.enabled = False
+                            changes_made = True  # Need another pass
+                            break  # Stop checking other deps for this entity
 
     def _topological_sort(
         self, entities: List[RegisteredEntity]

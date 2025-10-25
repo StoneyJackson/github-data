@@ -17,7 +17,7 @@ from src.entities.milestones.restore_strategy import (
     MilestonesRestoreStrategy,
 )
 from src.entities.issues.restore_strategy import IssuesRestoreStrategy
-from src.operations.restore.strategies.pull_requests_strategy import (
+from src.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
 
