@@ -12,7 +12,7 @@ from src.entities.milestones.models import Milestone
 from src.entities.issues.models import Issue
 from src.entities.pull_requests.models import PullRequest
 from src.entities.users.models import GitHubUser
-from src.operations.save.strategies.milestones_strategy import MilestonesSaveStrategy
+from src.entities.milestones.save_strategy import MilestonesSaveStrategy
 from src.operations.restore.strategies.milestones_strategy import (
     MilestonesRestoreStrategy,
 )

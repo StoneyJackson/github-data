@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime
 
-from src.operations.save.strategies.milestones_strategy import MilestonesSaveStrategy
+from src.entities.milestones.save_strategy import MilestonesSaveStrategy
 from src.operations.restore.strategies.milestones_strategy import (
     MilestonesRestoreStrategy,
 )

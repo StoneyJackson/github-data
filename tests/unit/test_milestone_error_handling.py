@@ -11,7 +11,7 @@ from datetime import datetime
 import json
 
 from src.github.service import GitHubService
-from src.operations.save.strategies.milestones_strategy import MilestonesSaveStrategy
+from src.entities.milestones.save_strategy import MilestonesSaveStrategy
 from src.operations.restore.strategies.milestones_strategy import (
     MilestonesRestoreStrategy,
 )

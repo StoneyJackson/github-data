@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 from src.git.service import GitRepositoryServiceImpl
 from src.entities.git_repositories.models import GitBackupFormat, GitOperationResult
-from src.operations.save.strategies.git_repository_strategy import GitRepositoryStrategy
+from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
 from src.operations.restore.strategies.git_repository_strategy import (
     GitRepositoryRestoreStrategy,
 )
@@ -25,7 +25,7 @@ class TestGitRepositoryIntegration:
     @pytest.fixture
     def git_strategy(self, git_service):
         """Create Git repository strategy."""
-        return GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        return GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
 
     @pytest.fixture
     def git_restore_strategy(self, git_service):
@@ -122,7 +122,7 @@ class TestGitRepositoryIntegration:
         self, git_service, storage_service_mock, temp_data_dir
     ):
         """Test integration between GitRepositoryService and GitRepositoryStrategy."""
-        strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
 
         # Mock the command executor to avoid actual Git operations
         with patch.object(
@@ -248,7 +248,7 @@ class TestGitRepositoryStorageIntegration:
     def test_git_data_directory_creation(self, temp_data_dir, storage_service_mock):
         """Test that git-repo directory is created properly."""
         git_service = GitRepositoryServiceImpl()
-        strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
 
         entities = [
             {
@@ -277,7 +277,7 @@ class TestGitRepositoryStorageIntegration:
     def test_git_backup_path_sanitization(self, temp_data_dir, storage_service_mock):
         """Test that repository names with slashes are properly sanitized for paths."""
         git_service = GitRepositoryServiceImpl()
-        strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
 
         entities = [
             {
@@ -310,7 +310,7 @@ class TestGitRepositoryStorageIntegration:
         git_service = GitRepositoryServiceImpl()
 
         # Test mirror format
-        mirror_strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        mirror_strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
         mirror_entities = [
             {
                 "repo_name": "test/repo",
@@ -346,7 +346,7 @@ class TestGitRepositoryWorkflow:
         git_service = GitRepositoryServiceImpl()
 
         # Step 1: Save operation
-        save_strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+        save_strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
         entities = [
             {
                 "repo_name": "test/repo",
