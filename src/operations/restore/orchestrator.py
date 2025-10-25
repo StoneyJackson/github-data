@@ -3,7 +3,7 @@
 import json
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from .strategy import RestoreEntityStrategy
-from src.operations.restore.strategies.labels_strategy import OverwriteConflictStrategy
+from src.entities.labels.restore_strategy import OverwriteConflictStrategy
 from src.config.settings import ApplicationConfig
 from src.operations.strategy_factory import StrategyFactory
 from src.operations.dependency_resolver import DependencyResolver
