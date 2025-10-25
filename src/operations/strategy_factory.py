@@ -1,285 +1,198 @@
-from typing import List, Optional, TYPE_CHECKING, Union, Set
+"""Factory for creating save and restore strategies."""
+
+import importlib
 import logging
-from src.config.settings import ApplicationConfig
+from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.github.protocols import RepositoryService
-    from src.git.protocols import GitRepositoryService
+    from src.config.settings import ApplicationConfig
+    from src.entities.registry import EntityRegistry
     from src.operations.save.strategy import SaveEntityStrategy
     from src.operations.restore.strategy import RestoreEntityStrategy
 
+logger = logging.getLogger(__name__)
+
 
 class StrategyFactory:
-    """Factory for creating operation strategies based on configuration."""
+    """Factory for creating entity strategies.
 
-    @staticmethod
-    def create_save_strategies(
-        config: ApplicationConfig, git_service: Optional["GitRepositoryService"] = None
-    ) -> List["SaveEntityStrategy"]:
-        """Create save strategies based on configuration."""
-        from src.operations.save.strategies.labels_strategy import LabelsSaveStrategy
-        from src.operations.save.strategies.milestones_strategy import (
-            MilestonesSaveStrategy,
-        )
-        from src.operations.save.strategies.issues_strategy import IssuesSaveStrategy
-        from src.operations.save.strategies.comments_strategy import (
-            CommentsSaveStrategy,
-        )
+    Supports loading strategies from both EntityRegistry (new system)
+    and ApplicationConfig (legacy system for unmigrated entities).
+    """
 
-        strategies: List["SaveEntityStrategy"] = [
-            LabelsSaveStrategy(),
-        ]
-
-        # Add milestone strategy before issues (dependency order)
-        if config.include_milestones:
-            strategies.append(MilestonesSaveStrategy())
-
-        if StrategyFactory._is_enabled(config.include_issues):
-            strategies.append(IssuesSaveStrategy(config.include_issues))
-
-        if (
-            StrategyFactory._is_enabled(config.include_issues)
-            and config.include_issue_comments
-        ):
-            # Determine if we're in selective mode
-            selective_mode = isinstance(config.include_issues, set)
-            strategies.append(CommentsSaveStrategy(selective_mode))
-        elif config.include_issue_comments and not StrategyFactory._is_enabled(
-            config.include_issues
-        ):
-            # Warn if issue comments are enabled but issues are not
-            logging.warning(
-                "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
-                "INCLUDE_ISSUES=true. Ignoring issue comments."
-            )
-
-        if StrategyFactory._is_enabled(config.include_pull_requests):
-            from src.operations.save.strategies.pull_requests_strategy import (
-                PullRequestsSaveStrategy,
-            )
-
-            strategies.append(PullRequestsSaveStrategy(config.include_pull_requests))
-
-            if config.include_pr_reviews:
-                from src.operations.save.strategies.pr_reviews_strategy import (
-                    PullRequestReviewsSaveStrategy,
-                )
-
-                # Determine if we're in selective mode
-                selective_mode = isinstance(config.include_pull_requests, set)
-                strategies.append(PullRequestReviewsSaveStrategy(selective_mode))
-
-            if config.include_pull_request_comments:
-                from src.operations.save.strategies.pr_comments_strategy import (
-                    PullRequestCommentsSaveStrategy,
-                )
-
-                # Determine if we're in selective mode
-                selective_mode = isinstance(config.include_pull_requests, set)
-                strategies.append(PullRequestCommentsSaveStrategy(selective_mode))
-
-            if config.include_pr_review_comments:
-                from src.operations.save.strategies.pr_review_comments_strategy import (
-                    PullRequestReviewCommentsSaveStrategy,
-                )
-
-                # Determine if we're in selective mode
-                selective_mode = isinstance(config.include_pull_requests, set)
-                strategies.append(PullRequestReviewCommentsSaveStrategy(selective_mode))
-        elif config.include_pull_request_comments:
-            # Warn if PR comments are enabled but PRs are not
-            logging.warning(
-                "Warning: INCLUDE_PULL_REQUEST_COMMENTS=true requires "
-                "INCLUDE_PULL_REQUESTS=true. Ignoring PR comments."
-            )
-
-        if config.include_sub_issues:
-            from src.operations.save.strategies.sub_issues_strategy import (
-                SubIssuesSaveStrategy,
-            )
-
-            strategies.append(SubIssuesSaveStrategy())
-
-        if config.include_git_repo and git_service:
-            from src.operations.save.strategies.git_repository_strategy import (
-                GitRepositoryStrategy,
-            )
-
-            strategies.append(GitRepositoryStrategy(git_service))
-
-        return strategies
-
-    @staticmethod
-    def create_restore_strategies(
-        config: ApplicationConfig,
-        github_service: Optional["RepositoryService"] = None,
-        include_original_metadata: bool = True,
-        git_service: Optional["GitRepositoryService"] = None,
-    ) -> List["RestoreEntityStrategy"]:
-        """Create restore strategies based on configuration."""
-        from src.operations.restore.strategies.labels_strategy import (
-            LabelsRestoreStrategy,
-            create_conflict_strategy,
-        )
-        from src.operations.restore.strategies.milestones_strategy import (
-            MilestonesRestoreStrategy,
-        )
-        from src.operations.restore.strategies.issues_strategy import (
-            IssuesRestoreStrategy,
-        )
-        from src.operations.restore.strategies.comments_strategy import (
-            CommentsRestoreStrategy,
-        )
-
-        strategies: List["RestoreEntityStrategy"] = []
-
-        # Create labels strategy with conflict resolution
-        if github_service:
-            conflict_strategy = create_conflict_strategy(
-                config.label_conflict_strategy, github_service
-            )
-            strategies.append(LabelsRestoreStrategy(conflict_strategy))
-
-        # Add milestone strategy before issues (dependency order)
-        if config.include_milestones:
-            strategies.append(MilestonesRestoreStrategy())
-
-        # Create issues strategy if enabled
-        if StrategyFactory._is_enabled(config.include_issues):
-            strategies.append(
-                IssuesRestoreStrategy(include_original_metadata, config.include_issues)
-            )
-
-        # Create comments strategy if enabled
-        if (
-            StrategyFactory._is_enabled(config.include_issues)
-            and config.include_issue_comments
-        ):
-            strategies.append(CommentsRestoreStrategy(include_original_metadata))
-        elif config.include_issue_comments and not StrategyFactory._is_enabled(
-            config.include_issues
-        ):
-            # Warn if issue comments are enabled but issues are not
-            logging.warning(
-                "Warning: INCLUDE_ISSUE_COMMENTS=true requires "
-                "INCLUDE_ISSUES=true. Ignoring issue comments."
-            )
-
-        # Create PR strategies if enabled
-        if StrategyFactory._is_enabled(config.include_pull_requests):
-            from src.operations.restore.strategies.pull_requests_strategy import (
-                PullRequestsRestoreStrategy,
-                create_conflict_strategy as create_pr_conflict_strategy,
-            )
-
-            pr_conflict_strategy = create_pr_conflict_strategy()
-
-            strategies.append(
-                PullRequestsRestoreStrategy(
-                    pr_conflict_strategy,
-                    include_original_metadata,
-                    config.include_pull_requests,
-                )
-            )
-
-            if config.include_pr_reviews:
-                from src.operations.restore.strategies.pr_reviews_strategy import (
-                    PullRequestReviewsRestoreStrategy,
-                )
-
-                strategies.append(
-                    PullRequestReviewsRestoreStrategy(include_original_metadata)
-                )
-
-            if config.include_pull_request_comments:
-                from src.operations.restore.strategies.pr_comments_strategy import (
-                    PullRequestCommentsRestoreStrategy,
-                    create_conflict_strategy as create_pr_comment_conflict_strategy,
-                )
-
-                pr_comment_conflict_strategy = create_pr_comment_conflict_strategy()
-                strategies.append(
-                    PullRequestCommentsRestoreStrategy(
-                        pr_comment_conflict_strategy, include_original_metadata
-                    )
-                )
-
-            if config.include_pr_review_comments:
-                from src.operations.restore.strategies.pr_review_comments_strategy import (  # noqa: E501
-                    PullRequestReviewCommentsRestoreStrategy,
-                )
-
-                strategies.append(
-                    PullRequestReviewCommentsRestoreStrategy(include_original_metadata)
-                )
-        elif config.include_pull_request_comments:
-            # Warn if PR comments are enabled but PRs are not
-            logging.warning(
-                "Warning: INCLUDE_PULL_REQUEST_COMMENTS=true requires "
-                "INCLUDE_PULL_REQUESTS=true. Ignoring PR comments."
-            )
-
-        # Create sub-issues strategy if enabled
-        if config.include_sub_issues:
-            from src.operations.restore.strategies.sub_issues_strategy import (
-                SubIssuesRestoreStrategy,
-            )
-
-            strategies.append(SubIssuesRestoreStrategy(include_original_metadata))
-
-        # Create git repository strategy if enabled
-        if config.include_git_repo and git_service:
-            from src.operations.restore.strategies.git_repository_strategy import (
-                GitRepositoryRestoreStrategy,
-            )
-
-            strategies.append(GitRepositoryRestoreStrategy(git_service))
-
-        return strategies
-
-    @staticmethod
-    def get_enabled_entities(config: ApplicationConfig) -> List[str]:
-        """Get list of entities that should be processed based on configuration."""
-        entities = ["labels"]
-
-        # Handle Union[bool, Set[int]] types - enabled if True or non-empty set
-        if StrategyFactory._is_enabled(config.include_issues):
-            entities.append("issues")
-
-        if (
-            StrategyFactory._is_enabled(config.include_issues)
-            and config.include_issue_comments
-        ):
-            entities.append("comments")
-
-        if StrategyFactory._is_enabled(config.include_pull_requests):
-            entities.append("pull_requests")
-            if config.include_pr_reviews:
-                entities.append("pr_reviews")
-            if config.include_pull_request_comments:
-                entities.append("pr_comments")
-            if config.include_pr_review_comments:
-                entities.append("pr_review_comments")
-
-        if config.include_sub_issues:
-            entities.append("sub_issues")
-
-        if config.include_git_repo:
-            entities.append("git_repository")
-
-        return entities
-
-    @staticmethod
-    def _is_enabled(value: Union[bool, Set[int]]) -> bool:
-        """Check if a Union[bool, Set[int]] value is enabled.
+    def __init__(
+        self,
+        registry: Optional["EntityRegistry"] = None,
+        config: Optional["ApplicationConfig"] = None
+    ):
+        """Initialize strategy factory.
 
         Args:
-            value: Boolean or set of integers
+            registry: EntityRegistry for migrated entities
+            config: ApplicationConfig for unmigrated entities (legacy)
+        """
+        self.registry = registry
+        self.config = config
+
+    def load_save_strategy(self, entity_name: str) -> Optional["SaveEntityStrategy"]:
+        """Load save strategy for entity by name.
+
+        Args:
+            entity_name: Name of entity (e.g., "labels", "issues")
 
         Returns:
-            True if enabled (True boolean or non-empty set), False otherwise
+            Save strategy instance or None if not found
         """
-        if isinstance(value, bool):
-            return value
-        else:  # isinstance(value, set)
-            return len(value) > 0
+        # Try loading from registry first (migrated entities)
+        if self.registry:
+            try:
+                entity = self.registry.get_entity(entity_name)
+                return self._load_save_strategy_from_registry(entity)
+            except ValueError:
+                # Entity not in registry, try ApplicationConfig
+                pass
+
+        # Fall back to ApplicationConfig (unmigrated entities)
+        if self.config:
+            return self._load_save_strategy_from_config(entity_name)
+
+        return None
+
+    def _load_save_strategy_from_registry(self, entity) -> Optional["SaveEntityStrategy"]:
+        """Load save strategy from registry entity using convention.
+
+        Args:
+            entity: RegisteredEntity instance
+
+        Returns:
+            Save strategy instance or None
+        """
+        # Check for override in entity config
+        if entity.config.save_strategy_class:
+            return entity.config.save_strategy_class()
+
+        # Use convention: src.entities.{dir_name}.save_strategy.{Name}SaveStrategy
+        entity_name = entity.config.name
+        dir_name = self._to_directory_name(entity_name)
+        module_name = f"src.entities.{dir_name}.save_strategy"
+        class_name = self._to_class_name(entity_name) + "SaveStrategy"
+
+        try:
+            module = importlib.import_module(module_name)
+            strategy_class = getattr(module, class_name)
+            return strategy_class()
+        except (ImportError, AttributeError) as e:
+            logger.warning(
+                f"Could not load save strategy for {entity_name}: {e}"
+            )
+            return None
+
+    def _load_save_strategy_from_config(self, entity_name: str) -> Optional["SaveEntityStrategy"]:
+        """Load save strategy from ApplicationConfig (legacy).
+
+        Args:
+            entity_name: Entity name
+
+        Returns:
+            Save strategy instance or None
+        """
+        # TODO: Implement ApplicationConfig loading for unmigrated entities
+        logger.warning(f"ApplicationConfig loading not yet implemented for {entity_name}")
+        return None
+
+    def load_restore_strategy(self, entity_name: str, **kwargs) -> Optional["RestoreEntityStrategy"]:
+        """Load restore strategy for entity by name.
+
+        Args:
+            entity_name: Name of entity (e.g., "labels", "issues")
+            **kwargs: Additional arguments for strategy instantiation
+
+        Returns:
+            Restore strategy instance or None if not found
+        """
+        # Try loading from registry first (migrated entities)
+        if self.registry:
+            try:
+                entity = self.registry.get_entity(entity_name)
+                return self._load_restore_strategy_from_registry(entity, **kwargs)
+            except ValueError:
+                # Entity not in registry, try ApplicationConfig
+                pass
+
+        # Fall back to ApplicationConfig (unmigrated entities)
+        if self.config:
+            return self._load_restore_strategy_from_config(entity_name, **kwargs)
+
+        return None
+
+    def _load_restore_strategy_from_registry(self, entity, **kwargs) -> Optional["RestoreEntityStrategy"]:
+        """Load restore strategy from registry entity using convention.
+
+        Args:
+            entity: RegisteredEntity instance
+            **kwargs: Additional arguments for strategy instantiation
+
+        Returns:
+            Restore strategy instance or None
+        """
+        # Check for override in entity config
+        if entity.config.restore_strategy_class:
+            return entity.config.restore_strategy_class(**kwargs)
+
+        # Use convention: src.entities.{dir_name}.restore_strategy.{Name}RestoreStrategy
+        entity_name = entity.config.name
+        dir_name = self._to_directory_name(entity_name)
+        module_name = f"src.entities.{dir_name}.restore_strategy"
+        class_name = self._to_class_name(entity_name) + "RestoreStrategy"
+
+        try:
+            module = importlib.import_module(module_name)
+            strategy_class = getattr(module, class_name)
+            return strategy_class(**kwargs)
+        except (ImportError, AttributeError) as e:
+            logger.warning(
+                f"Could not load restore strategy for {entity_name}: {e}"
+            )
+            return None
+
+    def _load_restore_strategy_from_config(self, entity_name: str, **kwargs) -> Optional["RestoreEntityStrategy"]:
+        """Load restore strategy from ApplicationConfig (legacy).
+
+        Args:
+            entity_name: Entity name
+            **kwargs: Additional arguments for strategy instantiation
+
+        Returns:
+            Restore strategy instance or None
+        """
+        # TODO: Implement ApplicationConfig loading for unmigrated entities
+        logger.warning(f"ApplicationConfig loading not yet implemented for {entity_name}")
+        return None
+
+    def _to_directory_name(self, entity_name: str) -> str:
+        """Convert entity name to directory name.
+
+        Args:
+            entity_name: Entity name (e.g., "git_repository", "labels")
+
+        Returns:
+            Directory name (e.g., "git_repositories", "labels")
+        """
+        # Special case: git_repository -> git_repositories (plural)
+        if entity_name == "git_repository":
+            return "git_repositories"
+        # Default: use entity name as-is
+        return entity_name
+
+    def _to_class_name(self, entity_name: str) -> str:
+        """Convert entity name to class name.
+
+        Args:
+            entity_name: Snake case name (e.g., "pr_review_comments")
+
+        Returns:
+            PascalCase name (e.g., "PrReviewComments")
+        """
+        # Handle special case: git_repository -> GitRepository
+        parts = entity_name.split("_")
+        return "".join(word.capitalize() for word in parts)

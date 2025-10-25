@@ -42,7 +42,7 @@ def test_git_repository_entity_enabled_by_default():
 def test_git_repository_save_strategy_exists():
     """Test that git_repository save strategy exists at expected location."""
     module = importlib.import_module("src.entities.git_repositories.save_strategy")
-    strategy_class = getattr(module, "GitRepositoryStrategy")
+    strategy_class = getattr(module, "GitRepositorySaveStrategy")
     assert strategy_class is not None
 
 
