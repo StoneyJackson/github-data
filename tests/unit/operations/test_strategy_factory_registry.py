@@ -56,3 +56,23 @@ def test_strategy_factory_loads_restore_strategy():
     strategy = factory.load_restore_strategy("labels", conflict_strategy=LabelConflictStrategy.OVERWRITE)
 
     assert strategy is not None
+
+
+@pytest.mark.unit
+def test_strategy_factory_loads_all_batch1_and_batch2():
+    """Test StrategyFactory loads strategies for all Batch 1+2 entities."""
+    registry = EntityRegistry()
+    factory = StrategyFactory(registry=registry, config=None)
+
+    # Test entities that don't require special constructor parameters
+    simple_entities = ["labels", "milestones", "issues", "comments", "sub_issues"]
+
+    for entity_name in simple_entities:
+        strategy = factory.load_save_strategy(entity_name)
+        assert strategy is not None, f"Failed to load {entity_name}"
+        assert strategy.get_entity_name() == entity_name
+
+    # Verify git_repository entity is discovered (even though it needs git_service param)
+    git_entity = registry.get_entity("git_repository")
+    assert git_entity is not None
+    assert git_entity.config.name == "git_repository"
