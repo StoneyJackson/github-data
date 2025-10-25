@@ -8,10 +8,10 @@ from unittest.mock import Mock
 
 from src.entities.pull_requests.models import PullRequest
 from src.entities.milestones.models import Milestone
-from src.operations.save.strategies.pull_requests_strategy import (
+from src.entities.pull_requests.save_strategy import (
     PullRequestsSaveStrategy,
 )
-from src.operations.restore.strategies.pull_requests_strategy import (
+from src.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
 from src.operations.restore.strategy import RestoreConflictStrategy
