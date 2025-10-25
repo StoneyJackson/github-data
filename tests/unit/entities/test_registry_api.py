@@ -6,6 +6,7 @@ from src.entities.base import RegisteredEntity
 @pytest.fixture
 def populated_registry():
     """Registry with test entities."""
+
     class LabelsConfig:
         name = "labels"
         env_var = "INCLUDE_LABELS"
