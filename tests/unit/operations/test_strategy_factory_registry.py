@@ -10,20 +10,17 @@ from src.entities.registry import EntityRegistry
 def test_strategy_factory_accepts_registry():
     """Test that StrategyFactory accepts EntityRegistry parameter."""
     registry = EntityRegistry()
-    config = Mock()  # ApplicationConfig for unmigrated entities
 
-    factory = StrategyFactory(registry=registry, config=config)
+    factory = StrategyFactory(registry=registry)
 
     assert factory.registry == registry
-    assert factory.config == config
 
 
 @pytest.mark.unit
 def test_strategy_factory_loads_labels_from_registry():
     """Test that StrategyFactory loads labels strategy from registry."""
     registry = EntityRegistry()
-    config = Mock()
-    factory = StrategyFactory(registry=registry, config=config)
+    factory = StrategyFactory(registry=registry)
 
     strategy = factory.load_save_strategy("labels")
 
@@ -35,8 +32,7 @@ def test_strategy_factory_loads_labels_from_registry():
 def test_strategy_factory_loads_milestones_from_registry():
     """Test that StrategyFactory loads milestones strategy from registry."""
     registry = EntityRegistry()
-    config = Mock()
-    factory = StrategyFactory(registry=registry, config=config)
+    factory = StrategyFactory(registry=registry)
 
     strategy = factory.load_save_strategy("milestones")
 
@@ -50,8 +46,7 @@ def test_strategy_factory_loads_restore_strategy():
     from src.entities.labels.conflict_strategies import LabelConflictStrategy
 
     registry = EntityRegistry()
-    config = Mock()
-    factory = StrategyFactory(registry=registry, config=config)
+    factory = StrategyFactory(registry=registry)
 
     strategy = factory.load_restore_strategy(
         "labels", conflict_strategy=LabelConflictStrategy.OVERWRITE
@@ -64,7 +59,7 @@ def test_strategy_factory_loads_restore_strategy():
 def test_strategy_factory_loads_all_batch1_and_batch2():
     """Test StrategyFactory loads strategies for all Batch 1+2 entities."""
     registry = EntityRegistry()
-    factory = StrategyFactory(registry=registry, config=None)
+    factory = StrategyFactory(registry=registry)
 
     # Test entities that don't require special constructor parameters
     simple_entities = ["labels", "milestones", "issues", "comments", "sub_issues"]
@@ -85,7 +80,7 @@ def test_strategy_factory_loads_all_batch1_and_batch2():
 def test_strategy_factory_loads_all_10_entities():
     """Test StrategyFactory loads all 10 migrated entities."""
     registry = EntityRegistry()
-    factory = StrategyFactory(registry=registry, config=None)
+    factory = StrategyFactory(registry=registry)
 
     # Entities that can be loaded without special constructor parameters
     simple_entities = [
@@ -109,3 +104,46 @@ def test_strategy_factory_loads_all_10_entities():
     git_entity = registry.get_entity("git_repository")
     assert git_entity is not None
     assert git_entity.config.name == "git_repository"
+
+
+@pytest.mark.unit
+def test_strategy_factory_works_without_config():
+    """Test StrategyFactory works with only EntityRegistry."""
+    registry = EntityRegistry()
+    factory = StrategyFactory(registry=registry)
+
+    # Should work without config parameter
+    assert factory.registry == registry
+
+
+@pytest.mark.unit
+def test_strategy_factory_create_save_strategies_from_registry():
+    """Test factory creates save strategies for enabled entities."""
+    registry = EntityRegistry()
+    factory = StrategyFactory(registry=registry)
+
+    strategies = factory.create_save_strategies()
+
+    # Should return strategies for all enabled entities except git_repository (needs git_service)
+    strategy_names = [s.get_entity_name() for s in strategies]
+    assert "labels" in strategy_names
+    assert "milestones" in strategy_names
+    assert "git_repository" not in strategy_names  # Skipped without git_service
+    assert len(strategy_names) == 9  # 9 entities when git_service not provided
+
+
+@pytest.mark.unit
+def test_strategy_factory_respects_disabled_entities():
+    """Test factory skips disabled entities."""
+    import os
+
+    os.environ["INCLUDE_LABELS"] = "false"
+    registry = EntityRegistry.from_environment()
+    factory = StrategyFactory(registry=registry)
+
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+
+    assert "labels" not in strategy_names
+
+    del os.environ["INCLUDE_LABELS"]
