@@ -7,8 +7,8 @@ import pytest
 
 from src.entities.issues.models import Issue
 from src.entities.milestones.models import Milestone
-from src.operations.save.strategies.issues_strategy import IssuesSaveStrategy
-from src.operations.restore.strategies.issues_strategy import IssuesRestoreStrategy
+from src.entities.issues.save_strategy import IssuesSaveStrategy
+from src.entities.issues.restore_strategy import IssuesRestoreStrategy
 
 # Required markers following docs/testing.md
 pytestmark = [
