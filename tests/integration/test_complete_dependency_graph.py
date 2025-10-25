@@ -43,7 +43,9 @@ def test_complete_dependency_graph():
 
     assert registry.get_entity("pull_requests").get_dependencies() == ["milestones"]
     assert registry.get_entity("pr_reviews").get_dependencies() == ["pull_requests"]
-    assert registry.get_entity("pr_review_comments").get_dependencies() == ["pr_reviews"]
+    assert registry.get_entity("pr_review_comments").get_dependencies() == [
+        "pr_reviews"
+    ]
     assert registry.get_entity("pr_comments").get_dependencies() == ["pull_requests"]
 
 

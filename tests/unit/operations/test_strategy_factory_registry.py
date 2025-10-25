@@ -53,7 +53,9 @@ def test_strategy_factory_loads_restore_strategy():
     config = Mock()
     factory = StrategyFactory(registry=registry, config=config)
 
-    strategy = factory.load_restore_strategy("labels", conflict_strategy=LabelConflictStrategy.OVERWRITE)
+    strategy = factory.load_restore_strategy(
+        "labels", conflict_strategy=LabelConflictStrategy.OVERWRITE
+    )
 
     assert strategy is not None
 
@@ -72,7 +74,8 @@ def test_strategy_factory_loads_all_batch1_and_batch2():
         assert strategy is not None, f"Failed to load {entity_name}"
         assert strategy.get_entity_name() == entity_name
 
-    # Verify git_repository entity is discovered (even though it needs git_service param)
+    # Verify git_repository entity is discovered
+    # (even though it needs git_service param)
     git_entity = registry.get_entity("git_repository")
     assert git_entity is not None
     assert git_entity.config.name == "git_repository"
@@ -86,9 +89,15 @@ def test_strategy_factory_loads_all_10_entities():
 
     # Entities that can be loaded without special constructor parameters
     simple_entities = [
-        "labels", "milestones",
-        "issues", "comments", "sub_issues",
-        "pull_requests", "pr_reviews", "pr_review_comments", "pr_comments"
+        "labels",
+        "milestones",
+        "issues",
+        "comments",
+        "sub_issues",
+        "pull_requests",
+        "pr_reviews",
+        "pr_review_comments",
+        "pr_comments",
     ]
 
     for entity_name in simple_entities:

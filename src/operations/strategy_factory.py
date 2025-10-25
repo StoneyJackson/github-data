@@ -2,11 +2,11 @@
 
 import importlib
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Optional, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from src.config.settings import ApplicationConfig
-    from src.entities.registry import EntityRegistry
+    from src.entities.registry import EntityRegistry, RegisteredEntity
     from src.operations.save.strategy import SaveEntityStrategy
     from src.operations.restore.strategy import RestoreEntityStrategy
 
@@ -23,7 +23,7 @@ class StrategyFactory:
     def __init__(
         self,
         registry: Optional["EntityRegistry"] = None,
-        config: Optional["ApplicationConfig"] = None
+        config: Optional["ApplicationConfig"] = None,
     ):
         """Initialize strategy factory.
 
@@ -58,7 +58,9 @@ class StrategyFactory:
 
         return None
 
-    def _load_save_strategy_from_registry(self, entity) -> Optional["SaveEntityStrategy"]:
+    def _load_save_strategy_from_registry(
+        self, entity: "RegisteredEntity"
+    ) -> Optional["SaveEntityStrategy"]:
         """Load save strategy from registry entity using convention.
 
         Args:
@@ -75,24 +77,24 @@ class StrategyFactory:
         # Use explicit class name if provided, otherwise use naming convention
         if entity.config.save_strategy_class:
             if isinstance(entity.config.save_strategy_class, str):
-                class_name = entity.config.save_strategy_class
+                class_name = entity.config.save_strategy_class  # type: ignore[unreachable]
             else:
                 # It's already a class, instantiate it
-                return entity.config.save_strategy_class()
+                return cast("SaveEntityStrategy", entity.config.save_strategy_class())
         else:
             class_name = self._to_class_name(entity_name) + "SaveStrategy"
 
         try:
             module = importlib.import_module(module_name)
             strategy_class = getattr(module, class_name)
-            return strategy_class()
+            return cast("SaveEntityStrategy", strategy_class())
         except (ImportError, AttributeError) as e:
-            logger.warning(
-                f"Could not load save strategy for {entity_name}: {e}"
-            )
+            logger.warning(f"Could not load save strategy for {entity_name}: {e}")
             return None
 
-    def _load_save_strategy_from_config(self, entity_name: str) -> Optional["SaveEntityStrategy"]:
+    def _load_save_strategy_from_config(
+        self, entity_name: str
+    ) -> Optional["SaveEntityStrategy"]:
         """Load save strategy from ApplicationConfig (legacy).
 
         Args:
@@ -102,10 +104,14 @@ class StrategyFactory:
             Save strategy instance or None
         """
         # TODO: Implement ApplicationConfig loading for unmigrated entities
-        logger.warning(f"ApplicationConfig loading not yet implemented for {entity_name}")
+        logger.warning(
+            f"ApplicationConfig loading not yet implemented for {entity_name}"
+        )
         return None
 
-    def load_restore_strategy(self, entity_name: str, **kwargs) -> Optional["RestoreEntityStrategy"]:
+    def load_restore_strategy(
+        self, entity_name: str, **kwargs: Any
+    ) -> Optional["RestoreEntityStrategy"]:
         """Load restore strategy for entity by name.
 
         Args:
@@ -130,7 +136,9 @@ class StrategyFactory:
 
         return None
 
-    def _load_restore_strategy_from_registry(self, entity, **kwargs) -> Optional["RestoreEntityStrategy"]:
+    def _load_restore_strategy_from_registry(
+        self, entity: "RegisteredEntity", **kwargs: Any
+    ) -> Optional["RestoreEntityStrategy"]:
         """Load restore strategy from registry entity using convention.
 
         Args:
@@ -147,24 +155,26 @@ class StrategyFactory:
         # Use explicit class name if provided, otherwise use naming convention
         if entity.config.restore_strategy_class:
             if isinstance(entity.config.restore_strategy_class, str):
-                class_name = entity.config.restore_strategy_class
+                class_name = entity.config.restore_strategy_class  # type: ignore[unreachable]
             else:
                 # It's already a class, instantiate it
-                return entity.config.restore_strategy_class(**kwargs)
+                return cast(
+                    "RestoreEntityStrategy", entity.config.restore_strategy_class(**kwargs)
+                )
         else:
             class_name = self._to_class_name(entity_name) + "RestoreStrategy"
 
         try:
             module = importlib.import_module(module_name)
             strategy_class = getattr(module, class_name)
-            return strategy_class(**kwargs)
+            return cast("RestoreEntityStrategy", strategy_class(**kwargs))
         except (ImportError, AttributeError) as e:
-            logger.warning(
-                f"Could not load restore strategy for {entity_name}: {e}"
-            )
+            logger.warning(f"Could not load restore strategy for {entity_name}: {e}")
             return None
 
-    def _load_restore_strategy_from_config(self, entity_name: str, **kwargs) -> Optional["RestoreEntityStrategy"]:
+    def _load_restore_strategy_from_config(
+        self, entity_name: str, **kwargs: Any
+    ) -> Optional["RestoreEntityStrategy"]:
         """Load restore strategy from ApplicationConfig (legacy).
 
         Args:
@@ -175,7 +185,9 @@ class StrategyFactory:
             Restore strategy instance or None
         """
         # TODO: Implement ApplicationConfig loading for unmigrated entities
-        logger.warning(f"ApplicationConfig loading not yet implemented for {entity_name}")
+        logger.warning(
+            f"ApplicationConfig loading not yet implemented for {entity_name}"
+        )
         return None
 
     def _to_directory_name(self, entity_name: str) -> str:
