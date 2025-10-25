@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from src.github.protocols import RepositoryService
 
 
-class GitRepositoryStrategy(SaveEntityStrategy):
+class GitRepositorySaveStrategy(SaveEntityStrategy):
     """Strategy for saving Git repository data."""
 
     def __init__(
