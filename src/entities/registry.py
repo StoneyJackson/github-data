@@ -164,7 +164,8 @@ class EntityRegistry:
                 for dep_name in entity.get_dependencies():
                     if dep_name not in self._entities:
                         logger.warning(
-                            f"Entity {entity_name} depends on unknown entity: {dep_name}"
+                            f"Entity {entity_name} depends on unknown "
+                            f"entity: {dep_name}"
                         )
                         continue
 

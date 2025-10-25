@@ -1,10 +1,6 @@
 """Pull requests entity configuration for EntityRegistry."""
 
-from typing import Union, Set, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
-    from src.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
+from typing import Union, Set
 
 
 class PullRequestsEntityConfig:
