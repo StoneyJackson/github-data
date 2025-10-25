@@ -76,3 +76,27 @@ def test_strategy_factory_loads_all_batch1_and_batch2():
     git_entity = registry.get_entity("git_repository")
     assert git_entity is not None
     assert git_entity.config.name == "git_repository"
+
+
+@pytest.mark.unit
+def test_strategy_factory_loads_all_10_entities():
+    """Test StrategyFactory loads all 10 migrated entities."""
+    registry = EntityRegistry()
+    factory = StrategyFactory(registry=registry, config=None)
+
+    # Entities that can be loaded without special constructor parameters
+    simple_entities = [
+        "labels", "milestones",
+        "issues", "comments", "sub_issues",
+        "pull_requests", "pr_reviews", "pr_review_comments", "pr_comments"
+    ]
+
+    for entity_name in simple_entities:
+        strategy = factory.load_save_strategy(entity_name)
+        assert strategy is not None, f"Failed to load {entity_name}"
+        assert strategy.get_entity_name() == entity_name
+
+    # Verify git_repository is discovered (even though it needs git_service param)
+    git_entity = registry.get_entity("git_repository")
+    assert git_entity is not None
+    assert git_entity.config.name == "git_repository"

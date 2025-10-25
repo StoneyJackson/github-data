@@ -12,7 +12,7 @@ class PrReviewCommentsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["pr_reviews"]  # Review comments belong to reviews
-    save_strategy_class = None
-    restore_strategy_class = None
+    save_strategy_class = "PullRequestReviewCommentsSaveStrategy"
+    restore_strategy_class = "PullRequestReviewCommentsRestoreStrategy"
     storage_filename = None
     description = "Code review inline comments"
