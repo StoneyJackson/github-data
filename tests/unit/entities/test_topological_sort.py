@@ -5,6 +5,7 @@ from src.entities.base import RegisteredEntity
 
 def test_topological_sort_orders_by_dependencies():
     """Test entities sorted by dependency order."""
+
     class LabelsConfig:
         name = "labels"
         dependencies = []
@@ -43,6 +44,7 @@ def test_topological_sort_orders_by_dependencies():
 
 def test_topological_sort_detects_cycles():
     """Test cycle detection in dependencies."""
+
     class AConfig:
         name = "a"
         dependencies = ["b"]
