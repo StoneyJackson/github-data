@@ -8,7 +8,7 @@ from src.operations.restore.strategy import (
     RestoreConflictStrategy,
 )
 from src.entities.labels.models import Label
-from src.conflict_strategies import (
+from src.entities.labels.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,
     detect_label_conflicts,

@@ -13,7 +13,7 @@ from src.operations.restore.restore import restore_repository_data_with_strategy
 from src.github import create_github_service
 from src.storage import create_storage_service
 
-from src.conflict_strategies import (
+from src.entities.labels.conflict_strategies import (
     LabelConflictStrategy,
     parse_conflict_strategy,
     detect_label_conflicts,
