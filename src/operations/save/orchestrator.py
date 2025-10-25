@@ -2,85 +2,90 @@
 
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from .strategy import SaveEntityStrategy
-from src.config.settings import ApplicationConfig
 from src.operations.strategy_factory import StrategyFactory
-from src.operations.dependency_resolver import DependencyResolver
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
     from src.github.protocols import RepositoryService
     from src.git.protocols import GitRepositoryService
+    from src.entities.registry import EntityRegistry
 
 
 class StrategyBasedSaveOrchestrator:
-    """Orchestrator that executes save operations using registered strategies."""
+    """Orchestrator that executes save operations using EntityRegistry."""
 
     def __init__(
         self,
-        config: ApplicationConfig,
+        registry: "EntityRegistry",
         github_service: "RepositoryService",
         storage_service: "StorageService",
         git_service: Optional["GitRepositoryService"] = None,
     ) -> None:
-        self._config = config
+        """Initialize save orchestrator.
+
+        Args:
+            registry: EntityRegistry for entity management
+            github_service: GitHub API service
+            storage_service: Storage service for writing data
+            git_service: Optional git service for repository cloning
+        """
+        self._registry = registry
         self._github_service = github_service
         self._storage_service = storage_service
-        self._strategies: Dict[str, SaveEntityStrategy] = {}
+        self._git_service = git_service
         self._context: Dict[str, Any] = {}
-        self._dependency_resolver = DependencyResolver()
 
-        # Auto-register strategies based on configuration
-        for strategy in StrategyFactory.create_save_strategies(config, git_service):
-            self.register_strategy(strategy)
+        # Create strategy factory
+        self._factory = StrategyFactory(registry=registry)
 
-    def register_strategy(self, strategy: SaveEntityStrategy) -> None:
-        """Register an entity save strategy."""
-        self._strategies[strategy.get_entity_name()] = strategy
+        # Load strategies for enabled entities
+        self._strategies = self._factory.create_save_strategies(git_service=git_service)
 
     def execute_save(
         self,
         repo_name: str,
         output_path: str,
-        requested_entities: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
-        """Execute save operation using registered strategies."""
-        if requested_entities is None:
-            requested_entities = StrategyFactory.get_enabled_entities(self._config)
+        """Execute save operation using registered strategies.
 
+        Args:
+            repo_name: Repository name (owner/repo)
+            output_path: Output directory path
+
+        Returns:
+            List of result dictionaries for each entity
+        """
         results = []
 
-        # Resolve dependency order
-        execution_order = self._dependency_resolver.resolve_execution_order(
-            self._strategies, requested_entities
-        )
-
-        # Execute strategies in dependency order
-        for entity_name in execution_order:
-            if entity_name in self._strategies:
-                result = self._execute_strategy(entity_name, repo_name, output_path)
-                results.append(result)
+        # Execute strategies in dependency order (already sorted by registry)
+        for strategy in self._strategies:
+            entity_name = strategy.get_entity_name()
+            result = self._execute_strategy(strategy, repo_name, output_path)
+            results.append(result)
+            print(f"Saved {entity_name}: {result['count']} items")
 
         return results
 
     def _is_selective_mode(self, entity_name: str) -> bool:
-        """Check if we're in selective mode for the given entity type."""
-        if entity_name == "issues":
-            return isinstance(self._config.include_issues, set)
-        elif entity_name == "pull_requests":
-            return isinstance(self._config.include_pull_requests, set)
-        elif entity_name == "comments":
-            # Comments depend on issues, so if issues are selective, comments are too
-            return isinstance(self._config.include_issues, set)
-        elif entity_name == "pr_comments":
-            # PR comments depend on PRs, so if PRs are selective, PR comments are too
-            return isinstance(self._config.include_pull_requests, set)
-        return False
+        """Check if entity is in selective mode (Set[int] instead of bool).
+
+        Args:
+            entity_name: Entity name to check
+
+        Returns:
+            True if entity has Set[int] value (selective mode)
+        """
+        try:
+            entity = self._registry.get_entity(entity_name)
+            return isinstance(entity.enabled, set)
+        except ValueError:
+            return False
 
     def _execute_strategy(
-        self, entity_name: str, repo_name: str, output_path: str
+        self, strategy: SaveEntityStrategy, repo_name: str, output_path: str
     ) -> Dict[str, Any]:
         """Execute a single entity save strategy."""
-        strategy = self._strategies[entity_name]
+        entity_name = strategy.get_entity_name()
 
         try:
             # Read data
@@ -100,6 +105,7 @@ class StrategyBasedSaveOrchestrator:
                     "success": True,
                     "entities_processed": len(entities),
                     "entities_saved": 0,
+                    "count": 0,
                     "data_type": entity_name,
                     "items_processed": 0,
                     "execution_time_seconds": 0,
@@ -131,6 +137,7 @@ class StrategyBasedSaveOrchestrator:
                 "success": True,
                 "entities_processed": len(entities),
                 "entities_saved": len(processed_entities),
+                "count": len(processed_entities),
                 **result,
             }
 
@@ -141,4 +148,5 @@ class StrategyBasedSaveOrchestrator:
                 "error": str(e),
                 "entities_processed": 0,
                 "entities_saved": 0,
+                "count": 0,
             }
