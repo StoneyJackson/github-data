@@ -68,14 +68,19 @@ class StrategyFactory:
             Save strategy instance or None
         """
         # Check for override in entity config
-        if entity.config.save_strategy_class:
-            return entity.config.save_strategy_class()
-
-        # Use convention: src.entities.{dir_name}.save_strategy.{Name}SaveStrategy
         entity_name = entity.config.name
         dir_name = self._to_directory_name(entity_name)
         module_name = f"src.entities.{dir_name}.save_strategy"
-        class_name = self._to_class_name(entity_name) + "SaveStrategy"
+
+        # Use explicit class name if provided, otherwise use naming convention
+        if entity.config.save_strategy_class:
+            if isinstance(entity.config.save_strategy_class, str):
+                class_name = entity.config.save_strategy_class
+            else:
+                # It's already a class, instantiate it
+                return entity.config.save_strategy_class()
+        else:
+            class_name = self._to_class_name(entity_name) + "SaveStrategy"
 
         try:
             module = importlib.import_module(module_name)
@@ -135,15 +140,19 @@ class StrategyFactory:
         Returns:
             Restore strategy instance or None
         """
-        # Check for override in entity config
-        if entity.config.restore_strategy_class:
-            return entity.config.restore_strategy_class(**kwargs)
-
-        # Use convention: src.entities.{dir_name}.restore_strategy.{Name}RestoreStrategy
         entity_name = entity.config.name
         dir_name = self._to_directory_name(entity_name)
         module_name = f"src.entities.{dir_name}.restore_strategy"
-        class_name = self._to_class_name(entity_name) + "RestoreStrategy"
+
+        # Use explicit class name if provided, otherwise use naming convention
+        if entity.config.restore_strategy_class:
+            if isinstance(entity.config.restore_strategy_class, str):
+                class_name = entity.config.restore_strategy_class
+            else:
+                # It's already a class, instantiate it
+                return entity.config.restore_strategy_class(**kwargs)
+        else:
+            class_name = self._to_class_name(entity_name) + "RestoreStrategy"
 
         try:
             module = importlib.import_module(module_name)

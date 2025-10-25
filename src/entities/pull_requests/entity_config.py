@@ -1,6 +1,10 @@
 """Pull requests entity configuration for EntityRegistry."""
 
-from typing import Union, Set
+from typing import Union, Set, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+    from src.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
 
 
 class PullRequestsEntityConfig:
@@ -15,7 +19,7 @@ class PullRequestsEntityConfig:
     default_value = True
     value_type = Union[bool, Set[int]]
     dependencies = ["milestones"]  # PRs can reference milestones
-    save_strategy_class = None
-    restore_strategy_class = None
+    save_strategy_class = "PullRequestsSaveStrategy"
+    restore_strategy_class = "PullRequestsRestoreStrategy"
     storage_filename = None
     description = "Pull requests with milestone references"
