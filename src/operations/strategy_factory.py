@@ -57,6 +57,7 @@ class StrategyFactory:
 
         Args:
             **kwargs: Additional arguments for strategy instantiation
+                     (e.g., include_original_metadata, git_service)
 
         Returns:
             List of restore strategy instances in dependency order
@@ -67,7 +68,17 @@ class StrategyFactory:
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
-            strategy = self.load_restore_strategy(entity.config.name, **kwargs)
+            # Special handling for git_repository - needs git_service, not other kwargs
+            if entity.config.name == "git_repository":
+                git_service = kwargs.get("git_service")
+                if git_service is None:
+                    continue  # Skip if no git_service provided
+                strategy = self.load_restore_strategy(entity.config.name, git_service=git_service)
+            else:
+                # Filter out git_service from kwargs for other entities
+                filtered_kwargs = {k: v for k, v in kwargs.items() if k != "git_service"}
+                strategy = self.load_restore_strategy(entity.config.name, **filtered_kwargs)
+
             if strategy:
                 strategies.append(strategy)
 
@@ -159,6 +170,11 @@ class StrategyFactory:
             return cast("RestoreEntityStrategy", strategy_class(**kwargs))
         except (ImportError, AttributeError) as e:
             logger.warning(f"Could not load restore strategy for {entity_name}: {e}")
+            return None
+        except TypeError as e:
+            # Strategy requires different constructor parameters
+            # This happens when entity config doesn't match strategy signature
+            logger.warning(f"Could not instantiate restore strategy for {entity_name}: {e}")
             return None
 
     def _to_directory_name(self, entity_name: str) -> str:
