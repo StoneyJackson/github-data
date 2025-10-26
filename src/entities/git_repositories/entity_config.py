@@ -29,18 +29,13 @@ class GitRepositoryEntityConfig:
                 - git_service: GitRepositoryService instance (REQUIRED)
 
         Returns:
-            GitRepositorySaveStrategy instance
-
-        Raises:
-            ValueError: If git_service not provided
+            GitRepositorySaveStrategy instance, or None if git_service not provided
         """
         from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
 
         git_service = context.get('git_service')
         if git_service is None:
-            raise ValueError(
-                "git_repository save strategy requires 'git_service' in context"
-            )
+            return None  # Skip when git_service not available
         return GitRepositorySaveStrategy(git_service)
 
     @staticmethod
@@ -52,16 +47,11 @@ class GitRepositoryEntityConfig:
                 - git_service: GitRepositoryService instance (REQUIRED)
 
         Returns:
-            GitRepositoryRestoreStrategy instance
-
-        Raises:
-            ValueError: If git_service not provided
+            GitRepositoryRestoreStrategy instance, or None if git_service not provided
         """
         from src.entities.git_repositories.restore_strategy import GitRepositoryRestoreStrategy
 
         git_service = context.get('git_service')
         if git_service is None:
-            raise ValueError(
-                "git_repository restore strategy requires 'git_service' in context"
-            )
+            return None  # Skip when git_service not available
         return GitRepositoryRestoreStrategy(git_service)
