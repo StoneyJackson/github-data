@@ -1,11 +1,9 @@
-"""Restore operations module."""
+"""Restore operations module.
 
-from .restore import (
-    restore_repository_data_with_strategy_pattern,
-    restore_repository_data_with_config,
-)
+Legacy restore_repository_data_with_config removed.
+Use StrategyBasedRestoreOrchestrator with EntityRegistry instead.
+"""
 
-__all__ = [
-    "restore_repository_data_with_strategy_pattern",
-    "restore_repository_data_with_config",
-]
+from .orchestrator import StrategyBasedRestoreOrchestrator
+
+__all__ = ["StrategyBasedRestoreOrchestrator"]

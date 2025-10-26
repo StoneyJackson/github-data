@@ -1,11 +1,9 @@
-"""Save operations module."""
+"""Save operations module.
 
-from .save import (
-    save_repository_data_with_strategy_pattern,
-    save_repository_data_with_config,
-)
+Legacy save_repository_data_with_config removed.
+Use StrategyBasedSaveOrchestrator with EntityRegistry instead.
+"""
 
-__all__ = [
-    "save_repository_data_with_strategy_pattern",
-    "save_repository_data_with_config",
-]
+from .orchestrator import StrategyBasedSaveOrchestrator
+
+__all__ = ["StrategyBasedSaveOrchestrator"]
