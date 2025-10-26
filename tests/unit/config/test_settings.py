@@ -562,3 +562,21 @@ class TestApplicationConfig:
         config.include_pull_requests = {4, 5, 6}
 
         # These should all be valid without type errors
+
+
+@pytest.mark.unit
+def test_application_config_removed():
+    """Test that ApplicationConfig class no longer exists."""
+    import src.config.settings as settings
+
+    # ApplicationConfig should not exist
+    assert not hasattr(settings, "ApplicationConfig")
+
+
+@pytest.mark.unit
+def test_number_specification_parser_still_exists():
+    """Test that NumberSpecificationParser still exists (used by registry)."""
+    from src.config.settings import NumberSpecificationParser
+
+    # Parser should still exist
+    assert NumberSpecificationParser is not None
