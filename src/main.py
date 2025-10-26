@@ -1,173 +1,108 @@
-#!/usr/bin/env python3
-"""
-GitHub Data - Main entry point for the container.
+"""Main entry point for GitHub data save/restore operations."""
 
-This script handles saving and restoring GitHub repository labels, issues,
-subissues, and comments based on environment variables.
-"""
-
+import os
 import sys
-from typing import TYPE_CHECKING, Any, Optional
 
-if TYPE_CHECKING:
-    from src.git.service import GitRepositoryServiceImpl
+from src.entities.registry import EntityRegistry
+from src.operations.save.orchestrator import StrategyBasedSaveOrchestrator
+from src.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
+from src.github import create_github_service
+from src.storage import create_storage_service
+from src.git.service import GitRepositoryServiceImpl
 
-from src.config.settings import ApplicationConfig
-from src.operations.strategy_factory import StrategyFactory
 
+def main():
+    """Execute save or restore operation based on environment variables."""
+    # Get operation type
+    operation = os.getenv("OPERATION", "save").lower()
 
-def main() -> None:
-    """Main entry point for the github-data container."""
+    if operation not in ["save", "restore"]:
+        print(f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.")
+        sys.exit(1)
+
+    # Initialize EntityRegistry from environment
     try:
-        config = _setup_and_validate_configuration()
-        _execute_operation(config)
-        _print_completion_message(config.operation)
+        registry = EntityRegistry.from_environment(strict=False)
+    except ValueError as e:
+        print(f"Error initializing registry: {e}")
+        sys.exit(1)
+
+    # Get required environment variables
+    github_token = os.getenv("GITHUB_TOKEN")
+    repo_name = os.getenv("GITHUB_REPO")
+    data_path = os.getenv("DATA_PATH", "./data")
+
+    if not github_token:
+        print("Error: GITHUB_TOKEN environment variable required")
+        sys.exit(1)
+
+    if not repo_name:
+        print("Error: GITHUB_REPO environment variable required")
+        sys.exit(1)
+
+    # Initialize services
+    github_service = create_github_service(github_token)
+    storage_service = create_storage_service("json")
+    git_service = GitRepositoryServiceImpl(auth_token=github_token) if registry.get_entity("git_repository").is_enabled() else None
+
+    # Execute operation
+    if operation == "save":
+        execute_save(registry, github_service, storage_service, git_service, repo_name, data_path)
+    else:
+        execute_restore(registry, github_service, storage_service, repo_name, data_path)
+
+
+def execute_save(registry, github_service, storage_service, git_service, repo_name, output_path):
+    """Execute save operation."""
+    print(f"Starting save operation for {repo_name}")
+    print(f"Output path: {output_path}")
+
+    # Show enabled entities
+    enabled = registry.get_enabled_entities()
+    print(f"\nEnabled entities ({len(enabled)}):")
+    for entity in enabled:
+        print(f"  - {entity.config.name}")
+
+    orchestrator = StrategyBasedSaveOrchestrator(
+        registry=registry,
+        github_service=github_service,
+        storage_service=storage_service,
+        git_service=git_service
+    )
+
+    try:
+        results = orchestrator.execute_save(repo_name, output_path)
+        print("\nSave operation completed successfully")
+        print(f"Total entities saved: {len(results)}")
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        print(f"\nError during save operation: {e}")
         sys.exit(1)
 
 
-def _setup_and_validate_configuration() -> ApplicationConfig:
-    """Set up and validate configuration for the operation."""
-    config = ApplicationConfig.from_environment()
-    config.validate()
-    _print_operation_info(config)
-    return config
+def execute_restore(registry, github_service, storage_service, repo_name, input_path):
+    """Execute restore operation."""
+    print(f"Starting restore operation for {repo_name}")
+    print(f"Input path: {input_path}")
 
+    # Show enabled entities
+    enabled = registry.get_enabled_entities()
+    print(f"\nEnabled entities ({len(enabled)}):")
+    for entity in enabled:
+        print(f"  - {entity.config.name}")
 
-def _execute_operation(config: ApplicationConfig) -> None:
-    """Execute the requested operation based on configuration."""
-    if config.operation == "save":
-        _perform_save_operation(config)
-    else:
-        _perform_restore_operation(config)
-
-
-def _perform_save_operation(config: ApplicationConfig) -> None:
-    """Execute save operation to backup GitHub repository data."""
-    _print_save_operation_start()
-
-    github_service = _create_github_service(config)
-    storage_service = _create_storage_service()
-    git_service = _create_git_service_if_needed(config)
-
-    _execute_save_with_config(config, github_service, storage_service, git_service)
-
-
-def _print_save_operation_start() -> None:
-    """Print start message for save operation."""
-    print("Saving GitHub data...")
-
-
-def _create_github_service(config: ApplicationConfig) -> Any:
-    """Create GitHub service with token from configuration."""
-    from .github import create_github_service
-
-    return create_github_service(config.github_token)
-
-
-def _create_storage_service() -> Any:
-    """Create JSON storage service."""
-    from .storage import create_storage_service
-
-    return create_storage_service("json")
-
-
-def _create_git_service_if_needed(config: ApplicationConfig) -> Optional[Any]:
-    """Create git service if git repository backup is enabled."""
-    return _create_git_repository_service(config) if config.include_git_repo else None
-
-
-def _execute_save_with_config(
-    config: ApplicationConfig,
-    github_service: Any,
-    storage_service: Any,
-    git_service: Optional[Any],
-) -> None:
-    """Execute save operation using configuration-based approach."""
-    from .operations.save import save_repository_data_with_config
-
-    save_repository_data_with_config(
-        config,
-        github_service,
-        storage_service,
-        config.github_repo,
-        config.data_path,
-        include_pull_requests=StrategyFactory._is_enabled(config.include_pull_requests),
-        include_sub_issues=config.include_sub_issues,
-        git_service=git_service,
+    orchestrator = StrategyBasedRestoreOrchestrator(
+        registry=registry,
+        github_service=github_service,
+        storage_service=storage_service
     )
 
-
-def _perform_restore_operation(config: ApplicationConfig) -> None:
-    """Execute restore operation to restore GitHub repository data."""
-    _print_restore_operation_start()
-
-    github_service = _create_github_service(config)
-    storage_service = _create_storage_service()
-    git_service = _create_git_service_if_needed(config)
-
-    _execute_restore_with_config(config, github_service, storage_service, git_service)
-
-
-def _print_restore_operation_start() -> None:
-    """Print start message for restore operation."""
-    print("Restoring GitHub data...")
-
-
-def _execute_restore_with_config(
-    config: ApplicationConfig,
-    github_service: Any,
-    storage_service: Any,
-    git_service: Optional[Any],
-) -> None:
-    """Execute restore operation using configuration-based approach."""
-    from .operations.restore.restore import restore_repository_data_with_config
-
-    restore_repository_data_with_config(
-        config,
-        github_service,
-        storage_service,
-        config.github_repo,
-        config.data_path,
-        include_original_metadata=True,
-        include_pull_requests=StrategyFactory._is_enabled(config.include_pull_requests),
-        include_sub_issues=config.include_sub_issues,
-        git_service=git_service,
-    )
-
-
-def _create_git_repository_service(
-    config: ApplicationConfig,
-) -> "GitRepositoryServiceImpl":
-    """Create Git repository service with configuration."""
-    from src.git.service import GitRepositoryServiceImpl
-
-    return GitRepositoryServiceImpl(auth_token=config.github_token)
-
-
-def _print_operation_info(config: ApplicationConfig) -> None:
-    """Print information about the operation being performed."""
-    print(f"GitHub Data - {config.operation.capitalize()} operation")
-    print(f"Repository: {config.github_repo}")
-    print(f"Data path: {config.data_path}")
-
-    # Feature status information
-    features = []
-    if config.include_git_repo:
-        features.append("Git repository backup")
-    if config.include_issue_comments:
-        features.append("Issue comments")
-    else:
-        print("Issue comments: excluded")
-
-    if features:
-        print(f"Enabled features: {', '.join(features)}")
-
-
-def _print_completion_message(operation: str) -> None:
-    """Print completion message for the operation."""
-    print(f"{operation.capitalize()} operation completed successfully")
+    try:
+        results = orchestrator.execute_restore(repo_name, input_path)
+        print("\nRestore operation completed successfully")
+        print(f"Total entities restored: {len(results)}")
+    except Exception as e:
+        print(f"\nError during restore operation: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
