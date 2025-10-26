@@ -24,29 +24,43 @@ class StrategyFactory:
         self.registry = registry
 
     def create_save_strategies(
-        self, git_service: Optional[Any] = None
+        self,
+        git_service: Optional[Any] = None,
+        **additional_context: Any
     ) -> List["SaveEntityStrategy"]:
         """Create save strategies for all enabled entities.
 
         Args:
-            git_service: Optional git service for git_repository entity
+            git_service: Optional git service for entities that need it
+            **additional_context: Additional context for strategy creation
 
         Returns:
             List of save strategy instances in dependency order
-        """
-        strategies = []
 
-        # Get enabled entities in dependency order
+        Raises:
+            RuntimeError: If any strategy factory method fails
+        """
+        context = {
+            'git_service': git_service,
+            **additional_context
+        }
+
+        strategies = []
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
-            # Skip git_repository if no git_service provided
-            if entity.config.name == "git_repository" and git_service is None:
-                continue
+            if entity.config.save_strategy_class is None:
+                continue  # No save strategy - expected
 
-            strategy = self.load_save_strategy(entity.config.name, git_service=git_service)
-            if strategy:
-                strategies.append(strategy)
+            try:
+                strategy = entity.config.create_save_strategy(**context)
+                if strategy is not None:
+                    strategies.append(strategy)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to create save strategy for '{entity.config.name}': {e}. "
+                    f"Cannot proceed with save operation."
+                ) from e
 
         return strategies
 
