@@ -20,6 +20,30 @@ class EntityConfig(Protocol):
     storage_filename: Optional[str] = None  # Override convention
     description: str = ""  # Documentation
 
+    @staticmethod
+    def create_save_strategy(**context: Any) -> Optional["BaseSaveStrategy"]:
+        """Factory method for creating save strategy instances.
+
+        Args:
+            **context: Available dependencies (git_service, etc.)
+
+        Returns:
+            Configured save strategy instance, or None if not applicable
+        """
+        ...
+
+    @staticmethod
+    def create_restore_strategy(**context: Any) -> Optional["BaseRestoreStrategy"]:
+        """Factory method for creating restore strategy instances.
+
+        Args:
+            **context: Available dependencies (git_service, conflict_strategy, etc.)
+
+        Returns:
+            Configured restore strategy instance, or None if not applicable
+        """
+        ...
+
 
 class BaseSaveStrategy(Protocol):
     """Protocol for save strategies."""
