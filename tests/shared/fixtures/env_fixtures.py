@@ -1,17 +1,11 @@
 """Enhanced environment variable fixtures for testing.
 
 Provides fixture patterns for environment variable testing scenarios
-using the new ConfigBuilder and ConfigFactory utilities.
+for use with EntityRegistry.from_environment().
 """
 
-import os
 import pytest
-from contextlib import contextmanager
 from typing import Dict
-from unittest.mock import patch
-
-from tests.shared.builders import ConfigBuilder, ConfigFactory
-from src.config.settings import ApplicationConfig
 
 
 @pytest.fixture
@@ -102,54 +96,6 @@ def issues_only_env_vars(minimal_env_vars):
         "INCLUDE_PULL_REQUEST_COMMENTS": "false",
         "INCLUDE_SUB_ISSUES": "false",
     }
-
-
-@pytest.fixture
-def config_builder():
-    """Provide a fresh ConfigBuilder instance for each test."""
-    return ConfigBuilder()
-
-
-@pytest.fixture
-def config_factory():
-    """Provide access to ConfigFactory for each test."""
-    return ConfigFactory
-
-
-@contextmanager
-def env_config(**env_overrides):
-    """Context manager for environment variable testing.
-
-    Example usage:
-        def test_something():
-            with env_config(INCLUDE_PULL_REQUESTS="true") as config:
-                assert config.include_pull_requests is True
-    """
-    base_env = {
-        "OPERATION": "save",
-        "GITHUB_TOKEN": "test-token",
-        "GITHUB_REPO": "test-owner/test-repo",
-        "DATA_PATH": "/tmp/test-data",
-        "LABEL_CONFLICT_STRATEGY": "skip",
-        "INCLUDE_GIT_REPO": "true",
-        "INCLUDE_ISSUES": "true",
-        "INCLUDE_ISSUE_COMMENTS": "true",
-        "INCLUDE_PULL_REQUESTS": "true",
-        "INCLUDE_PULL_REQUEST_COMMENTS": "true",
-        "INCLUDE_SUB_ISSUES": "true",
-        "GIT_AUTH_METHOD": "token",
-    }
-
-    env_vars = {**base_env, **env_overrides}
-
-    with patch.dict(os.environ, env_vars, clear=True):
-        yield ApplicationConfig.from_environment()
-
-
-@pytest.fixture
-def env_config_context():
-    """Provide the env_config context manager as a fixture."""
-    return env_config
 
 
 def make_env_vars(**overrides) -> Dict[str, str]:

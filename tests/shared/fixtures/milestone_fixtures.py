@@ -17,7 +17,6 @@ from src.operations.restore.strategies.milestones_strategy import (
     MilestonesRestoreStrategy,
 )
 from src.github.service import GitHubService
-from src.config.settings import ApplicationConfig
 
 
 # Core Milestone Fixtures
@@ -264,7 +263,7 @@ def bulk_milestone_builder():
 @pytest.fixture
 def mock_milestone_config():
     """Create a mock configuration with milestones enabled."""
-    config = Mock(spec=ApplicationConfig)
+    config = Mock()
     config.include_milestones = True
     config.repository_owner = "test-owner"
     config.repository_name = "test-repo"

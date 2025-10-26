@@ -1,7 +1,9 @@
-"""Test builder utilities for constructing test configurations and data."""
+"""Test builder utilities for constructing test data.
 
-from .config_builder import ConfigBuilder
-from .config_factory import ConfigFactory
+ConfigBuilder and ConfigFactory removed (ApplicationConfig deprecated).
+Use EntityRegistry.from_environment() with environment variables instead.
+"""
+
 from .github_data_builder import GitHubDataBuilder
 
-__all__ = ["ConfigBuilder", "ConfigFactory", "GitHubDataBuilder"]
+__all__ = ["GitHubDataBuilder"]
