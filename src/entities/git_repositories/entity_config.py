@@ -14,7 +14,7 @@ class GitRepositoryEntityConfig:
     env_var = "INCLUDE_GIT_REPO"
     default_value = True
     value_type = bool
-    dependencies = []
+    dependencies: list = []
     save_strategy_class = None
     restore_strategy_class = None
     storage_filename = None
