@@ -41,15 +41,16 @@ def test_batch1_entities_no_dependencies():
 
 
 @pytest.mark.integration
-def test_batch1_save_strategies_load():
-    """Test that save strategies load for Batch 1 entities."""
+def test_batch1_save_strategies_create():
+    """Test that save strategies create for Batch 1 entities."""
     registry = EntityRegistry()
-    factory = StrategyFactory(registry=registry, config=None)
+    factory = StrategyFactory(registry=registry)
 
-    for entity_name in ["labels", "milestones"]:
-        strategy = factory.load_save_strategy(entity_name)
-        assert strategy is not None
-        assert strategy.get_entity_name() == entity_name
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+
+    assert "labels" in strategy_names
+    assert "milestones" in strategy_names
 
 
 @pytest.mark.integration

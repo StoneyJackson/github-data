@@ -5,10 +5,10 @@ from unittest.mock import Mock
 from src.entities.git_repositories.entity_config import GitRepositoryEntityConfig
 
 
-def test_git_repository_create_save_strategy_requires_git_service():
-    """Test that save strategy requires git_service."""
-    with pytest.raises(ValueError, match="git_service"):
-        GitRepositoryEntityConfig.create_save_strategy()
+def test_git_repository_create_save_strategy_without_git_service():
+    """Test that save strategy returns None without git_service."""
+    strategy = GitRepositoryEntityConfig.create_save_strategy()
+    assert strategy is None
 
 
 def test_git_repository_create_save_strategy_with_service():
@@ -19,10 +19,10 @@ def test_git_repository_create_save_strategy_with_service():
     assert strategy._git_service is mock_service
 
 
-def test_git_repository_create_restore_strategy_requires_git_service():
-    """Test that restore strategy requires git_service."""
-    with pytest.raises(ValueError, match="git_service"):
-        GitRepositoryEntityConfig.create_restore_strategy()
+def test_git_repository_create_restore_strategy_without_git_service():
+    """Test that restore strategy returns None without git_service."""
+    strategy = GitRepositoryEntityConfig.create_restore_strategy()
+    assert strategy is None
 
 
 def test_git_repository_create_restore_strategy_with_service():

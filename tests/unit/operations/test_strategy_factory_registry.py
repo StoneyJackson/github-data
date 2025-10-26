@@ -17,57 +17,59 @@ def test_strategy_factory_accepts_registry():
 
 
 @pytest.mark.unit
-def test_strategy_factory_loads_labels_from_registry():
-    """Test that StrategyFactory loads labels strategy from registry."""
+def test_strategy_factory_creates_labels_strategy():
+    """Test that StrategyFactory creates labels strategy via factory method."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategy = factory.load_save_strategy("labels")
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
 
-    assert strategy is not None
-    assert strategy.get_entity_name() == "labels"
+    assert "labels" in strategy_names
 
 
 @pytest.mark.unit
-def test_strategy_factory_loads_milestones_from_registry():
-    """Test that StrategyFactory loads milestones strategy from registry."""
+def test_strategy_factory_creates_milestones_strategy():
+    """Test that StrategyFactory creates milestones strategy via factory method."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategy = factory.load_save_strategy("milestones")
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
 
-    assert strategy is not None
-    assert strategy.get_entity_name() == "milestones"
+    assert "milestones" in strategy_names
 
 
 @pytest.mark.unit
-def test_strategy_factory_loads_restore_strategy():
-    """Test that StrategyFactory loads restore strategies from registry."""
+def test_strategy_factory_creates_restore_strategy():
+    """Test that StrategyFactory creates restore strategies via factory methods."""
     from src.entities.labels.conflict_strategies import LabelConflictStrategy
 
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategy = factory.load_restore_strategy(
-        "labels", conflict_strategy=LabelConflictStrategy.OVERWRITE
+    strategies = factory.create_restore_strategies(
+        conflict_strategy=LabelConflictStrategy.SKIP
     )
+    strategy_names = [s.get_entity_name() for s in strategies]
 
-    assert strategy is not None
+    assert "labels" in strategy_names
 
 
 @pytest.mark.unit
-def test_strategy_factory_loads_all_batch1_and_batch2():
-    """Test StrategyFactory loads strategies for all Batch 1+2 entities."""
+def test_strategy_factory_creates_all_batch1_and_batch2():
+    """Test StrategyFactory creates strategies for all Batch 1+2 entities."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
     # Test entities that don't require special constructor parameters
     simple_entities = ["labels", "milestones", "issues", "comments", "sub_issues"]
 
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+
     for entity_name in simple_entities:
-        strategy = factory.load_save_strategy(entity_name)
-        assert strategy is not None, f"Failed to load {entity_name}"
-        assert strategy.get_entity_name() == entity_name
+        assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
     # Verify git_repository entity is discovered
     # (even though it needs git_service param)
@@ -77,12 +79,12 @@ def test_strategy_factory_loads_all_batch1_and_batch2():
 
 
 @pytest.mark.unit
-def test_strategy_factory_loads_all_10_entities():
-    """Test StrategyFactory loads all 10 migrated entities."""
+def test_strategy_factory_creates_all_10_entities():
+    """Test StrategyFactory creates all 10 migrated entities."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    # Entities that can be loaded without special constructor parameters
+    # Entities that can be created without special constructor parameters
     simple_entities = [
         "labels",
         "milestones",
@@ -95,10 +97,11 @@ def test_strategy_factory_loads_all_10_entities():
         "pr_comments",
     ]
 
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+
     for entity_name in simple_entities:
-        strategy = factory.load_save_strategy(entity_name)
-        assert strategy is not None, f"Failed to load {entity_name}"
-        assert strategy.get_entity_name() == entity_name
+        assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
     # Verify git_repository is discovered (even though it needs git_service param)
     git_entity = registry.get_entity("git_repository")

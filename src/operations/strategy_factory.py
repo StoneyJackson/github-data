@@ -49,9 +49,6 @@ class StrategyFactory:
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
-            if entity.config.save_strategy_class is None:
-                continue  # No save strategy - expected
-
             try:
                 strategy = entity.config.create_save_strategy(**context)
                 if strategy is not None:
@@ -65,36 +62,46 @@ class StrategyFactory:
         return strategies
 
     def create_restore_strategies(
-        self, **kwargs: Any
+        self,
+        git_service: Optional[Any] = None,
+        conflict_strategy: Optional[Any] = None,
+        include_original_metadata: bool = True,
+        **additional_context: Any
     ) -> List["RestoreEntityStrategy"]:
         """Create restore strategies for all enabled entities.
 
         Args:
-            **kwargs: Additional arguments for strategy instantiation
-                     (e.g., include_original_metadata, git_service)
+            git_service: Optional git service for entities that need it
+            conflict_strategy: Optional conflict resolution strategy
+            include_original_metadata: Whether to preserve original metadata
+            **additional_context: Additional context for strategy creation
 
         Returns:
             List of restore strategy instances in dependency order
-        """
-        strategies = []
 
-        # Get enabled entities in dependency order
+        Raises:
+            RuntimeError: If any strategy factory method fails
+        """
+        context = {
+            'git_service': git_service,
+            'conflict_strategy': conflict_strategy,
+            'include_original_metadata': include_original_metadata,
+            **additional_context
+        }
+
+        strategies = []
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
-            # Special handling for git_repository - needs git_service, not other kwargs
-            if entity.config.name == "git_repository":
-                git_service = kwargs.get("git_service")
-                if git_service is None:
-                    continue  # Skip if no git_service provided
-                strategy = self.load_restore_strategy(entity.config.name, git_service=git_service)
-            else:
-                # Filter out git_service from kwargs for other entities
-                filtered_kwargs = {k: v for k, v in kwargs.items() if k != "git_service"}
-                strategy = self.load_restore_strategy(entity.config.name, **filtered_kwargs)
-
-            if strategy:
-                strategies.append(strategy)
+            try:
+                strategy = entity.config.create_restore_strategy(**context)
+                if strategy is not None:
+                    strategies.append(strategy)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to create restore strategy for '{entity.config.name}': {e}. "
+                    f"Cannot proceed with restore operation."
+                ) from e
 
         return strategies
 
