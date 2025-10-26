@@ -1,10 +1,12 @@
-"""Operations package - main orchestration interface."""
+"""Operations package - orchestrator interface.
 
-# Strategy-based operations
-from .save import save_repository_data_with_strategy_pattern
-from .restore.restore import restore_repository_data_with_strategy_pattern
+Legacy save/restore functions removed. Use orchestrators with EntityRegistry.
+"""
+
+from .save.orchestrator import StrategyBasedSaveOrchestrator
+from .restore.orchestrator import StrategyBasedRestoreOrchestrator
 
 __all__ = [
-    "save_repository_data_with_strategy_pattern",
-    "restore_repository_data_with_strategy_pattern",
+    "StrategyBasedSaveOrchestrator",
+    "StrategyBasedRestoreOrchestrator",
 ]
