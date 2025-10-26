@@ -4,74 +4,82 @@ import json
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from .strategy import RestoreEntityStrategy
 from src.entities.labels.restore_strategy import OverwriteConflictStrategy
-from src.config.settings import ApplicationConfig
 from src.operations.strategy_factory import StrategyFactory
-from src.operations.dependency_resolver import DependencyResolver
 
 if TYPE_CHECKING:
     from src.storage.protocols import StorageService
     from src.github.protocols import RepositoryService
     from src.git.protocols import GitRepositoryService
+    from src.entities.registry import EntityRegistry
 
 
 class StrategyBasedRestoreOrchestrator:
-    """Orchestrator that executes restore operations using registered strategies."""
+    """Orchestrator that executes restore operations using EntityRegistry."""
 
     def __init__(
         self,
-        config: ApplicationConfig,
+        registry: "EntityRegistry",
         github_service: "RepositoryService",
         storage_service: "StorageService",
         include_original_metadata: bool = True,
         git_service: Optional["GitRepositoryService"] = None,
     ) -> None:
-        self._config = config
+        """Initialize restore orchestrator.
+
+        Args:
+            registry: EntityRegistry for entity management
+            github_service: GitHub API service
+            storage_service: Storage service for reading data
+            include_original_metadata: Whether to include original metadata
+            git_service: Optional git service for repository cloning
+        """
+        self._registry = registry
         self._github_service = github_service
         self._storage_service = storage_service
-        self._strategies: Dict[str, RestoreEntityStrategy] = {}
+        self._git_service = git_service
         self._context: Dict[str, Any] = {}
-        self._dependency_resolver = DependencyResolver()
 
-        # Auto-register strategies based on configuration
-        for strategy in StrategyFactory.create_restore_strategies(
-            config, github_service, include_original_metadata, git_service
-        ):
-            self.register_strategy(strategy)
+        # Create strategy factory
+        self._factory = StrategyFactory(registry=registry)
 
-    def register_strategy(self, strategy: RestoreEntityStrategy) -> None:
-        """Register an entity restoration strategy."""
-        self._strategies[strategy.get_entity_name()] = strategy
+        # Load strategies for enabled entities
+        # Note: include_original_metadata is stored but not passed to all strategies
+        # Each strategy uses its own defaults or config
+        self._include_original_metadata = include_original_metadata
+        self._strategies = self._factory.create_restore_strategies(
+            git_service=git_service
+        )
 
     def execute_restore(
         self,
         repo_name: str,
         input_path: str,
-        requested_entities: Optional[List[str]] = None,
     ) -> List[Dict[str, Any]]:
-        """Execute restore operation using registered strategies."""
-        if requested_entities is None:
-            requested_entities = StrategyFactory.get_enabled_entities(self._config)
+        """Execute restore operation using registered strategies.
 
+        Args:
+            repo_name: Repository name (owner/repo)
+            input_path: Input directory path
+
+        Returns:
+            List of result dictionaries for each entity
+        """
         results = []
 
-        # Resolve dependency order
-        execution_order = self._dependency_resolver.resolve_execution_order(
-            self._strategies, requested_entities
-        )
-
-        # Execute strategies in dependency order
-        for entity_name in execution_order:
-            if entity_name in self._strategies:
-                result = self._execute_strategy(entity_name, repo_name, input_path)
-                results.append(result)
+        # Execute strategies in dependency order (already sorted by registry)
+        for strategy in self._strategies:
+            entity_name = strategy.get_entity_name()
+            result = self._execute_strategy(strategy, repo_name, input_path)
+            results.append(result)
+            print(f"Restored {entity_name}: {result.get('entities_created', 0)} items")
 
         return results
 
     def _execute_strategy(
-        self, entity_name: str, repo_name: str, input_path: str
+        self, strategy: RestoreEntityStrategy, repo_name: str, input_path: str
     ) -> Dict[str, Any]:
         """Execute a single entity restoration strategy."""
-        strategy = self._strategies[entity_name]
+        entity_name = strategy.get_entity_name()
 
         try:
             # Read data
