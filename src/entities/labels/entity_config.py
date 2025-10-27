@@ -1,6 +1,11 @@
 """Labels entity configuration for EntityRegistry."""
 
-from typing import Optional, Any, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.labels.save_strategy import LabelsSaveStrategy
+    from src.entities.labels.restore_strategy import LabelsRestoreStrategy
 
 
 class LabelsEntityConfig:
@@ -17,12 +22,16 @@ class LabelsEntityConfig:
     dependencies: List[str] = []
     description = "Repository labels for issue/PR categorization"
 
+    # Service requirements (NEW)
+    required_services_save: List[str] = []  # No services needed for save
+    required_services_restore = ["github_service"]  # Need GitHub API for conflict resolution
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["LabelsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused)
+            context: Typed strategy context with validated services
 
         Returns:
             LabelsSaveStrategy instance
@@ -32,15 +41,19 @@ class LabelsEntityConfig:
         return LabelsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["LabelsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - conflict_strategy: How to handle label conflicts (default: SKIP)
+            context: Typed strategy context with validated services
 
         Returns:
             LabelsRestoreStrategy instance
+
+        Note:
+            Conflict strategy resolution handled internally with github_service
         """
         from src.entities.labels.restore_strategy import (
             LabelsRestoreStrategy,
@@ -48,12 +61,15 @@ class LabelsEntityConfig:
         )
         from src.entities.labels.conflict_strategies import LabelConflictStrategy
 
-        conflict_strategy = context.get("conflict_strategy", LabelConflictStrategy.SKIP)
+        # Access conflict_strategy from context if available
+        conflict_strategy = getattr(context, "_conflict_strategy", None)
+        if conflict_strategy is None:
+            conflict_strategy = LabelConflictStrategy.SKIP
 
         # Convert enum to strategy object if needed
         if isinstance(conflict_strategy, LabelConflictStrategy):
-            # Convert enum to strategy object
-            github_service = context.get("github_service")
+            # Get github_service from context for conflict resolution
+            github_service = context.github_service
             conflict_strategy_obj = create_conflict_strategy(
                 conflict_strategy.value, github_service
             )
