@@ -13,7 +13,6 @@ def mock_entity_registry(monkeypatch):
         default_value = True
         value_type = bool
         dependencies = []
-        storage_filename = None
         description = "Test"
 
     registry = EntityRegistry.__new__(EntityRegistry)

@@ -14,7 +14,6 @@ class SubIssuesEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["issues"]  # Sub-issues are hierarchical issues
-    storage_filename = None
     description = "Hierarchical sub-issue relationships"
 
     @staticmethod

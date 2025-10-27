@@ -10,7 +10,6 @@ class MockEntityConfig:
     default_value: Union[bool, Set[int]] = True
     value_type: Type = bool
     dependencies: List[str] = []
-    storage_filename: Optional[str] = None
     description: str = "Test entity"
 
 
@@ -51,7 +50,6 @@ def test_registered_entity_get_dependencies() -> None:
         default_value: Union[bool, Set[int]] = True
         value_type: Type = bool
         dependencies: List[str] = ["issues", "comments"]
-        storage_filename: Optional[str] = None
         description: str = ""
 
     entity = RegisteredEntity(config=ConfigWithDeps(), enabled=True)

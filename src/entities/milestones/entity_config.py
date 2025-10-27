@@ -15,7 +15,6 @@ class MilestonesEntityConfig:
     default_value = True
     value_type = bool
     dependencies: List[str] = []
-    storage_filename = None
     description = "Project milestones for issue/PR organization"
 
     @staticmethod
