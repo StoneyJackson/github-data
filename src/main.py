@@ -17,14 +17,14 @@ def main():
     operation = os.getenv("OPERATION", "save").lower()
 
     if operation not in ["save", "restore"]:
-        print(f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.")
+        print(f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.", file=sys.stderr)
         sys.exit(1)
 
     # Initialize EntityRegistry from environment
     try:
         registry = EntityRegistry.from_environment(strict=False)
     except ValueError as e:
-        print(f"Error initializing registry: {e}")
+        print(f"Error initializing registry: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Get required environment variables
@@ -33,11 +33,11 @@ def main():
     data_path = os.getenv("DATA_PATH", "./data")
 
     if not github_token:
-        print("Error: GITHUB_TOKEN environment variable required")
+        print("Error: GITHUB_TOKEN environment variable required", file=sys.stderr)
         sys.exit(1)
 
     if not repo_name:
-        print("Error: GITHUB_REPO environment variable required")
+        print("Error: GITHUB_REPO environment variable required", file=sys.stderr)
         sys.exit(1)
 
     # Initialize services
@@ -83,7 +83,7 @@ def execute_save(
         print("\nSave operation completed successfully")
         print(f"Total entities saved: {len(results)}")
     except Exception as e:
-        print(f"\nError during save operation: {e}")
+        print(f"\nError during save operation: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -109,7 +109,7 @@ def execute_restore(registry, github_service, storage_service, repo_name, input_
         print("\nRestore operation completed successfully")
         print(f"Total entities restored: {len(results)}")
     except Exception as e:
-        print(f"\nError during restore operation: {e}")
+        print(f"\nError during restore operation: {e}", file=sys.stderr)
         sys.exit(1)
 
 
