@@ -3,6 +3,7 @@
 import pytest
 from unittest.mock import Mock
 from src.operations.strategy_factory import StrategyFactory
+from src.entities.strategy_context import StrategyContext
 
 
 def test_create_save_strategies_uses_factory_methods(mock_registry):
@@ -10,6 +11,7 @@ def test_create_save_strategies_uses_factory_methods(mock_registry):
     # Setup mock entity with factory method
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
+    mock_entity.config.required_services_save = []
     mock_strategy = Mock()
     mock_entity.config.create_save_strategy = Mock(return_value=mock_strategy)
 
@@ -20,10 +22,8 @@ def test_create_save_strategies_uses_factory_methods(mock_registry):
 
     strategies = factory.create_save_strategies(git_service=mock_git_service)
 
-    # Verify factory method was called with context
+    # Verify factory method was called
     mock_entity.config.create_save_strategy.assert_called_once()
-    call_kwargs = mock_entity.config.create_save_strategy.call_args[1]
-    assert call_kwargs["git_service"] is mock_git_service
 
     # Verify strategy was added to list
     assert mock_strategy in strategies
@@ -33,6 +33,7 @@ def test_create_save_strategies_skips_none_results(mock_registry):
     """Test that None results from factory are skipped."""
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
+    mock_entity.config.required_services_save = []
     mock_entity.config.create_save_strategy = Mock(return_value=None)
 
     mock_registry.get_enabled_entities.return_value = [mock_entity]
@@ -47,6 +48,7 @@ def test_create_save_strategies_raises_on_factory_error(mock_registry):
     """Test that factory errors are re-raised as RuntimeError."""
     mock_entity = Mock()
     mock_entity.config.name = "failing_entity"
+    mock_entity.config.required_services_save = []
     mock_entity.config.create_save_strategy = Mock(
         side_effect=ValueError("Missing dependency")
     )
@@ -102,6 +104,48 @@ def test_create_restore_strategies_raises_on_factory_error(mock_registry):
 
     with pytest.raises(RuntimeError, match="Failed to create restore strategy"):
         factory.create_restore_strategies()
+
+
+def test_create_save_strategies_uses_strategy_context(mock_registry):
+    """Test that create_save_strategies passes StrategyContext to factory methods."""
+    mock_entity = Mock()
+    mock_entity.config.name = "test_entity"
+    mock_entity.config.required_services_save = []
+    mock_strategy = Mock()
+    mock_entity.config.create_save_strategy = Mock(return_value=mock_strategy)
+
+    mock_registry.get_enabled_entities.return_value = [mock_entity]
+
+    factory = StrategyFactory(mock_registry)
+    mock_git_service = Mock()
+
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
+
+    # Verify factory method called with StrategyContext
+    mock_entity.config.create_save_strategy.assert_called_once()
+    call_args = mock_entity.config.create_save_strategy.call_args[0]
+    assert len(call_args) == 1
+    assert isinstance(call_args[0], StrategyContext)
+    assert call_args[0].git_service is mock_git_service
+
+
+def test_create_save_strategies_validates_before_creation(mock_registry):
+    """Test that validation happens before strategy creation."""
+    mock_entity = Mock()
+    mock_entity.config.name = "git_repository"
+    mock_entity.config.required_services_save = ["git_service"]
+    mock_entity.config.create_save_strategy = Mock()
+
+    mock_registry.get_enabled_entities.return_value = [mock_entity]
+
+    factory = StrategyFactory(mock_registry)
+
+    # No git_service provided
+    with pytest.raises(RuntimeError, match="git_repository.*requires.*git_service"):
+        factory.create_save_strategies()
+
+    # Factory method should never be called
+    mock_entity.config.create_save_strategy.assert_not_called()
 
 
 @pytest.fixture
