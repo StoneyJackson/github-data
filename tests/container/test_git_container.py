@@ -376,13 +376,13 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 from src.git.service import GitRepositoryServiceImpl
-from src.operations.save.strategies.git_repository_strategy import GitRepositoryStrategy
+from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
 from src.entities.git_repositories.models import GitBackupFormat, GitOperationResult
 
 try:
     # Test strategy creation
     git_service = GitRepositoryServiceImpl()
-    strategy = GitRepositoryStrategy(git_service, GitBackupFormat.MIRROR)
+    strategy = GitRepositorySaveStrategy(git_service, GitBackupFormat.MIRROR)
     print("SUCCESS: Strategy created")
 
     # Test read
@@ -448,10 +448,8 @@ def mock_create_github_service(token):
     mock = Mock()
     return mock
 
-def mock_save_function(config):
+def mock_save_function(registry, github_service, storage_service, git_service, repo_name, output_path):
     """Mock save function that creates expected directory structure."""
-    output_path = config.data_path  # Use config.data_path instead of args[3]
-
     # Create git-repo directory to simulate successful operation
     git_data_dir = Path(output_path) / "git-repo"
     git_data_dir.mkdir(parents=True, exist_ok=True)
@@ -464,7 +462,7 @@ def mock_save_function(config):
 
 try:
     # Patch the functions to avoid actual GitHub API calls and Git operations
-    with patch('src.main._perform_save_operation') as mock_save_op:
+    with patch('src.main.execute_save') as mock_save_op:
         mock_save_op.side_effect = mock_save_function
 
         # Import and run main after patching
