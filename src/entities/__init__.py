@@ -25,6 +25,7 @@ from src.entities.base import (
     RegisteredEntity,
 )
 from src.entities.registry import EntityRegistry
+from src.entities.strategy_context import StrategyContext
 
 __all__ = [
     "GitHubUser",
@@ -43,4 +44,5 @@ __all__ = [
     "BaseRestoreStrategy",
     "RegisteredEntity",
     "EntityRegistry",
+    "StrategyContext",
 ]
