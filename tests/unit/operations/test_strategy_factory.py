@@ -65,6 +65,7 @@ def test_create_restore_strategies_uses_factory_methods(mock_registry):
     """Test that create_restore_strategies delegates to entity factory methods."""
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
+    mock_entity.config.required_services_restore = []
     mock_strategy = Mock()
     mock_entity.config.create_restore_strategy = Mock(return_value=mock_strategy)
 
@@ -80,12 +81,8 @@ def test_create_restore_strategies_uses_factory_methods(mock_registry):
         include_original_metadata=False,
     )
 
-    # Verify factory method was called with all context
+    # Verify factory method was called
     mock_entity.config.create_restore_strategy.assert_called_once()
-    call_kwargs = mock_entity.config.create_restore_strategy.call_args[1]
-    assert call_kwargs["git_service"] is mock_git_service
-    assert call_kwargs["conflict_strategy"] is mock_conflict_strategy
-    assert call_kwargs["include_original_metadata"] is False
 
     assert mock_strategy in strategies
 
@@ -94,6 +91,7 @@ def test_create_restore_strategies_raises_on_factory_error(mock_registry):
     """Test that factory errors are re-raised as RuntimeError."""
     mock_entity = Mock()
     mock_entity.config.name = "failing_entity"
+    mock_entity.config.required_services_restore = []
     mock_entity.config.create_restore_strategy = Mock(
         side_effect=ValueError("Missing dependency")
     )
@@ -146,6 +144,55 @@ def test_create_save_strategies_validates_before_creation(mock_registry):
 
     # Factory method should never be called
     mock_entity.config.create_save_strategy.assert_not_called()
+
+
+def test_create_restore_strategies_uses_strategy_context(mock_registry):
+    """Test that create_restore_strategies passes StrategyContext to factory methods."""
+    mock_entity = Mock()
+    mock_entity.config.name = "test_entity"
+    mock_entity.config.required_services_restore = []
+    mock_strategy = Mock()
+    mock_entity.config.create_restore_strategy = Mock(return_value=mock_strategy)
+
+    mock_registry.get_enabled_entities.return_value = [mock_entity]
+
+    factory = StrategyFactory(mock_registry)
+    mock_github_service = Mock()
+    mock_conflict_strategy = Mock()
+
+    strategies = factory.create_restore_strategies(
+        github_service=mock_github_service,
+        conflict_strategy=mock_conflict_strategy,
+        include_original_metadata=False,
+    )
+
+    # Verify factory method called with StrategyContext
+    mock_entity.config.create_restore_strategy.assert_called_once()
+    call_args = mock_entity.config.create_restore_strategy.call_args[0]
+    assert len(call_args) == 1
+    assert isinstance(call_args[0], StrategyContext)
+    assert call_args[0].github_service is mock_github_service
+    assert call_args[0].conflict_strategy is mock_conflict_strategy
+    assert call_args[0].include_original_metadata is False
+
+
+def test_create_restore_strategies_validates_before_creation(mock_registry):
+    """Test that validation happens before strategy creation."""
+    mock_entity = Mock()
+    mock_entity.config.name = "labels"
+    mock_entity.config.required_services_restore = ["conflict_strategy"]
+    mock_entity.config.create_restore_strategy = Mock()
+
+    mock_registry.get_enabled_entities.return_value = [mock_entity]
+
+    factory = StrategyFactory(mock_registry)
+
+    # No conflict_strategy provided
+    with pytest.raises(RuntimeError, match="labels.*requires.*conflict_strategy"):
+        factory.create_restore_strategies()
+
+    # Factory method should never be called
+    mock_entity.config.create_restore_strategy.assert_not_called()
 
 
 @pytest.fixture
