@@ -20,7 +20,9 @@ def test_service_property_raises_when_none():
 
     context = StrategyContext()
 
-    with pytest.raises(RuntimeError, match="git_service is required but was not provided"):
+    with pytest.raises(
+        RuntimeError, match="git_service is required but was not provided"
+    ):
         _ = context.git_service
 
 
@@ -40,7 +42,9 @@ def test_github_service_property_raises_when_none():
 
     context = StrategyContext()
 
-    with pytest.raises(RuntimeError, match="github_service is required but was not provided"):
+    with pytest.raises(
+        RuntimeError, match="github_service is required but was not provided"
+    ):
         _ = context.github_service
 
 
@@ -60,7 +64,9 @@ def test_conflict_strategy_property_raises_when_none():
 
     context = StrategyContext()
 
-    with pytest.raises(RuntimeError, match="conflict_strategy is required but was not provided"):
+    with pytest.raises(
+        RuntimeError, match="conflict_strategy is required but was not provided"
+    ):
         _ = context.conflict_strategy
 
 

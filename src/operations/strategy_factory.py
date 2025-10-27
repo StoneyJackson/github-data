@@ -38,7 +38,8 @@ class StrategyFactory:
         Raises:
             RuntimeError: If required service not available
         """
-        # Get requirements for this operation (default empty list for backward compatibility)
+        # Get requirements for this operation
+        # (default empty list for backward compatibility)
         required = getattr(config, f"required_services_{operation}", [])
 
         for service_name in required:

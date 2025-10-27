@@ -1,6 +1,5 @@
 """Tests for EntityConfig protocol with StrategyContext."""
 
-import pytest
 from typing import Optional, List
 from src.entities.base import EntityConfig
 from src.entities.strategy_context import StrategyContext
