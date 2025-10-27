@@ -1,6 +1,6 @@
 """Milestones entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 
 class MilestonesEntityConfig:
@@ -14,7 +14,7 @@ class MilestonesEntityConfig:
     env_var = "INCLUDE_MILESTONES"
     default_value = True
     value_type = bool
-    dependencies = []
+    dependencies: List[str] = []
     save_strategy_class = None
     restore_strategy_class = None
     storage_filename = None

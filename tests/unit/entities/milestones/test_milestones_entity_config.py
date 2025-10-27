@@ -1,6 +1,5 @@
 """Tests for milestones entity configuration."""
 
-import pytest
 from src.entities.milestones.entity_config import MilestonesEntityConfig
 
 
@@ -16,7 +15,8 @@ def test_milestones_create_restore_strategy_default():
     strategy = MilestonesEntityConfig.create_restore_strategy()
     assert strategy is not None
     assert strategy.get_entity_name() == "milestones"
-    # Milestones restore strategy has no include_original_metadata (no constructor params)
+    # Milestones restore strategy has no include_original_metadata
+    # (no constructor params)
 
 
 def test_milestones_factory_ignores_unknown_context():

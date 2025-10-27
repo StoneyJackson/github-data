@@ -1,7 +1,6 @@
 """Strategy-based save orchestrator."""
 
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
-from .strategy import SaveEntityStrategy
 from src.operations.strategy_factory import StrategyFactory
 
 if TYPE_CHECKING:
@@ -9,6 +8,7 @@ if TYPE_CHECKING:
     from src.github.protocols import RepositoryService
     from src.git.protocols import GitRepositoryService
     from src.entities.registry import EntityRegistry
+    from src.entities.base import BaseSaveStrategy
 
 
 class StrategyBasedSaveOrchestrator:
@@ -82,7 +82,7 @@ class StrategyBasedSaveOrchestrator:
             return False
 
     def _execute_strategy(
-        self, strategy: SaveEntityStrategy, repo_name: str, output_path: str
+        self, strategy: "BaseSaveStrategy", repo_name: str, output_path: str
     ) -> Dict[str, Any]:
         """Execute a single entity save strategy."""
         entity_name = strategy.get_entity_name()

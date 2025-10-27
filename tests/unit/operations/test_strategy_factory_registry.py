@@ -1,7 +1,6 @@
 """Tests for StrategyFactory with EntityRegistry integration."""
 
 import pytest
-from unittest.mock import Mock
 from src.operations.strategy_factory import StrategyFactory
 from src.entities.registry import EntityRegistry
 
@@ -127,7 +126,8 @@ def test_strategy_factory_create_save_strategies_from_registry():
 
     strategies = factory.create_save_strategies()
 
-    # Should return strategies for all enabled entities except git_repository (needs git_service)
+    # Should return strategies for all enabled entities except
+    # git_repository (needs git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
     assert "labels" in strategy_names
     assert "milestones" in strategy_names

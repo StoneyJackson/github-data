@@ -1,6 +1,5 @@
 """Tests for git_repositories entity configuration."""
 
-import pytest
 from unittest.mock import Mock
 from src.entities.git_repositories.entity_config import GitRepositoryEntityConfig
 

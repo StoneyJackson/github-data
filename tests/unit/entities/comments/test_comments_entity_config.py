@@ -1,6 +1,5 @@
 """Tests for comments entity configuration."""
 
-import pytest
 from src.entities.comments.entity_config import CommentsEntityConfig
 
 

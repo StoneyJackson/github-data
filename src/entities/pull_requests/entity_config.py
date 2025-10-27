@@ -40,9 +40,12 @@ class PullRequestsEntityConfig:
 
         Args:
             **context: Available dependencies
-                - conflict_strategy: Strategy for handling conflicts (default: DefaultPullRequestConflictStrategy)
-                - include_original_metadata: Preserve original metadata (default: True)
-                - include_pull_requests: Boolean or Set[int] for selective filtering (default: True)
+                - conflict_strategy: Strategy for handling conflicts
+                  (default: DefaultPullRequestConflictStrategy)
+                - include_original_metadata: Preserve original metadata
+                  (default: True)
+                - include_pull_requests: Boolean or Set[int] for
+                  selective filtering (default: True)
 
         Returns:
             PullRequestsRestoreStrategy instance

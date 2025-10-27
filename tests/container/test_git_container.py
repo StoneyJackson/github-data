@@ -448,7 +448,9 @@ def mock_create_github_service(token):
     mock = Mock()
     return mock
 
-def mock_save_function(registry, github_service, storage_service, git_service, repo_name, output_path):
+def mock_save_function(
+    registry, github_service, storage_service, git_service, repo_name, output_path
+):
     """Mock save function that creates expected directory structure."""
     # Create git-repo directory to simulate successful operation
     git_data_dir = Path(output_path) / "git-repo"
