@@ -1,7 +1,10 @@
 """Base protocols and types for entity system."""
 
-from typing import Protocol, Optional, List, Union, Set, Type, Any
+from typing import Protocol, Optional, List, Union, Set, Type, Any, TYPE_CHECKING
 from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
 
 
 class EntityConfig(Protocol):
@@ -17,12 +20,16 @@ class EntityConfig(Protocol):
     dependencies: List[str] = []  # List of entity names this depends on
     description: str = ""  # Documentation
 
+    # Service requirements for operations (NEW)
+    required_services_save: List[str] = []  # Services needed for save
+    required_services_restore: List[str] = []  # Services needed for restore
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional["BaseSaveStrategy"]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["BaseSaveStrategy"]:
         """Factory method for creating save strategy instances.
 
         Args:
-            **context: Available dependencies (git_service, etc.)
+            context: Typed strategy context with validated services
 
         Returns:
             Configured save strategy instance, or None if not applicable
@@ -30,11 +37,11 @@ class EntityConfig(Protocol):
         ...
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional["BaseRestoreStrategy"]:
+    def create_restore_strategy(context: "StrategyContext") -> Optional["BaseRestoreStrategy"]:
         """Factory method for creating restore strategy instances.
 
         Args:
-            **context: Available dependencies (git_service, conflict_strategy, etc.)
+            context: Typed strategy context with validated services
 
         Returns:
             Configured restore strategy instance, or None if not applicable
