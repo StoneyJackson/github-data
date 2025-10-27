@@ -51,7 +51,9 @@ class StrategyFactory:
                 )
 
     def create_save_strategies(
-        self, git_service: Optional[Any] = None, **additional_context: Any
+        self,
+        git_service: Optional[Any] = None,
+        **additional_context: Any,
     ) -> List["BaseSaveStrategy"]:
         """Create save strategies for all enabled entities.
 
@@ -63,16 +65,29 @@ class StrategyFactory:
             List of save strategy instances in dependency order
 
         Raises:
-            RuntimeError: If any strategy factory method fails
+            RuntimeError: If any entity's service requirements not met
         """
-        context = {"git_service": git_service, **additional_context}
+        from src.entities.strategy_context import StrategyContext
+
+        # Create typed context from parameters
+        context = StrategyContext(
+            _git_service=git_service,
+            _github_service=additional_context.get("github_service"),
+            _conflict_strategy=additional_context.get("conflict_strategy"),
+            _include_original_metadata=additional_context.get(
+                "include_original_metadata", True
+            ),
+        )
 
         strategies = []
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
+            # Validate requirements BEFORE creating strategy
+            self._validate_requirements(entity.config, context, "save")
+
             try:
-                strategy = entity.config.create_save_strategy(**context)
+                strategy = entity.config.create_save_strategy(context)
                 if strategy is not None:
                     strategies.append(strategy)
             except Exception as e:
