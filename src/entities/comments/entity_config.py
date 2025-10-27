@@ -14,7 +14,6 @@ class CommentsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["issues"]  # Comments belong to issues
-    storage_filename = None
     description = "Issue comments and discussions"
 
     @staticmethod

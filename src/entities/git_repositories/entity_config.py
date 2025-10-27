@@ -15,7 +15,6 @@ class GitRepositoryEntityConfig:
     default_value = True
     value_type = bool
     dependencies: list = []
-    storage_filename = None
     description = "Git repository clone for full backup"
 
     @staticmethod

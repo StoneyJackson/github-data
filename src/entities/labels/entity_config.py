@@ -15,7 +15,6 @@ class LabelsEntityConfig:
     default_value = True
     value_type = bool
     dependencies: List[str] = []
-    storage_filename = None  # Use convention (labels.json)
     description = "Repository labels for issue/PR categorization"
 
     @staticmethod

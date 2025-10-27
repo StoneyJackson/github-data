@@ -14,7 +14,6 @@ class PrReviewCommentsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["pr_reviews"]  # Review comments belong to reviews
-    storage_filename = None
     description = "Code review inline comments"
 
     @staticmethod

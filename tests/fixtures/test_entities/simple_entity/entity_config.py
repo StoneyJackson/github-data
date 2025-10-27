@@ -9,5 +9,4 @@ class SimpleEntityEntityConfig:
     default_value = True
     value_type = bool
     dependencies = []
-    storage_filename = None
     description = "Simple test entity"

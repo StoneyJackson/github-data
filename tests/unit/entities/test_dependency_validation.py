@@ -14,7 +14,6 @@ def registry_with_dependencies():
         default_value = True
         value_type = bool
         dependencies = []
-        storage_filename = None
         description = ""
 
     class CommentsConfig:
@@ -23,7 +22,6 @@ def registry_with_dependencies():
         default_value = True
         value_type = bool
         dependencies = ["issues"]
-        storage_filename = None
         description = ""
 
     registry = EntityRegistry.__new__(EntityRegistry)

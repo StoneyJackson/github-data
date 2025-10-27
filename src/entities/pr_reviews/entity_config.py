@@ -14,7 +14,6 @@ class PrReviewsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["pull_requests"]  # Reviews belong to PRs
-    storage_filename = None
     description = "Pull request code reviews"
 
     @staticmethod

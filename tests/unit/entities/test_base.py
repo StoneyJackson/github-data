@@ -18,7 +18,6 @@ class MinimalTestConfig:
     default_value = True
     value_type = bool
     dependencies = []
-    storage_filename = None
     description = "Test config"
 
     @staticmethod
