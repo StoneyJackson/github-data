@@ -101,6 +101,7 @@ class StrategyFactory:
     def create_restore_strategies(
         self,
         git_service: Optional[Any] = None,
+        github_service: Optional[Any] = None,
         conflict_strategy: Optional[Any] = None,
         include_original_metadata: bool = True,
         **additional_context: Any,
@@ -109,6 +110,7 @@ class StrategyFactory:
 
         Args:
             git_service: Optional git service for entities that need it
+            github_service: Optional GitHub API service for entities that need it
             conflict_strategy: Optional conflict resolution strategy
             include_original_metadata: Whether to preserve original metadata
             **additional_context: Additional context for strategy creation
@@ -117,21 +119,27 @@ class StrategyFactory:
             List of restore strategy instances in dependency order
 
         Raises:
-            RuntimeError: If any strategy factory method fails
+            RuntimeError: If any entity's service requirements not met
         """
-        context = {
-            "git_service": git_service,
-            "conflict_strategy": conflict_strategy,
-            "include_original_metadata": include_original_metadata,
-            **additional_context,
-        }
+        from src.entities.strategy_context import StrategyContext
+
+        # Create typed context from parameters
+        context = StrategyContext(
+            _git_service=git_service,
+            _github_service=github_service,
+            _conflict_strategy=conflict_strategy,
+            _include_original_metadata=include_original_metadata,
+        )
 
         strategies = []
         enabled_entities = self.registry.get_enabled_entities()
 
         for entity in enabled_entities:
+            # Validate requirements BEFORE creating strategy
+            self._validate_requirements(entity.config, context, "restore")
+
             try:
-                strategy = entity.config.create_restore_strategy(**context)
+                strategy = entity.config.create_restore_strategy(context)
                 if strategy is not None:
                     strategies.append(strategy)
             except Exception as e:
