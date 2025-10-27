@@ -2,7 +2,6 @@
 
 import json
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
-from .strategy import RestoreEntityStrategy
 from src.entities.labels.restore_strategy import OverwriteConflictStrategy
 from src.operations.strategy_factory import StrategyFactory
 
@@ -11,6 +10,7 @@ if TYPE_CHECKING:
     from src.github.protocols import RepositoryService
     from src.git.protocols import GitRepositoryService
     from src.entities.registry import EntityRegistry
+    from src.entities.base import BaseRestoreStrategy
 
 
 class StrategyBasedRestoreOrchestrator:
@@ -76,7 +76,7 @@ class StrategyBasedRestoreOrchestrator:
         return results
 
     def _execute_strategy(
-        self, strategy: RestoreEntityStrategy, repo_name: str, input_path: str
+        self, strategy: "BaseRestoreStrategy", repo_name: str, input_path: str
     ) -> Dict[str, Any]:
         """Execute a single entity restoration strategy."""
         entity_name = strategy.get_entity_name()

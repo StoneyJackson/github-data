@@ -48,6 +48,22 @@ class EntityConfig(Protocol):
 class BaseSaveStrategy(Protocol):
     """Protocol for save strategies."""
 
+    def get_entity_name(self) -> str:
+        """Get the entity name this strategy handles."""
+        ...
+
+    def read(self, *args: Any, **kwargs: Any) -> Any:
+        """Read entities from source."""
+        ...
+
+    def transform(self, *args: Any, **kwargs: Any) -> Any:
+        """Transform entities for storage."""
+        ...
+
+    def write(self, *args: Any, **kwargs: Any) -> Any:
+        """Write entities to storage."""
+        ...
+
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the save operation."""
         ...
@@ -55,6 +71,26 @@ class BaseSaveStrategy(Protocol):
 
 class BaseRestoreStrategy(Protocol):
     """Protocol for restore strategies."""
+
+    def get_entity_name(self) -> str:
+        """Get the entity name this strategy handles."""
+        ...
+
+    def read(self, *args: Any, **kwargs: Any) -> Any:
+        """Read entities from storage."""
+        ...
+
+    def transform(self, *args: Any, **kwargs: Any) -> Any:
+        """Transform entities for restoration."""
+        ...
+
+    def write(self, *args: Any, **kwargs: Any) -> Any:
+        """Write entities to GitHub."""
+        ...
+
+    def post_create_actions(self, *args: Any, **kwargs: Any) -> Any:
+        """Perform post-creation actions."""
+        ...
 
     def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the restore operation."""

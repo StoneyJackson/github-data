@@ -1,7 +1,5 @@
 """Tests for entity base protocols."""
 
-import pytest
-from typing import Optional
 from src.entities.base import EntityConfig
 
 

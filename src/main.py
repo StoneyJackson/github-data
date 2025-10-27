@@ -2,6 +2,7 @@
 
 import os
 import sys
+from typing import Any
 
 from src.entities.registry import EntityRegistry
 from src.operations.save.orchestrator import StrategyBasedSaveOrchestrator
@@ -11,13 +12,16 @@ from src.storage import create_storage_service
 from src.git.service import GitRepositoryServiceImpl
 
 
-def main():
+def main() -> None:
     """Execute save or restore operation based on environment variables."""
     # Get operation type
     operation = os.getenv("OPERATION", "save").lower()
 
     if operation not in ["save", "restore"]:
-        print(f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.", file=sys.stderr)
+        print(
+            f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     # Initialize EntityRegistry from environment
@@ -59,8 +63,13 @@ def main():
 
 
 def execute_save(
-    registry, github_service, storage_service, git_service, repo_name, output_path
-):
+    registry: EntityRegistry,
+    github_service: Any,
+    storage_service: Any,
+    git_service: Any,
+    repo_name: str,
+    output_path: str,
+) -> None:
     """Execute save operation."""
     print(f"Starting save operation for {repo_name}")
     print(f"Output path: {output_path}")
@@ -98,7 +107,13 @@ def execute_save(
         sys.exit(1)
 
 
-def execute_restore(registry, github_service, storage_service, repo_name, input_path):
+def execute_restore(
+    registry: EntityRegistry,
+    github_service: Any,
+    storage_service: Any,
+    repo_name: str,
+    input_path: str,
+) -> None:
     """Execute restore operation."""
     print(f"Starting restore operation for {repo_name}")
     print(f"Input path: {input_path}")

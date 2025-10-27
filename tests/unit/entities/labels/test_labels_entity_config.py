@@ -1,6 +1,5 @@
 """Tests for labels entity configuration."""
 
-import pytest
 from unittest.mock import Mock
 from src.entities.labels.entity_config import LabelsEntityConfig
 from src.entities.labels.conflict_strategies import LabelConflictStrategy

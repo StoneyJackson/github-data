@@ -1,7 +1,7 @@
 """Tests for main entry point with EntityRegistry."""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, Mock
 import os
 
 

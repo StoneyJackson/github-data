@@ -1,7 +1,7 @@
 """Tests for StrategyFactory."""
 
 import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 from src.operations.strategy_factory import StrategyFactory
 
 

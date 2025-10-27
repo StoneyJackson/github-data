@@ -5,8 +5,7 @@ from typing import Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.entities.registry import EntityRegistry
-    from src.operations.save.strategy import SaveEntityStrategy
-    from src.operations.restore.strategy import RestoreEntityStrategy
+    from src.entities.base import BaseSaveStrategy, BaseRestoreStrategy
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ class StrategyFactory:
 
     def create_save_strategies(
         self, git_service: Optional[Any] = None, **additional_context: Any
-    ) -> List["SaveEntityStrategy"]:
+    ) -> List["BaseSaveStrategy"]:
         """Create save strategies for all enabled entities.
 
         Args:
@@ -61,7 +60,7 @@ class StrategyFactory:
         conflict_strategy: Optional[Any] = None,
         include_original_metadata: bool = True,
         **additional_context: Any,
-    ) -> List["RestoreEntityStrategy"]:
+    ) -> List["BaseRestoreStrategy"]:
         """Create restore strategies for all enabled entities.
 
         Args:
@@ -93,7 +92,8 @@ class StrategyFactory:
                     strategies.append(strategy)
             except Exception as e:
                 raise RuntimeError(
-                    f"Failed to create restore strategy for '{entity.config.name}': {e}. "
+                    f"Failed to create restore strategy for "
+                    f"'{entity.config.name}': {e}. "
                     f"Cannot proceed with restore operation."
                 ) from e
 

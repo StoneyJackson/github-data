@@ -1,6 +1,5 @@
 """Tests for issues entity configuration."""
 
-import pytest
 from src.entities.issues.entity_config import IssuesEntityConfig
 
 

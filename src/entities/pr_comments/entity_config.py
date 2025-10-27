@@ -41,8 +41,10 @@ class PrCommentsEntityConfig:
 
         Args:
             **context: Available dependencies
-                - conflict_strategy: Strategy for handling conflicts (default: DefaultPRCommentConflictStrategy)
-                - include_original_metadata: Preserve original metadata (default: True)
+                - conflict_strategy: Strategy for handling conflicts
+                  (default: DefaultPRCommentConflictStrategy)
+                - include_original_metadata: Preserve original metadata
+                  (default: True)
 
         Returns:
             PullRequestCommentsRestoreStrategy instance

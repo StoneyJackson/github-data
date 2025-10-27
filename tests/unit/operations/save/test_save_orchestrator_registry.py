@@ -29,7 +29,7 @@ def test_save_orchestrator_uses_registry_for_execution_order():
     github_service = Mock()
     storage_service = Mock()
 
-    orchestrator = StrategyBasedSaveOrchestrator(
+    StrategyBasedSaveOrchestrator(
         registry=registry,
         github_service=github_service,
         storage_service=storage_service,
