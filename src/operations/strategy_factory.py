@@ -5,7 +5,8 @@ from typing import Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from src.entities.registry import EntityRegistry
-    from src.entities.base import BaseSaveStrategy, BaseRestoreStrategy
+    from src.entities.base import BaseSaveStrategy, BaseRestoreStrategy, EntityConfig
+    from src.entities.strategy_context import StrategyContext
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,34 @@ class StrategyFactory:
             registry: EntityRegistry for entity management
         """
         self.registry = registry
+
+    def _validate_requirements(
+        self,
+        config: "EntityConfig",
+        context: "StrategyContext",
+        operation: str,
+    ) -> None:
+        """Validate required services are available in context.
+
+        Args:
+            config: Entity configuration
+            context: Strategy context to validate
+            operation: "save" or "restore"
+
+        Raises:
+            RuntimeError: If required service not available
+        """
+        # Get requirements for this operation (default empty list for backward compatibility)
+        required = getattr(config, f"required_services_{operation}", [])
+
+        for service_name in required:
+            # Check if service is available (not None)
+            private_attr = f"_{service_name}"
+            if getattr(context, private_attr, None) is None:
+                raise RuntimeError(
+                    f"Entity '{config.name}' requires '{service_name}' "
+                    f"for {operation} operation, but it was not provided in context"
+                )
 
     def create_save_strategies(
         self, git_service: Optional[Any] = None, **additional_context: Any
