@@ -14,8 +14,6 @@ class CommentsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["issues"]  # Comments belong to issues
-    save_strategy_class = None
-    restore_strategy_class = None
     storage_filename = None
     description = "Issue comments and discussions"
 

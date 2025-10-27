@@ -15,8 +15,6 @@ class MilestonesEntityConfig:
     default_value = True
     value_type = bool
     dependencies: List[str] = []
-    save_strategy_class = None
-    restore_strategy_class = None
     storage_filename = None
     description = "Project milestones for issue/PR organization"
 

@@ -14,8 +14,6 @@ class PrCommentsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["pull_requests"]  # PR comments belong to PRs
-    save_strategy_class = "PullRequestCommentsSaveStrategy"
-    restore_strategy_class = "PullRequestCommentsRestoreStrategy"
     storage_filename = None
     description = "Pull request conversation comments"
 

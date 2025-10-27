@@ -14,8 +14,6 @@ class PrReviewsEntityConfig:
     default_value = True
     value_type = bool
     dependencies = ["pull_requests"]  # Reviews belong to PRs
-    save_strategy_class = "PullRequestReviewsSaveStrategy"
-    restore_strategy_class = "PullRequestReviewsRestoreStrategy"
     storage_filename = None
     description = "Pull request code reviews"
 

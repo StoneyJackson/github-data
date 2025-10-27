@@ -10,7 +10,6 @@ def test_create_save_strategies_uses_factory_methods(mock_registry):
     # Setup mock entity with factory method
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
-    mock_entity.config.save_strategy_class = Mock()
     mock_strategy = Mock()
     mock_entity.config.create_save_strategy = Mock(return_value=mock_strategy)
 
@@ -34,7 +33,6 @@ def test_create_save_strategies_skips_none_results(mock_registry):
     """Test that None results from factory are skipped."""
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
-    mock_entity.config.save_strategy_class = Mock()
     mock_entity.config.create_save_strategy = Mock(return_value=None)
 
     mock_registry.get_enabled_entities.return_value = [mock_entity]
@@ -49,7 +47,6 @@ def test_create_save_strategies_raises_on_factory_error(mock_registry):
     """Test that factory errors are re-raised as RuntimeError."""
     mock_entity = Mock()
     mock_entity.config.name = "failing_entity"
-    mock_entity.config.save_strategy_class = Mock()
     mock_entity.config.create_save_strategy = Mock(
         side_effect=ValueError("Missing dependency")
     )
@@ -66,7 +63,6 @@ def test_create_restore_strategies_uses_factory_methods(mock_registry):
     """Test that create_restore_strategies delegates to entity factory methods."""
     mock_entity = Mock()
     mock_entity.config.name = "test_entity"
-    mock_entity.config.restore_strategy_class = Mock()
     mock_strategy = Mock()
     mock_entity.config.create_restore_strategy = Mock(return_value=mock_strategy)
 
@@ -96,7 +92,6 @@ def test_create_restore_strategies_raises_on_factory_error(mock_registry):
     """Test that factory errors are re-raised as RuntimeError."""
     mock_entity = Mock()
     mock_entity.config.name = "failing_entity"
-    mock_entity.config.restore_strategy_class = Mock()
     mock_entity.config.create_restore_strategy = Mock(
         side_effect=ValueError("Missing dependency")
     )
