@@ -31,6 +31,7 @@ class IssuesEntityConfig:
             IssuesSaveStrategy instance
         """
         from src.entities.issues.save_strategy import IssuesSaveStrategy
+
         return IssuesSaveStrategy()
 
     @staticmethod
@@ -45,5 +46,8 @@ class IssuesEntityConfig:
             IssuesRestoreStrategy instance
         """
         from src.entities.issues.restore_strategy import IssuesRestoreStrategy
-        include_original_metadata = context.get('include_original_metadata', True)
-        return IssuesRestoreStrategy(include_original_metadata=include_original_metadata)
+
+        include_original_metadata = context.get("include_original_metadata", True)
+        return IssuesRestoreStrategy(
+            include_original_metadata=include_original_metadata
+        )

@@ -1,24 +1,28 @@
 """Tests for sub_issues entity configuration."""
 
 import pytest
-from src.entities.registry import EntityRegistry
+from src.entities.sub_issues.entity_config import SubIssuesEntityConfig
 
 
-@pytest.mark.unit
-def test_sub_issues_entity_discovered():
-    """Test that sub_issues entity is discovered."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("sub_issues")
-
-    assert entity.config.name == "sub_issues"
-    assert entity.config.env_var == "INCLUDE_SUB_ISSUES"
-    assert entity.config.dependencies == ["issues"]
+def test_sub_issues_create_save_strategy():
+    """Test save strategy factory method."""
+    strategy = SubIssuesEntityConfig.create_save_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "sub_issues"
 
 
-@pytest.mark.unit
-def test_sub_issues_depends_on_issues():
-    """Test that sub_issues depend on issues."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("sub_issues")
+def test_sub_issues_create_restore_strategy_default():
+    """Test restore strategy factory with defaults."""
+    strategy = SubIssuesEntityConfig.create_restore_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "sub_issues"
+    assert strategy._include_original_metadata is True
 
-    assert "issues" in entity.get_dependencies()
+
+def test_sub_issues_create_restore_strategy_custom():
+    """Test restore strategy factory with custom metadata flag."""
+    strategy = SubIssuesEntityConfig.create_restore_strategy(
+        include_original_metadata=False
+    )
+    assert strategy is not None
+    assert strategy._include_original_metadata is False

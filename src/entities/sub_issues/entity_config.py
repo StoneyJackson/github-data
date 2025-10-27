@@ -30,6 +30,7 @@ class SubIssuesEntityConfig:
             SubIssuesSaveStrategy instance
         """
         from src.entities.sub_issues.save_strategy import SubIssuesSaveStrategy
+
         return SubIssuesSaveStrategy()
 
     @staticmethod
@@ -44,5 +45,8 @@ class SubIssuesEntityConfig:
             SubIssuesRestoreStrategy instance
         """
         from src.entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
-        include_original_metadata = context.get('include_original_metadata', True)
-        return SubIssuesRestoreStrategy(include_original_metadata=include_original_metadata)
+
+        include_original_metadata = context.get("include_original_metadata", True)
+        return SubIssuesRestoreStrategy(
+            include_original_metadata=include_original_metadata
+        )

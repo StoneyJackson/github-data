@@ -12,9 +12,17 @@ def test_create_save_strategies_all_entities():
     registry = EntityRegistry()
 
     # Enable all entities
-    for entity_name in ["labels", "milestones", "issues", "comments",
-                        "pull_requests", "pr_reviews", "pr_comments",
-                        "pr_review_comments", "sub_issues"]:
+    for entity_name in [
+        "labels",
+        "milestones",
+        "issues",
+        "comments",
+        "pull_requests",
+        "pr_reviews",
+        "pr_comments",
+        "pr_review_comments",
+        "sub_issues",
+    ]:
         pass  # Already enabled by default
 
     factory = StrategyFactory(registry)
@@ -42,7 +50,9 @@ def test_create_save_strategies_with_git_repository():
     assert "git_repository" in entity_names
 
     # Find git_repository strategy and verify it has git_service
-    git_strategy = next(s for s in strategies if s.get_entity_name() == "git_repository")
+    git_strategy = next(
+        s for s in strategies if s.get_entity_name() == "git_repository"
+    )
     assert git_strategy._git_service is mock_git_service
 
 
@@ -52,16 +62,14 @@ def test_create_restore_strategies_all_entities():
     registry = EntityRegistry()
 
     factory = StrategyFactory(registry)
-    strategies = factory.create_restore_strategies(
-        include_original_metadata=False
-    )
+    strategies = factory.create_restore_strategies(include_original_metadata=False)
 
     # Should get strategies for all enabled entities except git_repository
     assert len(strategies) == 9
 
     # Verify metadata flag was passed
     for strategy in strategies:
-        if hasattr(strategy, '_include_original_metadata'):
+        if hasattr(strategy, "_include_original_metadata"):
             assert strategy._include_original_metadata is False
 
 

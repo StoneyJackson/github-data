@@ -16,7 +16,7 @@ def test_restore_orchestrator_accepts_registry():
     orchestrator = StrategyBasedRestoreOrchestrator(
         registry=registry,
         github_service=github_service,
-        storage_service=storage_service
+        storage_service=storage_service,
     )
 
     assert orchestrator._registry == registry

@@ -31,9 +31,11 @@ class GitRepositoryEntityConfig:
         Returns:
             GitRepositorySaveStrategy instance, or None if git_service not provided
         """
-        from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
+        from src.entities.git_repositories.save_strategy import (
+            GitRepositorySaveStrategy,
+        )
 
-        git_service = context.get('git_service')
+        git_service = context.get("git_service")
         if git_service is None:
             return None  # Skip when git_service not available
         return GitRepositorySaveStrategy(git_service)
@@ -49,9 +51,11 @@ class GitRepositoryEntityConfig:
         Returns:
             GitRepositoryRestoreStrategy instance, or None if git_service not provided
         """
-        from src.entities.git_repositories.restore_strategy import GitRepositoryRestoreStrategy
+        from src.entities.git_repositories.restore_strategy import (
+            GitRepositoryRestoreStrategy,
+        )
 
-        git_service = context.get('git_service')
+        git_service = context.get("git_service")
         if git_service is None:
             return None  # Skip when git_service not available
         return GitRepositoryRestoreStrategy(git_service)

@@ -1,42 +1,37 @@
 """Tests for comments entity configuration."""
 
 import pytest
-from src.entities.registry import EntityRegistry
+from src.entities.comments.entity_config import CommentsEntityConfig
 
 
-@pytest.mark.unit
-def test_comments_entity_discovered():
-    """Test that comments entity is discovered by registry."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("comments")
-
-    assert entity.config.name == "comments"
-    assert entity.config.env_var == "INCLUDE_ISSUE_COMMENTS"
-    assert entity.config.default_value is True
-    assert entity.config.dependencies == ["issues"]
+def test_comments_create_save_strategy():
+    """Test save strategy factory method."""
+    strategy = CommentsEntityConfig.create_save_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "comments"
 
 
-@pytest.mark.unit
-def test_comments_depends_on_issues():
-    """Test that comments depend on issues."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("comments")
+def test_comments_create_restore_strategy_default():
+    """Test restore strategy factory with defaults."""
+    strategy = CommentsEntityConfig.create_restore_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "comments"
+    # Default: include_original_metadata=True
+    assert strategy._include_original_metadata is True
 
-    assert "issues" in entity.get_dependencies()
+
+def test_comments_create_restore_strategy_custom():
+    """Test restore strategy factory with custom metadata flag."""
+    strategy = CommentsEntityConfig.create_restore_strategy(
+        include_original_metadata=False
+    )
+    assert strategy is not None
+    assert strategy._include_original_metadata is False
 
 
-@pytest.mark.unit
-def test_comments_disabled_when_issues_disabled():
-    """Test comments auto-disable when issues disabled."""
-    import os
-
-    os.environ["INCLUDE_ISSUES"] = "false"
-    os.environ["INCLUDE_ISSUE_COMMENTS"] = "true"
-
-    registry = EntityRegistry.from_environment(strict=False)
-    comments = registry.get_entity("comments")
-
-    assert comments.is_enabled() is False
-
-    del os.environ["INCLUDE_ISSUES"]
-    del os.environ["INCLUDE_ISSUE_COMMENTS"]
+def test_comments_factory_ignores_unknown_context():
+    """Test that factory methods ignore unknown context keys."""
+    strategy = CommentsEntityConfig.create_restore_strategy(
+        unknown_key="should_be_ignored", include_original_metadata=False
+    )
+    assert strategy is not None

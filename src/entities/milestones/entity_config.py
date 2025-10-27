@@ -31,6 +31,7 @@ class MilestonesEntityConfig:
             MilestonesSaveStrategy instance
         """
         from src.entities.milestones.save_strategy import MilestonesSaveStrategy
+
         return MilestonesSaveStrategy()
 
     @staticmethod
@@ -44,4 +45,5 @@ class MilestonesEntityConfig:
             MilestonesRestoreStrategy instance
         """
         from src.entities.milestones.restore_strategy import MilestonesRestoreStrategy
+
         return MilestonesRestoreStrategy()

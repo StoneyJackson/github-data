@@ -3,7 +3,9 @@
 import pytest
 from src.entities.registry import EntityRegistry
 from src.entities.pull_requests.entity_config import PullRequestsEntityConfig
-from src.entities.pull_requests.restore_strategy import DefaultPullRequestConflictStrategy
+from src.entities.pull_requests.restore_strategy import (
+    DefaultPullRequestConflictStrategy,
+)
 from unittest.mock import Mock
 from typing import Union, Set
 
@@ -55,8 +57,7 @@ def test_pull_requests_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
     mock_conflict_strategy = Mock()
     strategy = PullRequestsEntityConfig.create_restore_strategy(
-        include_original_metadata=False,
-        conflict_strategy=mock_conflict_strategy
+        include_original_metadata=False, conflict_strategy=mock_conflict_strategy
     )
     assert strategy is not None
     assert strategy._include_original_metadata is False
@@ -67,7 +68,6 @@ def test_pull_requests_create_restore_strategy_custom():
 def test_pull_requests_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
     strategy = PullRequestsEntityConfig.create_restore_strategy(
-        unknown_key="should_be_ignored",
-        include_original_metadata=False
+        unknown_key="should_be_ignored", include_original_metadata=False
     )
     assert strategy is not None

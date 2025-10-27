@@ -31,6 +31,7 @@ class LabelsEntityConfig:
             LabelsSaveStrategy instance
         """
         from src.entities.labels.save_strategy import LabelsSaveStrategy
+
         return LabelsSaveStrategy()
 
     @staticmethod
@@ -44,16 +45,21 @@ class LabelsEntityConfig:
         Returns:
             LabelsRestoreStrategy instance
         """
-        from src.entities.labels.restore_strategy import LabelsRestoreStrategy, create_conflict_strategy
+        from src.entities.labels.restore_strategy import (
+            LabelsRestoreStrategy,
+            create_conflict_strategy,
+        )
         from src.entities.labels.conflict_strategies import LabelConflictStrategy
 
-        conflict_strategy = context.get('conflict_strategy', LabelConflictStrategy.SKIP)
+        conflict_strategy = context.get("conflict_strategy", LabelConflictStrategy.SKIP)
 
         # Convert enum to strategy object if needed
         if isinstance(conflict_strategy, LabelConflictStrategy):
             # Convert enum to strategy object
-            github_service = context.get('github_service')
-            conflict_strategy_obj = create_conflict_strategy(conflict_strategy.value, github_service)
+            github_service = context.get("github_service")
+            conflict_strategy_obj = create_conflict_strategy(
+                conflict_strategy.value, github_service
+            )
         else:
             # Assume it's already a strategy object
             conflict_strategy_obj = conflict_strategy

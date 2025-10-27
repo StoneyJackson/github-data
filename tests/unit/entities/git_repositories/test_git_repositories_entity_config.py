@@ -28,7 +28,9 @@ def test_git_repository_create_restore_strategy_without_git_service():
 def test_git_repository_create_restore_strategy_with_service():
     """Test restore strategy creation with git_service."""
     mock_service = Mock()
-    strategy = GitRepositoryEntityConfig.create_restore_strategy(git_service=mock_service)
+    strategy = GitRepositoryEntityConfig.create_restore_strategy(
+        git_service=mock_service
+    )
     assert strategy is not None
     assert strategy._git_service is mock_service
 
@@ -39,6 +41,6 @@ def test_git_repository_factory_ignores_other_context():
     strategy = GitRepositoryEntityConfig.create_restore_strategy(
         git_service=mock_service,
         include_original_metadata=True,  # Should be ignored
-        conflict_strategy="skip"  # Should be ignored
+        conflict_strategy="skip",  # Should be ignored
     )
     assert strategy is not None

@@ -1,54 +1,28 @@
 """Tests for milestones entity configuration."""
 
-import importlib
-
 import pytest
-from src.entities.registry import EntityRegistry
+from src.entities.milestones.entity_config import MilestonesEntityConfig
 
 
-@pytest.mark.unit
-def test_milestones_entity_discovered():
-    """Test that milestones entity is discovered by registry."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("milestones")
-
-    assert entity.config.name == "milestones"
-    assert entity.config.env_var == "INCLUDE_MILESTONES"
-    assert entity.config.default_value is True
-    assert entity.config.value_type == bool
-    assert entity.config.dependencies == []
-    assert entity.config.description != ""
+def test_milestones_create_save_strategy():
+    """Test save strategy factory method."""
+    strategy = MilestonesEntityConfig.create_save_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "milestones"
 
 
-@pytest.mark.unit
-def test_milestones_entity_no_dependencies():
-    """Test that milestones entity has no dependencies."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("milestones")
-
-    assert entity.get_dependencies() == []
-
-
-@pytest.mark.unit
-def test_milestones_entity_enabled_by_default():
-    """Test that milestones entity is enabled by default."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("milestones")
-
-    assert entity.is_enabled() is True
+def test_milestones_create_restore_strategy_default():
+    """Test restore strategy factory with defaults."""
+    strategy = MilestonesEntityConfig.create_restore_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "milestones"
+    # Milestones restore strategy has no include_original_metadata (no constructor params)
 
 
-@pytest.mark.unit
-def test_milestones_save_strategy_exists():
-    """Test that milestones save strategy exists at expected location."""
-    module = importlib.import_module("src.entities.milestones.save_strategy")
-    strategy_class = getattr(module, "MilestonesSaveStrategy")
-    assert strategy_class is not None
-
-
-@pytest.mark.unit
-def test_milestones_restore_strategy_exists():
-    """Test that milestones restore strategy exists at expected location."""
-    module = importlib.import_module("src.entities.milestones.restore_strategy")
-    strategy_class = getattr(module, "MilestonesRestoreStrategy")
-    assert strategy_class is not None
+def test_milestones_factory_ignores_unknown_context():
+    """Test that factory methods ignore unknown context keys."""
+    strategy = MilestonesEntityConfig.create_restore_strategy(
+        unknown_key="should_be_ignored",
+        include_original_metadata=False,  # Should be ignored
+    )
+    assert strategy is not None

@@ -31,6 +31,7 @@ class PullRequestsEntityConfig:
             PullRequestsSaveStrategy instance
         """
         from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+
         return PullRequestsSaveStrategy()
 
     @staticmethod
@@ -48,15 +49,17 @@ class PullRequestsEntityConfig:
         """
         from src.entities.pull_requests.restore_strategy import (
             PullRequestsRestoreStrategy,
-            DefaultPullRequestConflictStrategy
+            DefaultPullRequestConflictStrategy,
         )
 
-        conflict_strategy = context.get('conflict_strategy', DefaultPullRequestConflictStrategy())
-        include_original_metadata = context.get('include_original_metadata', True)
-        include_pull_requests = context.get('include_pull_requests', True)
+        conflict_strategy = context.get(
+            "conflict_strategy", DefaultPullRequestConflictStrategy()
+        )
+        include_original_metadata = context.get("include_original_metadata", True)
+        include_pull_requests = context.get("include_pull_requests", True)
 
         return PullRequestsRestoreStrategy(
             conflict_strategy=conflict_strategy,
             include_original_metadata=include_original_metadata,
-            include_pull_requests=include_pull_requests
+            include_pull_requests=include_pull_requests,
         )

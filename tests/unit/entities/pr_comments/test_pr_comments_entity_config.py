@@ -52,8 +52,7 @@ def test_pr_comments_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
     mock_conflict_strategy = Mock()
     strategy = PrCommentsEntityConfig.create_restore_strategy(
-        include_original_metadata=False,
-        conflict_strategy=mock_conflict_strategy
+        include_original_metadata=False, conflict_strategy=mock_conflict_strategy
     )
     assert strategy is not None
     assert strategy._include_original_metadata is False
@@ -64,7 +63,6 @@ def test_pr_comments_create_restore_strategy_custom():
 def test_pr_comments_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
     strategy = PrCommentsEntityConfig.create_restore_strategy(
-        unknown_key="should_be_ignored",
-        include_original_metadata=False
+        unknown_key="should_be_ignored", include_original_metadata=False
     )
     assert strategy is not None
