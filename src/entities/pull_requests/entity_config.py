@@ -15,8 +15,6 @@ class PullRequestsEntityConfig:
     default_value = True
     value_type = Union[bool, Set[int]]
     dependencies = ["milestones"]  # PRs can reference milestones
-    save_strategy_class = "PullRequestsSaveStrategy"
-    restore_strategy_class = "PullRequestsRestoreStrategy"
     storage_filename = None
     description = "Pull requests with milestone references"
 

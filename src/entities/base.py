@@ -15,8 +15,6 @@ class EntityConfig(Protocol):
     default_value: Union[bool, Set[int]]  # Default enabled state
     value_type: Type  # bool or Union[bool, Set[int]]
     dependencies: List[str] = []  # List of entity names this depends on
-    save_strategy_class: Optional[Type] = None  # Override auto-discovery
-    restore_strategy_class: Optional[Type] = None  # Override auto-discovery
     storage_filename: Optional[str] = None  # Override convention
     description: str = ""  # Documentation
 

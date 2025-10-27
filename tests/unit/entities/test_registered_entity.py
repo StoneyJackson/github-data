@@ -10,8 +10,6 @@ class MockEntityConfig:
     default_value: Union[bool, Set[int]] = True
     value_type: Type = bool
     dependencies: List[str] = []
-    save_strategy_class: Optional[Type] = None
-    restore_strategy_class: Optional[Type] = None
     storage_filename: Optional[str] = None
     description: str = "Test entity"
 
@@ -53,8 +51,6 @@ def test_registered_entity_get_dependencies() -> None:
         default_value: Union[bool, Set[int]] = True
         value_type: Type = bool
         dependencies: List[str] = ["issues", "comments"]
-        save_strategy_class: Optional[Type] = None
-        restore_strategy_class: Optional[Type] = None
         storage_filename: Optional[str] = None
         description: str = ""
 
