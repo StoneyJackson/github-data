@@ -1,6 +1,13 @@
 """Git repository entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
+    from src.entities.git_repositories.restore_strategy import (
+        GitRepositoryRestoreStrategy,
+    )
 
 
 class GitRepositoryEntityConfig:
@@ -17,42 +24,48 @@ class GitRepositoryEntityConfig:
     dependencies: list = []
     description = "Git repository clone for full backup"
 
+    # Service requirements (NEW)
+    required_services_save = ["git_service"]
+    required_services_restore = ["git_service"]
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["GitRepositorySaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies
-                - git_service: GitRepositoryService instance (REQUIRED)
+            context: Typed strategy context with validated services
 
         Returns:
-            GitRepositorySaveStrategy instance, or None if git_service not provided
+            GitRepositorySaveStrategy instance
+
+        Note:
+            Validation ensures git_service is available, no None check needed
         """
         from src.entities.git_repositories.save_strategy import (
             GitRepositorySaveStrategy,
         )
 
-        git_service = context.get("git_service")
-        if git_service is None:
-            return None  # Skip when git_service not available
-        return GitRepositorySaveStrategy(git_service)
+        return GitRepositorySaveStrategy(context.git_service)
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["GitRepositoryRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - git_service: GitRepositoryService instance (REQUIRED)
+            context: Typed strategy context with validated services
 
         Returns:
-            GitRepositoryRestoreStrategy instance, or None if git_service not provided
+            GitRepositoryRestoreStrategy instance
+
+        Note:
+            Validation ensures git_service is available, no None check needed
         """
         from src.entities.git_repositories.restore_strategy import (
             GitRepositoryRestoreStrategy,
         )
 
-        git_service = context.get("git_service")
-        if git_service is None:
-            return None  # Skip when git_service not available
-        return GitRepositoryRestoreStrategy(git_service)
+        return GitRepositoryRestoreStrategy(context.git_service)
