@@ -1,54 +1,45 @@
 """Tests for labels entity configuration."""
 
-import importlib
-
 import pytest
-from src.entities.registry import EntityRegistry
+from unittest.mock import Mock
+from src.entities.labels.entity_config import LabelsEntityConfig
+from src.entities.labels.conflict_strategies import LabelConflictStrategy
 
 
-@pytest.mark.unit
-def test_labels_entity_discovered():
-    """Test that labels entity is discovered by registry."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("labels")
-
-    assert entity.config.name == "labels"
-    assert entity.config.env_var == "INCLUDE_LABELS"
-    assert entity.config.default_value is True
-    assert entity.config.value_type == bool
-    assert entity.config.dependencies == []
-    assert entity.config.description != ""
+def test_labels_create_save_strategy():
+    """Test save strategy factory method."""
+    strategy = LabelsEntityConfig.create_save_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "labels"
 
 
-@pytest.mark.unit
-def test_labels_entity_no_dependencies():
-    """Test that labels entity has no dependencies."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("labels")
-
-    assert entity.get_dependencies() == []
-
-
-@pytest.mark.unit
-def test_labels_entity_enabled_by_default():
-    """Test that labels entity is enabled by default."""
-    registry = EntityRegistry()
-    entity = registry.get_entity("labels")
-
-    assert entity.is_enabled() is True
+def test_labels_create_restore_strategy_default():
+    """Test restore strategy factory with default conflict strategy."""
+    strategy = LabelsEntityConfig.create_restore_strategy()
+    assert strategy is not None
+    assert strategy.get_entity_name() == "labels"
+    # Default should be SKIP strategy - verify by class name to avoid circular import
+    assert strategy._conflict_strategy.__class__.__name__ == "SkipConflictStrategy"
 
 
-@pytest.mark.unit
-def test_labels_save_strategy_exists():
-    """Test that labels save strategy exists at expected location."""
-    module = importlib.import_module("src.entities.labels.save_strategy")
-    strategy_class = getattr(module, "LabelsSaveStrategy")
-    assert strategy_class is not None
+def test_labels_create_restore_strategy_custom():
+    """Test restore strategy factory with custom conflict strategy."""
+    # OVERWRITE strategy requires github_service
+    mock_github_service = Mock()
+    strategy = LabelsEntityConfig.create_restore_strategy(
+        conflict_strategy=LabelConflictStrategy.OVERWRITE,
+        github_service=mock_github_service,
+    )
+    assert strategy is not None
+    # Should be OverwriteConflictStrategy instance - check by class name
+    assert strategy._conflict_strategy.__class__.__name__ == "OverwriteConflictStrategy"
 
 
-@pytest.mark.unit
-def test_labels_restore_strategy_exists():
-    """Test that labels restore strategy exists at expected location."""
-    module = importlib.import_module("src.entities.labels.restore_strategy")
-    strategy_class = getattr(module, "LabelsRestoreStrategy")
-    assert strategy_class is not None
+def test_labels_create_restore_strategy_ignores_metadata():
+    """Test that labels factory ignores include_original_metadata."""
+    # Labels don't use this parameter
+    strategy = LabelsEntityConfig.create_restore_strategy(
+        include_original_metadata=False, conflict_strategy=LabelConflictStrategy.SKIP
+    )
+    assert strategy is not None
+    assert strategy._conflict_strategy.__class__.__name__ == "SkipConflictStrategy"

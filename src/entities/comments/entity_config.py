@@ -30,6 +30,7 @@ class CommentsEntityConfig:
             CommentsSaveStrategy instance
         """
         from src.entities.comments.save_strategy import CommentsSaveStrategy
+
         return CommentsSaveStrategy()
 
     @staticmethod
@@ -44,5 +45,8 @@ class CommentsEntityConfig:
             CommentsRestoreStrategy instance
         """
         from src.entities.comments.restore_strategy import CommentsRestoreStrategy
-        include_original_metadata = context.get('include_original_metadata', True)
-        return CommentsRestoreStrategy(include_original_metadata=include_original_metadata)
+
+        include_original_metadata = context.get("include_original_metadata", True)
+        return CommentsRestoreStrategy(
+            include_original_metadata=include_original_metadata
+        )

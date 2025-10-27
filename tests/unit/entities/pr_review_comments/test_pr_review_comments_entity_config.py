@@ -57,7 +57,6 @@ def test_pr_review_comments_create_restore_strategy_custom():
 def test_pr_review_comments_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
     strategy = PrReviewCommentsEntityConfig.create_restore_strategy(
-        unknown_key="should_be_ignored",
-        include_original_metadata=False
+        unknown_key="should_be_ignored", include_original_metadata=False
     )
     assert strategy is not None

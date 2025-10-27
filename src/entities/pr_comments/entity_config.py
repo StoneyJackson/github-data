@@ -29,7 +29,10 @@ class PrCommentsEntityConfig:
         Returns:
             PullRequestCommentsSaveStrategy instance
         """
-        from src.entities.pr_comments.save_strategy import PullRequestCommentsSaveStrategy
+        from src.entities.pr_comments.save_strategy import (
+            PullRequestCommentsSaveStrategy,
+        )
+
         return PullRequestCommentsSaveStrategy()
 
     @staticmethod
@@ -46,13 +49,15 @@ class PrCommentsEntityConfig:
         """
         from src.entities.pr_comments.restore_strategy import (
             PullRequestCommentsRestoreStrategy,
-            DefaultPRCommentConflictStrategy
+            DefaultPRCommentConflictStrategy,
         )
 
-        conflict_strategy = context.get('conflict_strategy', DefaultPRCommentConflictStrategy())
-        include_original_metadata = context.get('include_original_metadata', True)
+        conflict_strategy = context.get(
+            "conflict_strategy", DefaultPRCommentConflictStrategy()
+        )
+        include_original_metadata = context.get("include_original_metadata", True)
 
         return PullRequestCommentsRestoreStrategy(
             conflict_strategy=conflict_strategy,
-            include_original_metadata=include_original_metadata
+            include_original_metadata=include_original_metadata,
         )

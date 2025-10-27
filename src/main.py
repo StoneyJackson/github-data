@@ -43,16 +43,24 @@ def main():
     # Initialize services
     github_service = create_github_service(github_token)
     storage_service = create_storage_service("json")
-    git_service = GitRepositoryServiceImpl(auth_token=github_token) if registry.get_entity("git_repository").is_enabled() else None
+    git_service = (
+        GitRepositoryServiceImpl(auth_token=github_token)
+        if registry.get_entity("git_repository").is_enabled()
+        else None
+    )
 
     # Execute operation
     if operation == "save":
-        execute_save(registry, github_service, storage_service, git_service, repo_name, data_path)
+        execute_save(
+            registry, github_service, storage_service, git_service, repo_name, data_path
+        )
     else:
         execute_restore(registry, github_service, storage_service, repo_name, data_path)
 
 
-def execute_save(registry, github_service, storage_service, git_service, repo_name, output_path):
+def execute_save(
+    registry, github_service, storage_service, git_service, repo_name, output_path
+):
     """Execute save operation."""
     print(f"Starting save operation for {repo_name}")
     print(f"Output path: {output_path}")
@@ -67,7 +75,7 @@ def execute_save(registry, github_service, storage_service, git_service, repo_na
         registry=registry,
         github_service=github_service,
         storage_service=storage_service,
-        git_service=git_service
+        git_service=git_service,
     )
 
     try:
@@ -93,7 +101,7 @@ def execute_restore(registry, github_service, storage_service, repo_name, input_
     orchestrator = StrategyBasedRestoreOrchestrator(
         registry=registry,
         github_service=github_service,
-        storage_service=storage_service
+        storage_service=storage_service,
     )
 
     try:

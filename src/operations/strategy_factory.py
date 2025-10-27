@@ -23,9 +23,7 @@ class StrategyFactory:
         self.registry = registry
 
     def create_save_strategies(
-        self,
-        git_service: Optional[Any] = None,
-        **additional_context: Any
+        self, git_service: Optional[Any] = None, **additional_context: Any
     ) -> List["SaveEntityStrategy"]:
         """Create save strategies for all enabled entities.
 
@@ -39,10 +37,7 @@ class StrategyFactory:
         Raises:
             RuntimeError: If any strategy factory method fails
         """
-        context = {
-            'git_service': git_service,
-            **additional_context
-        }
+        context = {"git_service": git_service, **additional_context}
 
         strategies = []
         enabled_entities = self.registry.get_enabled_entities()
@@ -65,7 +60,7 @@ class StrategyFactory:
         git_service: Optional[Any] = None,
         conflict_strategy: Optional[Any] = None,
         include_original_metadata: bool = True,
-        **additional_context: Any
+        **additional_context: Any,
     ) -> List["RestoreEntityStrategy"]:
         """Create restore strategies for all enabled entities.
 
@@ -82,10 +77,10 @@ class StrategyFactory:
             RuntimeError: If any strategy factory method fails
         """
         context = {
-            'git_service': git_service,
-            'conflict_strategy': conflict_strategy,
-            'include_original_metadata': include_original_metadata,
-            **additional_context
+            "git_service": git_service,
+            "conflict_strategy": conflict_strategy,
+            "include_original_metadata": include_original_metadata,
+            **additional_context,
         }
 
         strategies = []

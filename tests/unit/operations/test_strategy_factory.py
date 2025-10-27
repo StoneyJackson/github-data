@@ -24,7 +24,7 @@ def test_create_save_strategies_uses_factory_methods(mock_registry):
     # Verify factory method was called with context
     mock_entity.config.create_save_strategy.assert_called_once()
     call_kwargs = mock_entity.config.create_save_strategy.call_args[1]
-    assert call_kwargs['git_service'] is mock_git_service
+    assert call_kwargs["git_service"] is mock_git_service
 
     # Verify strategy was added to list
     assert mock_strategy in strategies
@@ -79,15 +79,15 @@ def test_create_restore_strategies_uses_factory_methods(mock_registry):
     strategies = factory.create_restore_strategies(
         git_service=mock_git_service,
         conflict_strategy=mock_conflict_strategy,
-        include_original_metadata=False
+        include_original_metadata=False,
     )
 
     # Verify factory method was called with all context
     mock_entity.config.create_restore_strategy.assert_called_once()
     call_kwargs = mock_entity.config.create_restore_strategy.call_args[1]
-    assert call_kwargs['git_service'] is mock_git_service
-    assert call_kwargs['conflict_strategy'] is mock_conflict_strategy
-    assert call_kwargs['include_original_metadata'] is False
+    assert call_kwargs["git_service"] is mock_git_service
+    assert call_kwargs["conflict_strategy"] is mock_conflict_strategy
+    assert call_kwargs["include_original_metadata"] is False
 
     assert mock_strategy in strategies
 

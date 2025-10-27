@@ -6,12 +6,15 @@ import os
 
 
 @pytest.mark.unit
-@patch('src.main.StrategyBasedSaveOrchestrator')
-@patch('src.main.EntityRegistry')
-@patch('src.main.create_github_service')
-@patch('src.main.create_storage_service')
+@patch("src.main.StrategyBasedSaveOrchestrator")
+@patch("src.main.EntityRegistry")
+@patch("src.main.create_github_service")
+@patch("src.main.create_storage_service")
 def test_main_initializes_registry_from_environment(
-    mock_storage_factory, mock_github_factory, mock_registry_class, mock_orchestrator_class
+    mock_storage_factory,
+    mock_github_factory,
+    mock_registry_class,
+    mock_orchestrator_class,
 ):
     """Test main initializes EntityRegistry from environment."""
     from src.main import main

@@ -30,6 +30,7 @@ class PrReviewsEntityConfig:
             PullRequestReviewsSaveStrategy instance
         """
         from src.entities.pr_reviews.save_strategy import PullRequestReviewsSaveStrategy
+
         return PullRequestReviewsSaveStrategy()
 
     @staticmethod
@@ -43,6 +44,11 @@ class PrReviewsEntityConfig:
         Returns:
             PullRequestReviewsRestoreStrategy instance
         """
-        from src.entities.pr_reviews.restore_strategy import PullRequestReviewsRestoreStrategy
-        include_original_metadata = context.get('include_original_metadata', True)
-        return PullRequestReviewsRestoreStrategy(include_original_metadata=include_original_metadata)
+        from src.entities.pr_reviews.restore_strategy import (
+            PullRequestReviewsRestoreStrategy,
+        )
+
+        include_original_metadata = context.get("include_original_metadata", True)
+        return PullRequestReviewsRestoreStrategy(
+            include_original_metadata=include_original_metadata
+        )

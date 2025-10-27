@@ -16,7 +16,7 @@ def test_save_orchestrator_accepts_registry():
     orchestrator = StrategyBasedSaveOrchestrator(
         registry=registry,
         github_service=github_service,
-        storage_service=storage_service
+        storage_service=storage_service,
     )
 
     assert orchestrator._registry == registry
@@ -32,7 +32,7 @@ def test_save_orchestrator_uses_registry_for_execution_order():
     orchestrator = StrategyBasedSaveOrchestrator(
         registry=registry,
         github_service=github_service,
-        storage_service=storage_service
+        storage_service=storage_service,
     )
 
     # Get execution order

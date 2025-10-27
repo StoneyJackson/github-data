@@ -8,12 +8,13 @@ from src.entities.base import EntityConfig
 def test_entity_config_has_factory_methods():
     """Verify EntityConfig protocol defines factory methods."""
     # This test validates protocol structure
-    assert hasattr(EntityConfig, 'create_save_strategy')
-    assert hasattr(EntityConfig, 'create_restore_strategy')
+    assert hasattr(EntityConfig, "create_save_strategy")
+    assert hasattr(EntityConfig, "create_restore_strategy")
 
 
 class MinimalTestConfig:
     """Minimal config for testing protocol compliance."""
+
     name = "test"
     env_var = "INCLUDE_TEST"
     default_value = True
@@ -55,8 +56,6 @@ def test_factory_methods_accept_context():
     assert result is None
 
     result = config.create_restore_strategy(
-        git_service="test",
-        conflict_strategy="skip",
-        include_original_metadata=True
+        git_service="test", conflict_strategy="skip", include_original_metadata=True
     )
     assert result is None
