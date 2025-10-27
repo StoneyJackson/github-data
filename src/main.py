@@ -80,6 +80,17 @@ def execute_save(
 
     try:
         results = orchestrator.execute_save(repo_name, output_path)
+
+        # Check if any entity save operations failed
+        failures = [r for r in results if not r.get("success", True)]
+        if failures:
+            print("\nSave operation completed with errors:", file=sys.stderr)
+            for failure in failures:
+                entity_name = failure.get("entity_name", "unknown")
+                error_msg = failure.get("error", "unknown error")
+                print(f"  - {entity_name}: {error_msg}", file=sys.stderr)
+            sys.exit(1)
+
         print("\nSave operation completed successfully")
         print(f"Total entities saved: {len(results)}")
     except Exception as e:
@@ -106,6 +117,17 @@ def execute_restore(registry, github_service, storage_service, repo_name, input_
 
     try:
         results = orchestrator.execute_restore(repo_name, input_path)
+
+        # Check if any entity restore operations failed
+        failures = [r for r in results if not r.get("success", True)]
+        if failures:
+            print("\nRestore operation completed with errors:", file=sys.stderr)
+            for failure in failures:
+                entity_name = failure.get("entity_name", "unknown")
+                error_msg = failure.get("error", "unknown error")
+                print(f"  - {entity_name}: {error_msg}", file=sys.stderr)
+            sys.exit(1)
+
         print("\nRestore operation completed successfully")
         print(f"Total entities restored: {len(results)}")
     except Exception as e:
