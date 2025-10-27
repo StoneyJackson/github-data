@@ -117,7 +117,7 @@ def test_create_save_strategies_uses_strategy_context(mock_registry):
     factory = StrategyFactory(mock_registry)
     mock_git_service = Mock()
 
-    strategies = factory.create_save_strategies(git_service=mock_git_service)
+    factory.create_save_strategies(git_service=mock_git_service)
 
     # Verify factory method called with StrategyContext
     mock_entity.config.create_save_strategy.assert_called_once()
@@ -160,7 +160,7 @@ def test_create_restore_strategies_uses_strategy_context(mock_registry):
     mock_github_service = Mock()
     mock_conflict_strategy = Mock()
 
-    strategies = factory.create_restore_strategies(
+    factory.create_restore_strategies(
         github_service=mock_github_service,
         conflict_strategy=mock_conflict_strategy,
         include_original_metadata=False,

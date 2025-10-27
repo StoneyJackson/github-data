@@ -25,7 +25,9 @@ class EntityConfig(Protocol):
     required_services_restore: List[str] = []  # Services needed for restore
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["BaseSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["BaseSaveStrategy"]:
         """Factory method for creating save strategy instances.
 
         Args:
@@ -37,7 +39,9 @@ class EntityConfig(Protocol):
         ...
 
     @staticmethod
-    def create_restore_strategy(context: "StrategyContext") -> Optional["BaseRestoreStrategy"]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["BaseRestoreStrategy"]:
         """Factory method for creating restore strategy instances.
 
         Args:
