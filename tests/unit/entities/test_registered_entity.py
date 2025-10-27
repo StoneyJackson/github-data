@@ -1,4 +1,4 @@
-from typing import List, Optional, Type, Union, Set
+from typing import List, Type, Union, Set
 from src.entities.base import RegisteredEntity
 
 
