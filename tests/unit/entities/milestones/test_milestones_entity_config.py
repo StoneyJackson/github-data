@@ -1,6 +1,5 @@
 """Tests for milestones entity configuration."""
 
-from unittest.mock import Mock
 from src.entities.milestones.entity_config import MilestonesEntityConfig
 from src.entities.strategy_context import StrategyContext
 

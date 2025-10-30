@@ -1,6 +1,7 @@
 """Integration tests for Batch 1 entity migration."""
 
 import pytest
+from unittest.mock import Mock
 from src.entities.registry import EntityRegistry
 from src.operations.strategy_factory import StrategyFactory
 
@@ -46,11 +47,13 @@ def test_batch1_save_strategies_create():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
     assert "labels" in strategy_names
     assert "milestones" in strategy_names
+    assert "git_repository" in strategy_names
 
 
 @pytest.mark.integration

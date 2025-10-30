@@ -1,6 +1,7 @@
 """Tests for StrategyFactory with EntityRegistry integration."""
 
 import pytest
+from unittest.mock import Mock
 from src.operations.strategy_factory import StrategyFactory
 from src.entities.registry import EntityRegistry
 
@@ -21,7 +22,8 @@ def test_strategy_factory_creates_labels_strategy():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
     assert "labels" in strategy_names
@@ -33,7 +35,8 @@ def test_strategy_factory_creates_milestones_strategy():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
     assert "milestones" in strategy_names
@@ -47,8 +50,12 @@ def test_strategy_factory_creates_restore_strategy():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
+    mock_git_service = Mock()
+    mock_github_service = Mock()
     strategies = factory.create_restore_strategies(
-        conflict_strategy=LabelConflictStrategy.SKIP
+        git_service=mock_git_service,
+        github_service=mock_github_service,
+        conflict_strategy=LabelConflictStrategy.SKIP,
     )
     strategy_names = [s.get_entity_name() for s in strategies]
 
@@ -64,17 +71,18 @@ def test_strategy_factory_creates_all_batch1_and_batch2():
     # Test entities that don't require special constructor parameters
     simple_entities = ["labels", "milestones", "issues", "comments", "sub_issues"]
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
     for entity_name in simple_entities:
         assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
-    # Verify git_repository entity is discovered
-    # (even though it needs git_service param)
+    # Verify git_repository entity is discovered and created with git_service
     git_entity = registry.get_entity("git_repository")
     assert git_entity is not None
     assert git_entity.config.name == "git_repository"
+    assert "git_repository" in strategy_names
 
 
 @pytest.mark.unit
@@ -83,8 +91,8 @@ def test_strategy_factory_creates_all_10_entities():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    # Entities that can be created without special constructor parameters
-    simple_entities = [
+    # All entities including git_repository
+    all_entities = [
         "labels",
         "milestones",
         "issues",
@@ -94,18 +102,18 @@ def test_strategy_factory_creates_all_10_entities():
         "pr_reviews",
         "pr_review_comments",
         "pr_comments",
+        "git_repository",
     ]
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
-    for entity_name in simple_entities:
+    for entity_name in all_entities:
         assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
-    # Verify git_repository is discovered (even though it needs git_service param)
-    git_entity = registry.get_entity("git_repository")
-    assert git_entity is not None
-    assert git_entity.config.name == "git_repository"
+    # Verify all 10 entities are created
+    assert len(strategy_names) == 10
 
 
 @pytest.mark.unit
@@ -124,15 +132,15 @@ def test_strategy_factory_create_save_strategies_from_registry():
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
 
-    # Should return strategies for all enabled entities except
-    # git_repository (needs git_service)
+    # Should return strategies for all enabled entities including git_repository
     strategy_names = [s.get_entity_name() for s in strategies]
     assert "labels" in strategy_names
     assert "milestones" in strategy_names
-    assert "git_repository" not in strategy_names  # Skipped without git_service
-    assert len(strategy_names) == 9  # 9 entities when git_service not provided
+    assert "git_repository" in strategy_names  # Included with git_service
+    assert len(strategy_names) == 10  # All 10 entities with git_service provided
 
 
 @pytest.mark.unit
@@ -144,7 +152,8 @@ def test_strategy_factory_respects_disabled_entities():
     registry = EntityRegistry.from_environment()
     factory = StrategyFactory(registry=registry)
 
-    strategies = factory.create_save_strategies()
+    mock_git_service = Mock()
+    strategies = factory.create_save_strategies(git_service=mock_git_service)
     strategy_names = [s.get_entity_name() for s in strategies]
 
     assert "labels" not in strategy_names

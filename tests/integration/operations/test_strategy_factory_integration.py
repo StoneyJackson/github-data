@@ -11,19 +11,8 @@ def test_create_save_strategies_all_entities():
     """Test creating save strategies for all real entities."""
     registry = EntityRegistry()
 
-    # Enable all entities
-    for entity_name in [
-        "labels",
-        "milestones",
-        "issues",
-        "comments",
-        "pull_requests",
-        "pr_reviews",
-        "pr_comments",
-        "pr_review_comments",
-        "sub_issues",
-    ]:
-        pass  # Already enabled by default
+    # Disable git_repository since we're not providing git_service
+    registry.get_entity("git_repository").enabled = False
 
     factory = StrategyFactory(registry)
     strategies = factory.create_save_strategies()
@@ -61,8 +50,14 @@ def test_create_restore_strategies_all_entities():
     """Test creating restore strategies for all real entities."""
     registry = EntityRegistry()
 
+    # Disable git_repository since we're not providing git_service
+    registry.get_entity("git_repository").enabled = False
+
     factory = StrategyFactory(registry)
-    strategies = factory.create_restore_strategies(include_original_metadata=False)
+    mock_github_service = Mock()
+    strategies = factory.create_restore_strategies(
+        github_service=mock_github_service, include_original_metadata=False
+    )
 
     # Should get strategies for all enabled entities except git_repository
     assert len(strategies) == 9
@@ -81,9 +76,14 @@ def test_create_restore_strategies_labels_with_conflict_strategy():
 
     registry = EntityRegistry()
 
+    # Disable git_repository since we're not providing git_service
+    registry.get_entity("git_repository").enabled = False
+
     factory = StrategyFactory(registry)
+    mock_github_service = Mock()
     strategies = factory.create_restore_strategies(
-        conflict_strategy=LabelConflictStrategy.FAIL_IF_CONFLICT
+        github_service=mock_github_service,
+        conflict_strategy=LabelConflictStrategy.FAIL_IF_CONFLICT,
     )
 
     # Find labels strategy
@@ -93,17 +93,19 @@ def test_create_restore_strategies_labels_with_conflict_strategy():
 
 @pytest.mark.integration
 def test_git_repository_requires_git_service():
-    """Test that git_repository is skipped without git_service."""
+    """Test that git_repository validation requires git_service."""
     registry = EntityRegistry()
 
     factory = StrategyFactory(registry)
 
-    # Without git_service, git_repository should be skipped (returns None)
-    strategies = factory.create_save_strategies()  # No git_service provided
-    entity_names = [s.get_entity_name() for s in strategies]
-    assert "git_repository" not in entity_names
+    # Without git_service, should raise validation error for git_repository
+    with pytest.raises(
+        RuntimeError, match="Entity 'git_repository' requires 'git_service'"
+    ):
+        factory.create_save_strategies()  # No git_service provided
 
     # Same for restore
-    strategies = factory.create_restore_strategies()  # No git_service provided
-    entity_names = [s.get_entity_name() for s in strategies]
-    assert "git_repository" not in entity_names
+    with pytest.raises(
+        RuntimeError, match="Entity 'git_repository' requires 'git_service'"
+    ):
+        factory.create_restore_strategies()  # No git_service provided

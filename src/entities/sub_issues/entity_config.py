@@ -26,7 +26,9 @@ class SubIssuesEntityConfig:
     required_services_restore: List[str] = []  # No services needed
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["SubIssuesSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["SubIssuesSaveStrategy"]:
         """Create save strategy instance.
 
         Args:

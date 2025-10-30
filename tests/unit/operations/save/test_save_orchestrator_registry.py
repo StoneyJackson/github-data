@@ -12,11 +12,13 @@ def test_save_orchestrator_accepts_registry():
     registry = EntityRegistry()
     github_service = Mock()
     storage_service = Mock()
+    git_service = Mock()
 
     orchestrator = StrategyBasedSaveOrchestrator(
         registry=registry,
         github_service=github_service,
         storage_service=storage_service,
+        git_service=git_service,
     )
 
     assert orchestrator._registry == registry
@@ -28,11 +30,13 @@ def test_save_orchestrator_uses_registry_for_execution_order():
     registry = EntityRegistry()
     github_service = Mock()
     storage_service = Mock()
+    git_service = Mock()
 
     StrategyBasedSaveOrchestrator(
         registry=registry,
         github_service=github_service,
         storage_service=storage_service,
+        git_service=git_service,
     )
 
     # Get execution order
