@@ -129,7 +129,7 @@ class TestDockerBuild:
         output = result.stdout
 
         # Check for expected files/directories
-        assert "src" in output, "Source directory should be present"
+        assert "github_data" in output, "Source directory should be present"
         assert "pyproject.toml" in output, "pyproject.toml should be present"
 
     def test_built_image_has_python_dependencies(self):

@@ -51,9 +51,9 @@ services:
     profiles:
       - health
       - test
-    command: ["python", "-c", "import src.main; print('Health check passed')"]
+    command: ["python", "-c", "import github_data.main; print('Health check passed')"]
     healthcheck:
-      test: ["CMD", "python", "-c", "import src.main"]
+      test: ["CMD", "python", "-c", "import github_data.main"]
       interval: 10s
       timeout: 5s
       retries: 3
