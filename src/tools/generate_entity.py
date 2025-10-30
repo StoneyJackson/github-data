@@ -10,6 +10,8 @@ Usage:
         --type bool \
         --default true \
         --deps issues,comments \
+        --save-services github_service \
+        --restore-services github_service,conflict_strategy \
         --description "Save and restore comment attachments"
 
     # Hybrid mode (some args, prompts for missing)
@@ -19,8 +21,16 @@ Usage:
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Dict
 from jinja2 import Environment, FileSystemLoader
+
+
+# Available services for entity strategies
+KNOWN_SERVICES: Dict[str, str] = {
+    'github_service': 'GitHub API service for issues, PRs, labels, etc.',
+    'git_service': 'Git repository service for cloning/restoring repositories',
+    'conflict_strategy': 'Conflict resolution strategy for restoration'
+}
 
 
 def main() -> None:
@@ -33,6 +43,8 @@ def main() -> None:
     value_type = get_value_type(args)
     default_value = get_default_value(args)
     dependencies = get_dependencies(args)
+    save_services = get_save_services(args)
+    restore_services = get_restore_services(args)
     description = get_description(args)
 
     # Generate files
@@ -42,6 +54,8 @@ def main() -> None:
         value_type,
         default_value,
         dependencies,
+        save_services,
+        restore_services,
         description,
         args.force,
     )
@@ -76,6 +90,18 @@ def parse_arguments() -> argparse.Namespace:
         "--deps",
         type=str,
         help="Comma-separated dependencies (e.g., 'issues,comments')",
+    )
+
+    parser.add_argument(
+        "--save-services",
+        type=str,
+        help="Comma-separated services for save (e.g., 'github_service,git_service')",
+    )
+
+    parser.add_argument(
+        "--restore-services",
+        type=str,
+        help="Comma-separated services for restore (e.g., 'github_service,conflict_strategy')",
     )
 
     parser.add_argument("--description", type=str, help="Entity description")
@@ -279,6 +305,103 @@ def get_description(args: argparse.Namespace) -> str:
     return description
 
 
+def validate_services(services: List[str]) -> bool:
+    """Validate that all services are known.
+
+    Args:
+        services: List of service names to validate
+
+    Returns:
+        True if all services are known, False otherwise
+    """
+    unknown = set(services) - set(KNOWN_SERVICES.keys())
+    if unknown:
+        print(f"Error: Unknown services: {', '.join(unknown)}")
+        print(f"Known services: {', '.join(KNOWN_SERVICES.keys())}")
+        return False
+    return True
+
+
+def get_save_services(args: argparse.Namespace) -> List[str]:
+    """Get save services from args or prompt.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        List of service names for save operation
+    """
+    if hasattr(args, 'save_services') and args.save_services is not None:
+        if not args.save_services:
+            return []
+        services = [s.strip() for s in args.save_services.split(",")]
+        services = [s for s in services if s]
+        if not validate_services(services):
+            sys.exit(1)
+        return services
+
+    # Show available services
+    print("\nAvailable services:")
+    for name, desc in KNOWN_SERVICES.items():
+        print(f"  - {name}: {desc}")
+
+    services_input = prompt_for_value(
+        "\nServices required for save (comma-separated, or empty)",
+        default=""
+    )
+
+    if not services_input:
+        return []
+
+    services = [s.strip() for s in services_input.split(",")]
+    services = [s for s in services if s]
+
+    if not validate_services(services):
+        sys.exit(1)
+
+    return services
+
+
+def get_restore_services(args: argparse.Namespace) -> List[str]:
+    """Get restore services from args or prompt.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        List of service names for restore operation
+    """
+    if hasattr(args, 'restore_services') and args.restore_services is not None:
+        if not args.restore_services:
+            return []
+        services = [s.strip() for s in args.restore_services.split(",")]
+        services = [s for s in services if s]
+        if not validate_services(services):
+            sys.exit(1)
+        return services
+
+    # Show available services (skip if already shown by get_save_services)
+    print("\nAvailable services:")
+    for name, desc in KNOWN_SERVICES.items():
+        print(f"  - {name}: {desc}")
+
+    services_input = prompt_for_value(
+        "\nServices required for restore (comma-separated, or empty)",
+        default=""
+    )
+
+    if not services_input:
+        return []
+
+    services = [s.strip() for s in services_input.split(",")]
+    services = [s for s in services if s]
+
+    if not validate_services(services):
+        sys.exit(1)
+
+    return services
+
+
 def snake_to_pascal(snake_str: str) -> str:
     """Convert snake_case to PascalCase.
 
@@ -302,6 +425,8 @@ def prepare_template_context(
     value_type: str,
     default_value: str,
     dependencies: List[str],
+    save_services: List[str],
+    restore_services: List[str],
     description: str,
 ) -> dict:
     """Prepare context dictionary for template rendering.
@@ -312,6 +437,8 @@ def prepare_template_context(
         value_type: 'bool' or 'set'
         default_value: 'true' or 'false'
         dependencies: List of dependency names
+        save_services: List of service names for save operation
+        restore_services: List of service names for restore operation
         description: Entity description
 
     Returns:
@@ -338,6 +465,11 @@ def prepare_template_context(
         "value_type": python_type,
         "dependencies": dependencies,
         "description": description,
+        "required_services_save": repr(save_services),
+        "required_services_restore": repr(restore_services),
+        "save_services": save_services,
+        "restore_services": restore_services,
+        "service_descriptions": KNOWN_SERVICES,
     }
 
 
@@ -401,6 +533,8 @@ def generate_entity_files(
     value_type: str,
     default_value: str,
     dependencies: List[str],
+    save_services: List[str],
+    restore_services: List[str],
     description: str,
     force: bool,
 ) -> None:
@@ -412,6 +546,8 @@ def generate_entity_files(
         value_type: 'bool' or 'set'
         default_value: 'true' or 'false'
         dependencies: List of dependency names
+        save_services: List of service names for save operation
+        restore_services: List of service names for restore operation
         description: Entity description
         force: Overwrite existing files
     """
@@ -425,7 +561,8 @@ def generate_entity_files(
 
     # Prepare template context
     context = prepare_template_context(
-        entity_name, env_var, value_type, default_value, dependencies, description
+        entity_name, env_var, value_type, default_value, dependencies,
+        save_services, restore_services, description
     )
 
     # Render templates
