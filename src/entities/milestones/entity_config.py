@@ -27,7 +27,9 @@ class MilestonesEntityConfig:
     required_services_restore: List[str] = []  # No services needed
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["MilestonesSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["MilestonesSaveStrategy"]:
         """Create save strategy instance.
 
         Args:

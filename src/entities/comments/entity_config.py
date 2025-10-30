@@ -26,7 +26,9 @@ class CommentsEntityConfig:
     required_services_restore: List[str] = []  # No services needed
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["CommentsSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["CommentsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:

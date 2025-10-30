@@ -28,7 +28,9 @@ class PrReviewsEntityConfig:
     required_services_restore: List[str] = []  # No services needed
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["PullRequestReviewsSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["PullRequestReviewsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:

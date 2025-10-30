@@ -12,11 +12,13 @@ def test_restore_orchestrator_accepts_registry():
     registry = EntityRegistry()
     github_service = Mock()
     storage_service = Mock()
+    git_service = Mock()
 
     orchestrator = StrategyBasedRestoreOrchestrator(
         registry=registry,
         github_service=github_service,
         storage_service=storage_service,
+        git_service=git_service,
     )
 
     assert orchestrator._registry == registry

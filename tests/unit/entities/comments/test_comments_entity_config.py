@@ -1,6 +1,5 @@
 """Tests for comments entity configuration."""
 
-from unittest.mock import Mock
 from src.entities.comments.entity_config import CommentsEntityConfig
 from src.entities.strategy_context import StrategyContext
 

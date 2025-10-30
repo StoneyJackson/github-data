@@ -43,11 +43,11 @@ class StrategyBasedRestoreOrchestrator:
         self._factory = StrategyFactory(registry=registry)
 
         # Load strategies for enabled entities
-        # Note: include_original_metadata is stored but not passed to all strategies
-        # Each strategy uses its own defaults or config
         self._include_original_metadata = include_original_metadata
         self._strategies = self._factory.create_restore_strategies(
-            git_service=git_service
+            git_service=git_service,
+            github_service=github_service,
+            include_original_metadata=include_original_metadata,
         )
 
     def execute_restore(

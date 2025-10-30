@@ -1,6 +1,5 @@
 """Tests for sub_issues entity configuration."""
 
-from unittest.mock import Mock
 from src.entities.sub_issues.entity_config import SubIssuesEntityConfig
 from src.entities.strategy_context import StrategyContext
 
