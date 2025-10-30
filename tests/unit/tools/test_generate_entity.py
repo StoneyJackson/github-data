@@ -78,6 +78,8 @@ class TestPrepareTemplateContext:
             value_type="bool",
             default_value="true",
             dependencies=["issues"],
+            save_services=["github_service"],
+            restore_services=["github_service", "conflict_strategy"],
             description="Test entity",
         )
 
@@ -100,6 +102,8 @@ class TestPrepareTemplateContext:
             value_type="set",
             default_value="false",
             dependencies=[],
+            save_services=["github_service"],
+            restore_services=["github_service", "conflict_strategy"],
             description="Issues entity",
         )
 
@@ -114,6 +118,8 @@ class TestPrepareTemplateContext:
             value_type="bool",
             default_value="true",
             dependencies=[],
+            save_services=["github_service"],
+            restore_services=["github_service", "conflict_strategy"],
             description="Labels",
         )
 
@@ -167,6 +173,14 @@ class TestRenderTemplates:
             "value_type": "bool",
             "dependencies": ["issues"],
             "description": "Test entity",
+            "required_services_save": "['github_service']",
+            "required_services_restore": "['github_service', 'conflict_strategy']",
+            "save_services": ["github_service"],
+            "restore_services": ["github_service", "conflict_strategy"],
+            "service_descriptions": {
+                "github_service": "GitHub API service",
+                "conflict_strategy": "Conflict resolution strategy",
+            },
         }
 
         entity_path = tmp_path / "test_entity"
@@ -192,6 +206,14 @@ class TestRenderTemplates:
             "value_type": "bool",
             "dependencies": ["issues", "comments"],
             "description": "Comment attachments",
+            "required_services_save": "['github_service']",
+            "required_services_restore": "['github_service', 'conflict_strategy']",
+            "save_services": ["github_service"],
+            "restore_services": ["github_service", "conflict_strategy"],
+            "service_descriptions": {
+                "github_service": "GitHub API service",
+                "conflict_strategy": "Conflict resolution strategy",
+            },
         }
 
         entity_path = tmp_path / "comment_attachments"
@@ -219,6 +241,14 @@ class TestRenderTemplates:
             "value_type": "bool",
             "dependencies": [],
             "description": "Test",
+            "required_services_save": "['github_service']",
+            "required_services_restore": "['github_service', 'conflict_strategy']",
+            "save_services": ["github_service"],
+            "restore_services": ["github_service", "conflict_strategy"],
+            "service_descriptions": {
+                "github_service": "GitHub API service",
+                "conflict_strategy": "Conflict resolution strategy",
+            },
         }
 
         entity_path = tmp_path / "test_entity"
@@ -247,6 +277,8 @@ class TestGenerateEntityFiles:
             value_type="bool",
             default_value="true",
             dependencies=["issues", "comments"],
+            save_services=["github_service"],
+            restore_services=["github_service", "conflict_strategy"],
             description="Full workflow test",
         )
 
