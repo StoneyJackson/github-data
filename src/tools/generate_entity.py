@@ -27,9 +27,9 @@ from jinja2 import Environment, FileSystemLoader
 
 # Available services for entity strategies
 KNOWN_SERVICES: Dict[str, str] = {
-    'github_service': 'GitHub API service for issues, PRs, labels, etc.',
-    'git_service': 'Git repository service for cloning/restoring repositories',
-    'conflict_strategy': 'Conflict resolution strategy for restoration'
+    "github_service": "GitHub API service for issues, PRs, labels, etc.",
+    "git_service": "Git repository service for cloning/restoring repositories",
+    "conflict_strategy": "Conflict resolution strategy for restoration",
 }
 
 
@@ -101,7 +101,10 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--restore-services",
         type=str,
-        help="Comma-separated services for restore (e.g., 'github_service,conflict_strategy')",
+        help=(
+            "Comma-separated services for restore "
+            "(e.g., 'github_service,conflict_strategy')"
+        ),
     )
 
     parser.add_argument("--description", type=str, help="Entity description")
@@ -331,7 +334,7 @@ def get_save_services(args: argparse.Namespace) -> List[str]:
     Returns:
         List of service names for save operation
     """
-    if hasattr(args, 'save_services') and args.save_services is not None:
+    if hasattr(args, "save_services") and args.save_services is not None:
         if not args.save_services:
             return []
         services = [s.strip() for s in args.save_services.split(",")]
@@ -346,8 +349,7 @@ def get_save_services(args: argparse.Namespace) -> List[str]:
         print(f"  - {name}: {desc}")
 
     services_input = prompt_for_value(
-        "\nServices required for save (comma-separated, or empty)",
-        default=""
+        "\nServices required for save (comma-separated, or empty)", default=""
     )
 
     if not services_input:
@@ -371,7 +373,7 @@ def get_restore_services(args: argparse.Namespace) -> List[str]:
     Returns:
         List of service names for restore operation
     """
-    if hasattr(args, 'restore_services') and args.restore_services is not None:
+    if hasattr(args, "restore_services") and args.restore_services is not None:
         if not args.restore_services:
             return []
         services = [s.strip() for s in args.restore_services.split(",")]
@@ -386,8 +388,7 @@ def get_restore_services(args: argparse.Namespace) -> List[str]:
         print(f"  - {name}: {desc}")
 
     services_input = prompt_for_value(
-        "\nServices required for restore (comma-separated, or empty)",
-        default=""
+        "\nServices required for restore (comma-separated, or empty)", default=""
     )
 
     if not services_input:
@@ -561,8 +562,14 @@ def generate_entity_files(
 
     # Prepare template context
     context = prepare_template_context(
-        entity_name, env_var, value_type, default_value, dependencies,
-        save_services, restore_services, description
+        entity_name,
+        env_var,
+        value_type,
+        default_value,
+        dependencies,
+        save_services,
+        restore_services,
+        description,
     )
 
     # Render templates
