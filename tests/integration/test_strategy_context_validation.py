@@ -3,7 +3,6 @@
 import pytest
 from src.entities.registry import EntityRegistry
 from src.operations.strategy_factory import StrategyFactory
-from src.entities.strategy_context import StrategyContext
 
 
 @pytest.mark.integration
@@ -51,8 +50,6 @@ def test_labels_requires_github_service_for_restore():
 @pytest.mark.integration
 def test_validation_fails_before_any_strategy_creation():
     """Test that validation fails fast before creating any strategies."""
-    from unittest.mock import Mock
-
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
 
