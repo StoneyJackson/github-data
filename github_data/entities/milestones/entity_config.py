@@ -5,7 +5,9 @@ from typing import Optional, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from github_data.entities.strategy_context import StrategyContext
     from github_data.entities.milestones.save_strategy import MilestonesSaveStrategy
-    from github_data.entities.milestones.restore_strategy import MilestonesRestoreStrategy
+    from github_data.entities.milestones.restore_strategy import (
+        MilestonesRestoreStrategy,
+    )
 
 
 class MilestonesEntityConfig:
@@ -54,6 +56,8 @@ class MilestonesEntityConfig:
         Returns:
             MilestonesRestoreStrategy instance
         """
-        from github_data.entities.milestones.restore_strategy import MilestonesRestoreStrategy
+        from github_data.entities.milestones.restore_strategy import (
+            MilestonesRestoreStrategy,
+        )
 
         return MilestonesRestoreStrategy()

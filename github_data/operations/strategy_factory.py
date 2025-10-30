@@ -5,7 +5,11 @@ from typing import Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data.entities.registry import EntityRegistry
-    from github_data.entities.base import BaseSaveStrategy, BaseRestoreStrategy, EntityConfig
+    from github_data.entities.base import (
+        BaseSaveStrategy,
+        BaseRestoreStrategy,
+        EntityConfig,
+    )
     from github_data.entities.strategy_context import StrategyContext
 
 logger = logging.getLogger(__name__)

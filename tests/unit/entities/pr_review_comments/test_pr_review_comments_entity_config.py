@@ -2,7 +2,9 @@
 
 import pytest
 from github_data.entities.registry import EntityRegistry
-from github_data.entities.pr_review_comments.entity_config import PrReviewCommentsEntityConfig
+from github_data.entities.pr_review_comments.entity_config import (
+    PrReviewCommentsEntityConfig,
+)
 
 
 @pytest.mark.unit

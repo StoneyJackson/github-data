@@ -376,8 +376,13 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 from github_data.git.service import GitRepositoryServiceImpl
-from github_data.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
-from github_data.entities.git_repositories.models import GitBackupFormat, GitOperationResult
+from github_data.entities.git_repositories.save_strategy import (
+    GitRepositorySaveStrategy,
+)
+from github_data.entities.git_repositories.models import (
+    GitBackupFormat,
+    GitOperationResult,
+)
 
 try:
     # Test strategy creation

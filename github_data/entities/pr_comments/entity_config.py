@@ -4,7 +4,9 @@ from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.pr_comments.save_strategy import PullRequestCommentsSaveStrategy
+    from github_data.entities.pr_comments.save_strategy import (
+        PullRequestCommentsSaveStrategy,
+    )
     from github_data.entities.pr_comments.restore_strategy import (
         PullRequestCommentsRestoreStrategy,
     )

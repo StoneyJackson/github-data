@@ -3,7 +3,9 @@
 import pytest
 from github_data.entities.registry import EntityRegistry
 from github_data.entities.pr_comments.entity_config import PrCommentsEntityConfig
-from github_data.entities.pr_comments.restore_strategy import DefaultPRCommentConflictStrategy
+from github_data.entities.pr_comments.restore_strategy import (
+    DefaultPRCommentConflictStrategy,
+)
 from unittest.mock import Mock
 
 

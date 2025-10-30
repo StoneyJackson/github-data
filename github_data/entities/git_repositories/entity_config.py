@@ -4,7 +4,9 @@ from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
+    from github_data.entities.git_repositories.save_strategy import (
+        GitRepositorySaveStrategy,
+    )
     from github_data.entities.git_repositories.restore_strategy import (
         GitRepositoryRestoreStrategy,
     )

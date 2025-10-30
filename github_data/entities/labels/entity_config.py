@@ -63,7 +63,9 @@ class LabelsEntityConfig:
             LabelsRestoreStrategy,
             create_conflict_strategy,
         )
-        from github_data.entities.labels.conflict_strategies import LabelConflictStrategy
+        from github_data.entities.labels.conflict_strategies import (
+            LabelConflictStrategy,
+        )
 
         # Access conflict_strategy from context if available
         conflict_strategy = getattr(context, "_conflict_strategy", None)

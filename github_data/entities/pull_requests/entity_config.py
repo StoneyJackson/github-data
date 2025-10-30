@@ -4,8 +4,12 @@ from typing import Union, Set, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
-    from github_data.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
+    from github_data.entities.pull_requests.save_strategy import (
+        PullRequestsSaveStrategy,
+    )
+    from github_data.entities.pull_requests.restore_strategy import (
+        PullRequestsRestoreStrategy,
+    )
 
 
 class PullRequestsEntityConfig:
@@ -38,7 +42,9 @@ class PullRequestsEntityConfig:
         Returns:
             PullRequestsSaveStrategy instance
         """
-        from github_data.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+        from github_data.entities.pull_requests.save_strategy import (
+            PullRequestsSaveStrategy,
+        )
 
         return PullRequestsSaveStrategy()
 

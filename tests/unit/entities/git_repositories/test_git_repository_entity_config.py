@@ -41,7 +41,9 @@ def test_git_repository_entity_enabled_by_default():
 @pytest.mark.unit
 def test_git_repository_save_strategy_exists():
     """Test that git_repository save strategy exists at expected location."""
-    module = importlib.import_module("github_data.entities.git_repositories.save_strategy")
+    module = importlib.import_module(
+        "github_data.entities.git_repositories.save_strategy"
+    )
     strategy_class = getattr(module, "GitRepositorySaveStrategy")
     assert strategy_class is not None
 
@@ -49,6 +51,8 @@ def test_git_repository_save_strategy_exists():
 @pytest.mark.unit
 def test_git_repository_restore_strategy_exists():
     """Test that git_repository restore strategy exists at expected location."""
-    module = importlib.import_module("github_data.entities.git_repositories.restore_strategy")
+    module = importlib.import_module(
+        "github_data.entities.git_repositories.restore_strategy"
+    )
     strategy_class = getattr(module, "GitRepositoryRestoreStrategy")
     assert strategy_class is not None

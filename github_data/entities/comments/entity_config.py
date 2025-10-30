@@ -53,7 +53,9 @@ class CommentsEntityConfig:
         Returns:
             CommentsRestoreStrategy instance
         """
-        from github_data.entities.comments.restore_strategy import CommentsRestoreStrategy
+        from github_data.entities.comments.restore_strategy import (
+            CommentsRestoreStrategy,
+        )
 
         return CommentsRestoreStrategy(
             include_original_metadata=context.include_original_metadata
