@@ -1,6 +1,11 @@
 """Pull requests entity configuration for EntityRegistry."""
 
-from typing import Union, Set, Optional, Any
+from typing import Union, Set, Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+    from src.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
 
 
 class PullRequestsEntityConfig:
@@ -17,12 +22,16 @@ class PullRequestsEntityConfig:
     dependencies = ["milestones"]  # PRs can reference milestones
     description = "Pull requests with milestone references"
 
+    # Service requirements
+    required_services_save: List[str] = []  # No services needed
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["PullRequestsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for pull_requests)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestsSaveStrategy instance
@@ -32,17 +41,13 @@ class PullRequestsEntityConfig:
         return PullRequestsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["PullRequestsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - conflict_strategy: Strategy for handling conflicts
-                  (default: DefaultPullRequestConflictStrategy)
-                - include_original_metadata: Preserve original metadata
-                  (default: True)
-                - include_pull_requests: Boolean or Set[int] for
-                  selective filtering (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestsRestoreStrategy instance
@@ -52,14 +57,16 @@ class PullRequestsEntityConfig:
             DefaultPullRequestConflictStrategy,
         )
 
-        conflict_strategy = context.get(
-            "conflict_strategy", DefaultPullRequestConflictStrategy()
-        )
-        include_original_metadata = context.get("include_original_metadata", True)
-        include_pull_requests = context.get("include_pull_requests", True)
+        # Access conflict_strategy from context if available, else use default
+        conflict_strategy = getattr(context, "_conflict_strategy", None)
+        if conflict_strategy is None:
+            conflict_strategy = DefaultPullRequestConflictStrategy()
+
+        # Access include_pull_requests from context if available, else use default
+        include_pull_requests = getattr(context, "_include_pull_requests", True)
 
         return PullRequestsRestoreStrategy(
             conflict_strategy=conflict_strategy,
-            include_original_metadata=include_original_metadata,
+            include_original_metadata=context.include_original_metadata,
             include_pull_requests=include_pull_requests,
         )

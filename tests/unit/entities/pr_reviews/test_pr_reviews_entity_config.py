@@ -28,7 +28,10 @@ def test_pr_reviews_depends_on_pull_requests():
 @pytest.mark.unit
 def test_pr_reviews_create_save_strategy():
     """Test save strategy factory method."""
-    strategy = PrReviewsEntityConfig.create_save_strategy()
+    from src.entities.strategy_context import StrategyContext
+
+    context = StrategyContext()
+    strategy = PrReviewsEntityConfig.create_save_strategy(context)
     assert strategy is not None
     assert strategy.get_entity_name() == "pr_reviews"
 
@@ -36,7 +39,10 @@ def test_pr_reviews_create_save_strategy():
 @pytest.mark.unit
 def test_pr_reviews_create_restore_strategy_default():
     """Test restore strategy factory with defaults."""
-    strategy = PrReviewsEntityConfig.create_restore_strategy()
+    from src.entities.strategy_context import StrategyContext
+
+    context = StrategyContext()
+    strategy = PrReviewsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy.get_entity_name() == "pr_reviews"
     # Default: include_original_metadata=True
@@ -46,9 +52,10 @@ def test_pr_reviews_create_restore_strategy_default():
 @pytest.mark.unit
 def test_pr_reviews_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
-    strategy = PrReviewsEntityConfig.create_restore_strategy(
-        include_original_metadata=False
-    )
+    from src.entities.strategy_context import StrategyContext
+
+    context = StrategyContext(_include_original_metadata=False)
+    strategy = PrReviewsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy._include_original_metadata is False
 
@@ -56,7 +63,9 @@ def test_pr_reviews_create_restore_strategy_custom():
 @pytest.mark.unit
 def test_pr_reviews_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
-    strategy = PrReviewsEntityConfig.create_restore_strategy(
-        unknown_key="should_be_ignored", include_original_metadata=False
-    )
+    from src.entities.strategy_context import StrategyContext
+
+    # Unknown keys in StrategyContext are simply ignored
+    context = StrategyContext(_include_original_metadata=False)
+    strategy = PrReviewsEntityConfig.create_restore_strategy(context)
     assert strategy is not None

@@ -1,6 +1,11 @@
 """Milestones entity configuration for EntityRegistry."""
 
-from typing import Optional, Any, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.milestones.save_strategy import MilestonesSaveStrategy
+    from src.entities.milestones.restore_strategy import MilestonesRestoreStrategy
 
 
 class MilestonesEntityConfig:
@@ -17,12 +22,16 @@ class MilestonesEntityConfig:
     dependencies: List[str] = []
     description = "Project milestones for issue/PR organization"
 
+    # Service requirements
+    required_services_save: List[str] = []
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["MilestonesSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for milestones)
+            context: Typed strategy context with validated services
 
         Returns:
             MilestonesSaveStrategy instance
@@ -32,11 +41,13 @@ class MilestonesEntityConfig:
         return MilestonesSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["MilestonesRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies (unused for milestones)
+            context: Typed strategy context with validated services
 
         Returns:
             MilestonesRestoreStrategy instance

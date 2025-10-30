@@ -1,6 +1,13 @@
 """PR comments entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.pr_comments.save_strategy import PullRequestCommentsSaveStrategy
+    from src.entities.pr_comments.restore_strategy import (
+        PullRequestCommentsRestoreStrategy,
+    )
 
 
 class PrCommentsEntityConfig:
@@ -16,12 +23,16 @@ class PrCommentsEntityConfig:
     dependencies = ["pull_requests"]  # PR comments belong to PRs
     description = "Pull request conversation comments"
 
+    # Service requirements
+    required_services_save: List[str] = []  # No services needed
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["PullRequestCommentsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for pr_comments)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestCommentsSaveStrategy instance
@@ -33,15 +44,13 @@ class PrCommentsEntityConfig:
         return PullRequestCommentsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["PullRequestCommentsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - conflict_strategy: Strategy for handling conflicts
-                  (default: DefaultPRCommentConflictStrategy)
-                - include_original_metadata: Preserve original metadata
-                  (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestCommentsRestoreStrategy instance
@@ -51,12 +60,12 @@ class PrCommentsEntityConfig:
             DefaultPRCommentConflictStrategy,
         )
 
-        conflict_strategy = context.get(
-            "conflict_strategy", DefaultPRCommentConflictStrategy()
-        )
-        include_original_metadata = context.get("include_original_metadata", True)
+        # Access conflict_strategy from context if available, else use default
+        conflict_strategy = getattr(context, "_conflict_strategy", None)
+        if conflict_strategy is None:
+            conflict_strategy = DefaultPRCommentConflictStrategy()
 
         return PullRequestCommentsRestoreStrategy(
             conflict_strategy=conflict_strategy,
-            include_original_metadata=include_original_metadata,
+            include_original_metadata=context.include_original_metadata,
         )

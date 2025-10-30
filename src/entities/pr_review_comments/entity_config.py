@@ -1,6 +1,15 @@
 """PR review comments entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.pr_review_comments.save_strategy import (
+        PullRequestReviewCommentsSaveStrategy,
+    )
+    from src.entities.pr_review_comments.restore_strategy import (
+        PullRequestReviewCommentsRestoreStrategy,
+    )
 
 
 class PrReviewCommentsEntityConfig:
@@ -16,12 +25,16 @@ class PrReviewCommentsEntityConfig:
     dependencies = ["pr_reviews"]  # Review comments belong to reviews
     description = "Code review inline comments"
 
+    # Service requirements
+    required_services_save: List[str] = []  # No services needed
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["PullRequestReviewCommentsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for pr_review_comments)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestReviewCommentsSaveStrategy instance
@@ -33,12 +46,13 @@ class PrReviewCommentsEntityConfig:
         return PullRequestReviewCommentsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["PullRequestReviewCommentsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - include_original_metadata: Preserve original metadata (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestReviewCommentsRestoreStrategy instance
@@ -47,7 +61,6 @@ class PrReviewCommentsEntityConfig:
             PullRequestReviewCommentsRestoreStrategy,
         )
 
-        include_original_metadata = context.get("include_original_metadata", True)
         return PullRequestReviewCommentsRestoreStrategy(
-            include_original_metadata=include_original_metadata
+            include_original_metadata=context.include_original_metadata
         )

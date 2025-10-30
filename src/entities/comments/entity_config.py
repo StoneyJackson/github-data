@@ -1,6 +1,11 @@
 """Comments entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.comments.save_strategy import CommentsSaveStrategy
+    from src.entities.comments.restore_strategy import CommentsRestoreStrategy
 
 
 class CommentsEntityConfig:
@@ -16,12 +21,16 @@ class CommentsEntityConfig:
     dependencies = ["issues"]  # Comments belong to issues
     description = "Issue comments and discussions"
 
+    # Service requirements
+    required_services_save: List[str] = []
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["CommentsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for comments)
+            context: Typed strategy context with validated services
 
         Returns:
             CommentsSaveStrategy instance
@@ -31,19 +40,19 @@ class CommentsEntityConfig:
         return CommentsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["CommentsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - include_original_metadata: Preserve original metadata (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             CommentsRestoreStrategy instance
         """
         from src.entities.comments.restore_strategy import CommentsRestoreStrategy
 
-        include_original_metadata = context.get("include_original_metadata", True)
         return CommentsRestoreStrategy(
-            include_original_metadata=include_original_metadata
+            include_original_metadata=context.include_original_metadata
         )
