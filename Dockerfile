@@ -18,7 +18,7 @@ COPY pyproject.toml pdm.lock* README.md ./
 RUN pdm install --prod --no-editable
 
 # Copy source code
-COPY src/ ./src/
+COPY github_data/ ./github_data/
 
 # Create data directory for volume mounting
 RUN mkdir -p /data
@@ -30,4 +30,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
 
 # Run the application using PDM
-CMD ["pdm", "run", "python", "-m", "src.main"]
+CMD ["pdm", "run", "python", "-m", "github_data.main"]
