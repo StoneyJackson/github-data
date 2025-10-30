@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from gql import Client
 from gql.transport.exceptions import TransportError
 
-from src.github.utils.graphql_paginator import GraphQLPaginator
+from github_data.github.utils.graphql_paginator import GraphQLPaginator
 
 pytestmark = [pytest.mark.unit, pytest.mark.fast, pytest.mark.github_api]
 

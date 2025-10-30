@@ -4,12 +4,12 @@ import os
 import sys
 from typing import Any
 
-from src.entities.registry import EntityRegistry
-from src.operations.save.orchestrator import StrategyBasedSaveOrchestrator
-from src.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
-from src.github import create_github_service
-from src.storage import create_storage_service
-from src.git.service import GitRepositoryServiceImpl
+from github_data.entities.registry import EntityRegistry
+from github_data.operations.save.orchestrator import StrategyBasedSaveOrchestrator
+from github_data.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
+from github_data.github import create_github_service
+from github_data.storage import create_storage_service
+from github_data.git.service import GitRepositoryServiceImpl
 
 
 def main() -> None:

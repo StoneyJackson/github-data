@@ -18,14 +18,14 @@ from .repository import RepositoryData
 from .milestones import Milestone
 
 # Import entity system components
-from src.entities.base import (
+from github_data.entities.base import (
     EntityConfig,
     BaseSaveStrategy,
     BaseRestoreStrategy,
     RegisteredEntity,
 )
-from src.entities.registry import EntityRegistry
-from src.entities.strategy_context import StrategyContext
+from github_data.entities.registry import EntityRegistry
+from github_data.entities.strategy_context import StrategyContext
 
 __all__ = [
     "GitHubUser",

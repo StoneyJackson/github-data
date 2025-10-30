@@ -6,7 +6,7 @@ and URL construction utilities.
 """
 
 import pytest
-from src.github.utils.data_enrichment import (
+from github_data.github.utils.data_enrichment import (
     CommentEnricher,
     SubIssueRelationshipBuilder,
     URLEnricher,

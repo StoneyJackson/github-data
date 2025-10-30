@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 def test_service_property_returns_value_when_set():
     """Test that service_property returns the service when set."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     mock_git_service = Mock()
     context = StrategyContext(_git_service=mock_git_service)
@@ -16,7 +16,7 @@ def test_service_property_returns_value_when_set():
 
 def test_service_property_raises_when_none():
     """Test that service_property raises RuntimeError when service is None."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
 
@@ -28,7 +28,7 @@ def test_service_property_raises_when_none():
 
 def test_github_service_property_returns_value_when_set():
     """Test that github_service property returns the service when set."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     mock_github_service = Mock()
     context = StrategyContext(_github_service=mock_github_service)
@@ -38,7 +38,7 @@ def test_github_service_property_returns_value_when_set():
 
 def test_github_service_property_raises_when_none():
     """Test that github_service property raises when None."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
 
@@ -50,7 +50,7 @@ def test_github_service_property_raises_when_none():
 
 def test_conflict_strategy_property_returns_value_when_set():
     """Test that conflict_strategy property returns the strategy when set."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     mock_strategy = Mock()
     context = StrategyContext(_conflict_strategy=mock_strategy)
@@ -60,7 +60,7 @@ def test_conflict_strategy_property_returns_value_when_set():
 
 def test_conflict_strategy_property_raises_when_none():
     """Test that conflict_strategy property raises when None."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
 
@@ -72,7 +72,7 @@ def test_conflict_strategy_property_raises_when_none():
 
 def test_include_original_metadata_has_default_value():
     """Test that include_original_metadata has a default value."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
 
@@ -81,7 +81,7 @@ def test_include_original_metadata_has_default_value():
 
 def test_include_original_metadata_can_be_set():
     """Test that include_original_metadata can be set."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext(_include_original_metadata=False)
 
@@ -90,7 +90,7 @@ def test_include_original_metadata_can_be_set():
 
 def test_multiple_services_can_be_set():
     """Test that multiple services can be set and accessed."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     mock_git = Mock()
     mock_github = Mock()

@@ -2,15 +2,15 @@
 
 import json
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
-from src.entities.labels.restore_strategy import OverwriteConflictStrategy
-from src.operations.strategy_factory import StrategyFactory
+from github_data.entities.labels.restore_strategy import OverwriteConflictStrategy
+from github_data.operations.strategy_factory import StrategyFactory
 
 if TYPE_CHECKING:
-    from src.storage.protocols import StorageService
-    from src.github.protocols import RepositoryService
-    from src.git.protocols import GitRepositoryService
-    from src.entities.registry import EntityRegistry
-    from src.entities.base import BaseRestoreStrategy
+    from github_data.storage.protocols import StorageService
+    from github_data.github.protocols import RepositoryService
+    from github_data.git.protocols import GitRepositoryService
+    from github_data.entities.registry import EntityRegistry
+    from github_data.entities.base import BaseRestoreStrategy
 
 
 class StrategyBasedRestoreOrchestrator:
@@ -99,7 +99,7 @@ class StrategyBasedRestoreOrchestrator:
                         strategy._conflict_strategy, OverwriteConflictStrategy
                     ):
                         # Get existing labels for overwrite strategy
-                        from src.github import converters
+                        from github_data.github import converters
 
                         raw_existing = self._github_service.get_repository_labels(
                             repo_name

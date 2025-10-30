@@ -2,8 +2,8 @@
 
 from typing import List, Dict, Any
 
-from src.operations.save.strategy import SaveEntityStrategy
-from src.operations.save.mixins.entity_coupling import EntityCouplingMixin
+from github_data.operations.save.strategy import SaveEntityStrategy
+from github_data.operations.save.mixins.entity_coupling import EntityCouplingMixin
 
 
 class PullRequestReviewCommentsSaveStrategy(EntityCouplingMixin, SaveEntityStrategy):

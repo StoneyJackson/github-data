@@ -11,12 +11,12 @@ from datetime import datetime, timezone
 from typing import List, Dict, Any, Optional
 import json
 
-from src.entities.milestones.models import Milestone
-from src.entities.milestones.save_strategy import MilestonesSaveStrategy
-from src.operations.restore.strategies.milestones_strategy import (
+from github_data.entities.milestones.models import Milestone
+from github_data.entities.milestones.save_strategy import MilestonesSaveStrategy
+from github_data.operations.restore.strategies.milestones_strategy import (
     MilestonesRestoreStrategy,
 )
-from src.github.service import GitHubService
+from github_data.github.service import GitHubService
 
 
 # Core Milestone Fixtures

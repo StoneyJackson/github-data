@@ -4,17 +4,17 @@ import logging
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 
-from src.operations.restore.strategy import (
+from github_data.operations.restore.strategy import (
     RestoreEntityStrategy,
     RestoreConflictStrategy,
 )
-from src.entities.pr_comments.models import PullRequestComment
+from github_data.entities.pr_comments.models import PullRequestComment
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from src.storage.protocols import StorageService
-    from src.github.protocols import RepositoryService
+    from github_data.storage.protocols import StorageService
+    from github_data.github.protocols import RepositoryService
 
 
 class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
@@ -106,7 +106,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
         """Prepare comment body with optional metadata."""
         if self._include_original_metadata:
-            from src.github.metadata import add_pr_comment_metadata_footer
+            from github_data.github.metadata import add_pr_comment_metadata_footer
 
             return add_pr_comment_metadata_footer(comment)
         return comment.body

@@ -3,9 +3,9 @@
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.entities.strategy_context import StrategyContext
-    from src.entities.comments.save_strategy import CommentsSaveStrategy
-    from src.entities.comments.restore_strategy import CommentsRestoreStrategy
+    from github_data.entities.strategy_context import StrategyContext
+    from github_data.entities.comments.save_strategy import CommentsSaveStrategy
+    from github_data.entities.comments.restore_strategy import CommentsRestoreStrategy
 
 
 class CommentsEntityConfig:
@@ -37,7 +37,7 @@ class CommentsEntityConfig:
         Returns:
             CommentsSaveStrategy instance
         """
-        from src.entities.comments.save_strategy import CommentsSaveStrategy
+        from github_data.entities.comments.save_strategy import CommentsSaveStrategy
 
         return CommentsSaveStrategy()
 
@@ -53,7 +53,7 @@ class CommentsEntityConfig:
         Returns:
             CommentsRestoreStrategy instance
         """
-        from src.entities.comments.restore_strategy import CommentsRestoreStrategy
+        from github_data.entities.comments.restore_strategy import CommentsRestoreStrategy
 
         return CommentsRestoreStrategy(
             include_original_metadata=context.include_original_metadata

@@ -1,9 +1,9 @@
 """Tests for pull_requests entity configuration."""
 
 import pytest
-from src.entities.registry import EntityRegistry
-from src.entities.pull_requests.entity_config import PullRequestsEntityConfig
-from src.entities.pull_requests.restore_strategy import (
+from github_data.entities.registry import EntityRegistry
+from github_data.entities.pull_requests.entity_config import PullRequestsEntityConfig
+from github_data.entities.pull_requests.restore_strategy import (
     DefaultPullRequestConflictStrategy,
 )
 from unittest.mock import Mock
@@ -35,7 +35,7 @@ def test_pull_requests_depends_on_milestones():
 @pytest.mark.unit
 def test_pull_requests_create_save_strategy():
     """Test save strategy factory method."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PullRequestsEntityConfig.create_save_strategy(context)
@@ -46,7 +46,7 @@ def test_pull_requests_create_save_strategy():
 @pytest.mark.unit
 def test_pull_requests_create_restore_strategy_default():
     """Test restore strategy factory with defaults."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PullRequestsEntityConfig.create_restore_strategy(context)
@@ -61,7 +61,7 @@ def test_pull_requests_create_restore_strategy_default():
 @pytest.mark.unit
 def test_pull_requests_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     mock_conflict_strategy = Mock()
     context = StrategyContext(
@@ -76,7 +76,7 @@ def test_pull_requests_create_restore_strategy_custom():
 @pytest.mark.unit
 def test_pull_requests_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     # Unknown keys in StrategyContext are simply ignored
     context = StrategyContext(_include_original_metadata=False)

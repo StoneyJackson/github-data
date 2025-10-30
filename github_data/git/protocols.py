@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Any
-from src.entities.git_repositories.models import (
+from github_data.entities.git_repositories.models import (
     GitBackupFormat,
     GitOperationResult,
     GitRepositoryInfo,

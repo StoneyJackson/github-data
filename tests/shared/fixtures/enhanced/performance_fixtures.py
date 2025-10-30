@@ -6,9 +6,9 @@ import pytest
 @pytest.fixture
 def performance_monitoring_services(boundary_with_large_dataset, temp_data_dir):
     """Services configured for performance monitoring and timing tests."""
-    from src.github.service import GitHubService
-    from src.github.rate_limiter import RateLimitHandler
-    from src.storage import create_storage_service
+    from github_data.github.service import GitHubService
+    from github_data.github.rate_limiter import RateLimitHandler
+    from github_data.storage import create_storage_service
     import time
 
     # Create timing-aware boundary mock
@@ -53,9 +53,9 @@ def performance_monitoring_services(boundary_with_large_dataset, temp_data_dir):
 @pytest.fixture
 def rate_limiting_test_services(boundary_with_rate_limiting, temp_data_dir):
     """Services configured for rate limiting behavior testing."""
-    from src.github.service import GitHubService
-    from src.github.rate_limiter import RateLimitHandler
-    from src.storage import create_storage_service
+    from github_data.github.service import GitHubService
+    from github_data.github.rate_limiter import RateLimitHandler
+    from github_data.storage import create_storage_service
 
     # Configure rate limiter with specific settings for testing
     rate_limiter = RateLimitHandler(

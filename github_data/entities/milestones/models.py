@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional, Union
 from pydantic import BaseModel, ConfigDict
-from src.entities.users.models import GitHubUser
+from github_data.entities.users.models import GitHubUser
 
 
 class Milestone(BaseModel):

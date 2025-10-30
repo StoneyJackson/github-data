@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Any
 
-from src.operations.save.strategy import SaveEntityStrategy
+from github_data.operations.save.strategy import SaveEntityStrategy
 
 
 class SubIssuesSaveStrategy(SaveEntityStrategy):

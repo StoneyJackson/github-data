@@ -1,14 +1,14 @@
 """Strategy-based save orchestrator."""
 
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
-from src.operations.strategy_factory import StrategyFactory
+from github_data.operations.strategy_factory import StrategyFactory
 
 if TYPE_CHECKING:
-    from src.storage.protocols import StorageService
-    from src.github.protocols import RepositoryService
-    from src.git.protocols import GitRepositoryService
-    from src.entities.registry import EntityRegistry
-    from src.entities.base import BaseSaveStrategy
+    from github_data.storage.protocols import StorageService
+    from github_data.github.protocols import RepositoryService
+    from github_data.git.protocols import GitRepositoryService
+    from github_data.entities.registry import EntityRegistry
+    from github_data.entities.base import BaseSaveStrategy
 
 
 class StrategyBasedSaveOrchestrator:

@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from src.operations.strategy_factory import StrategyFactory
-from src.entities.registry import EntityRegistry
+from github_data.operations.strategy_factory import StrategyFactory
+from github_data.entities.registry import EntityRegistry
 
 
 @pytest.mark.unit
@@ -45,7 +45,7 @@ def test_strategy_factory_creates_milestones_strategy():
 @pytest.mark.unit
 def test_strategy_factory_creates_restore_strategy():
     """Test that StrategyFactory creates restore strategies via factory methods."""
-    from src.entities.labels.conflict_strategies import LabelConflictStrategy
+    from github_data.entities.labels.conflict_strategies import LabelConflictStrategy
 
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)

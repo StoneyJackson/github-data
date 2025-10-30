@@ -1,4 +1,4 @@
-from src.entities.registry import EntityRegistry
+from github_data.entities.registry import EntityRegistry
 
 
 def test_entity_registry_initializes():

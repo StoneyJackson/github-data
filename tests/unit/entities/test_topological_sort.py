@@ -1,6 +1,6 @@
 import pytest
-from src.entities.registry import EntityRegistry
-from src.entities.base import RegisteredEntity
+from github_data.entities.registry import EntityRegistry
+from github_data.entities.base import RegisteredEntity
 
 
 def test_topological_sort_orders_by_dependencies():

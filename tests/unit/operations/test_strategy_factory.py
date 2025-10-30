@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from src.operations.strategy_factory import StrategyFactory
-from src.entities.strategy_context import StrategyContext
+from github_data.operations.strategy_factory import StrategyFactory
+from github_data.entities.strategy_context import StrategyContext
 
 
 def test_create_save_strategies_uses_factory_methods(mock_registry):

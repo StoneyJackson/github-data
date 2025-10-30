@@ -2,8 +2,8 @@
 
 from typing import List, Dict, Any, Union, Set
 
-from src.operations.save.strategy import SaveEntityStrategy
-from src.operations.save.mixins.selective_filtering import SelectiveFilteringMixin
+from github_data.operations.save.strategy import SaveEntityStrategy
+from github_data.operations.save.mixins.selective_filtering import SelectiveFilteringMixin
 
 
 class PullRequestsSaveStrategy(SelectiveFilteringMixin, SaveEntityStrategy):

@@ -4,9 +4,9 @@ import logging
 from typing import Any, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.entities.registry import EntityRegistry
-    from src.entities.base import BaseSaveStrategy, BaseRestoreStrategy, EntityConfig
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.registry import EntityRegistry
+    from github_data.entities.base import BaseSaveStrategy, BaseRestoreStrategy, EntityConfig
+    from github_data.entities.strategy_context import StrategyContext
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ class StrategyFactory:
         Raises:
             RuntimeError: If any entity's service requirements not met
         """
-        from src.entities.strategy_context import StrategyContext
+        from github_data.entities.strategy_context import StrategyContext
 
         # Create typed context from parameters
         context = StrategyContext(
@@ -122,7 +122,7 @@ class StrategyFactory:
         Raises:
             RuntimeError: If any entity's service requirements not met
         """
-        from src.entities.strategy_context import StrategyContext
+        from github_data.entities.strategy_context import StrategyContext
 
         # Create typed context from parameters
         context = StrategyContext(

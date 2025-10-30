@@ -3,7 +3,7 @@
 import importlib
 
 import pytest
-from src.entities.registry import EntityRegistry
+from github_data.entities.registry import EntityRegistry
 
 
 @pytest.mark.unit

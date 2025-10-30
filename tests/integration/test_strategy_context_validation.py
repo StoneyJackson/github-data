@@ -1,8 +1,8 @@
 """Integration tests for StrategyContext validation."""
 
 import pytest
-from src.entities.registry import EntityRegistry
-from src.operations.strategy_factory import StrategyFactory
+from github_data.entities.registry import EntityRegistry
+from github_data.operations.strategy_factory import StrategyFactory
 
 
 @pytest.mark.integration

@@ -1,8 +1,8 @@
 """Tests for git_repositories entity configuration."""
 
 from unittest.mock import Mock
-from src.entities.git_repositories.entity_config import GitRepositoryEntityConfig
-from src.entities.strategy_context import StrategyContext
+from github_data.entities.git_repositories.entity_config import GitRepositoryEntityConfig
+from github_data.entities.strategy_context import StrategyContext
 
 
 def test_git_repository_create_save_strategy_without_git_service():

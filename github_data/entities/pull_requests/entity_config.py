@@ -3,9 +3,9 @@
 from typing import Union, Set, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.entities.strategy_context import StrategyContext
-    from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
-    from src.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
+    from github_data.entities.strategy_context import StrategyContext
+    from github_data.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+    from github_data.entities.pull_requests.restore_strategy import PullRequestsRestoreStrategy
 
 
 class PullRequestsEntityConfig:
@@ -38,7 +38,7 @@ class PullRequestsEntityConfig:
         Returns:
             PullRequestsSaveStrategy instance
         """
-        from src.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
+        from github_data.entities.pull_requests.save_strategy import PullRequestsSaveStrategy
 
         return PullRequestsSaveStrategy()
 
@@ -54,7 +54,7 @@ class PullRequestsEntityConfig:
         Returns:
             PullRequestsRestoreStrategy instance
         """
-        from src.entities.pull_requests.restore_strategy import (
+        from github_data.entities.pull_requests.restore_strategy import (
             PullRequestsRestoreStrategy,
             DefaultPullRequestConflictStrategy,
         )

@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from src.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
-from src.entities.registry import EntityRegistry
+from github_data.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
+from github_data.entities.registry import EntityRegistry
 
 
 @pytest.mark.unit

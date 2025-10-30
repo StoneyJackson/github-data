@@ -4,12 +4,12 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from pathlib import Path
 from urllib.parse import urlparse
 
-from src.operations.restore.strategy import RestoreEntityStrategy
-from src.entities.pr_review_comments.models import PullRequestReviewComment
+from github_data.operations.restore.strategy import RestoreEntityStrategy
+from github_data.entities.pr_review_comments.models import PullRequestReviewComment
 
 if TYPE_CHECKING:
-    from src.storage.protocols import StorageService
-    from src.github.protocols import RepositoryService
+    from github_data.storage.protocols import StorageService
+    from github_data.github.protocols import RepositoryService
 
 
 class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
@@ -51,7 +51,7 @@ class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
 
         # Prepare comment body
         if self._include_original_metadata:
-            from src.github.metadata import add_pr_review_comment_metadata_footer
+            from github_data.github.metadata import add_pr_review_comment_metadata_footer
 
             comment_body = add_pr_review_comment_metadata_footer(comment)
         else:

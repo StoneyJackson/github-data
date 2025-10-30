@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from .protocols import GitRepositoryService, GitCommandExecutor
 from .command_executor import GitCommandExecutorImpl
-from src.entities.git_repositories.models import (
+from github_data.entities.git_repositories.models import (
     GitBackupFormat,
     GitOperationResult,
     GitRepositoryInfo,

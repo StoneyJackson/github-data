@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import Mock
 
-from src.github.protocols import GitHubApiBoundary
+from github_data.github.protocols import GitHubApiBoundary
 from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 from tests.shared.mocks.protocol_validation import (
     ProtocolValidator,

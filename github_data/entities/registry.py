@@ -6,8 +6,8 @@ from pathlib import Path
 import inspect
 import os
 from typing import Dict, Set, List
-from src.entities.base import RegisteredEntity
-from src.config.number_parser import NumberSpecificationParser
+from github_data.entities.base import RegisteredEntity
+from github_data.config.number_parser import NumberSpecificationParser
 import logging
 
 logger = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ that already exist in the target repository.
 from enum import Enum
 from typing import List
 
-from src.entities.labels.models import Label
+from github_data.entities.labels.models import Label
 
 
 class LabelConflictStrategy(Enum):

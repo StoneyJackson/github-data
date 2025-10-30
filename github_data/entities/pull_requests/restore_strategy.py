@@ -3,15 +3,15 @@
 from typing import List, Dict, Any, Optional, TYPE_CHECKING, Union, Set
 from pathlib import Path
 
-from src.operations.restore.strategy import (
+from github_data.operations.restore.strategy import (
     RestoreEntityStrategy,
     RestoreConflictStrategy,
 )
-from src.entities.pull_requests.models import PullRequest
+from github_data.entities.pull_requests.models import PullRequest
 
 if TYPE_CHECKING:
-    from src.storage.protocols import StorageService
-    from src.github.protocols import RepositoryService
+    from github_data.storage.protocols import StorageService
+    from github_data.github.protocols import RepositoryService
 
 
 class PullRequestsRestoreStrategy(RestoreEntityStrategy):
@@ -169,7 +169,7 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
     def _prepare_pr_body(self, pr: PullRequest) -> str:
         """Prepare pull request body with optional metadata."""
         if self._include_original_metadata:
-            from src.github.metadata import add_pr_metadata_footer
+            from github_data.github.metadata import add_pr_metadata_footer
 
             return add_pr_metadata_footer(pr)
         return pr.body or ""

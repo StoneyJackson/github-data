@@ -1,6 +1,6 @@
 """Tests for entity base protocols."""
 
-from src.entities.base import EntityConfig
+from github_data.entities.base import EntityConfig
 
 
 def test_entity_config_has_factory_methods():

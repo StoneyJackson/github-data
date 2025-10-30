@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from src.github.boundary import GitHubApiBoundary
-from src.github.graphql_converters import (
+from github_data.github.boundary import GitHubApiBoundary
+from github_data.github.graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,

@@ -1,7 +1,7 @@
 """Milestone save strategy implementation."""
 
 from typing import Any, Dict, List
-from src.operations.save.strategy import SaveEntityStrategy
+from github_data.operations.save.strategy import SaveEntityStrategy
 
 
 class MilestonesSaveStrategy(SaveEntityStrategy):

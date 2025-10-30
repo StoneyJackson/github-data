@@ -3,11 +3,11 @@
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.entities.strategy_context import StrategyContext
-    from src.entities.pr_review_comments.save_strategy import (
+    from github_data.entities.strategy_context import StrategyContext
+    from github_data.entities.pr_review_comments.save_strategy import (
         PullRequestReviewCommentsSaveStrategy,
     )
-    from src.entities.pr_review_comments.restore_strategy import (
+    from github_data.entities.pr_review_comments.restore_strategy import (
         PullRequestReviewCommentsRestoreStrategy,
     )
 
@@ -41,7 +41,7 @@ class PrReviewCommentsEntityConfig:
         Returns:
             PullRequestReviewCommentsSaveStrategy instance
         """
-        from src.entities.pr_review_comments.save_strategy import (
+        from github_data.entities.pr_review_comments.save_strategy import (
             PullRequestReviewCommentsSaveStrategy,
         )
 
@@ -59,7 +59,7 @@ class PrReviewCommentsEntityConfig:
         Returns:
             PullRequestReviewCommentsRestoreStrategy instance
         """
-        from src.entities.pr_review_comments.restore_strategy import (
+        from github_data.entities.pr_review_comments.restore_strategy import (
             PullRequestReviewCommentsRestoreStrategy,
         )
 

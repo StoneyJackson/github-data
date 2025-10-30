@@ -1,8 +1,8 @@
 """Tests for pr_reviews entity configuration."""
 
 import pytest
-from src.entities.registry import EntityRegistry
-from src.entities.pr_reviews.entity_config import PrReviewsEntityConfig
+from github_data.entities.registry import EntityRegistry
+from github_data.entities.pr_reviews.entity_config import PrReviewsEntityConfig
 
 
 @pytest.mark.unit
@@ -28,7 +28,7 @@ def test_pr_reviews_depends_on_pull_requests():
 @pytest.mark.unit
 def test_pr_reviews_create_save_strategy():
     """Test save strategy factory method."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PrReviewsEntityConfig.create_save_strategy(context)
@@ -39,7 +39,7 @@ def test_pr_reviews_create_save_strategy():
 @pytest.mark.unit
 def test_pr_reviews_create_restore_strategy_default():
     """Test restore strategy factory with defaults."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PrReviewsEntityConfig.create_restore_strategy(context)
@@ -52,7 +52,7 @@ def test_pr_reviews_create_restore_strategy_default():
 @pytest.mark.unit
 def test_pr_reviews_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext(_include_original_metadata=False)
     strategy = PrReviewsEntityConfig.create_restore_strategy(context)
@@ -63,7 +63,7 @@ def test_pr_reviews_create_restore_strategy_custom():
 @pytest.mark.unit
 def test_pr_reviews_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     # Unknown keys in StrategyContext are simply ignored
     context = StrategyContext(_include_original_metadata=False)

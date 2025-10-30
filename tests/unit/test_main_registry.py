@@ -17,7 +17,7 @@ def test_main_initializes_registry_from_environment(
     mock_orchestrator_class,
 ):
     """Test main initializes EntityRegistry from environment."""
-    from src.main import main
+    from github_data.main import main
 
     # Set up environment
     os.environ["OPERATION"] = "save"
@@ -68,7 +68,7 @@ def test_main_exits_with_error_code_on_save_failure(
     mock_orchestrator_class,
 ):
     """Test main exits with non-zero code when save operation has failures."""
-    from src.main import main
+    from github_data.main import main
 
     # Set up environment
     os.environ["OPERATION"] = "save"

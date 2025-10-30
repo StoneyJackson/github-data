@@ -6,7 +6,7 @@ import pytest
 @pytest.fixture
 def storage_service_for_temp_dir(temp_data_dir):
     """Storage service configured for temporary directory."""
-    from src.storage import create_storage_service
+    from github_data.storage import create_storage_service
 
     # Create storage service and set base path for testing
     storage_service = create_storage_service("json")
