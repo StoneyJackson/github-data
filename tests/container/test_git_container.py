@@ -464,7 +464,7 @@ def mock_save_function(
 
 try:
     # Patch the functions to avoid actual GitHub API calls and Git operations
-    with patch('src.main.execute_save') as mock_save_op:
+    with patch('github_data.main.execute_save') as mock_save_op:
         mock_save_op.side_effect = mock_save_function
 
         # Import and run main after patching

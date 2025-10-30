@@ -76,7 +76,7 @@ class EntityRegistry:
                 continue
 
             # Import the module
-            module_name = f"src.entities.{entity_dir.name}.entity_config"
+            module_name = f"github_data.entities.{entity_dir.name}.entity_config"
             try:
                 spec = importlib.util.spec_from_file_location(module_name, config_file)
                 if spec is None or spec.loader is None:
