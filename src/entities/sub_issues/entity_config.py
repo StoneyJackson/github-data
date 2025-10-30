@@ -1,6 +1,11 @@
 """Sub-issues entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.sub_issues.save_strategy import SubIssuesSaveStrategy
+    from src.entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
 
 
 class SubIssuesEntityConfig:
@@ -16,12 +21,16 @@ class SubIssuesEntityConfig:
     dependencies = ["issues"]  # Sub-issues are hierarchical issues
     description = "Hierarchical sub-issue relationships"
 
+    # Service requirements
+    required_services_save: List[str] = []
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["SubIssuesSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused)
+            context: Typed strategy context with validated services
 
         Returns:
             SubIssuesSaveStrategy instance
@@ -31,19 +40,19 @@ class SubIssuesEntityConfig:
         return SubIssuesSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["SubIssuesRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - include_original_metadata: Preserve original metadata (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             SubIssuesRestoreStrategy instance
         """
         from src.entities.sub_issues.restore_strategy import SubIssuesRestoreStrategy
 
-        include_original_metadata = context.get("include_original_metadata", True)
         return SubIssuesRestoreStrategy(
-            include_original_metadata=include_original_metadata
+            include_original_metadata=context.include_original_metadata
         )

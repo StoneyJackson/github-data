@@ -30,7 +30,10 @@ def test_pr_comments_depends_on_pull_requests():
 @pytest.mark.unit
 def test_pr_comments_create_save_strategy():
     """Test save strategy factory method."""
-    strategy = PrCommentsEntityConfig.create_save_strategy()
+    from src.entities.strategy_context import StrategyContext
+
+    context = StrategyContext()
+    strategy = PrCommentsEntityConfig.create_save_strategy(context)
     assert strategy is not None
     assert strategy.get_entity_name() == "pr_comments"
 
@@ -38,7 +41,10 @@ def test_pr_comments_create_save_strategy():
 @pytest.mark.unit
 def test_pr_comments_create_restore_strategy_default():
     """Test restore strategy factory with defaults."""
-    strategy = PrCommentsEntityConfig.create_restore_strategy()
+    from src.entities.strategy_context import StrategyContext
+
+    context = StrategyContext()
+    strategy = PrCommentsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy.get_entity_name() == "pr_comments"
     # Default: include_original_metadata=True
@@ -50,10 +56,13 @@ def test_pr_comments_create_restore_strategy_default():
 @pytest.mark.unit
 def test_pr_comments_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
+    from src.entities.strategy_context import StrategyContext
+
     mock_conflict_strategy = Mock()
-    strategy = PrCommentsEntityConfig.create_restore_strategy(
-        include_original_metadata=False, conflict_strategy=mock_conflict_strategy
+    context = StrategyContext(
+        _conflict_strategy=mock_conflict_strategy, _include_original_metadata=False
     )
+    strategy = PrCommentsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy._include_original_metadata is False
     assert strategy._conflict_strategy is mock_conflict_strategy
@@ -62,7 +71,9 @@ def test_pr_comments_create_restore_strategy_custom():
 @pytest.mark.unit
 def test_pr_comments_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
-    strategy = PrCommentsEntityConfig.create_restore_strategy(
-        unknown_key="should_be_ignored", include_original_metadata=False
-    )
+    from src.entities.strategy_context import StrategyContext
+
+    # Unknown keys in StrategyContext are simply ignored
+    context = StrategyContext(_include_original_metadata=False)
+    strategy = PrCommentsEntityConfig.create_restore_strategy(context)
     assert strategy is not None

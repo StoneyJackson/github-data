@@ -24,10 +24,14 @@ class LabelsEntityConfig:
 
     # Service requirements (NEW)
     required_services_save: List[str] = []  # No services needed for save
-    required_services_restore = ["github_service"]  # Need GitHub API for conflict resolution
+    required_services_restore = [
+        "github_service"
+    ]  # Need GitHub API for conflict resolution
 
     @staticmethod
-    def create_save_strategy(context: "StrategyContext") -> Optional["LabelsSaveStrategy"]:
+    def create_save_strategy(
+        context: "StrategyContext",
+    ) -> Optional["LabelsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:

@@ -1,6 +1,13 @@
 """PR reviews entity configuration for EntityRegistry."""
 
-from typing import Optional, Any
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.entities.strategy_context import StrategyContext
+    from src.entities.pr_reviews.save_strategy import PullRequestReviewsSaveStrategy
+    from src.entities.pr_reviews.restore_strategy import (
+        PullRequestReviewsRestoreStrategy,
+    )
 
 
 class PrReviewsEntityConfig:
@@ -16,12 +23,16 @@ class PrReviewsEntityConfig:
     dependencies = ["pull_requests"]  # Reviews belong to PRs
     description = "Pull request code reviews"
 
+    # Service requirements
+    required_services_save: List[str] = []  # No services needed
+    required_services_restore: List[str] = []  # No services needed
+
     @staticmethod
-    def create_save_strategy(**context: Any) -> Optional[Any]:
+    def create_save_strategy(context: "StrategyContext") -> Optional["PullRequestReviewsSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
-            **context: Available dependencies (unused for pr_reviews)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestReviewsSaveStrategy instance
@@ -31,12 +42,13 @@ class PrReviewsEntityConfig:
         return PullRequestReviewsSaveStrategy()
 
     @staticmethod
-    def create_restore_strategy(**context: Any) -> Optional[Any]:
+    def create_restore_strategy(
+        context: "StrategyContext",
+    ) -> Optional["PullRequestReviewsRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
-            **context: Available dependencies
-                - include_original_metadata: Preserve original metadata (default: True)
+            context: Typed strategy context with validated services
 
         Returns:
             PullRequestReviewsRestoreStrategy instance
@@ -45,7 +57,6 @@ class PrReviewsEntityConfig:
             PullRequestReviewsRestoreStrategy,
         )
 
-        include_original_metadata = context.get("include_original_metadata", True)
         return PullRequestReviewsRestoreStrategy(
-            include_original_metadata=include_original_metadata
+            include_original_metadata=context.include_original_metadata
         )
