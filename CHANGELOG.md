@@ -1,3 +1,71 @@
+# [2.0.0](https://github.com/StoneyJackson/github-data/compare/v1.12.0...v2.0.0) (2025-10-30)
+
+
+### Bug Fixes
+
+* code quality and type annotation improvements ([2ec434d](https://github.com/StoneyJackson/github-data/commit/2ec434d48370aec2d26219f0033d0dd675acdfef))
+* exit with non-zero code when entity operations fail ([787f7d2](https://github.com/StoneyJackson/github-data/commit/787f7d259b9dc73790b03fcdc31c6ac43826eaca))
+* remove unused import and sort coverage by Miss ([c0ed5e7](https://github.com/StoneyJackson/github-data/commit/c0ed5e740d5a070faf19b1759b663b5be12451ce))
+* remove unused imports from integration tests ([c6bee9e](https://github.com/StoneyJackson/github-data/commit/c6bee9e2acb6fcced7bc0fcc8c9fb1edbc18f1c5))
+* resolve linting and type checking errors ([6b58e42](https://github.com/StoneyJackson/github-data/commit/6b58e42a269e6e8c2c5635a961ca9a7f4edd2397))
+* update git container tests for entity registry refactoring ([7f267d4](https://github.com/StoneyJackson/github-data/commit/7f267d443ab0fdda6e6334ffe98afe8f96354e2b))
+* update tests for generate_entity service requirements ([f59ca3c](https://github.com/StoneyJackson/github-data/commit/f59ca3ccab6d0415499c239c48f1ddd96b6e97a1))
+* write error messages to stderr instead of stdout ([f8dfa33](https://github.com/StoneyJackson/github-data/commit/f8dfa337feac0677d5c843b1c8d177ba6d43a9ae))
+
+
+### Features
+
+* add base protocols for entity system ([fdd3b1c](https://github.com/StoneyJackson/github-data/commit/fdd3b1c19f7433b1afa03c8d65dc0c767411763d))
+* add CLI entity generator tool ([ebc8496](https://github.com/StoneyJackson/github-data/commit/ebc8496982ce701f6e7efcfd012cfa22a9de3ff4))
+* add EntityRegistry public API methods ([e4f87e5](https://github.com/StoneyJackson/github-data/commit/e4f87e571955bbc81f781df511d626aaf484cca4))
+* add EntityRegistry skeleton ([02ed4bf](https://github.com/StoneyJackson/github-data/commit/02ed4bf5f76c7461e040cf5f5f18c1c376b89d3a))
+* add factory methods to comments entity ([ea96653](https://github.com/StoneyJackson/github-data/commit/ea96653d84170c7b5a11e47c66d63810a3857ba5))
+* add factory methods to EntityConfig protocol ([136b9f1](https://github.com/StoneyJackson/github-data/commit/136b9f19891bf96f844fadaa26c0e6070ee004ba))
+* add factory methods to git_repository entity ([8d2f815](https://github.com/StoneyJackson/github-data/commit/8d2f815ccb4166a80e6be392d90e2cfbf8724cf9))
+* add factory methods to git_repository entity ([fdb2c9f](https://github.com/StoneyJackson/github-data/commit/fdb2c9fb6e2610eda40706c4a03140e20a9e5ac9))
+* add factory methods to issues entity ([c9d1443](https://github.com/StoneyJackson/github-data/commit/c9d1443c45608c2534f4578627c765c7bfe440b3))
+* add factory methods to labels entity ([9ae3789](https://github.com/StoneyJackson/github-data/commit/9ae3789e59cea57957602b5259dd1513eee82b86))
+* add factory methods to milestones entity ([44ba75e](https://github.com/StoneyJackson/github-data/commit/44ba75eda1b3b0556feb1107f62c67e0e88fb9ff))
+* add factory methods to pr_comments entity ([3dd7642](https://github.com/StoneyJackson/github-data/commit/3dd76423509c095e5f55360419c3731ded956cd9))
+* add factory methods to pr_review_comments entity ([c300145](https://github.com/StoneyJackson/github-data/commit/c30014521a26913bcf14be6800cadca5824fb849))
+* add factory methods to pr_reviews entity ([632b22b](https://github.com/StoneyJackson/github-data/commit/632b22bc8220217c0b1dcc30e8f1b5e90e103da4))
+* add factory methods to pull_requests entity ([c3a32ca](https://github.com/StoneyJackson/github-data/commit/c3a32ca58fd53d407c333b28329b3e909cde3cc0))
+* add factory methods to sub_issues entity ([e6279bb](https://github.com/StoneyJackson/github-data/commit/e6279bb87f16789cfdf96ac6c318ca1cc384ebc6))
+* add RegisteredEntity dataclass ([2815f82](https://github.com/StoneyJackson/github-data/commit/2815f823a49dcfcd2398ff6de19e1dc4a5407ea2))
+* add service requirement validation to StrategyFactory ([9d301aa](https://github.com/StoneyJackson/github-data/commit/9d301aa9f2c1d84a256aba5d6eed7a24e123c270))
+* add StrategyContext with typed service properties ([ad1af47](https://github.com/StoneyJackson/github-data/commit/ad1af47b790c448e912aaee717b383a6add0b420))
+* complete StrategyFactory migration to EntityRegistry ([d439885](https://github.com/StoneyJackson/github-data/commit/d4398855a32f3e72c362dd7d0bf2cb787157ddf8))
+* implement dependency validation ([5f14676](https://github.com/StoneyJackson/github-data/commit/5f14676790f6c5c601ac9df1b4706c67b9c2104a))
+* implement entity auto-discovery ([b941791](https://github.com/StoneyJackson/github-data/commit/b941791a63979b950d36717bd4ecce8522e7b449))
+* implement environment variable loading ([3a72b95](https://github.com/StoneyJackson/github-data/commit/3a72b95f5e26b77aebafca342a6475a2667d07cd))
+* implement topological sort for entity execution order ([5c6a151](https://github.com/StoneyJackson/github-data/commit/5c6a1519d8233232c1177149451625dfd022b2b5))
+* migrate comments entity with issues dependency ([0d06d27](https://github.com/StoneyJackson/github-data/commit/0d06d272491c9d28f5bea8a2ff970e5a0712e72d))
+* migrate git_repository entity to EntityRegistry ([e152759](https://github.com/StoneyJackson/github-data/commit/e152759b56e1960d51fc86f223b2d5ebe5dffe76))
+* migrate issues entity with milestone dependency ([537cd18](https://github.com/StoneyJackson/github-data/commit/537cd187aacadd25e4fd5c80cc584638a03f319b))
+* migrate labels entity to EntityRegistry ([8e6eaf1](https://github.com/StoneyJackson/github-data/commit/8e6eaf15518cee2415762cc4fec824cdbd92e9f9))
+* migrate main entry point to EntityRegistry ([6d029fb](https://github.com/StoneyJackson/github-data/commit/6d029fb411b974299de9c85e0bda757d20248c83))
+* migrate milestones entity to EntityRegistry ([33a3fc5](https://github.com/StoneyJackson/github-data/commit/33a3fc59a7b6a1fc14a12199cce8eda9e7f9a475))
+* migrate pr_comments entity with pull_requests dependency ([aa8a443](https://github.com/StoneyJackson/github-data/commit/aa8a44358ad6e73947960eb5dc305a499f4b508e))
+* migrate pr_review_comments entity with pr_reviews dependency ([095e417](https://github.com/StoneyJackson/github-data/commit/095e417dc5e9e80fc907a7335afaccfd1ce2f5f1))
+* migrate pr_reviews entity with pull_requests dependency ([8ae380a](https://github.com/StoneyJackson/github-data/commit/8ae380a5541ad70e5047261149d1419244331573))
+* migrate pull_requests entity with milestone dependency ([7221123](https://github.com/StoneyJackson/github-data/commit/7221123060e22d39c2f3677d5fa036ac5dbe48e3))
+* migrate RestoreOrchestrator to EntityRegistry ([32f7183](https://github.com/StoneyJackson/github-data/commit/32f7183fd57bae8276f4a2e2fc2c41278f783a48))
+* migrate SaveOrchestrator to EntityRegistry ([87cff5d](https://github.com/StoneyJackson/github-data/commit/87cff5de9c64873b35757fee1efd25ecdbc02015))
+* migrate sub_issues entity with issues dependency ([3dd8530](https://github.com/StoneyJackson/github-data/commit/3dd85302ef1fc5535b308245d829bd343c0a0f06))
+* remove ApplicationConfig class and legacy functions ([1d7c2c5](https://github.com/StoneyJackson/github-data/commit/1d7c2c5e2be8e0ba2859619d2cc152a3e2eeda76))
+* update entity generator template with zero-arg factory methods ([6673f89](https://github.com/StoneyJackson/github-data/commit/6673f89debb8026d87bb7e0a1135bc9e206fc237))
+* update entity generator templates for StrategyContext pattern ([f7c66e5](https://github.com/StoneyJackson/github-data/commit/f7c66e578dbde8c6cbf87e4718102fcf4f9b6ff3))
+* update StrategyFactory to support EntityRegistry ([9ee6f5d](https://github.com/StoneyJackson/github-data/commit/9ee6f5d238e80185215e90a0e4fc8290f193bc96))
+
+
+### BREAKING CHANGES
+
+* ApplicationConfig class removed. Use EntityRegistry instead.
+Legacy save/restore functions removed. Use orchestrators instead.
+
+Signed-off-by: Claude <noreply@anthropic.com>
+Signed-off-by: Stoney Jackson <dr.stoney@gmail.com>
+
 # [1.12.0](https://github.com/StoneyJackson/github-data/compare/v1.11.0...v1.12.0) (2025-10-23)
 
 
