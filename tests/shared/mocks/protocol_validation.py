@@ -2,7 +2,7 @@
 
 from typing import List, Dict, Tuple, Any
 
-from src.github.protocols import GitHubApiBoundary
+from github_data.github.protocols import GitHubApiBoundary
 
 
 class ProtocolValidator:

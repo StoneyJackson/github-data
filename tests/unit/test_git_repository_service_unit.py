@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import Mock, patch
 from pathlib import Path
-from src.git.service import GitRepositoryServiceImpl
-from src.git.command_executor import GitCommandExecutorImpl
-from src.entities.git_repositories.models import GitBackupFormat
+from github_data.git.service import GitRepositoryServiceImpl
+from github_data.git.command_executor import GitCommandExecutorImpl
+from github_data.entities.git_repositories.models import GitBackupFormat
 
 # Test markers following project standards
 pytestmark = [pytest.mark.unit, pytest.mark.fast]
@@ -186,7 +186,7 @@ class TestGitCommandExecutor:
         """Create Git command executor instance."""
         return GitCommandExecutorImpl(auth_token="test_token")
 
-    @patch("src.git.command_executor.subprocess.run")
+    @patch("github_data.git.command_executor.subprocess.run")
     def test_execute_clone_mirror_success(
         self, mock_subprocess, git_executor, temp_data_dir
     ):
@@ -214,7 +214,7 @@ class TestGitCommandExecutor:
         assert result["size_bytes"] == 2048
         mock_subprocess.assert_called_once()
 
-    @patch("src.git.command_executor.subprocess.run")
+    @patch("github_data.git.command_executor.subprocess.run")
     def test_execute_clone_mirror_failure(
         self, mock_subprocess, git_executor, temp_data_dir
     ):
@@ -254,7 +254,7 @@ class TestGitCommandExecutor:
 
         assert auth_url == original_url
 
-    @patch("src.git.command_executor.subprocess.run")
+    @patch("github_data.git.command_executor.subprocess.run")
     def test_execute_fsck_success(self, mock_subprocess, git_executor, temp_data_dir):
         """Test successful git fsck execution."""
         # Arrange
@@ -279,7 +279,7 @@ class TestGitCommandExecutor:
         assert "Everything looks good" in result["fsck_output"]
         assert mock_subprocess.call_count == 2
 
-    @patch("src.git.command_executor.subprocess.run")
+    @patch("github_data.git.command_executor.subprocess.run")
     def test_execute_fsck_invalid_repo(
         self, mock_subprocess, git_executor, temp_data_dir
     ):
@@ -299,7 +299,7 @@ class TestGitCommandExecutor:
         assert result["valid"] is False
         assert "Not a valid git repository" in result["error"]
 
-    @patch("src.git.command_executor.subprocess.run")
+    @patch("github_data.git.command_executor.subprocess.run")
     def test_get_repository_stats(self, mock_subprocess, git_executor, temp_data_dir):
         """Test getting repository statistics."""
         # Arrange

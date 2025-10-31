@@ -1,4 +1,4 @@
-from src.entities.base import EntityConfig
+from github_data.entities.base import EntityConfig
 
 
 def test_entity_config_protocol_has_required_attributes():

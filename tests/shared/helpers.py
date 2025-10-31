@@ -4,7 +4,7 @@ import pytest
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from unittest.mock import Mock
-from src.entities import (
+from github_data.entities import (
     GitHubUser,
     Issue,
     Comment,

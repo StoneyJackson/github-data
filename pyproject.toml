@@ -45,7 +45,7 @@ dev = [
 ]
 
 [project.scripts]
-github-data = "src.main:main"
+github-data = "github_data.main:main"
 
 [build-system]
 requires = ["pdm-backend"]

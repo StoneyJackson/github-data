@@ -1,8 +1,8 @@
 """Tests for EntityConfig protocol with StrategyContext."""
 
 from typing import Optional, List
-from src.entities.base import EntityConfig
-from src.entities.strategy_context import StrategyContext
+from github_data.entities.base import EntityConfig
+from github_data.entities.strategy_context import StrategyContext
 
 
 class TestEntityConfigProtocol:

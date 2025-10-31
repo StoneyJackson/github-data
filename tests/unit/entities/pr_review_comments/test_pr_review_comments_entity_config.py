@@ -1,8 +1,10 @@
 """Tests for pr_review_comments entity configuration."""
 
 import pytest
-from src.entities.registry import EntityRegistry
-from src.entities.pr_review_comments.entity_config import PrReviewCommentsEntityConfig
+from github_data.entities.registry import EntityRegistry
+from github_data.entities.pr_review_comments.entity_config import (
+    PrReviewCommentsEntityConfig,
+)
 
 
 @pytest.mark.unit
@@ -28,7 +30,7 @@ def test_pr_review_comments_depends_on_pr_reviews():
 @pytest.mark.unit
 def test_pr_review_comments_create_save_strategy():
     """Test save strategy factory method."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PrReviewCommentsEntityConfig.create_save_strategy(context)
@@ -39,7 +41,7 @@ def test_pr_review_comments_create_save_strategy():
 @pytest.mark.unit
 def test_pr_review_comments_create_restore_strategy_default():
     """Test restore strategy factory with defaults."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext()
     strategy = PrReviewCommentsEntityConfig.create_restore_strategy(context)
@@ -52,7 +54,7 @@ def test_pr_review_comments_create_restore_strategy_default():
 @pytest.mark.unit
 def test_pr_review_comments_create_restore_strategy_custom():
     """Test restore strategy factory with custom metadata flag."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     context = StrategyContext(_include_original_metadata=False)
     strategy = PrReviewCommentsEntityConfig.create_restore_strategy(context)
@@ -63,7 +65,7 @@ def test_pr_review_comments_create_restore_strategy_custom():
 @pytest.mark.unit
 def test_pr_review_comments_factory_ignores_unknown_context():
     """Test that factory methods ignore unknown context keys."""
-    from src.entities.strategy_context import StrategyContext
+    from github_data.entities.strategy_context import StrategyContext
 
     # Unknown keys in StrategyContext are simply ignored
     context = StrategyContext(_include_original_metadata=False)

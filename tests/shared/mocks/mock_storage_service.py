@@ -8,7 +8,7 @@ for unit testing without file I/O dependencies.
 from pathlib import Path
 from typing import List, Type, TypeVar, Union, Sequence, Dict, Any
 from pydantic import BaseModel
-from src.storage.protocols import StorageService
+from github_data.storage.protocols import StorageService
 
 # Type variable for Pydantic models
 T = TypeVar("T", bound=BaseModel)

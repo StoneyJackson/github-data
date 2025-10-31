@@ -1,7 +1,7 @@
 """Tests for milestones entity configuration."""
 
-from src.entities.milestones.entity_config import MilestonesEntityConfig
-from src.entities.strategy_context import StrategyContext
+from github_data.entities.milestones.entity_config import MilestonesEntityConfig
+from github_data.entities.strategy_context import StrategyContext
 
 
 def test_milestones_create_save_strategy():

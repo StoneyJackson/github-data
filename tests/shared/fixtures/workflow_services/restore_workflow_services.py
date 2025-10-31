@@ -8,9 +8,9 @@ def restore_workflow_services(
     boundary_with_empty_repository, temp_data_dir, sample_github_data
 ):
     """Pre-configured services for restore workflow testing."""
-    from src.github.service import GitHubService
-    from src.github.rate_limiter import RateLimitHandler
-    from src.storage import create_storage_service
+    from github_data.github.service import GitHubService
+    from github_data.github.rate_limiter import RateLimitHandler
+    from github_data.storage import create_storage_service
     import json
     import os
 

@@ -2,7 +2,7 @@
 
 import pytest
 import ast
-from src.tools.generate_entity import (
+from github_data.tools.generate_entity import (
     validate_entity_name,
     snake_to_pascal,
     prepare_template_context,

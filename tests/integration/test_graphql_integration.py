@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from src.github.boundary import GitHubApiBoundary
-from src.github.graphql_converters import (
+from github_data.github.boundary import GitHubApiBoundary
+from github_data.github.graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,
@@ -108,8 +108,8 @@ class TestGraphQLConverters:
 class TestGraphQLBoundaryIntegration:
     """Test GitHubApiBoundary with GraphQL functionality."""
 
-    @patch("src.github.graphql_client.Client")
-    @patch("src.github.boundary.Github")
+    @patch("github_data.github.graphql_client.Client")
+    @patch("github_data.github.boundary.Github")
     def test_boundary_initialization_with_graphql(self, mock_github, mock_client):
         """Test that boundary properly initializes both REST and GraphQL clients."""
         mock_github_instance = Mock()
@@ -124,8 +124,8 @@ class TestGraphQLBoundaryIntegration:
         assert hasattr(boundary, "_graphql_client")
         assert boundary._token == "fake-token"
 
-    @patch("src.github.graphql_client.Client")
-    @patch("src.github.boundary.Github")
+    @patch("github_data.github.graphql_client.Client")
+    @patch("github_data.github.boundary.Github")
     def test_get_repository_labels_graphql(self, mock_github, mock_client):
         """Test getting labels via GraphQL."""
         mock_gql_client = Mock()
@@ -156,9 +156,9 @@ class TestGraphQLBoundaryIntegration:
         assert result[0]["color"] == "d73a4a"
         assert "url" in result[0]
 
-    @patch("src.github.graphql_client.GraphQLPaginator")
-    @patch("src.github.graphql_client.Client")
-    @patch("src.github.boundary.Github")
+    @patch("github_data.github.graphql_client.GraphQLPaginator")
+    @patch("github_data.github.graphql_client.Client")
+    @patch("github_data.github.boundary.Github")
     def test_get_repository_issues_graphql(
         self, mock_github, mock_client, mock_paginator
     ):
@@ -195,7 +195,7 @@ class TestGraphQLBoundaryIntegration:
         assert result[0]["title"] == "Test Issue"
         assert result[0]["state"] == "open"  # Converted to lowercase
 
-    @patch("src.github.boundary.Github")
+    @patch("github_data.github.boundary.Github")
     def test_repo_name_parsing(self, mock_github):
         """Test repository name parsing."""
         boundary = GitHubApiBoundary("fake-token")
@@ -209,8 +209,8 @@ class TestGraphQLBoundaryIntegration:
         ):
             boundary._rest_client._parse_repo_name("invalid-repo-name")
 
-    @patch("src.github.graphql_client.Client")
-    @patch("src.github.boundary.Github")
+    @patch("github_data.github.graphql_client.Client")
+    @patch("github_data.github.boundary.Github")
     def test_graphql_client_creation_failure(self, mock_github, mock_client):
         """Test handling of GraphQL client creation failure."""
         # Mock client creation to raise an exception

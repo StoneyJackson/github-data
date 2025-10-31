@@ -14,26 +14,26 @@ sync:
 
 # Run tests (excludes test files from coverage)
 test:
-	pdm run pytest --cov=src --cov-config=pytest.ini
+	pdm run pytest --cov=github_data --cov-config=pytest.ini
 
 # Run unit tests only (excludes test files from coverage)
 test-unit:
-	pdm run pytest --cov=src --cov-config=pytest.ini -m unit
+	pdm run pytest --cov=github_data --cov-config=pytest.ini -m unit
 
 # Run integration tests (non-container, excludes test files from coverage)
 test-integration:
-	pdm run pytest --cov=src --cov-config=pytest.ini -m "integration and not container"
+	pdm run pytest --cov=github_data --cov-config=pytest.ini -m "integration and not container"
 
 # Run container integration tests only (excludes test files from coverage)
 test-container:
-	pdm run pytest --cov=src --cov-config=pytest.ini -m container
+	pdm run pytest --cov=github_data --cov-config=pytest.ini -m container
 
 # Alias for test-container (plural form)
 test-containers: test-container
 
 # Run all tests except container tests (excludes test files from coverage)
 test-fast:
-	pdm run pytest --durations=0 --durations-min=1 --cov=src --cov-config=pytest.ini -m "not container and not slow"
+	pdm run pytest --durations=0 --durations-min=1 --cov=github_data --cov-config=pytest.ini -m "not container and not slow"
 
 # Run tests with coverage of test files only
 test-with-test-coverage:
@@ -66,7 +66,7 @@ test-dev:  ## Development test workflow (fast + integration, no container)
 	pdm run python -m pytest -m "fast or (integration and not container)"
 
 test-ci:  ## CI test workflow (all tests with coverage)
-	pdm run python -m pytest --cov=src --cov-report=term-missing --cov-report=html
+	pdm run python -m pytest --cov=github_data --cov-report=term-missing --cov-report=html
 
 # Test discovery and information
 test-list-markers:  ## List all available test markers
@@ -80,15 +80,15 @@ test-by-markers:  ## Run tests by custom marker expression (usage: make test-by-
 
 # Run linting
 lint:
-	pdm run flake8 src tests
+	pdm run flake8 github_data tests
 
 # Format code
 format:
-	pdm run black src tests
+	pdm run black github_data tests
 
 # Type checking
 type-check:
-	pdm run mypy src
+	pdm run mypy github_data
 
 # Run all quality checks (excluding container tests for speed)
 check: format lint type-check test-fast

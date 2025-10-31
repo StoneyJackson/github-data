@@ -8,5 +8,5 @@ def mock_boundary_class():
     """Mock GitHubApiBoundary class for patching."""
     from unittest.mock import patch
 
-    with patch("src.github.service.GitHubApiBoundary") as mock:
+    with patch("github_data.github.service.GitHubApiBoundary") as mock:
         yield mock

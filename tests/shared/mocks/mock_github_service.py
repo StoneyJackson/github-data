@@ -6,7 +6,7 @@ for unit testing without external dependencies.
 """
 
 from typing import Dict, List, Any, Optional
-from src.github.protocols import RepositoryService
+from github_data.github.protocols import RepositoryService
 
 
 class MockGitHubService(RepositoryService):

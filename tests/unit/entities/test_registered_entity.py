@@ -1,5 +1,5 @@
 from typing import List, Type, Union, Set
-from src.entities.base import RegisteredEntity
+from github_data.entities.base import RegisteredEntity
 
 
 class MockEntityConfig:

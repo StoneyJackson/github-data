@@ -5,10 +5,10 @@ Following docs/testing.md comprehensive guidelines.
 
 import pytest
 
-from src.entities.issues.models import Issue
-from src.entities.milestones.models import Milestone
-from src.entities.issues.save_strategy import IssuesSaveStrategy
-from src.entities.issues.restore_strategy import IssuesRestoreStrategy
+from github_data.entities.issues.models import Issue
+from github_data.entities.milestones.models import Milestone
+from github_data.entities.issues.save_strategy import IssuesSaveStrategy
+from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
 
 # Required markers following docs/testing.md
 pytestmark = [
@@ -44,7 +44,7 @@ class TestMilestoneIssueRelationships:
         strategy = IssuesRestoreStrategy()
 
         # Create sample issue with milestone
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -81,7 +81,7 @@ class TestMilestoneIssueRelationships:
         strategy = IssuesRestoreStrategy()
 
         # Create sample issue without milestone
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -119,7 +119,7 @@ class TestMilestoneIssueRelationships:
         strategy = IssuesRestoreStrategy()
 
         # Create sample issue with milestone
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -158,7 +158,7 @@ class TestMilestoneIssueRelationships:
         """Test error handling when milestone mapping contains invalid data."""
         strategy = IssuesRestoreStrategy()
 
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -221,7 +221,7 @@ class TestMilestoneIssueRelationships:
         """Test milestone context propagation through transformations."""
         strategy = IssuesRestoreStrategy()
 
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -270,7 +270,7 @@ class TestMilestoneIssueRelationships:
         """Test handling of edge case where milestone number is 0."""
         strategy = IssuesRestoreStrategy()
 
-        from src.entities.users.models import GitHubUser
+        from github_data.entities.users.models import GitHubUser
 
         issue = Issue(
             id="issue_1",
@@ -317,7 +317,7 @@ class TestMilestoneIssueRelationships:
 @pytest.fixture
 def sample_milestone():
     """Create a sample milestone for testing."""
-    from src.entities.users.models import GitHubUser
+    from github_data.entities.users.models import GitHubUser
 
     return Milestone(
         id="milestone_1",

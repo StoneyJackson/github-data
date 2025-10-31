@@ -3,10 +3,15 @@
 import pytest
 from pathlib import Path
 from unittest.mock import patch
-from src.git.service import GitRepositoryServiceImpl
-from src.entities.git_repositories.models import GitBackupFormat, GitOperationResult
-from src.entities.git_repositories.save_strategy import GitRepositorySaveStrategy
-from src.entities.git_repositories.restore_strategy import (
+from github_data.git.service import GitRepositoryServiceImpl
+from github_data.entities.git_repositories.models import (
+    GitBackupFormat,
+    GitOperationResult,
+)
+from github_data.entities.git_repositories.save_strategy import (
+    GitRepositorySaveStrategy,
+)
+from github_data.entities.git_repositories.restore_strategy import (
     GitRepositoryRestoreStrategy,
 )
 

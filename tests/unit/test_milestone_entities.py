@@ -7,8 +7,8 @@ import pytest
 from datetime import datetime
 from pydantic import ValidationError
 
-from src.entities.milestones.models import Milestone
-from src.entities.users.models import GitHubUser
+from github_data.entities.milestones.models import Milestone
+from github_data.entities.users.models import GitHubUser
 
 # Required markers following docs/testing.md
 pytestmark = [

@@ -1,7 +1,7 @@
 """Mock boundary factory for GitHub Data tests."""
 
 from unittest.mock import Mock
-from src.github.protocols import GitHubApiBoundary
+from github_data.github.protocols import GitHubApiBoundary
 
 
 def add_pr_method_mocks(mock_boundary, sample_data=None):

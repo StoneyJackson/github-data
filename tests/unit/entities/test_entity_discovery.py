@@ -1,5 +1,5 @@
 import sys
-from src.entities.registry import EntityRegistry
+from github_data.entities.registry import EntityRegistry
 
 
 def test_discover_entities_finds_entity_configs(tmp_path, monkeypatch):
@@ -26,7 +26,7 @@ class TestEntityEntityConfig:
     (entity_dir / "__init__.py").write_text("")
 
     # Monkeypatch to use temp directory
-    import src.entities.registry as registry_module
+    import github_data.entities.registry as registry_module
 
     def mock_get_entities_path():
         return tmp_path / "entities"

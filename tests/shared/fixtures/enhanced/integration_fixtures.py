@@ -6,9 +6,9 @@ import pytest
 @pytest.fixture
 def integration_test_environment(temp_data_dir, parametrized_data_factory):
     """Complete environment for end-to-end integration testing."""
-    from src.github.service import GitHubService
-    from src.github.rate_limiter import RateLimitHandler
-    from src.storage import create_storage_service
+    from github_data.github.service import GitHubService
+    from github_data.github.rate_limiter import RateLimitHandler
+    from github_data.storage import create_storage_service
     from unittest.mock import Mock
 
     # Create realistic test data
@@ -52,9 +52,9 @@ def integration_test_environment(temp_data_dir, parametrized_data_factory):
 @pytest.fixture
 def validation_test_environment(temp_data_dir, github_data_builder):
     """Environment for testing data validation and integrity."""
-    from src.github.service import GitHubService
-    from src.github.rate_limiter import RateLimitHandler
-    from src.storage import create_storage_service
+    from github_data.github.service import GitHubService
+    from github_data.github.rate_limiter import RateLimitHandler
+    from github_data.storage import create_storage_service
     from unittest.mock import Mock
 
     # Create data with known validation issues
