@@ -416,16 +416,16 @@ Add to this plan:
 
 After all tasks complete, verify:
 
-- [ ] `git grep "from src\."` returns nothing
-- [ ] `git grep "import src\."` returns nothing
-- [ ] `git grep "^import src$"` returns nothing
-- [ ] `make test-fast` passes
-- [ ] `make test` passes
-- [ ] `make lint` passes
-- [ ] `make type-check` passes
-- [ ] `make docker-build` succeeds
-- [ ] All commits follow conventional commits format
-- [ ] Branch ready for PR or merge
+- [x] `git grep "from src\."` returns nothing
+- [x] `git grep "import src\."` returns nothing
+- [x] `git grep "^import src$"` returns nothing
+- [x] `make test-fast` passes (452 passed, 55 deselected)
+- [x] `make test` passes (504 passed, 1 skipped)
+- [x] `make lint` passes
+- [x] `make type-check` passes (108 source files checked)
+- [x] `make docker-build` succeeds (image: 2bd62281455f)
+- [x] All commits follow conventional commits format
+- [x] Branch ready for PR or merge
 
 ---
 
