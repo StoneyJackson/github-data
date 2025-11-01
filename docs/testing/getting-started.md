@@ -116,53 +116,14 @@ For comprehensive marker documentation, see [Test Infrastructure: Test Categorie
 
 ## Your First Test
 
-Here's a simple example of a well-structured unit test:
+For complete testing patterns and examples, see [Writing Tests](writing-tests.md).
 
-```python
-"""
-Tests for label management functionality.
-
-This module tests label creation, validation, and storage operations.
-"""
-
-import pytest
-from tests.shared import TestDataHelper, AssertionHelper
-from tests.shared.builders.config_factory import ConfigFactory
-from tests.shared.mocks.boundary_factory import MockBoundaryFactory
-
-# Mark this test file with appropriate markers
-pytestmark = [
-    pytest.mark.unit,
-    pytest.mark.fast,
-    pytest.mark.labels,
-]
-
-class TestLabelManagement:
-    """Test cases for label management operations."""
-
-    def test_label_creation_succeeds(self, sample_github_data):
-        """Test that label creation works correctly with valid data."""
-        # Arrange - Set up test data and configuration
-        config = ConfigFactory.create_labels_only_config()
-        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
-
-        # Act - Perform the operation
-        result = create_label(config, mock_boundary, "bug", "d73a4a")
-
-        # Assert - Verify the outcome
-        AssertionHelper.assert_valid_label(result)
-        assert result["name"] == "bug"
-        assert result["color"] == "d73a4a"
-```
-
-**Key elements:**
+**Key elements of a well-structured test:**
 1. **Docstrings**: Module and test method documentation
 2. **Markers**: `pytestmark` for test categorization
 3. **AAA Pattern**: Arrange, Act, Assert structure
-4. **Modern Infrastructure**: ConfigFactory + MockBoundaryFactory
-5. **Clear naming**: Test name describes expected behavior
-
-For complete pattern documentation, see [Writing Tests](writing-tests.md).
+4. **Clear naming**: Test name describes expected behavior
+5. **Shared fixtures**: Use existing test infrastructure
 
 ## Development Workflow
 
