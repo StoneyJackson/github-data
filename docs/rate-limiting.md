@@ -238,5 +238,5 @@ GitHub enforces rate limits per token:
 ## Related Documentation
 
 - [GitHub API Rate Limiting](https://docs.github.com/en/rest/overview/resources-in-the-rest-api#rate-limiting)
-- [Testing Documentation](testing.md)
+- [Testing Documentation](testing/README.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)

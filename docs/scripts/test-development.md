@@ -324,6 +324,6 @@ The script respects environment variables that affect pytest:
 
 ## Related Documentation
 
-- [Testing Guide](../testing.md): Complete testing documentation
+- [Testing Guide](../testing/README.md): Complete testing documentation
 - [CONTRIBUTING.md](../../CONTRIBUTING.md): Development workflow and standards
 - [Makefile](../../Makefile): Available make targets for testing
