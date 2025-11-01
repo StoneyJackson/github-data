@@ -116,53 +116,51 @@ For comprehensive marker documentation, see [Test Infrastructure: Test Categorie
 
 ## Your First Test
 
-Here's a simple example of a well-structured unit test:
+Here's a complete example showing EntityRegistry-based testing:
 
 ```python
-"""
-Tests for label management functionality.
-
-This module tests label creation, validation, and storage operations.
-"""
-
 import pytest
-from tests.shared import TestDataHelper, AssertionHelper
-from tests.shared.builders.config_factory import ConfigFactory
-from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+from pathlib import Path
+from github_data.core.registry import EntityRegistry
 
-# Mark this test file with appropriate markers
-pytestmark = [
-    pytest.mark.unit,
-    pytest.mark.fast,
-    pytest.mark.labels,
-]
+@pytest.mark.unit
+@pytest.mark.fast
+def test_label_save_creates_file(temp_data_dir, monkeypatch):
+    """Test that saving labels creates the expected JSON file."""
+    # Arrange: Set up environment variables
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token_abc123")
+    monkeypatch.setenv("GITHUB_REPO", "testowner/testrepo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
 
-class TestLabelManagement:
-    """Test cases for label management operations."""
+    # Arrange: Create registry and service
+    registry = EntityRegistry.from_environment()
+    label_saver = registry.create_label_saver()
 
-    def test_label_creation_succeeds(self, sample_github_data):
-        """Test that label creation works correctly with valid data."""
-        # Arrange - Set up test data and configuration
-        config = ConfigFactory.create_labels_only_config()
-        mock_boundary = MockBoundaryFactory.create_auto_configured(sample_github_data)
+    # Act: Save labels
+    result = label_saver.save_labels()
 
-        # Act - Perform the operation
-        result = create_label(config, mock_boundary, "bug", "d73a4a")
-
-        # Assert - Verify the outcome
-        AssertionHelper.assert_valid_label(result)
-        assert result["name"] == "bug"
-        assert result["color"] == "d73a4a"
+    # Assert: Verify file was created
+    labels_file = temp_data_dir / "labels.json"
+    assert labels_file.exists(), "Labels file should be created"
+    assert labels_file.stat().st_size > 0, "Labels file should not be empty"
+    assert result.success is True, "Save operation should succeed"
 ```
 
-**Key elements:**
+This example demonstrates:
+- Using `monkeypatch` to set environment variables
+- Creating `EntityRegistry` from environment
+- Testing a save operation
+- Verifying file creation and operation success
+
+**Key elements of a well-structured test:**
 1. **Docstrings**: Module and test method documentation
 2. **Markers**: `pytestmark` for test categorization
 3. **AAA Pattern**: Arrange, Act, Assert structure
-4. **Modern Infrastructure**: ConfigFactory + MockBoundaryFactory
-5. **Clear naming**: Test name describes expected behavior
+4. **Clear naming**: Test name describes expected behavior
+5. **Shared fixtures**: Use existing test infrastructure
 
-For complete pattern documentation, see [Writing Tests](writing-tests.md).
+For complete testing patterns, see [Writing Tests](writing-tests.md).
 
 ## Development Workflow
 

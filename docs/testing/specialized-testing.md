@@ -89,12 +89,50 @@ def test_malformed_data_handling():
     # Test malformed data handling...
 ```
 
+### Error Testing with EntityRegistry
+
+Test configuration and environment variable errors:
+
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.error_handling
+def test_missing_token_error(temp_data_dir, monkeypatch):
+    """Test error handling when GitHub token is missing."""
+    # Setup environment without token
+    monkeypatch.setenv("GITHUB_REPO", "owner/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    # Deliberately omit GITHUB_TOKEN
+
+    # Expect error when creating registry
+    with pytest.raises(ValueError, match="GITHUB_TOKEN.*required"):
+        registry = EntityRegistry.from_environment()
+```
+
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.error_handling
+def test_invalid_boolean_value(temp_data_dir, monkeypatch):
+    """Test error handling for invalid boolean environment variables."""
+    monkeypatch.setenv("GITHUB_TOKEN", "token")
+    monkeypatch.setenv("GITHUB_REPO", "owner/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+    monkeypatch.setenv("INCLUDE_ISSUES", "invalid")  # Invalid boolean
+
+    # Expect error on invalid boolean value
+    with pytest.raises(ValueError, match="Invalid boolean value"):
+        registry = EntityRegistry.from_environment()
+```
+
 ### Error Testing Best Practices
 
 1. **Use Hybrid Factory + Custom Override Pattern** for error simulation
 2. **Test both partial and complete failures** with realistic error scenarios
 3. **Verify error recovery mechanisms** and graceful degradation
 4. **Use appropriate error markers** for test selection (`@pytest.mark.error_simulation`)
+5. **Test configuration errors** with EntityRegistry and environment variables
 
 ## Container Integration Testing
 

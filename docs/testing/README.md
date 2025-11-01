@@ -28,11 +28,12 @@
 ## Search This Documentation
 
 Use your editor's project search across `docs/testing/` for keywords:
-- **ConfigBuilder, ConfigFactory** → [Writing Tests](writing-tests.md)
-- **MockBoundaryFactory** → [Writing Tests](writing-tests.md#boundary-mock-creation)
+- **EntityRegistry** → [Writing Tests](writing-tests.md#configuration-patterns---entityregistry)
+- **ConfigBuilder, ConfigFactory (legacy)** → [Migration Guide](reference/migration-guide.md#migrating-from-configbuilderconfigfactory-to-entityregistry)
+- **MockBoundaryFactory** → [Test Infrastructure](test-infrastructure.md#boundary-mock-standardization)
 - **Fixtures** → [Test Infrastructure](test-infrastructure.md#shared-fixture-system)
 - **Docker, Container** → [Specialized Testing](specialized-testing.md#container-integration-testing)
-- **pytest markers** → [Test Infrastructure](test-infrastructure.md#test-categories-and-markers)
+- **pytest markers** → [Test Infrastructure](test-infrastructure.md#pytest-marker-reference)
 - **Debugging tests** → [Reference: Debugging](reference/debugging.md)
 - **Error testing** → [Specialized Testing](specialized-testing.md#error-testing)
 

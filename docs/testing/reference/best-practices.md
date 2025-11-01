@@ -19,37 +19,36 @@
 - Consistent test data patterns
 - Reliable error simulation patterns
 
-### 4. Modern Infrastructure Standards ⭐ **MANDATORY FOR ALL NEW TESTS**
-- **ALWAYS use ConfigBuilder or ConfigFactory** for ApplicationConfig creation - prevents schema change brittleness
-- **ALWAYS use MockBoundaryFactory.create_auto_configured()** - ensures 100% protocol completeness
-- **ALWAYS validate protocol completeness** with `assert_boundary_mock_complete()` - catches implementation gaps immediately
-- **LEVERAGE existing sample data fixtures** for consistent, realistic test scenarios
-- **FOLLOW the ConfigBuilder/ConfigFactory + MockBoundaryFactory + Validation pattern** for maximum resilience
-- **CHOOSE ConfigFactory for standard scenarios**, ConfigBuilder for complex custom configurations
-- **EXTEND ConfigFactory when adding new common test patterns** - maintain centralized pattern library
+### 4. Configuration Standards ⭐ **MANDATORY**
+- **ALWAYS use EntityRegistry.from_environment()** for test configuration
+- **ALWAYS use monkeypatch** for setting environment variables - prevents leaks
+- **Use string values** for boolean environment variables (`"true"`, `"false"`)
+- **Convert paths to strings** with `str(path)` before setting env vars
+- **Set all required variables** (GITHUB_TOKEN, GITHUB_REPO, DATA_PATH, OPERATION)
 
 ### 5. Boundary Mock Standards ⭐ **CRITICAL**
 - **Never use manual Mock() creation** for boundary objects - protocol incomplete and brittle
 - **Always start with factory methods** that guarantee protocol completeness
+- **Use MockBoundaryFactory.create_auto_configured()** - ensures 100% protocol completeness
+- **Validate mock completeness** with `assert_boundary_mock_complete()` - catches gaps immediately
 - **Use hybrid factory pattern for error testing** - combine protocol completeness with custom error simulation
-- **Validate mock completeness during development** to catch missing protocol methods early
 
 ### 6. Error Testing Standards ⭐ **ENHANCED**
 - **Use hybrid factory + custom override pattern** for error simulation
 - **Start with protocol-complete boundary** via `MockBoundaryFactory.create_auto_configured()`
 - **Add custom error behavior** using `side_effect` and `return_value` overrides after factory creation
+- **Test configuration errors** with EntityRegistry and environment variables
 - **Test error recovery mechanisms** and graceful degradation
 - **Use error markers** (`@pytest.mark.error_simulation`) for test organization
-- **Cover multiple error scenarios** (timeouts, rate limits, malformed data, connection failures)
+- **Cover multiple error scenarios** (timeouts, rate limits, malformed data, connection failures, config errors)
 
-### 7. Configuration Standards ⭐ **MANDATORY**
-- **Never use manual ApplicationConfig() constructors** in new tests - breaks with schema changes
-- **Always use ConfigBuilder or ConfigFactory** for configuration creation
-- **Prefer ConfigFactory for common scenarios** (save, restore, PR workflows, dependency validation, boolean parsing)
-- **Use ConfigBuilder for complex custom configurations** requiring fine-grained control
-- **Leverage preset methods** like ConfigFactory.create_save_config(), ConfigBuilder.with_pr_features()
-- **Extend ConfigFactory when adding new common patterns** - maintain centralized pattern library
+### 7. Modern Infrastructure Standards ⭐ **RECOMMENDED**
+- **Use EntityRegistry** for integration tests requiring services
+- **Use MockBoundaryFactory** for protocol-complete mocks
+- **Leverage existing sample data fixtures** for consistent, realistic test scenarios
+- **Use GitHubDataBuilder** for dynamic test data generation when needed
 - **Use environment variable mapping** for container tests
+- **Follow migration guide** when updating legacy tests to current patterns
 
 ## General Testing
 

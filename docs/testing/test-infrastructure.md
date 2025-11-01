@@ -26,7 +26,7 @@ This document covers the core testing infrastructure used in the GitHub Data pro
 - `@pytest.mark.github_api` - GitHub API interaction tests
 - `@pytest.mark.storage` - Data storage and persistence tests
 - `@pytest.mark.rate_limiting` - Rate limiting behavior tests
-- `@pytest.mark.backup_workflow` - Backup operation workflows
+- `@pytest.mark.save_workflow` - Save operation workflows
 - `@pytest.mark.restore_workflow` - Restore operation workflows
 
 #### Enhanced Fixture Category Markers
@@ -34,6 +34,255 @@ This document covers the core testing infrastructure used in the GitHub Data pro
 - `@pytest.mark.data_builders` - Tests using dynamic data builder fixtures
 - `@pytest.mark.workflow_services` - Tests using workflow service fixtures
 - `@pytest.mark.error_simulation` - Error condition simulation tests
+
+## Pytest Marker Reference
+
+The project uses 71 registered pytest markers for sophisticated test organization and selective execution.
+
+### Performance Markers
+
+| Marker | Description | Typical Duration | Usage |
+|--------|-------------|-----------------|-------|
+| `@pytest.mark.fast` | Fast tests | < 1 second | Unit tests, quick feedback |
+| `@pytest.mark.medium` | Medium tests | 1-10 seconds | Integration tests |
+| `@pytest.mark.slow` | Slow tests | > 10 seconds | Container tests, end-to-end |
+| `@pytest.mark.performance` | Performance tests | Varies | Performance benchmarking |
+
+**Example:**
+```python
+@pytest.mark.fast
+@pytest.mark.unit
+def test_quick_operation():
+    assert True
+```
+
+### Test Type Markers
+
+| Marker | Description | Scope |
+|--------|-------------|-------|
+| `@pytest.mark.unit` | Unit tests | Single component, isolated |
+| `@pytest.mark.integration` | Integration tests | Multiple components |
+| `@pytest.mark.container` | Container tests | Full Docker workflow |
+| `@pytest.mark.asyncio` | Async tests | Asynchronous operations |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+def test_service_interaction():
+    # Test multiple components working together
+    pass
+```
+
+### Feature Area Markers
+
+#### Core Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.labels` | Label management | Label save/restore tests |
+| `@pytest.mark.issues` | Issue management | Issue save/restore tests |
+| `@pytest.mark.comments` | Comment management | Comment handling tests |
+| `@pytest.mark.pull_requests` | Pull requests | PR save/restore tests |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.labels
+def test_label_save_restore():
+    # Test label workflow
+    pass
+```
+
+#### Comment Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.include_issue_comments` | Issue comments | Tests with issue comment inclusion |
+| `@pytest.mark.include_pull_request_comments` | PR comments | Tests with PR comment inclusion |
+| `@pytest.mark.pr_comments` | PR comment functionality | PR comment-specific tests |
+
+#### Advanced Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.sub_issues` | Sub-issues workflow | Hierarchical issue tests |
+| `@pytest.mark.milestones` | Milestone management | Milestone save/restore |
+| `@pytest.mark.milestone_relationships` | Milestone relationships | Issue/PR milestone links |
+| `@pytest.mark.milestone_integration` | Milestone end-to-end | Complete milestone workflow |
+| `@pytest.mark.milestone_config` | Milestone configuration | INCLUDE_MILESTONES config tests |
+| `@pytest.mark.git_repositories` | Git repository backup | Git repo save/restore |
+
+### Infrastructure Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.github_api` | GitHub API interaction | API client tests |
+| `@pytest.mark.storage` | Data storage | Persistence layer tests |
+| `@pytest.mark.save_workflow` | Save workflows | Save operation tests |
+| `@pytest.mark.restore_workflow` | Restore workflows | Restore operation tests |
+| `@pytest.mark.save_operation` | Save operations | Specific save operations |
+| `@pytest.mark.restore_operation` | Restore operations | Specific restore operations |
+| `@pytest.mark.error_handling` | Error handling | Error resilience tests |
+| `@pytest.mark.strategy_factory` | Strategy factory | Factory pattern tests |
+| `@pytest.mark.end_to_end` | End-to-end | Complete feature workflows |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.save_workflow
+@pytest.mark.github_api
+@pytest.mark.storage
+def test_complete_save_workflow():
+    # Test full save operation
+    pass
+```
+
+### Special Scenario Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.empty_repository` | Empty repository | Tests with no data |
+| `@pytest.mark.large_dataset` | Large datasets | Performance/scale tests |
+| `@pytest.mark.rate_limiting` | Rate limiting | API rate limit tests |
+| `@pytest.mark.error_simulation` | Error conditions | Simulated error tests |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.empty_repository
+@pytest.mark.fast
+def test_save_empty_repo():
+    # Test saving repository with no issues
+    pass
+```
+
+### Enhanced Fixture Category Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.enhanced_fixtures` | Enhanced fixture patterns | Tests using enhanced fixtures |
+| `@pytest.mark.data_builders` | Data builder fixtures | Tests using builder patterns |
+| `@pytest.mark.workflow_services` | Workflow service fixtures | Tests using workflow services |
+| `@pytest.mark.performance_fixtures` | Performance monitoring | Tests with performance tracking |
+
+### Additional Quality Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.memory_intensive` | High memory usage | Memory-heavy tests |
+| `@pytest.mark.simple_data` | Simple data structures | Basic data tests |
+| `@pytest.mark.complex_hierarchy` | Complex hierarchical data | Nested structure tests |
+| `@pytest.mark.temporal_data` | Time-sensitive data | Timestamp/date tests |
+| `@pytest.mark.mixed_states` | Mixed state data | Multi-state tests |
+| `@pytest.mark.cross_component_interaction` | Multi-component | Cross-component tests |
+| `@pytest.mark.data_enrichment` | Data enrichment | Enrichment utility tests |
+| `@pytest.mark.edge_cases` | Edge cases | Boundary condition tests |
+| `@pytest.mark.issue_comments_validation` | Issue comment validation | Comment validation tests |
+| `@pytest.mark.backward_compatibility` | Backward compatibility | Compatibility tests |
+
+### Marker Combination Patterns
+
+**Pattern 1: Unit test with feature area**
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.labels
+def test_label_validation():
+    pass
+```
+
+**Pattern 2: Integration test with workflow**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.save_workflow
+@pytest.mark.issues
+def test_issue_save_workflow():
+    pass
+```
+
+**Pattern 3: Container test with scenario**
+```python
+@pytest.mark.container
+@pytest.mark.slow
+@pytest.mark.large_dataset
+@pytest.mark.end_to_end
+def test_large_dataset_save():
+    pass
+```
+
+**Pattern 4: Error handling test**
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.error_handling
+@pytest.mark.github_api
+def test_api_error_handling():
+    pass
+```
+
+### Running Tests by Marker
+
+**Single marker:**
+```bash
+pytest -m fast
+pytest -m unit
+pytest -m labels
+```
+
+**Multiple markers (AND):**
+```bash
+pytest -m "unit and fast"
+pytest -m "integration and labels"
+```
+
+**Multiple markers (OR):**
+```bash
+pytest -m "fast or medium"
+pytest -m "labels or issues"
+```
+
+**Exclude markers:**
+```bash
+pytest -m "not slow"
+pytest -m "not container"
+pytest -m "unit and not slow"
+```
+
+**Complex combinations:**
+```bash
+pytest -m "integration and save_workflow and not slow"
+pytest -m "(unit or integration) and not container"
+```
+
+### Marker Selection Best Practices
+
+1. **Always include test type**: `unit`, `integration`, or `container`
+2. **Always include performance**: `fast`, `medium`, or `slow`
+3. **Include feature area**: `labels`, `issues`, `comments`, etc.
+4. **Add workflow markers**: `save_workflow`, `restore_workflow`, etc. for integration tests
+5. **Add scenario markers**: `empty_repository`, `large_dataset`, etc. when relevant
+6. **Add quality markers**: `edge_cases`, `error_handling`, etc. when appropriate
+
+**Good marker usage:**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.save_workflow
+@pytest.mark.labels
+@pytest.mark.storage
+def test_label_save_to_storage():
+    """Test saving labels to storage."""
+    pass
+```
+
+**Poor marker usage:**
+```python
+@pytest.mark.integration  # Only one marker, missing context
+def test_label_save():
+    pass
+```
 
 ## Test Organization
 
@@ -239,6 +488,280 @@ def test_issue_processing(github_data_builder):
     for result in results:
         AssertionHelper.assert_valid_issue(result)
 ```
+
+### Milestone Fixtures
+
+The project provides comprehensive milestone testing fixtures for testing milestone save/restore workflows and relationships with issues and pull requests.
+
+**Source:** `tests/shared/fixtures/milestone_fixtures.py` (22KB comprehensive fixture file)
+
+#### Core Milestone Data Fixtures
+
+**`sample_milestone_data`** - Basic milestone dictionary with standard fields
+```python
+@pytest.mark.unit
+@pytest.mark.milestones
+def test_milestone_creation(sample_milestone_data):
+    milestone = Milestone(**sample_milestone_data)
+    assert milestone.title == "Version 1.0"
+    assert milestone.state == "open"
+```
+
+**`sample_closed_milestone_data`** - Closed milestone with completion data
+
+**`sample_milestone`** - Milestone entity instance
+
+**`sample_closed_milestone`** - Closed milestone entity instance
+
+**`multiple_milestones`** - Collection of milestones with varied states
+
+#### Milestone Builder Fixtures
+
+**`milestone_builder`** - Dynamic milestone creation
+```python
+def test_custom_milestone(milestone_builder):
+    milestone = milestone_builder(
+        title="Sprint 1",
+        state="open",
+        open_issues=5
+    )
+    assert milestone.title == "Sprint 1"
+```
+
+**`bulk_milestone_builder`** - Create multiple milestones efficiently
+
+#### Milestone Relationship Fixtures
+
+**`issue_with_milestone_data`** - Issue associated with milestone
+```python
+@pytest.mark.integration
+@pytest.mark.milestone_relationships
+def test_issue_milestone_link(issue_with_milestone_data):
+    issue, milestone = issue_with_milestone_data
+    assert issue["milestone_id"] == milestone["id"]
+```
+
+**`pr_with_milestone_data`** - Pull request with milestone association
+
+**`multiple_issues_with_milestones`** - Multiple issues linked to milestones
+
+**`multiple_prs_with_milestones`** - Multiple PRs linked to milestones
+
+#### Milestone Strategy Fixtures
+
+**`milestone_save_strategy`** - Configured save strategy
+
+**`milestone_restore_strategy`** - Configured restore strategy
+
+**`milestone_enabled_repository_context`** - Full repository with milestone support
+
+#### Milestone Mock Response Fixtures
+
+**`mock_github_milestone_response`** - GitHub REST API milestone response
+
+**`mock_graphql_milestone_response`** - GitHub GraphQL milestone response
+
+#### Milestone Test Data Fixtures
+
+**`milestone_test_data_directory`** - Temporary directory with milestone JSON files
+
+**`complex_milestone_dataset`** - Complex scenario with multiple milestones, issues, and PRs
+
+**`large_milestone_dataset`** - Large-scale dataset for performance testing
+
+**`milestone_error_scenarios`** - Error condition test data
+
+**`milestone_integration_context`** - Complete end-to-end integration setup
+
+#### Complete Example: Integration Test with Milestone Fixtures
+
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.milestones
+@pytest.mark.milestone_relationships
+@pytest.mark.save_workflow
+def test_milestone_with_issues_save(
+    temp_data_dir,
+    monkeypatch,
+    multiple_issues_with_milestones,
+    mock_github_service
+):
+    """Test saving milestones with associated issues."""
+    # Setup configuration
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token")
+    monkeypatch.setenv("GITHUB_REPO", "test/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+    monkeypatch.setenv("INCLUDE_MILESTONES", "true")
+
+    # Get test data
+    issues, milestones = multiple_issues_with_milestones
+
+    # Configure mock
+    mock_github_service.get_milestones.return_value = milestones
+    mock_github_service.get_issues.return_value = issues
+
+    # Create registry and execute save
+    registry = EntityRegistry.from_environment()
+    saver = registry.create_milestone_saver()
+    result = saver.save_milestones()
+
+    # Verify
+    assert result.success is True
+    milestone_file = temp_data_dir / "milestones.json"
+    assert milestone_file.exists()
+
+    # Verify relationships preserved
+    import json
+    saved_data = json.loads(milestone_file.read_text())
+    assert len(saved_data["milestones"]) == len(milestones)
+```
+
+#### Common Marker Combinations for Milestone Tests
+
+```python
+# Unit test with milestone data
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.milestones
+def test_milestone_validation(sample_milestone_data):
+    pass
+
+# Integration test with relationships
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.milestones
+@pytest.mark.milestone_relationships
+def test_milestone_issue_links(multiple_issues_with_milestones):
+    pass
+
+# End-to-end milestone workflow
+@pytest.mark.integration
+@pytest.mark.slow
+@pytest.mark.milestones
+@pytest.mark.milestone_integration
+@pytest.mark.end_to_end
+def test_milestone_complete_workflow(milestone_integration_context):
+    pass
+
+# Milestone configuration test
+@pytest.mark.integration
+@pytest.mark.fast
+@pytest.mark.milestone_config
+def test_milestone_config_parsing(monkeypatch):
+    monkeypatch.setenv("INCLUDE_MILESTONES", "true")
+    # Test configuration parsing
+    pass
+```
+
+For complete fixture definitions and additional fixtures, see `tests/shared/fixtures/milestone_fixtures.py`.
+
+### Migration Utilities
+
+The project provides migration utilities to help transition tests to modern patterns. These are specialized tools for automated test refactoring.
+
+**Source Files:**
+- `tests/shared/builders/migration_utilities.py` (13KB)
+- `tests/shared/mocks/migration_utils.py` (14KB)
+
+#### Purpose
+
+Migration utilities provide automated assistance for:
+- Converting static fixtures to GitHubDataBuilder patterns
+- Migrating manual boundary mocks to MockBoundaryFactory
+- Detecting and refactoring legacy test patterns
+
+**Important:** These are specialized refactoring tools, not standard test infrastructure. Most developers won't need to use these directly.
+
+#### Fixture Migration: FixtureToBuilderMigrator
+
+**Use when:** Converting static milestone/issue/PR fixtures to dynamic builder patterns
+
+```python
+from tests.shared.builders.migration_utilities import FixtureToBuilderMigrator
+
+# Convert static fixture data to builder
+fixture_data = {
+    "milestones": [...],  # Static milestone data
+    "issues": [...]       # Static issue data
+}
+
+builder = FixtureToBuilderMigrator.convert_milestone_fixtures(fixture_data)
+# Returns GitHubDataBuilder configured with equivalent data
+```
+
+**Benefits:**
+- Automated conversion of static fixtures
+- Maintains data relationships
+- Reduces manual refactoring effort
+
+#### Boundary Mock Migration: BoundaryMockMigrator
+
+**Use when:** Detecting and migrating manual `Mock()` boundary patterns
+
+```python
+from tests.shared.mocks.migration_utils import BoundaryMockMigrator
+
+# Detect manual mock patterns in test file
+with open("tests/test_something.py") as f:
+    content = f.read()
+
+patterns = BoundaryMockMigrator.detect_manual_mock_patterns(content)
+# Returns list of manual mock patterns found
+
+for pattern in patterns:
+    print(f"Line {pattern['line']}: {pattern['type']}")
+    print(f"  Variable: {pattern['variable']}")
+    print(f"  Suggestion: Use MockBoundaryFactory.create_auto_configured()")
+```
+
+**Detects:**
+- Manual `Mock()` boundary creation
+- Manual `return_value` assignments
+- Incomplete protocol implementations
+
+#### When to Use Migration Utilities
+
+**Use migration utilities when:**
+- Batch refactoring multiple test files
+- Auditing codebase for legacy patterns
+- Automated migration scripts
+
+**Do NOT use migration utilities when:**
+- Writing new tests (use current patterns directly)
+- Updating a single test (manual refactoring is clearer)
+- Learning test patterns (learn current patterns, not migrations)
+
+#### Migration Utility Best Practices
+
+1. **Understand before using**: Read the generated code, don't blindly apply
+2. **Test after migration**: Run tests to verify conversion correctness
+3. **Review changes**: Migration tools are helpers, not guaranteed correct
+4. **Incremental migration**: Migrate one file/pattern at a time
+5. **Commit frequently**: Commit each successful migration separately
+
+**Example migration workflow:**
+```python
+# 1. Detect patterns
+migrator = BoundaryMockMigrator()
+test_file = "tests/test_labels.py"
+with open(test_file) as f:
+    patterns = migrator.detect_manual_mock_patterns(f.read())
+
+# 2. Review findings
+print(f"Found {len(patterns)} manual mock patterns")
+for pattern in patterns[:5]:  # Show first 5
+    print(f"  {pattern['line']}: {pattern['type']}")
+
+# 3. Manual refactoring with guidance
+# Use patterns to guide manual updates to MockBoundaryFactory
+
+# 4. Verify
+# Run pytest to confirm tests still pass
+```
+
+**Note:** Migration utilities are tools for transitioning legacy code. New tests should use current patterns (EntityRegistry, MockBoundaryFactory, GitHubDataBuilder) from the start.
 
 ## Boundary Mock Standardization
 
