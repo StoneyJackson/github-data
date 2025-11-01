@@ -26,7 +26,7 @@ This document covers the core testing infrastructure used in the GitHub Data pro
 - `@pytest.mark.github_api` - GitHub API interaction tests
 - `@pytest.mark.storage` - Data storage and persistence tests
 - `@pytest.mark.rate_limiting` - Rate limiting behavior tests
-- `@pytest.mark.backup_workflow` - Backup operation workflows
+- `@pytest.mark.save_workflow` - Save operation workflows
 - `@pytest.mark.restore_workflow` - Restore operation workflows
 
 #### Enhanced Fixture Category Markers
