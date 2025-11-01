@@ -135,7 +135,7 @@ make check       # All quality checks (fast)
 make check-all   # All quality checks including container tests
 ```
 
-**For complete testing documentation, test categories, best practices, and detailed guidelines, see [docs/testing.md](docs/testing.md).**
+**For complete testing documentation, test categories, best practices, and detailed guidelines, see [docs/testing/README.md](docs/testing/README.md).**
 
 For detailed information about GitHub API rate limiting implementation, see **[docs/rate-limiting.md](docs/rate-limiting.md)**.
 

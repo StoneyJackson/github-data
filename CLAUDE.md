@@ -195,7 +195,7 @@ Follow Test-Driven Development practices:
 4. **Run `make check`** before committing
 5. **Use container tests** for final integration validation
 
-For complete testing documentation, commands, and best practices, see **[docs/testing.md](docs/testing.md)**.
+For complete testing documentation, commands, and best practices, see **[docs/testing/README.md](docs/testing/README.md)**.
 
 ## Code Quality and Standards
 
@@ -228,6 +228,6 @@ This creates a searchable history of development decisions and Claude Code inter
 
 For comprehensive development information, see:
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Main developer documentation, setup, workflow, and coding standards
-- **[docs/testing.md](docs/testing.md)** - Complete testing guide and best practices
+- **[docs/testing/README.md](docs/testing/README.md)** - Complete testing guide and best practices
 - Use TDD.
 - Never commit to main.

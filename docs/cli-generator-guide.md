@@ -919,7 +919,7 @@ python -m src.tools.generate_entity \
 - **Entity Registry:** `src/entities/registry.py` - Auto-discovery implementation
 - **Base Strategies:** `src/operations/save/base_save_strategy.py`, `src/operations/restore/base_restore_strategy.py`
 - **StrategyContext:** `src/entities/strategy_context.py` - Service dependency injection
-- **Testing Guide:** `docs/testing.md` - Comprehensive testing documentation
+- **Testing Guide:** `docs/testing/README.md` - Comprehensive testing documentation
 - **Contributing:** `CONTRIBUTING.md` - Code standards and workflow
 
 ---
