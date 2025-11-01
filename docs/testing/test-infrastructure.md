@@ -489,6 +489,174 @@ def test_issue_processing(github_data_builder):
         AssertionHelper.assert_valid_issue(result)
 ```
 
+### Milestone Fixtures
+
+The project provides comprehensive milestone testing fixtures for testing milestone save/restore workflows and relationships with issues and pull requests.
+
+**Source:** `tests/shared/fixtures/milestone_fixtures.py` (22KB comprehensive fixture file)
+
+#### Core Milestone Data Fixtures
+
+**`sample_milestone_data`** - Basic milestone dictionary with standard fields
+```python
+@pytest.mark.unit
+@pytest.mark.milestones
+def test_milestone_creation(sample_milestone_data):
+    milestone = Milestone(**sample_milestone_data)
+    assert milestone.title == "Version 1.0"
+    assert milestone.state == "open"
+```
+
+**`sample_closed_milestone_data`** - Closed milestone with completion data
+
+**`sample_milestone`** - Milestone entity instance
+
+**`sample_closed_milestone`** - Closed milestone entity instance
+
+**`multiple_milestones`** - Collection of milestones with varied states
+
+#### Milestone Builder Fixtures
+
+**`milestone_builder`** - Dynamic milestone creation
+```python
+def test_custom_milestone(milestone_builder):
+    milestone = milestone_builder(
+        title="Sprint 1",
+        state="open",
+        open_issues=5
+    )
+    assert milestone.title == "Sprint 1"
+```
+
+**`bulk_milestone_builder`** - Create multiple milestones efficiently
+
+#### Milestone Relationship Fixtures
+
+**`issue_with_milestone_data`** - Issue associated with milestone
+```python
+@pytest.mark.integration
+@pytest.mark.milestone_relationships
+def test_issue_milestone_link(issue_with_milestone_data):
+    issue, milestone = issue_with_milestone_data
+    assert issue["milestone_id"] == milestone["id"]
+```
+
+**`pr_with_milestone_data`** - Pull request with milestone association
+
+**`multiple_issues_with_milestones`** - Multiple issues linked to milestones
+
+**`multiple_prs_with_milestones`** - Multiple PRs linked to milestones
+
+#### Milestone Strategy Fixtures
+
+**`milestone_save_strategy`** - Configured save strategy
+
+**`milestone_restore_strategy`** - Configured restore strategy
+
+**`milestone_enabled_repository_context`** - Full repository with milestone support
+
+#### Milestone Mock Response Fixtures
+
+**`mock_github_milestone_response`** - GitHub REST API milestone response
+
+**`mock_graphql_milestone_response`** - GitHub GraphQL milestone response
+
+#### Milestone Test Data Fixtures
+
+**`milestone_test_data_directory`** - Temporary directory with milestone JSON files
+
+**`complex_milestone_dataset`** - Complex scenario with multiple milestones, issues, and PRs
+
+**`large_milestone_dataset`** - Large-scale dataset for performance testing
+
+**`milestone_error_scenarios`** - Error condition test data
+
+**`milestone_integration_context`** - Complete end-to-end integration setup
+
+#### Complete Example: Integration Test with Milestone Fixtures
+
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.milestones
+@pytest.mark.milestone_relationships
+@pytest.mark.save_workflow
+def test_milestone_with_issues_save(
+    temp_data_dir,
+    monkeypatch,
+    multiple_issues_with_milestones,
+    mock_github_service
+):
+    """Test saving milestones with associated issues."""
+    # Setup configuration
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token")
+    monkeypatch.setenv("GITHUB_REPO", "test/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+    monkeypatch.setenv("INCLUDE_MILESTONES", "true")
+
+    # Get test data
+    issues, milestones = multiple_issues_with_milestones
+
+    # Configure mock
+    mock_github_service.get_milestones.return_value = milestones
+    mock_github_service.get_issues.return_value = issues
+
+    # Create registry and execute save
+    registry = EntityRegistry.from_environment()
+    saver = registry.create_milestone_saver()
+    result = saver.save_milestones()
+
+    # Verify
+    assert result.success is True
+    milestone_file = temp_data_dir / "milestones.json"
+    assert milestone_file.exists()
+
+    # Verify relationships preserved
+    import json
+    saved_data = json.loads(milestone_file.read_text())
+    assert len(saved_data["milestones"]) == len(milestones)
+```
+
+#### Common Marker Combinations for Milestone Tests
+
+```python
+# Unit test with milestone data
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.milestones
+def test_milestone_validation(sample_milestone_data):
+    pass
+
+# Integration test with relationships
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.milestones
+@pytest.mark.milestone_relationships
+def test_milestone_issue_links(multiple_issues_with_milestones):
+    pass
+
+# End-to-end milestone workflow
+@pytest.mark.integration
+@pytest.mark.slow
+@pytest.mark.milestones
+@pytest.mark.milestone_integration
+@pytest.mark.end_to_end
+def test_milestone_complete_workflow(milestone_integration_context):
+    pass
+
+# Milestone configuration test
+@pytest.mark.integration
+@pytest.mark.fast
+@pytest.mark.milestone_config
+def test_milestone_config_parsing(monkeypatch):
+    monkeypatch.setenv("INCLUDE_MILESTONES", "true")
+    # Test configuration parsing
+    pass
+```
+
+For complete fixture definitions and additional fixtures, see `tests/shared/fixtures/milestone_fixtures.py`.
+
 ## Boundary Mock Standardization
 
 The GitHub Data project uses an advanced **boundary mock factory system** that provides 100% protocol completeness with automatic validation. This system eliminates manual mock configuration and prevents protocol extension failures.
