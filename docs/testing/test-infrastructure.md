@@ -35,6 +35,255 @@ This document covers the core testing infrastructure used in the GitHub Data pro
 - `@pytest.mark.workflow_services` - Tests using workflow service fixtures
 - `@pytest.mark.error_simulation` - Error condition simulation tests
 
+## Pytest Marker Reference
+
+The project uses 71 registered pytest markers for sophisticated test organization and selective execution.
+
+### Performance Markers
+
+| Marker | Description | Typical Duration | Usage |
+|--------|-------------|-----------------|-------|
+| `@pytest.mark.fast` | Fast tests | < 1 second | Unit tests, quick feedback |
+| `@pytest.mark.medium` | Medium tests | 1-10 seconds | Integration tests |
+| `@pytest.mark.slow` | Slow tests | > 10 seconds | Container tests, end-to-end |
+| `@pytest.mark.performance` | Performance tests | Varies | Performance benchmarking |
+
+**Example:**
+```python
+@pytest.mark.fast
+@pytest.mark.unit
+def test_quick_operation():
+    assert True
+```
+
+### Test Type Markers
+
+| Marker | Description | Scope |
+|--------|-------------|-------|
+| `@pytest.mark.unit` | Unit tests | Single component, isolated |
+| `@pytest.mark.integration` | Integration tests | Multiple components |
+| `@pytest.mark.container` | Container tests | Full Docker workflow |
+| `@pytest.mark.asyncio` | Async tests | Asynchronous operations |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+def test_service_interaction():
+    # Test multiple components working together
+    pass
+```
+
+### Feature Area Markers
+
+#### Core Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.labels` | Label management | Label save/restore tests |
+| `@pytest.mark.issues` | Issue management | Issue save/restore tests |
+| `@pytest.mark.comments` | Comment management | Comment handling tests |
+| `@pytest.mark.pull_requests` | Pull requests | PR save/restore tests |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.labels
+def test_label_save_restore():
+    # Test label workflow
+    pass
+```
+
+#### Comment Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.include_issue_comments` | Issue comments | Tests with issue comment inclusion |
+| `@pytest.mark.include_pull_request_comments` | PR comments | Tests with PR comment inclusion |
+| `@pytest.mark.pr_comments` | PR comment functionality | PR comment-specific tests |
+
+#### Advanced Features
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.sub_issues` | Sub-issues workflow | Hierarchical issue tests |
+| `@pytest.mark.milestones` | Milestone management | Milestone save/restore |
+| `@pytest.mark.milestone_relationships` | Milestone relationships | Issue/PR milestone links |
+| `@pytest.mark.milestone_integration` | Milestone end-to-end | Complete milestone workflow |
+| `@pytest.mark.milestone_config` | Milestone configuration | INCLUDE_MILESTONES config tests |
+| `@pytest.mark.git_repositories` | Git repository backup | Git repo save/restore |
+
+### Infrastructure Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.github_api` | GitHub API interaction | API client tests |
+| `@pytest.mark.storage` | Data storage | Persistence layer tests |
+| `@pytest.mark.save_workflow` | Save workflows | Save operation tests |
+| `@pytest.mark.restore_workflow` | Restore workflows | Restore operation tests |
+| `@pytest.mark.save_operation` | Save operations | Specific save operations |
+| `@pytest.mark.restore_operation` | Restore operations | Specific restore operations |
+| `@pytest.mark.error_handling` | Error handling | Error resilience tests |
+| `@pytest.mark.strategy_factory` | Strategy factory | Factory pattern tests |
+| `@pytest.mark.end_to_end` | End-to-end | Complete feature workflows |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.save_workflow
+@pytest.mark.github_api
+@pytest.mark.storage
+def test_complete_save_workflow():
+    # Test full save operation
+    pass
+```
+
+### Special Scenario Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.empty_repository` | Empty repository | Tests with no data |
+| `@pytest.mark.large_dataset` | Large datasets | Performance/scale tests |
+| `@pytest.mark.rate_limiting` | Rate limiting | API rate limit tests |
+| `@pytest.mark.error_simulation` | Error conditions | Simulated error tests |
+
+**Example:**
+```python
+@pytest.mark.integration
+@pytest.mark.empty_repository
+@pytest.mark.fast
+def test_save_empty_repo():
+    # Test saving repository with no issues
+    pass
+```
+
+### Enhanced Fixture Category Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.enhanced_fixtures` | Enhanced fixture patterns | Tests using enhanced fixtures |
+| `@pytest.mark.data_builders` | Data builder fixtures | Tests using builder patterns |
+| `@pytest.mark.workflow_services` | Workflow service fixtures | Tests using workflow services |
+| `@pytest.mark.performance_fixtures` | Performance monitoring | Tests with performance tracking |
+
+### Additional Quality Markers
+
+| Marker | Description | Use For |
+|--------|-------------|---------|
+| `@pytest.mark.memory_intensive` | High memory usage | Memory-heavy tests |
+| `@pytest.mark.simple_data` | Simple data structures | Basic data tests |
+| `@pytest.mark.complex_hierarchy` | Complex hierarchical data | Nested structure tests |
+| `@pytest.mark.temporal_data` | Time-sensitive data | Timestamp/date tests |
+| `@pytest.mark.mixed_states` | Mixed state data | Multi-state tests |
+| `@pytest.mark.cross_component_interaction` | Multi-component | Cross-component tests |
+| `@pytest.mark.data_enrichment` | Data enrichment | Enrichment utility tests |
+| `@pytest.mark.edge_cases` | Edge cases | Boundary condition tests |
+| `@pytest.mark.issue_comments_validation` | Issue comment validation | Comment validation tests |
+| `@pytest.mark.backward_compatibility` | Backward compatibility | Compatibility tests |
+
+### Marker Combination Patterns
+
+**Pattern 1: Unit test with feature area**
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.labels
+def test_label_validation():
+    pass
+```
+
+**Pattern 2: Integration test with workflow**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.save_workflow
+@pytest.mark.issues
+def test_issue_save_workflow():
+    pass
+```
+
+**Pattern 3: Container test with scenario**
+```python
+@pytest.mark.container
+@pytest.mark.slow
+@pytest.mark.large_dataset
+@pytest.mark.end_to_end
+def test_large_dataset_save():
+    pass
+```
+
+**Pattern 4: Error handling test**
+```python
+@pytest.mark.unit
+@pytest.mark.fast
+@pytest.mark.error_handling
+@pytest.mark.github_api
+def test_api_error_handling():
+    pass
+```
+
+### Running Tests by Marker
+
+**Single marker:**
+```bash
+pytest -m fast
+pytest -m unit
+pytest -m labels
+```
+
+**Multiple markers (AND):**
+```bash
+pytest -m "unit and fast"
+pytest -m "integration and labels"
+```
+
+**Multiple markers (OR):**
+```bash
+pytest -m "fast or medium"
+pytest -m "labels or issues"
+```
+
+**Exclude markers:**
+```bash
+pytest -m "not slow"
+pytest -m "not container"
+pytest -m "unit and not slow"
+```
+
+**Complex combinations:**
+```bash
+pytest -m "integration and save_workflow and not slow"
+pytest -m "(unit or integration) and not container"
+```
+
+### Marker Selection Best Practices
+
+1. **Always include test type**: `unit`, `integration`, or `container`
+2. **Always include performance**: `fast`, `medium`, or `slow`
+3. **Include feature area**: `labels`, `issues`, `comments`, etc.
+4. **Add workflow markers**: `save_workflow`, `restore_workflow`, etc. for integration tests
+5. **Add scenario markers**: `empty_repository`, `large_dataset`, etc. when relevant
+6. **Add quality markers**: `edge_cases`, `error_handling`, etc. when appropriate
+
+**Good marker usage:**
+```python
+@pytest.mark.integration
+@pytest.mark.medium
+@pytest.mark.save_workflow
+@pytest.mark.labels
+@pytest.mark.storage
+def test_label_save_to_storage():
+    """Test saving labels to storage."""
+    pass
+```
+
+**Poor marker usage:**
+```python
+@pytest.mark.integration  # Only one marker, missing context
+def test_label_save():
+    pass
+```
+
 ## Test Organization
 
 ### Directory Structure
