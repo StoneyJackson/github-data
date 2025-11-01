@@ -116,7 +116,42 @@ For comprehensive marker documentation, see [Test Infrastructure: Test Categorie
 
 ## Your First Test
 
-For complete testing patterns and examples, see [Writing Tests](writing-tests.md).
+Here's a complete example showing EntityRegistry-based testing:
+
+```python
+import pytest
+from pathlib import Path
+from github_data.core.registry import EntityRegistry
+
+@pytest.mark.unit
+@pytest.mark.fast
+def test_label_save_creates_file(temp_data_dir, monkeypatch):
+    """Test that saving labels creates the expected JSON file."""
+    # Arrange: Set up environment variables
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token_abc123")
+    monkeypatch.setenv("GITHUB_REPO", "testowner/testrepo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+
+    # Arrange: Create registry and service
+    registry = EntityRegistry.from_environment()
+    label_saver = registry.create_label_saver()
+
+    # Act: Save labels
+    result = label_saver.save_labels()
+
+    # Assert: Verify file was created
+    labels_file = temp_data_dir / "labels.json"
+    assert labels_file.exists(), "Labels file should be created"
+    assert labels_file.stat().st_size > 0, "Labels file should not be empty"
+    assert result.success is True, "Save operation should succeed"
+```
+
+This example demonstrates:
+- Using `monkeypatch` to set environment variables
+- Creating `EntityRegistry` from environment
+- Testing a save operation
+- Verifying file creation and operation success
 
 **Key elements of a well-structured test:**
 1. **Docstrings**: Module and test method documentation
@@ -124,6 +159,8 @@ For complete testing patterns and examples, see [Writing Tests](writing-tests.md
 3. **AAA Pattern**: Arrange, Act, Assert structure
 4. **Clear naming**: Test name describes expected behavior
 5. **Shared fixtures**: Use existing test infrastructure
+
+For complete testing patterns, see [Writing Tests](writing-tests.md).
 
 ## Development Workflow
 
