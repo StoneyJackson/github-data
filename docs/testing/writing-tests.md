@@ -4,10 +4,115 @@
 
 ## Table of Contents
 
+- [Configuration Patterns - EntityRegistry](#configuration-patterns---entityregistry)
 - [Basic Test Structure](#basic-test-structure)
 - [Integration Test Structure](#integration-test-structure)
 - [Container Test Structure](#container-test-structure)
 - [Testing Standards and Requirements](#testing-standards-and-requirements)
+
+## Configuration Patterns - EntityRegistry
+
+### Overview
+
+Tests use `EntityRegistry.from_environment()` to create service configurations from environment variables. This is the standard approach for all test configuration.
+
+### Basic Pattern
+
+```python
+import pytest
+from github_data.core.registry import EntityRegistry
+
+def test_with_entity_registry(temp_data_dir, monkeypatch):
+    """Example test using EntityRegistry configuration."""
+    # Set up environment variables
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token")
+    monkeypatch.setenv("GITHUB_REPO", "owner/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+
+    # Create registry from environment
+    registry = EntityRegistry.from_environment()
+
+    # Access services
+    github_service = registry.github_service
+    storage_service = registry.storage_service
+
+    # Perform test operations
+    result = github_service.get_repository_info()
+    assert result is not None
+```
+
+### Environment Variable Setup
+
+Common environment variables for tests:
+
+| Variable | Purpose | Example Value |
+|----------|---------|---------------|
+| `GITHUB_TOKEN` | GitHub API authentication | `"test_token_123"` |
+| `GITHUB_REPO` | Target repository | `"owner/repo"` |
+| `DATA_PATH` | Data storage path | `str(temp_data_dir)` |
+| `OPERATION` | Operation type | `"save"` or `"restore"` |
+| `INCLUDE_ISSUES` | Include issues | `"true"` or `"false"` |
+| `INCLUDE_PULL_REQUESTS` | Include PRs | `"true"` or `"false"` |
+
+### Using monkeypatch for Environment Variables
+
+Always use pytest's `monkeypatch` fixture for setting environment variables in tests:
+
+```python
+def test_with_custom_config(temp_data_dir, monkeypatch):
+    """Test with custom configuration."""
+    monkeypatch.setenv("GITHUB_TOKEN", "custom_token")
+    monkeypatch.setenv("GITHUB_REPO", "custom/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("INCLUDE_ISSUES", "true")
+    monkeypatch.setenv("INCLUDE_PULL_REQUESTS", "false")
+
+    registry = EntityRegistry.from_environment()
+
+    # Test with custom configuration
+    assert registry.config.include_issues is True
+    assert registry.config.include_pull_requests is False
+```
+
+### When to Use EntityRegistry
+
+**Use EntityRegistry when:**
+- Testing components that need full service integration
+- Testing end-to-end workflows
+- Testing configuration parsing and validation
+- Integration tests requiring multiple services
+
+**Use mocks when:**
+- Unit testing individual components
+- Testing error handling
+- Testing API interaction patterns
+- Fast feedback tests that don't need real service configuration
+
+### Example: Integration Test with EntityRegistry
+
+```python
+@pytest.mark.integration
+@pytest.mark.labels
+def test_label_save_workflow(temp_data_dir, monkeypatch):
+    """Test complete label save workflow with EntityRegistry."""
+    # Setup environment
+    monkeypatch.setenv("GITHUB_TOKEN", "test_token")
+    monkeypatch.setenv("GITHUB_REPO", "test/repo")
+    monkeypatch.setenv("DATA_PATH", str(temp_data_dir))
+    monkeypatch.setenv("OPERATION", "save")
+
+    # Create registry
+    registry = EntityRegistry.from_environment()
+
+    # Execute workflow
+    label_saver = registry.create_label_saver()
+    result = label_saver.save_labels()
+
+    # Verify results
+    assert result.success is True
+    assert (temp_data_dir / "labels.json").exists()
+```
 
 ## Basic Test Structure
 
