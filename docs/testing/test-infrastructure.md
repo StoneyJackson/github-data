@@ -657,6 +657,112 @@ def test_milestone_config_parsing(monkeypatch):
 
 For complete fixture definitions and additional fixtures, see `tests/shared/fixtures/milestone_fixtures.py`.
 
+### Migration Utilities
+
+The project provides migration utilities to help transition tests to modern patterns. These are specialized tools for automated test refactoring.
+
+**Source Files:**
+- `tests/shared/builders/migration_utilities.py` (13KB)
+- `tests/shared/mocks/migration_utils.py` (14KB)
+
+#### Purpose
+
+Migration utilities provide automated assistance for:
+- Converting static fixtures to GitHubDataBuilder patterns
+- Migrating manual boundary mocks to MockBoundaryFactory
+- Detecting and refactoring legacy test patterns
+
+**Important:** These are specialized refactoring tools, not standard test infrastructure. Most developers won't need to use these directly.
+
+#### Fixture Migration: FixtureToBuilderMigrator
+
+**Use when:** Converting static milestone/issue/PR fixtures to dynamic builder patterns
+
+```python
+from tests.shared.builders.migration_utilities import FixtureToBuilderMigrator
+
+# Convert static fixture data to builder
+fixture_data = {
+    "milestones": [...],  # Static milestone data
+    "issues": [...]       # Static issue data
+}
+
+builder = FixtureToBuilderMigrator.convert_milestone_fixtures(fixture_data)
+# Returns GitHubDataBuilder configured with equivalent data
+```
+
+**Benefits:**
+- Automated conversion of static fixtures
+- Maintains data relationships
+- Reduces manual refactoring effort
+
+#### Boundary Mock Migration: BoundaryMockMigrator
+
+**Use when:** Detecting and migrating manual `Mock()` boundary patterns
+
+```python
+from tests.shared.mocks.migration_utils import BoundaryMockMigrator
+
+# Detect manual mock patterns in test file
+with open("tests/test_something.py") as f:
+    content = f.read()
+
+patterns = BoundaryMockMigrator.detect_manual_mock_patterns(content)
+# Returns list of manual mock patterns found
+
+for pattern in patterns:
+    print(f"Line {pattern['line']}: {pattern['type']}")
+    print(f"  Variable: {pattern['variable']}")
+    print(f"  Suggestion: Use MockBoundaryFactory.create_auto_configured()")
+```
+
+**Detects:**
+- Manual `Mock()` boundary creation
+- Manual `return_value` assignments
+- Incomplete protocol implementations
+
+#### When to Use Migration Utilities
+
+**Use migration utilities when:**
+- Batch refactoring multiple test files
+- Auditing codebase for legacy patterns
+- Automated migration scripts
+
+**Do NOT use migration utilities when:**
+- Writing new tests (use current patterns directly)
+- Updating a single test (manual refactoring is clearer)
+- Learning test patterns (learn current patterns, not migrations)
+
+#### Migration Utility Best Practices
+
+1. **Understand before using**: Read the generated code, don't blindly apply
+2. **Test after migration**: Run tests to verify conversion correctness
+3. **Review changes**: Migration tools are helpers, not guaranteed correct
+4. **Incremental migration**: Migrate one file/pattern at a time
+5. **Commit frequently**: Commit each successful migration separately
+
+**Example migration workflow:**
+```python
+# 1. Detect patterns
+migrator = BoundaryMockMigrator()
+test_file = "tests/test_labels.py"
+with open(test_file) as f:
+    patterns = migrator.detect_manual_mock_patterns(f.read())
+
+# 2. Review findings
+print(f"Found {len(patterns)} manual mock patterns")
+for pattern in patterns[:5]:  # Show first 5
+    print(f"  {pattern['line']}: {pattern['type']}")
+
+# 3. Manual refactoring with guidance
+# Use patterns to guide manual updates to MockBoundaryFactory
+
+# 4. Verify
+# Run pytest to confirm tests still pass
+```
+
+**Note:** Migration utilities are tools for transitioning legacy code. New tests should use current patterns (EntityRegistry, MockBoundaryFactory, GitHubDataBuilder) from the start.
+
 ## Boundary Mock Standardization
 
 The GitHub Data project uses an advanced **boundary mock factory system** that provides 100% protocol completeness with automatic validation. This system eliminates manual mock configuration and prevents protocol extension failures.
