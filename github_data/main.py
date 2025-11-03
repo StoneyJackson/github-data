@@ -34,7 +34,7 @@ def main() -> None:
     # Get required environment variables
     github_token = os.getenv("GITHUB_TOKEN")
     repo_name = os.getenv("GITHUB_REPO")
-    data_path = os.getenv("DATA_PATH", "./data")
+    data_path = os.getenv("DATA_PATH", "/data")
 
     if not github_token:
         print("Error: GITHUB_TOKEN environment variable required", file=sys.stderr)
