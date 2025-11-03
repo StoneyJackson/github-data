@@ -89,7 +89,7 @@ REPOSITORY_PR_REVIEWS_QUERY = gql(
                     number
                     url
                     reviews(
-                        first: 100
+                        first: 10
                     ) {
                         nodes {
                             id
@@ -106,7 +106,7 @@ REPOSITORY_PR_REVIEWS_QUERY = gql(
                             submittedAt
                             authorAssociation
                             url
-                            comments(first: 100) {
+                            comments(first: 10) {
                                 nodes {
                                     id
                                     body

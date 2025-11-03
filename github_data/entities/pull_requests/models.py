@@ -26,8 +26,8 @@ class PullRequest(BaseModel):
     closed_at: Optional[datetime] = None
     merged_at: Optional[datetime] = None
     merge_commit_sha: Optional[str] = None
-    base_ref: str  # base branch
-    head_ref: str  # head branch
+    base_ref: Optional[str] = None  # base branch (can be None if deleted)
+    head_ref: Optional[str] = None  # head branch (can be None if deleted)
     html_url: str
     comments_count: int = Field(alias="comments")
 
