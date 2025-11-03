@@ -1,6 +1,6 @@
 # Chronological Index
 
-Total documents: 203
+Total documents: 206
 
 
 ## 2025-Q3
@@ -209,6 +209,9 @@ Total documents: 203
 - 2025-10-31  - [Testing Docs Reorganization Design](completed/2025-Q4/testing-docs-reorganization/2025-10-31-testing-docs-reorganization-design.md)
 - 2025-11-01  - [Testing Documentation Audit](completed/2025-Q4/testing-documentation/2025-11-01-testing-documentation-audit.md)
 - 2025-11-01  - [Testing Documentation Remediation](completed/2025-Q4/testing-documentation/2025-11-01-testing-documentation-remediation.md)
+- 2025-11-02  - [Releases And Tags Design](completed/2025-Q4/releases-and-tags/2025-11-02-releases-and-tags-design.md)
+- 2025-11-02  - [Releases And Tags Implementation](completed/2025-Q4/releases-and-tags/2025-11-02-releases-and-tags-implementation.md)
+- 2025-11-03  - [Architectural Improvements](completed/2025-Q4/architectural-improvements/2025-11-03-architectural-improvements.md)
 
 ## unknown
 
