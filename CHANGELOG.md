@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/StoneyJackson/github-data/compare/v2.0.0...v2.1.0) (2025-11-03)
+
+
+### Features
+
+* **releases:** add comprehensive release and tag save/restore functionality ([#42](https://github.com/StoneyJackson/github-data/issues/42)) ([1a5a669](https://github.com/StoneyJackson/github-data/commit/1a5a669d6399743d8cb81bb398775957545084ac))
+
 # [2.0.0](https://github.com/StoneyJackson/github-data/compare/v1.12.0...v2.0.0) (2025-10-30)
 
 
