@@ -80,7 +80,7 @@ REPOSITORY_PULL_REQUESTS_QUERY = gql(
                     comments {
                         totalCount
                     }
-                    reviews(first: 100) {
+                    reviews(first: 10) {
                         nodes {
                             id
                             author {
@@ -96,7 +96,7 @@ REPOSITORY_PULL_REQUESTS_QUERY = gql(
                             submittedAt
                             authorAssociation
                             url
-                            comments(first: 100) {
+                            comments(first: 10) {
                                 nodes {
                                     id
                                     body

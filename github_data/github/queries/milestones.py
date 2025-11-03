@@ -21,8 +21,7 @@ query getRepositoryMilestones($owner: String!, $name: String!, $after: String) {
           ... on User {
             id
             avatarUrl
-            htmlUrl
-            type
+            url
           }
         }
         createdAt
