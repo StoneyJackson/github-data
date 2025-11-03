@@ -110,6 +110,19 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
             logging.error(f"Failed to get milestones for {repo_name}: {e}")
             raise
 
+    def get_repository_releases(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all releases from repository via REST API.
+
+        Note: Uses REST API as releases are not fully supported in GraphQL.
+        PyGithub's get_releases() returns a PaginatedList that handles
+        pagination automatically.
+        """
+        repo = self._github.get_repo(repo_name)
+        releases = repo.get_releases()
+
+        # Convert PaginatedList to list of raw_data dicts
+        return [release.raw_data for release in releases]
+
     def create_milestone(
         self,
         repo_name: str,
@@ -126,6 +139,30 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         except Exception as e:
             logging.error(f"Failed to create milestone '{title}' for {repo_name}: {e}")
             raise
+
+    def create_release(
+        self,
+        repo_name: str,
+        tag_name: str,
+        target_commitish: str,
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        draft: bool = False,
+        prerelease: bool = False,
+    ) -> Dict[str, Any]:
+        """Create a release via REST API."""
+        repo = self._github.get_repo(repo_name)
+
+        release = repo.create_git_release(
+            tag=tag_name,
+            name=name or tag_name,
+            message=body or "",
+            draft=draft,
+            prerelease=prerelease,
+            target_commitish=target_commitish,
+        )
+
+        return release.raw_data
 
     # Public API - Rate Limit Monitoring
 

@@ -87,11 +87,11 @@ def test_strategy_factory_creates_all_batch1_and_batch2():
 
 @pytest.mark.unit
 def test_strategy_factory_creates_all_10_entities():
-    """Test StrategyFactory creates all 10 migrated entities."""
+    """Test StrategyFactory creates all 11 migrated entities."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
-    # All entities including git_repository
+    # All entities including git_repository and releases
     all_entities = [
         "labels",
         "milestones",
@@ -103,6 +103,7 @@ def test_strategy_factory_creates_all_10_entities():
         "pr_review_comments",
         "pr_comments",
         "git_repository",
+        "releases",
     ]
 
     mock_git_service = Mock()
@@ -112,8 +113,8 @@ def test_strategy_factory_creates_all_10_entities():
     for entity_name in all_entities:
         assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
-    # Verify all 10 entities are created
-    assert len(strategy_names) == 10
+    # Verify all 11 entities are created
+    assert len(strategy_names) == 11
 
 
 @pytest.mark.unit
@@ -135,12 +136,14 @@ def test_strategy_factory_create_save_strategies_from_registry():
     mock_git_service = Mock()
     strategies = factory.create_save_strategies(git_service=mock_git_service)
 
-    # Should return strategies for all enabled entities including git_repository
+    # Should return strategies for all enabled entities including
+    # git_repository and releases
     strategy_names = [s.get_entity_name() for s in strategies]
     assert "labels" in strategy_names
     assert "milestones" in strategy_names
     assert "git_repository" in strategy_names  # Included with git_service
-    assert len(strategy_names) == 10  # All 10 entities with git_service provided
+    assert "releases" in strategy_names
+    assert len(strategy_names) == 11  # All 11 entities with git_service provided
 
 
 @pytest.mark.unit

@@ -20,8 +20,10 @@ This GitHub Data project is in initial development phase. The foundation include
 - Label save and restore functionality with conflict resolution
 - Issue save and restore capabilities with metadata preservation
 - Comment save and restore functionality
-- Sub-issues support with hierarchical relationships and two-phase restore (NEW)
+- Milestone save and restore with project organization
+- Sub-issues support with hierarchical relationships and two-phase restore
 - Pull request save and restore capabilities
+- Release save and restore with asset metadata support (NEW)
 - Rate limiting and caching for API operations
 - CLI interface for repository data operations
 

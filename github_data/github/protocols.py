@@ -111,6 +111,11 @@ class RepositoryService(ABC):
         pass
 
     @abstractmethod
+    def get_repository_releases(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get all releases from repository."""
+        pass
+
+    @abstractmethod
     def get_rate_limit_status(self) -> Dict[str, Any]:
         """Get current rate limit status."""
         pass
@@ -242,6 +247,20 @@ class RepositoryService(ABC):
         Returns:
             Created milestone dictionary from GitHub API
         """
+        pass
+
+    @abstractmethod
+    def create_release(
+        self,
+        repo_name: str,
+        tag_name: str,
+        target_commitish: str,
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        draft: bool = False,
+        prerelease: bool = False,
+    ) -> Dict[str, Any]:
+        """Create a release."""
         pass
 
 

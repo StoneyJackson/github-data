@@ -65,6 +65,7 @@ def test_save_orchestrator_returns_failure_status_on_error():
     registry.get_entity("pr_reviews").enabled = False
     registry.get_entity("pr_review_comments").enabled = False
     registry.get_entity("sub_issues").enabled = False
+    registry.get_entity("releases").enabled = False
 
     github_service = Mock()
     storage_service = Mock()

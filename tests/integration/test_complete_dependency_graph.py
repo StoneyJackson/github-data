@@ -131,5 +131,5 @@ def test_no_circular_dependencies():
     # If there are circular deps, this raises ValueError
     enabled = registry.get_enabled_entities()
 
-    # Should succeed with all 10 entities
-    assert len(enabled) == 10
+    # Should succeed with all 11 entities
+    assert len(enabled) == 11
