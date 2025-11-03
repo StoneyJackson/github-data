@@ -31,6 +31,8 @@ All configuration is done through environment variables, and data files are acce
 ### GitHub Metadata Management
 - **Labels**: Complete label save/restore with conflict resolution strategies
 - **Issues & Comments**: Full issue data with hierarchical sub-issue relationships
+- **Milestones**: Project milestone organization and tracking
+- **Releases & Tags**: Version releases with binary asset metadata
 - **Pull Requests**: PR workflows with branch dependency validation
 - **Rate Limiting**: Intelligent API rate limiting with automatic retries
 
@@ -89,6 +91,8 @@ docker run --rm \
 | `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore operations. Supports boolean values (`true`/`false`) or selective numbers (e.g., `"10-15 20"`) (default: `true`) |
 | `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `true`) |
 | `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `true`) |
+| `INCLUDE_RELEASES` | No | Include releases in save/restore operations (default: `true`) |
+| `INCLUDE_RELEASE_ASSETS` | No | Include release asset binaries in save/restore operations (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
 #### Label Conflict Strategies
@@ -114,7 +118,7 @@ docker run --rm \
 
 #### Boolean Environment Variables
 
-Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`) accept the following values:
+Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`) accept the following values:
 - **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
 - **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
 
@@ -262,6 +266,14 @@ docker run --rm \
   -e GITHUB_REPO=owner/repo \
   -e INCLUDE_ISSUES="1-50" \
   -e INCLUDE_PULL_REQUESTS=false \
+  -v $(pwd)/data:/data \
+  ghcr.io/stoneyjackson/github-data:latest
+
+# Save releases metadata only (skip binary assets)
+docker run --rm \
+  -e OPERATION=save \
+  -e GITHUB_REPO=owner/repo \
+  -e INCLUDE_RELEASE_ASSETS=false \
   -v $(pwd)/data:/data \
   ghcr.io/stoneyjackson/github-data:latest
 ```

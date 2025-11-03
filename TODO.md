@@ -24,8 +24,8 @@
 ### Extended Backup/Restore Features
 - [ ] Save/restore project metadata and configuration
 - [ ] Save/restore git repository
-- [ ] Save/restore milestones
-- [ ] Save/restore releases and tags
+- [x] Save/restore milestones
+- [x] Save/restore releases and tags
 - [ ] Save/restore wiki pages
 - [ ] Save/restore repository settings (description, homepage, topics, visibility)
 - [ ] Save/restore branch protection rules
@@ -67,12 +67,14 @@
 
 ## Completed Features ✅
 
-### Core GitHub API Implementation (2025-09-12/15/16)
+### Core GitHub API Implementation (2025-09-12/15/16, 2025-11-03)
 ✅ **Complete GitHub API client** - labels, issues, comments with full CRUD operations
 ✅ **Comment-to-issue relationship mapping** - proper restore with issue number mapping
 ✅ **Chronological comment ordering** - maintains conversation flow during restore
 ✅ **Pull request support** - comprehensive backup/restore of PRs and PR comments with metadata preservation
 ✅ **Sub-issues support** - hierarchical issue relationships with two-phase restore (completed 2025-09-16)
+✅ **Milestones support** - project milestone organization and tracking
+✅ **Releases and tags** - version release metadata and binary asset metadata (completed 2025-11-03)
 ✅ **Original metadata preservation** - includes author, timestamps in restored content
 ✅ **Closed issue restoration** - captures and restores closure state and metadata
 

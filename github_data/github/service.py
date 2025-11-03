@@ -154,6 +154,13 @@ class GitHubService(RepositoryService):
             operation=lambda: self._boundary.get_repository_milestones(repo_name),
         )
 
+    def get_repository_releases(self, repo_name: str) -> List[Dict[str, Any]]:
+        """Get releases via REST API with caching and rate limiting."""
+        return self._execute_with_cross_cutting_concerns(
+            cache_key=f"releases:{repo_name}",
+            operation=lambda: self._boundary.get_repository_releases(repo_name),
+        )
+
     def get_issue_sub_issues(
         self, repo_name: str, issue_number: int
     ) -> List[Dict[str, Any]]:
@@ -395,6 +402,30 @@ class GitHubService(RepositoryService):
         self._invalidate_cache_for_repository(repo_name, "milestones")
 
         return result
+
+    def create_release(
+        self,
+        repo_name: str,
+        tag_name: str,
+        target_commitish: str,
+        name: Optional[str] = None,
+        body: Optional[str] = None,
+        draft: bool = False,
+        prerelease: bool = False,
+    ) -> Dict[str, Any]:
+        """Create release via REST API with rate limiting."""
+        return self._rate_limiter.execute_with_retry(
+            lambda: self._boundary.create_release(
+                repo_name=repo_name,
+                tag_name=tag_name,
+                target_commitish=target_commitish,
+                name=name,
+                body=body,
+                draft=draft,
+                prerelease=prerelease,
+            ),
+            self._boundary._github,
+        )
 
 
 def create_github_service(

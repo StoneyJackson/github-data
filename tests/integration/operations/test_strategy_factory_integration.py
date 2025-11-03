@@ -18,10 +18,11 @@ def test_create_save_strategies_all_entities():
     strategies = factory.create_save_strategies()
 
     # Should get strategies for all enabled entities except git_repository
-    assert len(strategies) == 9
+    assert len(strategies) == 10
     entity_names = [s.get_entity_name() for s in strategies]
     assert "labels" in entity_names
     assert "issues" in entity_names
+    assert "releases" in entity_names
 
 
 @pytest.mark.integration
@@ -60,7 +61,7 @@ def test_create_restore_strategies_all_entities():
     )
 
     # Should get strategies for all enabled entities except git_repository
-    assert len(strategies) == 9
+    assert len(strategies) == 10
 
     # Verify metadata flag was passed
     for strategy in strategies:
