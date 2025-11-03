@@ -86,10 +86,14 @@ docker run --rm \
 | `DATA_PATH` | No | Path inside container for data files (default: `/data`) |
 | `LABEL_CONFLICT_STRATEGY` | No | How to handle label conflicts during restore (default: `skip`) |
 | `INCLUDE_GIT_REPO` | No | Enable/disable Git repository save (default: `true`) |
+| `INCLUDE_LABELS` | No | Include labels in save/restore operations (default: `true`) |
+| `INCLUDE_MILESTONES` | No | Include milestones in save/restore operations (default: `true`) |
 | `INCLUDE_ISSUES` | No | Include issues in save/restore operations. Supports boolean values (`true`/`false`) or selective numbers (e.g., `"1-5 10 15-20"`) (default: `true`) |
 | `INCLUDE_ISSUE_COMMENTS` | No | Include issue comments in save/restore - requires `INCLUDE_ISSUES=true` (default: `true`) |
 | `INCLUDE_PULL_REQUESTS` | No | Include pull requests in save/restore operations. Supports boolean values (`true`/`false`) or selective numbers (e.g., `"10-15 20"`) (default: `true`) |
 | `INCLUDE_PULL_REQUEST_COMMENTS` | No | Include pull request comments in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `true`) |
+| `INCLUDE_PR_REVIEWS` | No | Include pull request code reviews in save/restore - requires `INCLUDE_PULL_REQUESTS=true` (default: `true`) |
+| `INCLUDE_PR_REVIEW_COMMENTS` | No | Include pull request review inline comments in save/restore - requires `INCLUDE_PR_REVIEWS=true` (default: `true`) |
 | `INCLUDE_SUB_ISSUES` | No | Include sub-issue relationships in save/restore (default: `true`) |
 | `INCLUDE_RELEASES` | No | Include releases in save/restore operations (default: `true`) |
 | `INCLUDE_RELEASE_ASSETS` | No | Include release asset binaries in save/restore operations (default: `true`) |
@@ -118,7 +122,7 @@ docker run --rm \
 
 #### Boolean Environment Variables
 
-Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`) accept the following values:
+Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_LABELS`, `INCLUDE_MILESTONES`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_PR_REVIEWS`, `INCLUDE_PR_REVIEW_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`) accept the following values:
 - **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
 - **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
 
