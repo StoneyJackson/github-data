@@ -1,3 +1,12 @@
+## [2.1.1](https://github.com/StoneyJackson/github-data/compare/v2.1.0...v2.1.1) (2025-11-03)
+
+
+### Bug Fixes
+
+* resolve 6 critical manual testing errors ([95c3d94](https://github.com/StoneyJackson/github-data/commit/95c3d94db7bc24fb8078344960006dd60c20cc1c))
+* resolve additional GraphQL field and node limit errors ([8a191bd](https://github.com/StoneyJackson/github-data/commit/8a191bd84f9e6da1f93bf8ff3f71464dcbdfceec))
+* resolve PullRequest validation and remaining node limit errors ([47df6a3](https://github.com/StoneyJackson/github-data/commit/47df6a3b45e0b2d40908f4ccfa8a962e741fbeb5))
+
 # [2.1.0](https://github.com/StoneyJackson/github-data/compare/v2.0.0...v2.1.0) (2025-11-03)
 
 
