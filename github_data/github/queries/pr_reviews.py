@@ -20,8 +20,7 @@ PULL_REQUEST_REVIEWS_QUERY = gql(
             pullRequest(number: $prNumber) {
                 reviews(
                     first: $first,
-                    after: $after,
-                    orderBy: {field: UPDATED_AT, direction: ASC}
+                    after: $after
                 ) {
                     nodes {
                         id
@@ -90,8 +89,7 @@ REPOSITORY_PR_REVIEWS_QUERY = gql(
                     number
                     url
                     reviews(
-                        first: 100,
-                        orderBy: {field: UPDATED_AT, direction: ASC}
+                        first: 100
                     ) {
                         nodes {
                             id
@@ -161,8 +159,7 @@ REVIEW_COMMENTS_QUERY = gql(
                 review(id: $reviewId) {
                     comments(
                         first: $first,
-                        after: $after,
-                        orderBy: {field: UPDATED_AT, direction: ASC}
+                        after: $after
                     ) {
                         nodes {
                             id
@@ -213,10 +210,10 @@ REPOSITORY_REVIEW_COMMENTS_QUERY = gql(
                 nodes {
                     number
                     url
-                    reviews(first: 100) {
+                    reviews(first: 10) {
                         nodes {
                             id
-                            comments(first: 100) {
+                            comments(first: 10) {
                                 nodes {
                                     id
                                     body

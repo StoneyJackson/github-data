@@ -18,10 +18,12 @@ query getRepositoryMilestones($owner: String!, $name: String!, $after: String) {
         state
         creator {
           login
-          id
-          avatarUrl
-          htmlUrl
-          type
+          ... on User {
+            id
+            avatarUrl
+            htmlUrl
+            type
+          }
         }
         createdAt
         updatedAt

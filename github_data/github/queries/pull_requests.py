@@ -192,7 +192,7 @@ REPOSITORY_PR_COMMENTS_QUERY = gql(
                     number
                     url
                     comments(
-                        first: 100,
+                        first: 10,
                         orderBy: {field: UPDATED_AT, direction: ASC}
                     ) {
                         nodes {
