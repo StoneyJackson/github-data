@@ -37,7 +37,7 @@ PULL_REQUEST_REVIEWS_QUERY = gql(
                         submittedAt
                         authorAssociation
                         url
-                        comments(first: 100) {
+                        comments(first: 10) {
                             nodes {
                                 id
                                 body
