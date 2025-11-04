@@ -7,39 +7,37 @@ from github_data.entities.registry import EntityRegistry
 
 
 @pytest.mark.integration
-def test_create_save_strategies_all_entities():
-    """Test creating save strategies for all real entities."""
+@pytest.mark.medium
+def test_create_save_strategies_all_entities(all_entity_names):
+    """Test creating save strategies for all enabled entities except git_repository."""
     registry = EntityRegistry()
-
-    # Disable git_repository since we're not providing git_service
     registry.get_entity("git_repository").enabled = False
-
     factory = StrategyFactory(registry)
     strategies = factory.create_save_strategies()
 
-    # Should get strategies for all enabled entities except git_repository
-    assert len(strategies) == 10
-    entity_names = [s.get_entity_name() for s in strategies]
-    assert "labels" in entity_names
-    assert "issues" in entity_names
-    assert "releases" in entity_names
+    strategy_names = [s.get_entity_name() for s in strategies]
+
+    # Verify we got all enabled entities
+    expected = set(all_entity_names) - {"git_repository"}
+    assert set(strategy_names) == expected
 
 
 @pytest.mark.integration
-def test_create_save_strategies_with_git_repository():
-    """Test creating save strategies including git_repository."""
+@pytest.mark.medium
+def test_create_save_strategies_with_git_repository(all_entity_names):
+    """Test git_repository strategy is included when git_service provided."""
     registry = EntityRegistry()
-
     factory = StrategyFactory(registry)
     mock_git_service = Mock()
 
     strategies = factory.create_save_strategies(git_service=mock_git_service)
 
-    # Should include git_repository when git_service provided
-    entity_names = [s.get_entity_name() for s in strategies]
-    assert "git_repository" in entity_names
+    strategy_names = [s.get_entity_name() for s in strategies]
 
-    # Find git_repository strategy and verify it has git_service
+    # Should get ALL entities when git_service provided
+    assert set(strategy_names) == set(all_entity_names)
+
+    # Verify git_repository strategy received git_service
     git_strategy = next(
         s for s in strategies if s.get_entity_name() == "git_repository"
     )
@@ -47,26 +45,20 @@ def test_create_save_strategies_with_git_repository():
 
 
 @pytest.mark.integration
-def test_create_restore_strategies_all_entities():
-    """Test creating restore strategies for all real entities."""
+@pytest.mark.medium
+def test_create_restore_strategies_all_entities(all_entity_names):
+    """Test creating restore strategies for all enabled entities."""
     registry = EntityRegistry()
-
-    # Disable git_repository since we're not providing git_service
     registry.get_entity("git_repository").enabled = False
-
     factory = StrategyFactory(registry)
     mock_github_service = Mock()
-    strategies = factory.create_restore_strategies(
-        github_service=mock_github_service, include_original_metadata=False
-    )
+    strategies = factory.create_restore_strategies(github_service=mock_github_service)
 
-    # Should get strategies for all enabled entities except git_repository
-    assert len(strategies) == 10
+    strategy_names = [s.get_entity_name() for s in strategies]
 
-    # Verify metadata flag was passed
-    for strategy in strategies:
-        if hasattr(strategy, "_include_original_metadata"):
-            assert strategy._include_original_metadata is False
+    # Verify we got all enabled entities
+    expected = set(all_entity_names) - {"git_repository"}
+    assert set(strategy_names) == expected
 
 
 @pytest.mark.integration

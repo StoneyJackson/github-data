@@ -50,18 +50,20 @@ def test_complete_dependency_graph():
 
 
 @pytest.mark.integration
-def test_complete_topological_sort():
-    """Test topological sort produces valid execution order for all 10 entities."""
+@pytest.mark.fast
+def test_complete_topological_sort(enabled_entity_names):
+    """Test topological sort produces valid execution order."""
     registry = EntityRegistry()
     enabled = registry.get_enabled_entities()
     enabled_names = [e.config.name for e in enabled]
 
-    # Get indices
+    # Verify count matches discovery
+    assert set(enabled_names) == set(enabled_entity_names)
+
     def idx(name):
         return enabled_names.index(name)
 
-    # Verify dependency order constraints
-    # Independent entities can appear anywhere, but:
+    # Verify dependency order constraints (explicit contracts)
     assert idx("milestones") < idx("issues")
     assert idx("milestones") < idx("pull_requests")
     assert idx("issues") < idx("comments")
@@ -123,13 +125,39 @@ def test_pr_branch_independence():
 
 
 @pytest.mark.integration
-def test_no_circular_dependencies():
-    """Test no circular dependencies in complete graph."""
+@pytest.mark.fast
+def test_no_circular_dependencies(enabled_entity_names):
+    """Test that there are no circular dependencies in the entity graph."""
     registry = EntityRegistry()
-
-    # get_enabled_entities performs topological sort
-    # If there are circular deps, this raises ValueError
     enabled = registry.get_enabled_entities()
+    enabled_names = [e.config.name for e in enabled]
 
-    # Should succeed with all 11 entities
-    assert len(enabled) == 11
+    # Verify we have all expected enabled entities
+    assert set(enabled_names) == set(enabled_entity_names)
+
+    # Build dependency graph
+    graph = {}
+    for entity in enabled:
+        graph[entity.config.name] = entity.get_dependencies()
+
+    # Check for cycles using DFS
+    def has_cycle(node, visited, rec_stack):
+        visited.add(node)
+        rec_stack.add(node)
+
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                if has_cycle(neighbor, visited, rec_stack):
+                    return True
+            elif neighbor in rec_stack:
+                return True
+
+        rec_stack.remove(node)
+        return False
+
+    visited = set()
+    for node in graph:
+        if node not in visited:
+            assert not has_cycle(
+                node, visited, set()
+            ), f"Circular dependency detected involving {node}"

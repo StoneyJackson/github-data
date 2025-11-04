@@ -763,6 +763,126 @@ for pattern in patterns[:5]:  # Show first 5
 
 **Note:** Migration utilities are tools for transitioning legacy code. New tests should use current patterns (EntityRegistry, MockBoundaryFactory, GitHubDataBuilder) from the start.
 
+### Entity Discovery Fixtures
+
+The project provides entity discovery fixtures in `tests.shared.fixtures.entity_fixtures` that dynamically discover all registered entities. These fixtures eliminate the need to hardcode entity counts or lists in tests.
+
+**Available Fixtures:**
+
+```python
+from tests.shared import (
+    entity_registry,                    # Fresh EntityRegistry instance
+    all_entity_names,                   # All registered entity names
+    enabled_entity_names,               # Default-enabled entity names
+    entity_names_by_dependency_order,   # Entities in topological order
+    independent_entity_names,           # Entities with no dependencies
+)
+```
+
+**When to Use:**
+
+- **all_entity_names**: When validating all entities are handled (factory tests, registry tests)
+- **enabled_entity_names**: When testing default configuration behavior
+- **entity_names_by_dependency_order**: When validating execution order
+- **independent_entity_names**: When testing root entities without dependencies
+- **entity_registry**: When tests need full registry access for custom queries
+
+**Key Benefits:**
+
+- Zero maintenance when adding/removing entities
+- Tests automatically adapt to system changes
+- Validates EntityRegistry discovery mechanism
+- Eliminates hardcoded entity counts and lists
+
+**Example: Factory Test with Entity Discovery**
+
+```python
+@pytest.mark.integration
+def test_factory_creates_all_entities(all_entity_names):
+    """Test factory creates strategies for all discovered entities."""
+    factory = StrategyFactory(registry=EntityRegistry())
+    strategies = factory.create_save_strategies(git_service=Mock())
+
+    strategy_names = [s.get_entity_name() for s in strategies]
+
+    # Verify all discovered entities have strategies
+    assert set(strategy_names) == set(all_entity_names)
+```
+
+**Example: Dependency Order Test**
+
+```python
+@pytest.mark.integration
+def test_entities_in_dependency_order(entity_names_by_dependency_order):
+    """Test entities are processed in correct dependency order."""
+    registry = EntityRegistry()
+    enabled = registry.get_enabled_entities()
+    enabled_names = [e.config.name for e in enabled]
+
+    # Verify matches discovered order
+    assert enabled_names == entity_names_by_dependency_order
+
+    # Verify specific dependency contracts
+    def idx(name):
+        return enabled_names.index(name)
+
+    assert idx("milestones") < idx("issues")
+    assert idx("issues") < idx("comments")
+```
+
+**Example: Testing Conditional Entity Inclusion**
+
+```python
+@pytest.mark.integration
+def test_strategy_without_git_service(all_entity_names):
+    """Test git_repository excluded when git_service not provided."""
+    registry = EntityRegistry()
+    registry.get_entity("git_repository").enabled = False
+    factory = StrategyFactory(registry)
+
+    strategies = factory.create_save_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+
+    # Verify all entities except git_repository
+    expected = set(all_entity_names) - {"git_repository"}
+    assert set(strategy_names) == expected
+```
+
+**Anti-Patterns to Avoid:**
+
+❌ **Don't hardcode entity names in fixtures:**
+```python
+# BAD - creates coupling
+def test_with_hardcoded_list():
+    expected = ["labels", "issues", "releases"]  # Manual list
+    assert actual == expected
+```
+
+✅ **Do use discovery fixtures:**
+```python
+# GOOD - uses discovery
+def test_with_discovery(all_entity_names):
+    assert set(actual) == set(all_entity_names)
+```
+
+❌ **Don't check specific entities unless testing that entity:**
+```python
+# BAD - unnecessary coupling
+def test_factory(all_entity_names):
+    strategies = create_strategies()
+    assert "labels" in strategies  # Only needed if testing labels specifically
+    assert "issues" in strategies  # Creates brittle test
+```
+
+✅ **Do use set equality for completeness:**
+```python
+# GOOD - validates behavior without coupling
+def test_factory(all_entity_names):
+    strategies = create_strategies()
+    strategy_names = [s.get_entity_name() for s in strategies]
+    assert set(strategy_names) == set(all_entity_names)
+```
+
 ## Boundary Mock Standardization
 
 The GitHub Data project uses an advanced **boundary mock factory system** that provides 100% protocol completeness with automatic validation. This system eliminates manual mock configuration and prevents protocol extension failures.
