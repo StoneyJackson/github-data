@@ -158,9 +158,24 @@ The project uses **pytest markers** for sophisticated test organization and sele
 
 #### Enhanced Test Organization
 - **Performance Markers**: `fast`, `medium`, `slow`, `performance` for execution time targeting
-- **Feature Markers**: `labels`, `issues`, `comments`, `save_workflow`, `restore_workflow`
+- **Infrastructure Markers**: `save_workflow`, `restore_workflow`, `github_api`, `storage`, `error_handling`
 - **Fixture Categories**: `enhanced_fixtures`, `data_builders`, `error_simulation`, `workflow_services`
 - **Scenario Markers**: `empty_repository`, `large_dataset`, `rate_limiting`, `api_errors`
+
+#### Entity-Specific Test Selection
+
+**Entity markers have been deprecated.** Use file paths or `-k` flag filtering for entity-specific tests:
+
+```bash
+# By file path (recommended)
+pytest tests/unit/entities/releases/           # All release unit tests
+pytest tests/unit/entities/{releases,milestones}/  # Multiple entities
+
+# By keyword filter
+pytest tests/ -k release                        # All tests matching "release"
+pytest tests/integration/ -k milestone          # Milestone integration tests
+pytest tests/ -k "release or milestone"         # Multiple entities
+```
 
 ### Essential Commands
 

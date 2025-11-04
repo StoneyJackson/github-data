@@ -14,7 +14,6 @@ from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.milestone_relationships,
     pytest.mark.enhanced_fixtures,
     pytest.mark.error_handling,
 ]

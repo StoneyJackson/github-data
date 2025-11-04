@@ -21,8 +21,6 @@ from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.milestone_relationships,
-    pytest.mark.pull_requests,
     pytest.mark.enhanced_fixtures,
     pytest.mark.error_handling,
 ]

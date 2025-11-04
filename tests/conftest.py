@@ -83,20 +83,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.unit)
             item.add_marker(pytest.mark.fast)
 
-        # Auto-mark by feature area based on filename
-        if "sub_issues" in item.nodeid:
-            item.add_marker(pytest.mark.sub_issues)
-        elif "pr_" in item.nodeid or "pull_request" in item.nodeid:
-            item.add_marker(pytest.mark.pull_requests)
-        elif "conflict" in item.nodeid:
-            item.add_marker(pytest.mark.labels)  # Conflicts typically with labels
-        elif "label" in item.nodeid:
-            item.add_marker(pytest.mark.labels)
-        elif "issue" in item.nodeid:
-            item.add_marker(pytest.mark.issues)
-        elif "comment" in item.nodeid:
-            item.add_marker(pytest.mark.comments)
-
         # Auto-mark GitHub API tests
         if hasattr(item, "function") and item.function:
             if "github" in str(item.function.__code__.co_names).lower():

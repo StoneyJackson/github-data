@@ -280,11 +280,15 @@ class TestJsonStoragePerformance:
         file_path = Path(temp_data_dir) / "repeated.json"
         test_data = [SampleModel(name="repeat", value=i) for i in range(50)]
 
+        # Warmup iteration to eliminate cold-start effects
+        save_json_data(test_data, file_path)
+        load_json_data(file_path, SampleModel)
+
         save_times = []
         load_times = []
 
-        # Perform multiple save/load cycles
-        for _ in range(5):
+        # Perform multiple save/load cycles with larger sample size
+        for _ in range(10):
             # Save timing
             start_time = time.time()
             save_json_data(test_data, file_path)
@@ -304,12 +308,22 @@ class TestJsonStoragePerformance:
         assert avg_save_time < 0.5, f"Average save time {avg_save_time:.3f}s too slow"
         assert avg_load_time < 0.5, f"Average load time {avg_load_time:.3f}s too slow"
 
-        # Consistency check: no operation should be more than 3x average
+        # Consistency check: no operation should be more than 5x average
+        # Using 5x threshold instead of 3x to accommodate normal system variability
+        # With 10 samples, this provides better statistical confidence
         max_save_time = max(save_times)
         max_load_time = max(load_times)
 
-        assert max_save_time < avg_save_time * 3, "Save time inconsistent"
-        assert max_load_time < avg_load_time * 3, "Load time inconsistent"
+        assert max_save_time < avg_save_time * 5, (
+            f"Save time inconsistent: max={max_save_time:.3f}s, "
+            f"avg={avg_save_time:.3f}s, "
+            f"ratio={max_save_time/avg_save_time:.1f}x"
+        )
+        assert max_load_time < avg_load_time * 5, (
+            f"Load time inconsistent: max={max_load_time:.3f}s, "
+            f"avg={avg_load_time:.3f}s, "
+            f"ratio={max_load_time/avg_load_time:.1f}x"
+        )
 
 
 @pytest.mark.storage

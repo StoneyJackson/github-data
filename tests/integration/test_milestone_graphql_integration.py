@@ -19,8 +19,6 @@ from github_data.github.converters import convert_to_milestone
 
 
 @pytest.mark.integration
-@pytest.mark.milestone_integration
-@pytest.mark.milestones
 class TestGraphQLMilestoneIntegration:
     """Test GraphQL milestone data integration."""
 

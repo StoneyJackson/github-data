@@ -17,13 +17,6 @@ All unit tests must:
 ### Standardized Markers
 Tests should include appropriate markers based on functionality:
 
-#### Feature Markers:
-- @pytest.mark.labels - Label management functionality
-- @pytest.mark.issues - Issue management functionality
-- @pytest.mark.comments - Comment management functionality
-- @pytest.mark.sub_issues - Sub-issues workflow functionality
-- @pytest.mark.pull_requests - Pull request workflow functionality
-
 #### Infrastructure Markers:
 - @pytest.mark.github_api - GitHub API interaction tests
 - @pytest.mark.storage - Data storage and persistence tests
@@ -73,7 +66,6 @@ from tests.shared import TestDataHelper, AssertionHelper, MockHelper
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.labels,  # Feature marker
     pytest.mark.restore_workflow  # Workflow marker
 ]
 

@@ -25,8 +25,6 @@ from github_data.entities.pull_requests.restore_strategy import (
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.medium,
-    pytest.mark.milestones,
-    pytest.mark.milestone_integration,
     pytest.mark.save_workflow,
     pytest.mark.restore_workflow,
     pytest.mark.end_to_end,

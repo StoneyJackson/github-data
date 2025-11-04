@@ -8,7 +8,6 @@ from github_data.entities.releases.models import Release
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.releases,
 ]
 
 

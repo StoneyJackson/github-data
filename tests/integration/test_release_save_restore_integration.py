@@ -17,8 +17,6 @@ from github_data.entities.releases.restore_strategy import ReleasesRestoreStrate
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.medium,
-    pytest.mark.releases,
-    pytest.mark.release_integration,
     pytest.mark.save_workflow,
     pytest.mark.restore_workflow,
     pytest.mark.end_to_end,

@@ -11,7 +11,6 @@ from github_data.entities.users.models import GitHubUser
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.releases,
     pytest.mark.restore_workflow,
 ]
 

@@ -16,7 +16,7 @@ from github_data.entities.git_repositories.restore_strategy import (
 )
 
 # Test markers following project standards
-pytestmark = [pytest.mark.integration, pytest.mark.medium, pytest.mark.git_repositories]
+pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
 
 class TestGitRepositoryIntegration:

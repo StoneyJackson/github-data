@@ -15,12 +15,16 @@ This document covers the core testing infrastructure used in the GitHub Data pro
 - `@pytest.mark.medium` - Tests completing in 1-10 seconds (integration tests)
 - `@pytest.mark.slow` - Tests completing in > 10 seconds (container/end-to-end tests)
 
-#### Feature Area Markers
-- `@pytest.mark.labels` - Label management functionality
-- `@pytest.mark.issues` - Issue management functionality
-- `@pytest.mark.comments` - Comment management functionality
-- `@pytest.mark.sub_issues` - Sub-issues workflow functionality
-- `@pytest.mark.pull_requests` - Pull request workflow functionality
+#### Feature Area Markers (DEPRECATED)
+
+**⚠️ Entity markers have been deprecated. Use file paths and `-k` flag filtering for entity-specific test selection.** See [Entity-Specific Test Selection](#entity-specific-test-selection) section below.
+
+Legacy entity markers (for reference only):
+- `@pytest.mark.labels` - Label management functionality (deprecated)
+- `@pytest.mark.issues` - Issue management functionality (deprecated)
+- `@pytest.mark.comments` - Comment management functionality (deprecated)
+- `@pytest.mark.sub_issues` - Sub-issues workflow functionality (deprecated)
+- `@pytest.mark.pull_requests` - Pull request workflow functionality (deprecated)
 
 #### Infrastructure Markers
 - `@pytest.mark.github_api` - GitHub API interaction tests
@@ -74,44 +78,42 @@ def test_service_interaction():
     pass
 ```
 
-### Feature Area Markers
+### Feature Area Markers (DEPRECATED)
 
-#### Core Features
+**⚠️ These entity markers are deprecated.** Use file paths and `-k` flag filtering instead. See [Entity-Specific Test Selection](#entity-specific-test-selection) for the new approach.
 
-| Marker | Description | Use For |
-|--------|-------------|---------|
-| `@pytest.mark.labels` | Label management | Label save/restore tests |
-| `@pytest.mark.issues` | Issue management | Issue save/restore tests |
-| `@pytest.mark.comments` | Comment management | Comment handling tests |
-| `@pytest.mark.pull_requests` | Pull requests | PR save/restore tests |
+<details>
+<summary>Legacy Entity Markers Reference (click to expand)</summary>
 
-**Example:**
-```python
-@pytest.mark.integration
-@pytest.mark.labels
-def test_label_save_restore():
-    # Test label workflow
-    pass
-```
+#### Core Features (Deprecated)
 
-#### Comment Features
+| Marker | Description | Use For | Replacement |
+|--------|-------------|---------|-------------|
+| `@pytest.mark.labels` | Label management | Label save/restore tests | `pytest tests/ -k label` |
+| `@pytest.mark.issues` | Issue management | Issue save/restore tests | `pytest tests/ -k issue` |
+| `@pytest.mark.comments` | Comment management | Comment handling tests | `pytest tests/ -k comment` |
+| `@pytest.mark.pull_requests` | Pull requests | PR save/restore tests | `pytest tests/ -k pull_request` |
 
-| Marker | Description | Use For |
-|--------|-------------|---------|
-| `@pytest.mark.include_issue_comments` | Issue comments | Tests with issue comment inclusion |
-| `@pytest.mark.include_pull_request_comments` | PR comments | Tests with PR comment inclusion |
-| `@pytest.mark.pr_comments` | PR comment functionality | PR comment-specific tests |
+#### Comment Features (Deprecated)
 
-#### Advanced Features
+| Marker | Description | Use For | Replacement |
+|--------|-------------|---------|-------------|
+| `@pytest.mark.include_issue_comments` | Issue comments | Tests with issue comment inclusion | `pytest tests/ -k issue_comment` |
+| `@pytest.mark.include_pull_request_comments` | PR comments | Tests with PR comment inclusion | `pytest tests/ -k pr_comment` |
+| `@pytest.mark.pr_comments` | PR comment functionality | PR comment-specific tests | `pytest tests/ -k pr_comment` |
 
-| Marker | Description | Use For |
-|--------|-------------|---------|
-| `@pytest.mark.sub_issues` | Sub-issues workflow | Hierarchical issue tests |
-| `@pytest.mark.milestones` | Milestone management | Milestone save/restore |
-| `@pytest.mark.milestone_relationships` | Milestone relationships | Issue/PR milestone links |
-| `@pytest.mark.milestone_integration` | Milestone end-to-end | Complete milestone workflow |
-| `@pytest.mark.milestone_config` | Milestone configuration | INCLUDE_MILESTONES config tests |
-| `@pytest.mark.git_repositories` | Git repository backup | Git repo save/restore |
+#### Advanced Features (Deprecated)
+
+| Marker | Description | Use For | Replacement |
+|--------|-------------|---------|-------------|
+| `@pytest.mark.sub_issues` | Sub-issues workflow | Hierarchical issue tests | `pytest tests/ -k sub_issue` |
+| `@pytest.mark.milestones` | Milestone management | Milestone save/restore | `pytest tests/ -k milestone` |
+| `@pytest.mark.milestone_relationships` | Milestone relationships | Issue/PR milestone links | `pytest tests/ -k milestone` |
+| `@pytest.mark.milestone_integration` | Milestone end-to-end | Complete milestone workflow | `pytest tests/integration/ -k milestone` |
+| `@pytest.mark.milestone_config` | Milestone configuration | INCLUDE_MILESTONES config tests | `pytest tests/ -k milestone` |
+| `@pytest.mark.git_repositories` | Git repository backup | Git repo save/restore | `pytest tests/ -k git_repository` |
+
+</details>
 
 ### Infrastructure Markers
 
@@ -255,6 +257,51 @@ pytest -m "unit and not slow"
 pytest -m "integration and save_workflow and not slow"
 pytest -m "(unit or integration) and not container"
 ```
+
+### Entity-Specific Test Selection
+
+**Entity markers have been deprecated.** Use file paths and `-k` flag filtering instead for entity-specific test selection.
+
+#### By File Path (Recommended)
+
+```bash
+# All release tests
+pytest tests/unit/entities/releases/
+
+# All milestone tests
+pytest tests/unit/entities/milestones/
+
+# Multiple entities
+pytest tests/unit/entities/{releases,milestones}/
+
+# Integration tests for specific entity
+pytest tests/integration/test_release_save_restore_integration.py
+```
+
+#### By Keyword Filter
+
+```bash
+# All tests with "release" in path/name
+pytest tests/ -k release
+
+# Combine with performance markers
+pytest tests/ -k release -m fast
+
+# Integration tests for releases
+pytest tests/integration/ -k release
+
+# Multiple entities with keyword
+pytest tests/ -k "release or milestone"
+```
+
+#### Migration Guide
+
+| Goal | OLD (deprecated) | NEW (use instead) |
+|------|------------------|-------------------|
+| All release tests | `pytest -m releases` | `pytest tests/ -k release` |
+| Release unit tests | `pytest -m "releases and unit"` | `pytest tests/unit/entities/releases/` |
+| Release integration | `pytest -m release_integration` | `pytest tests/integration/ -k release` |
+| Multiple entities | `pytest -m "issues or milestones"` | `pytest tests/unit/entities/{issues,milestones}/` |
 
 ### Marker Selection Best Practices
 
