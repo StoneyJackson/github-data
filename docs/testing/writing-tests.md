@@ -151,6 +151,90 @@ class TestComponentName:
         assert result.name == "test-label"
 ```
 
+### Testing with Entity Discovery
+
+When writing tests that validate entity-related behavior (factories, registries, workflows), use entity discovery fixtures instead of hardcoding entity names or counts.
+
+**Pattern: Registry and Factory Tests**
+
+```python
+import pytest
+from tests.shared import all_entity_names
+from github_data.entities.registry import EntityRegistry
+from github_data.operations.strategy_factory import StrategyFactory
+
+@pytest.mark.unit
+@pytest.mark.fast
+def test_factory_completeness(all_entity_names):
+    """Test factory creates strategies for all entities."""
+    factory = StrategyFactory(registry=EntityRegistry())
+    strategies = factory.create_strategies()
+
+    strategy_names = [s.get_entity_name() for s in strategies]
+    assert set(strategy_names) == set(all_entity_names)
+```
+
+**Pattern: Dependency Validation**
+
+```python
+@pytest.mark.integration
+def test_dependency_order(enabled_entity_names):
+    """Test enabled entities respect dependencies."""
+    registry = EntityRegistry()
+    enabled = registry.get_enabled_entities()
+
+    # Verify count matches discovery
+    assert len(enabled) == len(enabled_entity_names)
+
+    # Verify specific dependency contracts
+    # (These are explicit requirements that shouldn't change)
+    for entity in enabled:
+        for dep in entity.get_dependencies():
+            dep_entity = registry.get_entity(dep)
+            assert dep_entity.is_enabled()
+```
+
+**Pattern: Conditional Entity Handling**
+
+```python
+@pytest.mark.integration
+def test_conditional_entity(all_entity_names):
+    """Test entity included only when condition met."""
+    registry = EntityRegistry()
+
+    # Test without condition
+    factory = StrategyFactory(registry)
+    strategies_without = factory.create_strategies()
+    names_without = [s.get_entity_name() for s in strategies_without]
+
+    # Test with condition
+    strategies_with = factory.create_strategies(git_service=Mock())
+    names_with = [s.get_entity_name() for s in strategies_with]
+
+    # Verify all entities included when condition met
+    assert set(names_with) == set(all_entity_names)
+```
+
+**When NOT to Use Entity Discovery:**
+
+Entity discovery fixtures are for testing **system-wide entity behavior**. Don't use them when:
+
+- Testing a specific entity (just test that entity directly)
+- Entity names are part of the test's explicit contract
+- Testing exact dependency relationships (hardcode those - they're requirements)
+
+**Example of Appropriate Hardcoding:**
+
+```python
+def test_issues_depend_on_milestones():
+    """Test explicit dependency contract."""
+    registry = EntityRegistry()
+    issues_entity = registry.get_entity("issues")
+
+    # This is a requirement, not a discovery - hardcode it
+    assert "milestones" in issues_entity.get_dependencies()
+```
+
 ## Integration Test Structure
 
 ```python

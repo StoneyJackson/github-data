@@ -484,3 +484,7 @@ Entity Addition Checklist:
 
 Everything else auto-discovered and auto-generated!
 ```
+
+## Done
+
+- [x] Implement **Dynamic Entity Count Validation** (Improvement #2) before next entity
