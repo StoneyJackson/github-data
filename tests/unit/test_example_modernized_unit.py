@@ -22,12 +22,10 @@ from tests.shared import (
 
 # Other fixtures are auto-injected by pytest via conftest.py
 
-# Standardized markers: base + feature + infrastructure
+# Standardized markers: base + infrastructure
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.issues,  # Feature area
-    pytest.mark.comments,  # Feature area
     pytest.mark.save_workflow,  # Workflow type
 ]
 
@@ -257,7 +255,6 @@ class TestModernizedDataProcessing:
 class TestMarkerDemonstration:
     """Demonstrate different marker usage patterns."""
 
-    @pytest.mark.labels
     @pytest.mark.restore_workflow
     def test_label_restore_workflow(self):
         """Test specific to label restore workflow."""

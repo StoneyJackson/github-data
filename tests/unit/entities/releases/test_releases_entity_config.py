@@ -8,7 +8,6 @@ from github_data.entities.strategy_context import StrategyContext
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.releases,
 ]
 
 

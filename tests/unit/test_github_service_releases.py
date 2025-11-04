@@ -8,7 +8,6 @@ from github_data.github.service import GitHubService
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.releases,
 ]
 
 

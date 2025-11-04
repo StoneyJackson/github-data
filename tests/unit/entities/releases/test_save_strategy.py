@@ -8,7 +8,6 @@ from github_data.entities.releases.save_strategy import ReleasesSaveStrategy
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.releases,
     pytest.mark.save_workflow,
 ]
 

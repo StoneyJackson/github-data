@@ -15,9 +15,6 @@ from github_data.github.utils.data_enrichment import (
 pytestmark = [
     pytest.mark.unit,
     pytest.mark.fast,
-    pytest.mark.comments,
-    pytest.mark.sub_issues,
-    pytest.mark.pull_requests,
 ]
 
 
