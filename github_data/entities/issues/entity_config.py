@@ -26,6 +26,21 @@ class IssuesEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_issues": {
+            "boundary_method": "get_repository_issues",
+            "converter": "convert_to_issue",
+        },
+        "create_issue": {
+            "boundary_method": "create_issue",
+            "converter": "convert_to_issue",
+        },
+        "close_issue": {
+            "boundary_method": "close_issue",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

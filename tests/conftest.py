@@ -48,6 +48,8 @@ pytest_plugins = [
     "tests.shared.fixtures.support.storage_service_for_temp_dir",
     # Environment Variable Fixtures
     "tests.shared.fixtures.env_fixtures",
+    # GitHub Service Registry Fixtures
+    "tests.shared.fixtures.github_service_fixtures",
     # Entity Discovery Fixtures
     "tests.shared.fixtures.entity_fixtures",
 ]

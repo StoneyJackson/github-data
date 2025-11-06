@@ -37,3 +37,16 @@ def test_releases_create_restore_strategy():
     strategy = ReleasesEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy.get_entity_name() == "releases"
+
+
+def test_releases_config_declares_github_api_operations():
+    """Releases config should declare github_api_operations."""
+    assert hasattr(ReleasesEntityConfig, "github_api_operations")
+    assert "get_repository_releases" in ReleasesEntityConfig.github_api_operations
+
+    # Validate spec structure
+    get_releases_spec = ReleasesEntityConfig.github_api_operations[
+        "get_repository_releases"
+    ]
+    assert get_releases_spec["boundary_method"] == "get_repository_releases"
+    assert get_releases_spec["converter"] == "convert_to_release"

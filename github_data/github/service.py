@@ -6,11 +6,12 @@ Maintains clean separation from the ultra-thin boundary layer.
 """
 
 import logging
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, cast
 from .protocols import RepositoryService
 from .boundary import GitHubApiBoundary
 from .rate_limiter import RateLimitHandler
 from .cache import setup_global_cache, clear_cache, CacheConfig
+from .operation_registry import GitHubOperationRegistry, Operation
 
 logger = logging.getLogger(__name__)
 
@@ -41,91 +42,135 @@ class GitHubService(RepositoryService):
         self._rate_limiter = rate_limiter or RateLimitHandler()
         self._caching_enabled = caching_enabled
 
+        # Initialize operation registry
+        self._operation_registry = GitHubOperationRegistry()
+
+        logger.info(
+            f"GitHubService initialized with "
+            f"{len(self._operation_registry.list_operations())} registered operations"
+        )
+
     # Public API - Repository Data Operations
 
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"labels:{repo_name}",
-            operation=lambda: self._boundary.get_repository_labels(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"labels:{repo_name}",
+                operation=lambda: self._boundary.get_repository_labels(repo_name),
+            ),
         )
 
     def get_repository_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all issues from repository with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"issues:{repo_name}",
-            operation=lambda: self._boundary.get_repository_issues(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"issues:{repo_name}",
+                operation=lambda: self._boundary.get_repository_issues(repo_name),
+            ),
         )
 
     def get_issue_comments(
         self, repo_name: str, issue_number: int
     ) -> List[Dict[str, Any]]:
         """Get comments for specific issue with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"comments:{repo_name}:{issue_number}",
-            operation=lambda: self._boundary.get_issue_comments(
-                repo_name, issue_number
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"comments:{repo_name}:{issue_number}",
+                operation=lambda: self._boundary.get_issue_comments(
+                    repo_name, issue_number
+                ),
             ),
         )
 
     def get_all_issue_comments(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all issue comments with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"all_comments:{repo_name}",
-            operation=lambda: self._boundary.get_all_issue_comments(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"all_comments:{repo_name}",
+                operation=lambda: self._boundary.get_all_issue_comments(repo_name),
+            ),
         )
 
     def get_repository_pull_requests(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all pull requests from repository with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"pull_requests:{repo_name}",
-            operation=lambda: self._boundary.get_repository_pull_requests(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"pull_requests:{repo_name}",
+                operation=lambda: self._boundary.get_repository_pull_requests(
+                    repo_name
+                ),
+            ),
         )
 
     def get_pull_request_comments(
         self, repo_name: str, pr_number: int
     ) -> List[Dict[str, Any]]:
         """Get comments for specific pull request with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"pr_comments:{repo_name}:{pr_number}",
-            operation=lambda: self._boundary.get_pull_request_comments(
-                repo_name, pr_number
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"pr_comments:{repo_name}:{pr_number}",
+                operation=lambda: self._boundary.get_pull_request_comments(
+                    repo_name, pr_number
+                ),
             ),
         )
 
     def get_all_pull_request_comments(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all pull request comments with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"all_pr_comments:{repo_name}",
-            operation=lambda: self._boundary.get_all_pull_request_comments(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"all_pr_comments:{repo_name}",
+                operation=lambda: self._boundary.get_all_pull_request_comments(
+                    repo_name
+                ),
+            ),
         )
 
     def get_pull_request_reviews(
         self, repo_name: str, pr_number: int
     ) -> List[Dict[str, Any]]:
         """Get reviews for specific pull request with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"pr_reviews:{repo_name}:{pr_number}",
-            operation=lambda: self._boundary.get_pull_request_reviews(
-                repo_name, pr_number
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"pr_reviews:{repo_name}:{pr_number}",
+                operation=lambda: self._boundary.get_pull_request_reviews(
+                    repo_name, pr_number
+                ),
             ),
         )
 
     def get_all_pull_request_reviews(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all pull request reviews with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"all_pr_reviews:{repo_name}",
-            operation=lambda: self._boundary.get_all_pull_request_reviews(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"all_pr_reviews:{repo_name}",
+                operation=lambda: self._boundary.get_all_pull_request_reviews(
+                    repo_name
+                ),
+            ),
         )
 
     def get_pull_request_review_comments(
         self, repo_name: str, review_id: str
     ) -> List[Dict[str, Any]]:
         """Get comments for specific pull request review with rate limiting."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"pr_review_comments:{repo_name}:{review_id}",
-            operation=lambda: self._boundary.get_pull_request_review_comments(
-                repo_name, review_id
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"pr_review_comments:{repo_name}:{review_id}",
+                operation=lambda: self._boundary.get_pull_request_review_comments(
+                    repo_name, review_id
+                ),
             ),
         )
 
@@ -133,42 +178,57 @@ class GitHubService(RepositoryService):
         self, repo_name: str
     ) -> List[Dict[str, Any]]:
         """Get all pull request review comments with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"all_pr_review_comments:{repo_name}",
-            operation=lambda: self._boundary.get_all_pull_request_review_comments(
-                repo_name
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"all_pr_review_comments:{repo_name}",
+                operation=lambda: self._boundary.get_all_pull_request_review_comments(
+                    repo_name
+                ),
             ),
         )
 
     def get_repository_sub_issues(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get sub-issue relationships from repository with caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"sub_issues:{repo_name}",
-            operation=lambda: self._boundary.get_repository_sub_issues(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"sub_issues:{repo_name}",
+                operation=lambda: self._boundary.get_repository_sub_issues(repo_name),
+            ),
         )
 
     def get_repository_milestones(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get milestones via GraphQL with caching and rate limiting."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"milestones:{repo_name}",
-            operation=lambda: self._boundary.get_repository_milestones(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"milestones:{repo_name}",
+                operation=lambda: self._boundary.get_repository_milestones(repo_name),
+            ),
         )
 
     def get_repository_releases(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get releases via REST API with caching and rate limiting."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"releases:{repo_name}",
-            operation=lambda: self._boundary.get_repository_releases(repo_name),
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"releases:{repo_name}",
+                operation=lambda: self._boundary.get_repository_releases(repo_name),
+            ),
         )
 
     def get_issue_sub_issues(
         self, repo_name: str, issue_number: int
     ) -> List[Dict[str, Any]]:
         """Get sub-issues for specific issue with rate limiting and caching."""
-        return self._execute_with_cross_cutting_concerns(
-            cache_key=f"issue_sub_issues:{repo_name}:{issue_number}",
-            operation=lambda: self._boundary.get_issue_sub_issues_graphql(
-                repo_name, issue_number
+        return cast(
+            List[Dict[str, Any]],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=f"issue_sub_issues:{repo_name}:{issue_number}",
+                operation=lambda: self._boundary.get_issue_sub_issues_graphql(
+                    repo_name, issue_number
+                ),
             ),
         )
 
@@ -340,9 +400,133 @@ class GitHubService(RepositoryService):
 
     # Cross-cutting Concern Coordination
 
+    def __getattr__(self, method_name: str) -> Callable[..., Any]:
+        """
+        Dynamically generate methods from operation registry.
+
+        This is called only when an attribute isn't found explicitly on the class.
+        Explicit methods (escape hatch) take precedence automatically.
+
+        Args:
+            method_name: Name of method being accessed
+
+        Returns:
+            Dynamically generated method
+
+        Raises:
+            AttributeError: If method not found in registry
+        """
+        operation = self._operation_registry.get_operation(method_name)
+
+        if not operation:
+            raise AttributeError(
+                f"GitHubService has no method '{method_name}'. "
+                f"Available operations: {self._operation_registry.list_operations()}"
+            )
+
+        # Create dynamic method
+        def dynamic_method(**kwargs: Any) -> Any:
+            return self._execute_operation(operation, **kwargs)
+
+        # Make it debuggable
+        dynamic_method.__name__ = method_name
+        dynamic_method.__doc__ = (
+            f"Dynamically generated method from {operation.entity_name} entity."
+        )
+
+        return dynamic_method
+
+    def _execute_operation(self, operation: Operation, **kwargs: Any) -> Any:
+        """
+        Execute a registered operation with cross-cutting concerns.
+
+        Args:
+            operation: Operation instance from registry
+            **kwargs: Method parameters
+
+        Returns:
+            Operation result (raw or converted)
+
+        Raises:
+            Exception: Enhanced with entity/spec context
+        """
+        try:
+            # Apply caching if appropriate
+            if operation.should_cache() and self._caching_enabled:
+                cache_key = operation.get_cache_key(**kwargs)
+                return self._execute_with_cross_cutting_concerns(
+                    cache_key=cache_key,
+                    operation=lambda: self._call_boundary(operation, **kwargs),
+                )
+            else:
+                # No caching for write operations
+                return self._execute_with_cross_cutting_concerns(
+                    cache_key=None,
+                    operation=lambda: self._call_boundary(operation, **kwargs),
+                )
+        except Exception as e:
+            # Enhanced error context for debugging
+            raise type(e)(
+                f"Operation '{operation.method_name}' failed "
+                f"(entity={operation.entity_name}, spec={operation.spec}): {e}"
+            ) from e
+
+    def _call_boundary(self, operation: Operation, **kwargs: Any) -> Any:
+        """
+        Call boundary method and apply converter if specified.
+
+        Args:
+            operation: Operation instance
+            **kwargs: Method parameters
+
+        Returns:
+            Raw or converted result
+        """
+        logger.debug(
+            f"Executing {operation.method_name} "
+            f"[entity={operation.entity_name}, args={kwargs}]"
+        )
+
+        # Call the boundary method
+        boundary_method = getattr(self._boundary, operation.boundary_method)
+        raw_result = boundary_method(**kwargs)
+
+        # Apply converter if specified
+        if operation.converter_name:
+            converter = self._get_converter(operation.converter_name)
+
+            # Handle list results vs single results
+            if isinstance(raw_result, list):
+                result = [converter(item) for item in raw_result]
+            else:
+                result = converter(raw_result)
+
+            logger.debug(
+                f"Converted {operation.method_name} results "
+                f"using {operation.converter_name}"
+            )
+            return result
+
+        return raw_result
+
+    def _get_converter(self, converter_name: str) -> Callable[..., Any]:
+        """
+        Get converter function by name.
+
+        Args:
+            converter_name: Name of converter function
+
+        Returns:
+            Converter function
+        """
+        from github_data.github import converters
+
+        converter: Callable[..., Any] = getattr(converters, converter_name)
+        return converter
+
     def _execute_with_cross_cutting_concerns(
-        self, cache_key: str, operation: Callable[[], List[Dict[str, Any]]]
-    ) -> List[Dict[str, Any]]:
+        self, cache_key: Optional[str], operation: Callable[[], Any]
+    ) -> Any:
         """Execute operation with rate limiting and caching."""
         # With global caching, requests are automatically cached
         # We just need to execute with rate limiting

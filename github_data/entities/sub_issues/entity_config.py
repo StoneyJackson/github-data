@@ -27,6 +27,26 @@ class SubIssuesEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_sub_issues": {
+            "boundary_method": "get_repository_sub_issues",
+            "converter": "convert_to_sub_issue",
+        },
+        "get_issue_sub_issues": {
+            "boundary_method": "get_issue_sub_issues",
+        },
+        "add_sub_issue": {
+            "boundary_method": "add_sub_issue",
+        },
+        "remove_sub_issue": {
+            "boundary_method": "remove_sub_issue",
+        },
+        "reprioritize_sub_issue": {
+            "boundary_method": "reprioritize_sub_issue",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

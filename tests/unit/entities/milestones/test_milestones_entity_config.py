@@ -28,3 +28,22 @@ def test_milestones_factory_ignores_unknown_context():
     context = StrategyContext(_include_original_metadata=False)
     strategy = MilestonesEntityConfig.create_restore_strategy(context)
     assert strategy is not None
+
+
+def test_milestones_config_declares_github_api_operations():
+    """Milestones config should declare github_api_operations."""
+    assert hasattr(MilestonesEntityConfig, "github_api_operations")
+
+    ops = MilestonesEntityConfig.github_api_operations
+    assert "get_repository_milestones" in ops
+    assert "create_milestone" in ops
+
+    # Validate read operation
+    assert (
+        ops["get_repository_milestones"]["boundary_method"]
+        == "get_repository_milestones"
+    )
+    assert ops["get_repository_milestones"]["converter"] == "convert_to_milestone"
+
+    # Validate write operation
+    assert ops["create_milestone"]["boundary_method"] == "create_milestone"

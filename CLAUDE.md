@@ -90,6 +90,14 @@ This repository uses DevContainer for consistent development environments:
   - Claude Code CLI (`@anthropic-ai/claude-code`)
   - Docker CLI and Docker Compose
 
+## GitHub Service Layer
+
+The GitHub service layer uses a **declarative operation registry** that auto-generates
+service methods from entity configurations.
+
+**When adding entities:** See [docs/development/adding-entities.md](docs/development/adding-entities.md)
+for the complete guide on using the registry-based approach.
+
 ## Claude Code Agents
 
 This repository is configured to use Claude Code agents for specialized development tasks. Agents provide autonomous, multi-step task execution for complex operations.

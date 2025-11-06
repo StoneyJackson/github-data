@@ -28,6 +28,18 @@ class ReleasesEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_releases": {
+            "boundary_method": "get_repository_releases",
+            "converter": "convert_to_release",
+        },
+        "create_release": {
+            "boundary_method": "create_release",
+            "converter": "convert_to_release",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",
