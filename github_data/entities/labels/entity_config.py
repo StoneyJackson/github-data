@@ -28,6 +28,23 @@ class LabelsEntityConfig:
         "github_service"
     ]  # Need GitHub API for conflict resolution
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_labels": {
+            "boundary_method": "get_repository_labels",
+            "converter": "convert_to_label",
+        },
+        "create_label": {
+            "boundary_method": "create_label",
+        },
+        "update_label": {
+            "boundary_method": "update_label",
+        },
+        "delete_label": {
+            "boundary_method": "delete_label",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

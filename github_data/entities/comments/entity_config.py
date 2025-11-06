@@ -25,6 +25,21 @@ class CommentsEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_issue_comments": {
+            "boundary_method": "get_issue_comments",
+            "converter": "convert_to_comment",
+        },
+        "get_all_issue_comments": {
+            "boundary_method": "get_all_issue_comments",
+            "converter": "convert_to_comment",
+        },
+        "create_issue_comment": {
+            "boundary_method": "create_issue_comment",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

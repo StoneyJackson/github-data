@@ -28,6 +28,18 @@ class MilestonesEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_milestones": {
+            "boundary_method": "get_repository_milestones",
+            "converter": "convert_to_milestone",
+        },
+        "create_milestone": {
+            "boundary_method": "create_milestone",
+            "converter": "convert_to_milestone",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

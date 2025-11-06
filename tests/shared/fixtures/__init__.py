@@ -63,6 +63,9 @@ from .env_fixtures import (
     make_env_vars,
 )
 
+# GitHub Service Registry Fixtures
+from .github_service_fixtures import validate_github_service_registry
+
 # Export all fixtures
 __all__ = [
     # Core Infrastructure Fixtures
@@ -107,4 +110,6 @@ __all__ = [
     "restore_env_vars",
     "issues_only_env_vars",
     "make_env_vars",
+    # GitHub Service Registry Fixtures
+    "validate_github_service_registry",
 ]

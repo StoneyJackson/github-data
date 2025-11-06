@@ -30,6 +30,18 @@ class PullRequestsEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_repository_pull_requests": {
+            "boundary_method": "get_repository_pull_requests",
+            "converter": "convert_to_pull_request",
+        },
+        "create_pull_request": {
+            "boundary_method": "create_pull_request",
+            "converter": "convert_to_pull_request",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

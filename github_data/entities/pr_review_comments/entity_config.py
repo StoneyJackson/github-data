@@ -29,6 +29,14 @@ class PrReviewCommentsEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # GitHub API operations
+    github_api_operations = {
+        "get_all_pull_request_review_comments": {
+            "boundary_method": "get_all_pull_request_review_comments",
+            "converter": "convert_to_pr_review_comment",
+        },
+    }
+
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",

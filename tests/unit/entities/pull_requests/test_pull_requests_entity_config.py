@@ -82,3 +82,23 @@ def test_pull_requests_factory_ignores_unknown_context():
     context = StrategyContext(_include_original_metadata=False)
     strategy = PullRequestsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
+
+
+@pytest.mark.unit
+def test_pull_requests_config_declares_github_api_operations():
+    """Pull requests config should declare github_api_operations."""
+    assert hasattr(PullRequestsEntityConfig, "github_api_operations")
+
+    ops = PullRequestsEntityConfig.github_api_operations
+    assert "get_repository_pull_requests" in ops
+    assert "create_pull_request" in ops
+
+    # Validate read operation
+    assert (
+        ops["get_repository_pull_requests"]["boundary_method"]
+        == "get_repository_pull_requests"
+    )
+    assert ops["get_repository_pull_requests"]["converter"] == "convert_to_pull_request"
+
+    # Validate write operation
+    assert ops["create_pull_request"]["boundary_method"] == "create_pull_request"

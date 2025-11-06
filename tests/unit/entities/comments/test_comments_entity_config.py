@@ -36,3 +36,22 @@ def test_comments_factory_ignores_unknown_context():
     context = StrategyContext(_include_original_metadata=False)
     strategy = CommentsEntityConfig.create_restore_strategy(context)
     assert strategy is not None
+
+
+def test_comments_config_declares_github_api_operations():
+    """Comments config should declare github_api_operations."""
+    assert hasattr(CommentsEntityConfig, "github_api_operations")
+
+    ops = CommentsEntityConfig.github_api_operations
+    assert "get_issue_comments" in ops
+    assert "get_all_issue_comments" in ops
+    assert "create_issue_comment" in ops
+
+    # Validate read operations
+    assert ops["get_issue_comments"]["boundary_method"] == "get_issue_comments"
+    assert ops["get_issue_comments"]["converter"] == "convert_to_comment"
+    assert ops["get_all_issue_comments"]["boundary_method"] == "get_all_issue_comments"
+    assert ops["get_all_issue_comments"]["converter"] == "convert_to_comment"
+
+    # Validate write operation
+    assert ops["create_issue_comment"]["boundary_method"] == "create_issue_comment"

@@ -27,3 +27,28 @@ def test_sub_issues_create_restore_strategy_custom():
     strategy = SubIssuesEntityConfig.create_restore_strategy(context)
     assert strategy is not None
     assert strategy._include_original_metadata is False
+
+
+def test_sub_issues_config_declares_github_api_operations():
+    """Sub-issues config should declare github_api_operations."""
+    assert hasattr(SubIssuesEntityConfig, "github_api_operations")
+
+    ops = SubIssuesEntityConfig.github_api_operations
+    assert "get_repository_sub_issues" in ops
+    assert "get_issue_sub_issues" in ops
+    assert "add_sub_issue" in ops
+    assert "remove_sub_issue" in ops
+    assert "reprioritize_sub_issue" in ops
+
+    # Validate read operations
+    assert (
+        ops["get_repository_sub_issues"]["boundary_method"]
+        == "get_repository_sub_issues"
+    )
+    assert ops["get_repository_sub_issues"]["converter"] == "convert_to_sub_issue"
+    assert ops["get_issue_sub_issues"]["boundary_method"] == "get_issue_sub_issues"
+
+    # Validate write operations
+    assert ops["add_sub_issue"]["boundary_method"] == "add_sub_issue"
+    assert ops["remove_sub_issue"]["boundary_method"] == "remove_sub_issue"
+    assert ops["reprioritize_sub_issue"]["boundary_method"] == "reprioritize_sub_issue"
