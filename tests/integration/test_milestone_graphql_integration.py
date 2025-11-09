@@ -15,7 +15,7 @@ from github_data.github.queries.milestones import (
 )
 from github_data.github.queries.issues import REPOSITORY_ISSUES_QUERY
 from github_data.github.queries.pull_requests import REPOSITORY_PULL_REQUESTS_QUERY
-from github_data.github.converters import convert_to_milestone
+from github_data.github.converter_registry import get_converter
 
 
 @pytest.mark.integration
@@ -208,7 +208,7 @@ class TestGraphQLMilestoneIntegration:
         ][0]
 
         # Convert using the converter
-        milestone = convert_to_milestone(milestone_data)
+        milestone = get_converter("convert_to_milestone")(milestone_data)
 
         # Verify conversion accuracy
         assert milestone.id == "M_kwDOABCDEF123"
@@ -340,7 +340,7 @@ class TestGraphQLMilestoneIntegration:
         milestone_data_with_none["closedAt"] = None
 
         # Should still convert successfully
-        milestone = convert_to_milestone(milestone_data_with_none)
+        milestone = get_converter("convert_to_milestone")(milestone_data_with_none)
         assert milestone.description is None
         assert milestone.due_on is None
         assert milestone.closed_at is None
@@ -414,7 +414,7 @@ class TestGraphQLMilestoneIntegration:
         # Convert all milestones
         milestones = []
         for milestone_data in result["repository"]["milestones"]["nodes"]:
-            milestone = convert_to_milestone(milestone_data)
+            milestone = get_converter("convert_to_milestone")(milestone_data)
             milestones.append(milestone)
 
         end_time = time.time()

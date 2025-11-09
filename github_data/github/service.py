@@ -519,10 +519,9 @@ class GitHubService(RepositoryService):
         Returns:
             Converter function
         """
-        from github_data.github import converters
+        from github_data.github.converter_registry import get_converter
 
-        converter: Callable[..., Any] = getattr(converters, converter_name)
-        return converter
+        return get_converter(converter_name)
 
     def _execute_with_cross_cutting_concerns(
         self, cache_key: Optional[str], operation: Callable[[], Any]

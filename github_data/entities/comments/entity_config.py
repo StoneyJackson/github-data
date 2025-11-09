@@ -25,6 +25,15 @@ class CommentsEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_comment": {
+            "module": "github_data.entities.comments.converters",
+            "function": "convert_to_comment",
+            "target_model": "Comment",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_issue_comments": {

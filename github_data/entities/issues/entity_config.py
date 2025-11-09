@@ -26,6 +26,15 @@ class IssuesEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_issue": {
+            "module": "github_data.entities.issues.converters",
+            "function": "convert_to_issue",
+            "target_model": "Issue",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_repository_issues": {

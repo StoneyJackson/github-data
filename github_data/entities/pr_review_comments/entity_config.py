@@ -29,6 +29,15 @@ class PrReviewCommentsEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_pr_review_comment": {
+            "module": "github_data.entities.pr_review_comments.converters",
+            "function": "convert_to_pr_review_comment",
+            "target_model": "PullRequestReviewComment",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_all_pull_request_review_comments": {
