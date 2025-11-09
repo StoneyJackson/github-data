@@ -86,11 +86,11 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
             self._conflict_strategy.set_repo_name(repo_name)
 
         # Get existing labels
-        from github_data.github import converters
+        from github_data.github.converter_registry import get_converter
 
         raw_existing = github_service.get_repository_labels(repo_name)
         existing_labels = [
-            converters.convert_to_label(label_dict) for label_dict in raw_existing
+            get_converter("convert_to_label")(label_dict) for label_dict in raw_existing
         ]
 
         # Apply conflict resolution strategy

@@ -30,6 +30,15 @@ class PullRequestsEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_pull_request": {
+            "module": "github_data.entities.pull_requests.converters",
+            "function": "convert_to_pull_request",
+            "target_model": "PullRequest",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_repository_pull_requests": {

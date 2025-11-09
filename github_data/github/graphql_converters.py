@@ -6,7 +6,7 @@ the existing REST-based data processing pipeline.
 """
 
 from typing import Dict, List, Any
-from .converters import convert_to_milestone
+from .converter_registry import get_converter
 
 
 def convert_graphql_labels_to_rest_format(
@@ -61,7 +61,7 @@ def convert_graphql_issues_to_rest_format(
         # Convert milestone
         milestone = None
         if issue.get("milestone"):
-            milestone = convert_to_milestone(issue["milestone"])
+            milestone = get_converter("convert_to_milestone")(issue["milestone"])
 
         rest_issue = {
             "id": issue["id"],
@@ -165,7 +165,7 @@ def convert_graphql_pull_requests_to_rest_format(
         # Convert milestone
         milestone = None
         if pr.get("milestone"):
-            milestone = convert_to_milestone(pr["milestone"])
+            milestone = get_converter("convert_to_milestone")(pr["milestone"])
 
         # Extract merge commit SHA
         merge_commit_sha = None

@@ -28,6 +28,15 @@ class MilestonesEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_milestone": {
+            "module": "github_data.entities.milestones.converters",
+            "function": "convert_to_milestone",
+            "target_model": "Milestone",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_repository_milestones": {

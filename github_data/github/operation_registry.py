@@ -39,9 +39,12 @@ class Operation:
         write_prefixes = ("create_", "update_", "delete_", "close_")
         return self.method_name.startswith(write_prefixes)
 
-    def validate(self) -> None:
+    def validate(self, converter_registry: Any = None) -> None:
         """
         Validate operation spec.
+
+        Args:
+            converter_registry: Optional ConverterRegistry instance for validation
 
         Raises:
             ValidationError: If spec is invalid
@@ -50,16 +53,25 @@ class Operation:
 
         # Validate converter exists if specified
         if self.converter_name:
-            if not self._converter_exists(self.converter_name):
+            if not self._converter_exists(self.converter_name, converter_registry):
                 raise ValidationError(f"Converter '{self.converter_name}' not found")
 
-    def _converter_exists(self, converter_name: str) -> bool:
-        """Check if converter function exists."""
-        try:
-            from github_data.github import converters
+    def _converter_exists(
+        self, converter_name: str, converter_registry: Any = None
+    ) -> bool:
+        """Check if converter function exists in the registry."""
+        if converter_registry:
+            # Use provided registry instance (avoids circular dependency during init)
+            return converter_name in converter_registry._converters
 
-            return hasattr(converters, converter_name)
-        except ImportError:
+        # Fallback: try to get from global registry
+        try:
+            from github_data.github.converter_registry import get_converter
+
+            get_converter(converter_name)
+            return True
+        except Exception:
+            # Converter not found or registry not ready
             return False
 
     def should_cache(self) -> bool:
@@ -91,11 +103,18 @@ class Operation:
 class GitHubOperationRegistry:
     """Registry for dynamically discovered GitHub API operations."""
 
-    def __init__(self) -> None:
-        """Initialize registry and discover operations from entity configs."""
+    def __init__(self, skip_validation: bool = False) -> None:
+        """
+        Initialize registry and discover operations from entity configs.
+
+        Args:
+            skip_validation: If True, skip validation
+                (used during ConverterRegistry init)
+        """
         self._operations: Dict[str, Operation] = {}
         self._load_operations()
-        self._validate_all()
+        if not skip_validation:
+            self._validate_all()
 
     def _load_operations(self) -> None:
         """Scan all entity configs and register operations."""

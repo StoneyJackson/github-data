@@ -28,6 +28,20 @@ class ReleasesEntityConfig:
     required_services_save: List[str] = []
     required_services_restore: List[str] = []
 
+    # Converter declarations
+    converters = {
+        "convert_to_release": {
+            "module": "github_data.entities.releases.converters",
+            "function": "convert_to_release",
+            "target_model": "Release",
+        },
+        "convert_to_release_asset": {
+            "module": "github_data.entities.releases.converters",
+            "function": "convert_to_release_asset",
+            "target_model": "ReleaseAsset",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_repository_releases": {

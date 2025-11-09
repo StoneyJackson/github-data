@@ -29,6 +29,15 @@ class PrCommentsEntityConfig:
     required_services_save: List[str] = []  # No services needed
     required_services_restore: List[str] = []  # No services needed
 
+    # Converter declarations
+    converters = {
+        "convert_to_pr_comment": {
+            "module": "github_data.entities.pr_comments.converters",
+            "function": "convert_to_pr_comment",
+            "target_model": "PullRequestComment",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_all_pull_request_comments": {

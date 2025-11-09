@@ -28,6 +28,15 @@ class LabelsEntityConfig:
         "github_service"
     ]  # Need GitHub API for conflict resolution
 
+    # Converter declarations
+    converters = {
+        "convert_to_label": {
+            "module": "github_data.entities.labels.converters",
+            "function": "convert_to_label",
+            "target_model": "Label",
+        },
+    }
+
     # GitHub API operations
     github_api_operations = {
         "get_repository_labels": {
