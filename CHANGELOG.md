@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/StoneyJackson/github-data/compare/v2.1.1...v2.1.2) (2025-11-10)
+
+
+### Bug Fixes
+
+* trigger release ([a864cd2](https://github.com/StoneyJackson/github-data/commit/a864cd2f8b70ee0a4b75bf8e8592f71d02c31eda))
+
 ## [2.1.1](https://github.com/StoneyJackson/github-data/compare/v2.1.0...v2.1.1) (2025-11-03)
 
 
