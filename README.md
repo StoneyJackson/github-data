@@ -8,6 +8,7 @@ A containerized tool for saving and restoring comprehensive GitHub repository da
 
 - [Overview](#overview)
 - [Features](#features)
+- [Architecture Highlights](#architecture-highlights)
 - [Usage](#usage)
   - [Save Data](#save-data)
   - [Restore Data](#restore-data)
@@ -47,6 +48,26 @@ All configuration is done through environment variables, and data files are acce
 
 - **Pull Request Restoration**: While PRs can be saved and restored, restored PRs will have current timestamps (not original creation/merge times) and require that the original branch references exist in the target repository.
 - **GraphQL API**: The tool uses GitHub's GraphQL API for efficient data retrieval, with automatic fallback to REST API for write operations.
+
+## Architecture Highlights
+
+### Distributed Converter Registry
+
+The project uses a distributed converter registry pattern where:
+
+- Each entity declares its converters in `entity_config.py`
+- Converter implementations live in `entities/{entity}/converters.py`
+- Common converters (like `convert_to_user`) are declared in `github/common_converters_config.py`
+- The `ConverterRegistry` discovers and validates all converters at startup
+- Fail-fast validation catches configuration errors before any operations run
+
+This pattern ensures:
+- Zero shared file modifications when adding entities
+- Clear ownership of conversion logic
+- Self-documenting entity capabilities
+- No circular import issues
+
+For details, see [docs/architecture/converter-registry.md](docs/architecture/converter-registry.md).
 
 ## Usage
 
