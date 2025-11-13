@@ -34,7 +34,7 @@ def test_main_initializes_registry_from_environment(
 
     # Mock orchestrator
     orchestrator_instance = Mock()
-    orchestrator_instance.execute_save.return_value = []
+    orchestrator_instance.execute.return_value = []
     mock_orchestrator_class.return_value = orchestrator_instance
 
     try:

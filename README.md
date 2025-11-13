@@ -1,103 +1,58 @@
 # GitHub Data
 
-A containerized tool for saving and restoring comprehensive GitHub repository data including labels, issues, comments, sub-issues, pull requests, and complete Git repository history. This tool allows you to save and restore GitHub repository metadata alongside full Git repository data with commit history, branches, and tags.
+A containerized tool for saving and restoring GitHub repository data.
 
 > **⚠️ Development Status**: This project is under active development. See [TODO.md](TODO.md) for current progress and upcoming features.
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture Highlights](#architecture-highlights)
+- [Authentication](#authentication)
 - [Usage](#usage)
   - [Save Data](#save-data)
   - [Restore Data](#restore-data)
-  - [Environment Variables](#environment-variables)
-  - [Selective Issue and PR Operations](#selective-issue-and-pr-operations)
-  - [Git Repository Save](#git-repository-save)
+- [Environment Variables](#environment-variables)
+- [Selective Issue and PR Operations](#selective-issue-and-pr-operations)
+- [Git Repository Save](#git-repository-save)
 - [Data Format](#data-format)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Overview
+## Authentication
 
-The `github-data` container provides two main operations:
-- **Save**: Extract labels, issues, comments, sub-issues, pull requests, and complete Git repository history from a GitHub repository
-- **Restore**: Read saved data and restore/recreate repository labels, issues, comments, sub-issue relationships, pull requests, and Git repository data
-
-All configuration is done through environment variables, and data files are accessed by mounting a local directory into the container.
-
-## Features
-
-### GitHub Metadata Management
-- **Labels**: Complete label save/restore with conflict resolution strategies
-- **Issues & Comments**: Full issue data with hierarchical sub-issue relationships
-- **Milestones**: Project milestone organization and tracking
-- **Releases & Tags**: Version releases with binary asset metadata
-- **Pull Requests**: PR workflows with branch dependency validation
-- **Rate Limiting**: Intelligent API rate limiting with automatic retries
-
-### Git Repository Save
-- **Complete Repository Cloning**: Full commit history, branches, and tags
-- **Mirror Clone Format**: Complete repository saves with full Git history
-- **Repository Validation**: Integrity checks and verification
-- **Flexible Restore Options**: Restore to new locations or directories
-- **Authentication Support**: Token-based authentication for private repositories
-
-## Important Notes
-
-- **Pull Request Restoration**: While PRs can be saved and restored, restored PRs will have current timestamps (not original creation/merge times) and require that the original branch references exist in the target repository.
-- **GraphQL API**: The tool uses GitHub's GraphQL API for efficient data retrieval, with automatic fallback to REST API for write operations.
-
-## Architecture Highlights
-
-### Distributed Converter Registry
-
-The project uses a distributed converter registry pattern where:
-
-- Each entity declares its converters in `entity_config.py`
-- Converter implementations live in `entities/{entity}/converters.py`
-- Common converters (like `convert_to_user`) are declared in `github/common_converters_config.py`
-- The `ConverterRegistry` discovers and validates all converters at startup
-- Fail-fast validation catches configuration errors before any operations run
-
-This pattern ensures:
-- Zero shared file modifications when adding entities
-- Clear ownership of conversion logic
-- Self-documenting entity capabilities
-- No circular import issues
-
-For details, see [docs/architecture/converter-registry.md](docs/architecture/converter-registry.md).
+To authorize GitHub-Data to read/write a GitHub repository,
+on GitHub, create a personal access token with appropriate permissions.
+Pass this token to GitHub-Data as the value of the GITHUB_TOKEN environment
+variable. See Usage examples below.
 
 ## Usage
 
 ### Save Data
 
-Save GitHub repository labels, issues, comments, sub-issues, and pull requests to JSON files:
+Save GitHub repository into the current working directory.
 
 ```bash
 docker run --rm \
-  -v /path/to/data:/data \
   -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/repository \
   -e OPERATION=save \
+  -e GITHUB_REPO=owner/repository \
+  -v "${PWD}:/data" \
   ghcr.io/stoneyjackson/github-data:latest
 ```
 
 ### Restore Data
 
-Restore GitHub repository labels, issues, comments, sub-issues, and pull requests from JSON files:
+Restore data in current working directory to a GitHub repository.
 
 ```bash
 docker run --rm \
-  -v /path/to/data:/data \
   -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/repository \
   -e OPERATION=restore \
+  -e GITHUB_REPO=owner/repository \
+  -v "${PWD}:/data" \
   ghcr.io/stoneyjackson/github-data:latest
 ```
 
-### Environment Variables
+## Environment Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
@@ -120,7 +75,7 @@ docker run --rm \
 | `INCLUDE_RELEASE_ASSETS` | No | Include release asset binaries in save/restore operations (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
 
-#### Label Conflict Strategies
+### Label Conflict Strategies
 
 When restoring labels to a repository that already has labels, you can choose how conflicts are handled:
 
@@ -130,81 +85,15 @@ When restoring labels to a repository that already has labels, you can choose ho
 - **`skip`**: Skip restoring labels that already exist, create only new ones
 - **`delete-all`**: Delete all existing labels before restoring
 
-Example with conflict strategy:
-```bash
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=restore \
-  -e LABEL_CONFLICT_STRATEGY=overwrite \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-#### Boolean Environment Variables
+### Boolean Environment Variables
 
 Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_LABELS`, `INCLUDE_MILESTONES`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_PR_REVIEWS`, `INCLUDE_PR_REVIEW_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`) accept the following values:
 - **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
 - **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
 
-Examples:
-```bash
-# Save repository data including issue comments (default behavior)
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=save \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Save repository data excluding issue comments
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=save \
-  -e INCLUDE_ISSUE_COMMENTS=false \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Restore repository data excluding issue comments
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token_here \
-  -e GITHUB_REPO=owner/new-repository \
-  -e OPERATION=restore \
-  -e INCLUDE_ISSUE_COMMENTS=false \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
 ### Selective Issue and PR Operations
 
 The GitHub Data tool supports selective operations for issues and pull requests, allowing you to work with specific numbers instead of all data. This feature provides significant performance improvements and enables focused data migration scenarios.
-
-#### Quick Start: Selective Operations
-
-**Save Only Critical Issues:**
-```bash
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_ISSUES="1-10 15 20-25" \
-  -e INCLUDE_ISSUE_COMMENTS=true \
-  -v $(pwd)/data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-**Restore Specific PRs:**
-```bash
-docker run --rm \
-  -e OPERATION=restore \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_REPO=owner/new-repo \
-  -e INCLUDE_PULL_REQUESTS="1 3 5-7" \
-  -e INCLUDE_PULL_REQUEST_COMMENTS=true \
-  -v $(pwd)/data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
 
 #### Selective Format Specification
 
@@ -224,128 +113,8 @@ Comments automatically follow their parent issue/PR selections:
 - `INCLUDE_PULL_REQUESTS="10-12"` → Only comments from PRs #10-12 are included
 - Set `INCLUDE_ISSUE_COMMENTS=false` to disable comment saving entirely
 
-#### Use Cases and Examples
 
-**Issue Migration Between Repositories:**
-
-1. **Save from source repository:**
-```bash
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=oldorg/oldrepo \
-  -e INCLUDE_ISSUES="100-150 200" \
-  -e INCLUDE_ISSUE_COMMENTS=true \
-  -v $(pwd)/migration:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-2. **Restore to target repository:**
-```bash
-docker run --rm \
-  -e OPERATION=restore \
-  -e GITHUB_REPO=neworg/newrepo \
-  -e INCLUDE_ISSUES="100-150 200" \
-  -e INCLUDE_ISSUE_COMMENTS=true \
-  -v $(pwd)/migration:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-**Backup Optimization:**
-```bash
-# Backup only current milestone issues
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_ISSUES="500-600" \
-  -e INCLUDE_PULL_REQUESTS="300-350" \
-  -v $(pwd)/milestone-backup:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-**Testing and Development:**
-```bash
-# Generate test data for specific scenarios
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_ISSUES="1 5 10-15" \
-  -e INCLUDE_ISSUE_COMMENTS=false \
-  -v $(pwd)/test-data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-**Mixed Configuration Examples:**
-```bash
-# All issues, selective PRs
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_ISSUES=true \
-  -e INCLUDE_PULL_REQUESTS="10-20 25 30-35" \
-  -v $(pwd)/data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Selective issues, no PRs
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_ISSUES="1-50" \
-  -e INCLUDE_PULL_REQUESTS=false \
-  -v $(pwd)/data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Save releases metadata only (skip binary assets)
-docker run --rm \
-  -e OPERATION=save \
-  -e GITHUB_REPO=owner/repo \
-  -e INCLUDE_RELEASE_ASSETS=false \
-  -v $(pwd)/data:/data \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-#### Performance Considerations
-
-- **Memory Usage**: Scales with selected items, not total repository size
-- **API Efficiency**: Selective operations can reduce API calls by 50-90%
-- **Optimal Range Size**: Ranges of 50-100 items balance efficiency and memory usage
-- **Comment Coupling**: Minimal performance impact, automatically optimized
-
-#### Best Practices
-
-1. **Start Small**: Test with small ranges before processing large selections
-2. **Use Ranges**: `"1-100"` is more efficient than `"1 2 3 ... 100"`
-3. **Comment Strategy**: Enable comments only when needed
-4. **Backup Verification**: Always verify restored data in test environments first
-5. **Mixed Configurations**: Combine boolean and selective as needed
-
-#### Troubleshooting
-
-**Common Issues:**
-- **Missing Numbers Warning**: Numbers not found in source repository (safe to ignore)
-- **Empty Results**: Verify repository contains specified issue/PR numbers
-- **API Rate Limits**: Use smaller selections or implement delays for large operations
-
-**Error Messages:**
-- `"No issues were saved, skipping all issue comments"` - Expected behavior when issues are disabled
-- `"Issues not found in repository: [X, Y, Z]"` - Specified numbers don't exist (warning only)
-- `"INCLUDE_ISSUES number specification cannot be empty"` - Use `false` instead of empty string
-
-#### GitHub Token Permissions
-
-**Create Token**: Visit [https://github.com/settings/tokens/new](https://github.com/settings/tokens/new)
-
-**Required scopes:**
-- `repo` (Full control of private repositories) - for both public and private repositories
-- OR `public_repo` (Access public repositories) - for public repositories only
-
-**Additional scopes for pull requests:**
-- `pull` permissions are included in the `repo` scope
-- For public repos only: may need `read:user` for PR author information
-
-**Optional scopes:**
-- `read:org` (Read org membership) - for organization repositories
-
-#### Rate Limiting
+## Rate Limiting
 
 The tool automatically handles GitHub API rate limiting with intelligent retry logic:
 
@@ -356,62 +125,16 @@ The tool automatically handles GitHub API rate limiting with intelligent retry l
 
 For large repositories, operations may take longer when approaching rate limits as the tool waits for the rate limit window to reset.
 
-### Git Repository Save
+## Save Format
 
-The Git repository save feature provides complete repository cloning alongside GitHub metadata save.
-
-#### Configuration
-
-Git repository save is controlled through environment variables:
-
-```bash
-# Enable/disable Git repository save (default: true)
-INCLUDE_GIT_REPO=true
-
-# Authentication method: token, ssh (default: token)
-GIT_AUTH_METHOD=token
-
-# GitHub token for private repositories
-GITHUB_TOKEN=your_github_token
-```
-
-#### Usage Examples
-
-```bash
-# Save with Git repository (default behavior)
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=save \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Save excluding Git repository (metadata only)
-docker run --rm \
-  -v /path/to/data:/data \
-  -e INCLUDE_GIT_REPO=false \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=save \
-  ghcr.io/stoneyjackson/github-data:latest
-
-# Basic Git repository save
-docker run --rm \
-  -v /path/to/data:/data \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_REPO=owner/repository \
-  -e OPERATION=save \
-  ghcr.io/stoneyjackson/github-data:latest
-```
-
-#### Git Save Format
+### Git Repositories
 
 Git repositories are saved using **Mirror Clone** format:
 - Complete repository clone with all branches, tags, and references
 - Best for: Complete repository save, easy browsing with Git tools
 - Storage: Directory structure with `.git` contents
 
-#### Directory Structure
+### Directory Structure
 
 ```
 /data/
@@ -425,7 +148,7 @@ Git repositories are saved using **Mirror Clone** format:
     └── ...               # Other repository content
 ```
 
-## Data Format
+### Data Format
 
 The container saves/restores data with the following directory structure:
 

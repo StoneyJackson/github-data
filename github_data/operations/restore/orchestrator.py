@@ -4,6 +4,8 @@ import json
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from github_data.entities.labels.restore_strategy import OverwriteConflictStrategy
 from github_data.operations.strategy_factory import StrategyFactory
+from github_data.operations.orchestrator_base import StrategyBasedOrchestrator
+
 
 if TYPE_CHECKING:
     from github_data.storage.protocols import StorageService
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
     from github_data.entities.base import BaseRestoreStrategy
 
 
-class StrategyBasedRestoreOrchestrator:
+class StrategyBasedRestoreOrchestrator(StrategyBasedOrchestrator):
     """Orchestrator that executes restore operations using EntityRegistry."""
 
     def __init__(
@@ -50,7 +52,7 @@ class StrategyBasedRestoreOrchestrator:
             include_original_metadata=include_original_metadata,
         )
 
-    def execute_restore(
+    def execute(
         self,
         repo_name: str,
         input_path: str,
