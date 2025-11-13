@@ -82,7 +82,7 @@ def test_save_orchestrator_returns_failure_status_on_error():
     )
 
     # Execute save - should not raise, but should return failure status
-    results = orchestrator.execute_save("owner/repo", "/tmp/test")
+    results = orchestrator.execute("owner/repo", "/tmp/test")
 
     assert len(results) == 1
     assert results[0]["entity_name"] == "milestones"

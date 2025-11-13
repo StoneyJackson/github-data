@@ -2,9 +2,10 @@
 
 import os
 import sys
-from typing import Any
+from typing import Optional, List, Dict, Any
 
 from github_data.entities.registry import EntityRegistry
+from github_data.operations import StrategyBasedOrchestrator
 from github_data.operations.save.orchestrator import StrategyBasedSaveOrchestrator
 from github_data.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
 from github_data.github import create_github_service
@@ -13,141 +14,143 @@ from github_data.git.service import GitRepositoryServiceImpl
 
 
 def main() -> None:
-    """Execute save or restore operation based on environment variables."""
-    # Get operation type
-    operation = os.getenv("OPERATION", "save").lower()
+    Main().main()
 
-    if operation not in ["save", "restore"]:
-        print(
-            f"Error: Invalid OPERATION '{operation}'. Must be 'save' or 'restore'.",
-            file=sys.stderr,
+
+class Main:
+    def __init__(self) -> None:
+        self._operation: str = "save"
+        self._registry: EntityRegistry
+        self._github_token: Optional[str]
+        self._github_repo: str
+        self._data_path: str
+        self._orchestrator: StrategyBasedOrchestrator
+        self._git_service: Optional[GitRepositoryServiceImpl] = None
+
+    def main(self) -> None:
+        """Execute save or restore operation based on environment variables."""
+        self.load_operation_from_environment()
+        self.load_registry_from_environment()
+        self.load_github_token_from_environment()
+        self.load_github_repo_from_environment()
+        self.load_data_path_from_environment()
+
+        self.create_github_service()
+        self.create_storage_service()
+        self.create_git_service()
+
+        self.build_orchestrator()
+
+        self.execute_operation()
+
+    def load_operation_from_environment(self) -> None:
+        op = os.getenv("OPERATION")
+        if op is None:
+            exit("Error: OPERATION environment variable required")
+        else:
+            self._operation = op.lower()
+            if self._operation not in ["save", "restore"]:
+                exit(f"Error: Invalid OPERATION '{op}'. Must be 'save' or 'restore'.")
+
+    def load_registry_from_environment(self) -> None:
+        try:
+            self._registry = EntityRegistry.from_environment(strict=False)
+        except ValueError as e:
+            exit(f"Error initializing registry: {e}")
+
+    def load_github_token_from_environment(self) -> None:
+        token = os.getenv("GITHUB_TOKEN")
+        if token is None or not token:
+            exit("Error: GITHUB_TOKEN environment variable required")
+        else:
+            self._github_token = token
+
+    def load_github_repo_from_environment(self) -> None:
+        repo_name = os.getenv("GITHUB_REPO")
+        if repo_name is None or not repo_name:
+            exit("Error: GITHUB_REPO environment variable required")
+        else:
+            self._repo_name = repo_name
+
+    def load_data_path_from_environment(self) -> None:
+        self._data_path = os.getenv("DATA_PATH", "/data")
+
+    def create_github_service(self) -> None:
+        self._github_service = create_github_service(self._github_token)
+
+    def create_storage_service(self) -> None:
+        self._storage_service = create_storage_service("json")
+
+    def create_git_service(self) -> None:
+        self._git_service = None
+        if self._registry.get_entity("git_repository").is_enabled():
+            self._git_service = GitRepositoryServiceImpl(auth_token=self._github_token)
+
+    def build_orchestrator(self) -> None:
+        Orchestrator: type[StrategyBasedOrchestrator]
+        if self._operation == "save":
+            Orchestrator = StrategyBasedSaveOrchestrator
+        else:
+            Orchestrator = StrategyBasedRestoreOrchestrator
+        self._orchestrator = Orchestrator(
+            registry=self._registry,
+            github_service=self._github_service,
+            storage_service=self._storage_service,
+            git_service=self._git_service,
         )
-        sys.exit(1)
 
-    # Initialize EntityRegistry from environment
-    try:
-        registry = EntityRegistry.from_environment(strict=False)
-    except ValueError as e:
-        print(f"Error initializing registry: {e}", file=sys.stderr)
-        sys.exit(1)
+    def execute_operation(self) -> None:
+        self.print_start_message()
+        try:
+            results = self._orchestrator.execute(self._repo_name, self._data_path)
+            self.report_results(results)
+        except Exception as e:
+            exit(f"\nError during {self._operation} operation: {e}")
 
-    # Get required environment variables
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo_name = os.getenv("GITHUB_REPO")
-    data_path = os.getenv("DATA_PATH", "/data")
+    def print_start_message(self) -> None:
+        print(f"Starting {self._operation} operation for {self._repo_name}")
+        print(f"{self.get_path_direction()} path: {self._data_path}")
+        self.show_enabled_entities()
 
-    if not github_token:
-        print("Error: GITHUB_TOKEN environment variable required", file=sys.stderr)
-        sys.exit(1)
-
-    if not repo_name:
-        print("Error: GITHUB_REPO environment variable required", file=sys.stderr)
-        sys.exit(1)
-
-    # Initialize services
-    github_service = create_github_service(github_token)
-    storage_service = create_storage_service("json")
-    git_service = (
-        GitRepositoryServiceImpl(auth_token=github_token)
-        if registry.get_entity("git_repository").is_enabled()
-        else None
-    )
-
-    # Execute operation
-    if operation == "save":
-        execute_save(
-            registry, github_service, storage_service, git_service, repo_name, data_path
-        )
-    else:
-        execute_restore(registry, github_service, storage_service, repo_name, data_path)
-
-
-def execute_save(
-    registry: EntityRegistry,
-    github_service: Any,
-    storage_service: Any,
-    git_service: Any,
-    repo_name: str,
-    output_path: str,
-) -> None:
-    """Execute save operation."""
-    print(f"Starting save operation for {repo_name}")
-    print(f"Output path: {output_path}")
-
-    # Show enabled entities
-    enabled = registry.get_enabled_entities()
-    print(f"\nEnabled entities ({len(enabled)}):")
-    for entity in enabled:
-        print(f"  - {entity.config.name}")
-
-    orchestrator = StrategyBasedSaveOrchestrator(
-        registry=registry,
-        github_service=github_service,
-        storage_service=storage_service,
-        git_service=git_service,
-    )
-
-    try:
-        results = orchestrator.execute_save(repo_name, output_path)
-
-        # Check if any entity save operations failed
+    def report_results(self, results: List[Dict[str, Any]]) -> None:
         failures = [r for r in results if not r.get("success", True)]
         if failures:
-            print("\nSave operation completed with errors:", file=sys.stderr)
-            for failure in failures:
-                entity_name = failure.get("entity_name", "unknown")
-                error_msg = failure.get("error", "unknown error")
-                print(f"  - {entity_name}: {error_msg}", file=sys.stderr)
-            sys.exit(1)
+            messages = [f"\n{self._operation.title()} operation completed with errors:"]
+            messages += get_failure_messages(failures)
+            exit("\n".join(messages))
 
-        print("\nSave operation completed successfully")
+        print(f"\n{self._operation.title()} operation completed successfully")
         print(f"Total entities saved: {len(results)}")
-    except Exception as e:
-        print(f"\nError during save operation: {e}", file=sys.stderr)
-        sys.exit(1)
+
+    def show_enabled_entities(self) -> None:
+        enabled = self._registry.get_enabled_entities()
+        print(f"\nEnabled entities ({len(enabled)}):")
+        for entity in enabled:
+            print(f"  - {entity.config.name}")
+
+    def get_path_direction(self) -> str:
+        if self._operation == "save":
+            return "Output"
+        else:
+            return "Input"
 
 
-def execute_restore(
-    registry: EntityRegistry,
-    github_service: Any,
-    storage_service: Any,
-    repo_name: str,
-    input_path: str,
-) -> None:
-    """Execute restore operation."""
-    print(f"Starting restore operation for {repo_name}")
-    print(f"Input path: {input_path}")
+def stderr(m: str) -> None:
+    print(m, file=sys.stderr)
 
-    # Show enabled entities
-    enabled = registry.get_enabled_entities()
-    print(f"\nEnabled entities ({len(enabled)}):")
-    for entity in enabled:
-        print(f"  - {entity.config.name}")
 
-    orchestrator = StrategyBasedRestoreOrchestrator(
-        registry=registry,
-        github_service=github_service,
-        storage_service=storage_service,
-    )
+def exit(m: str) -> None:
+    stderr(m)
+    sys.exit(1)
 
-    try:
-        results = orchestrator.execute_restore(repo_name, input_path)
 
-        # Check if any entity restore operations failed
-        failures = [r for r in results if not r.get("success", True)]
-        if failures:
-            print("\nRestore operation completed with errors:", file=sys.stderr)
-            for failure in failures:
-                entity_name = failure.get("entity_name", "unknown")
-                error_msg = failure.get("error", "unknown error")
-                print(f"  - {entity_name}: {error_msg}", file=sys.stderr)
-            sys.exit(1)
-
-        print("\nRestore operation completed successfully")
-        print(f"Total entities restored: {len(results)}")
-    except Exception as e:
-        print(f"\nError during restore operation: {e}", file=sys.stderr)
-        sys.exit(1)
+def get_failure_messages(failures: List[Dict[str, Any]]) -> List[str]:
+    messages = []
+    for failure in failures:
+        entity_name = failure.get("entity_name", "unknown")
+        error_msg = failure.get("error", "unknown error")
+        messages.append(f"  - {entity_name}: {error_msg}")
+    return messages
 
 
 if __name__ == "__main__":

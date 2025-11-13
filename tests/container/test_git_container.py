@@ -442,39 +442,35 @@ except Exception as e:
         }
 
         # Create a test script that mocks the GitHub service to avoid actual API calls
-        test_script = '''
+        test_script = """
 import sys
 import os
 from unittest.mock import Mock, patch
 from pathlib import Path
 
-# Mock the GitHub service to avoid API calls
-def mock_create_github_service(token):
-    mock = Mock()
-    return mock
-
-def mock_save_function(
-    registry, github_service, storage_service, git_service, repo_name, output_path
-):
-    """Mock save function that creates expected directory structure."""
-    # Create git-repo directory to simulate successful operation
-    git_data_dir = Path(output_path) / "git-repo"
-    git_data_dir.mkdir(parents=True, exist_ok=True)
-
-    # Create a dummy file to simulate backup
-    test_file = git_data_dir / "test_backup_indicator.txt"
-    test_file.write_text("Git backup simulation successful")
-
-    print("Mock save operation completed successfully")
-
 try:
-    # Patch the functions to avoid actual GitHub API calls and Git operations
-    with patch('github_data.main.execute_save') as mock_save_op:
-        mock_save_op.side_effect = mock_save_function
+    # Patch the orchestrator to avoid actual GitHub API calls
+    with patch(
+        'github_data.main.StrategyBasedSaveOrchestrator'
+    ) as mock_orchestrator_class:
+        # Create mock orchestrator instance
+        mock_orchestrator = Mock()
+
+        # Mock execute to return successful results
+        mock_orchestrator.execute.return_value = [
+            {"entity_name": "git_repository", "success": True}
+        ]
+
+        # Make the class return our mock instance
+        mock_orchestrator_class.return_value = mock_orchestrator
 
         # Import and run main after patching
         from github_data.main import main
         main()
+
+        # Verify the orchestrator was created and execute was called
+        if mock_orchestrator.execute.called:
+            print("Git backup simulation successful")
 
 except SystemExit as e:
     if e.code == 0:
@@ -487,7 +483,7 @@ except Exception as e:
     import traceback
     traceback.print_exc()
     sys.exit(1)
-'''
+"""
 
         result = GitContainerTestHelper.run_git_command_in_container(
             docker_image, ["python", "-c", test_script], environment, volumes

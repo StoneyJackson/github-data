@@ -2,6 +2,7 @@
 
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from github_data.operations.strategy_factory import StrategyFactory
+from github_data.operations.orchestrator_base import StrategyBasedOrchestrator
 
 if TYPE_CHECKING:
     from github_data.storage.protocols import StorageService
@@ -11,7 +12,7 @@ if TYPE_CHECKING:
     from github_data.entities.base import BaseSaveStrategy
 
 
-class StrategyBasedSaveOrchestrator:
+class StrategyBasedSaveOrchestrator(StrategyBasedOrchestrator):
     """Orchestrator that executes save operations using EntityRegistry."""
 
     def __init__(
@@ -41,7 +42,7 @@ class StrategyBasedSaveOrchestrator:
         # Load strategies for enabled entities
         self._strategies = self._factory.create_save_strategies(git_service=git_service)
 
-    def execute_save(
+    def execute(
         self,
         repo_name: str,
         output_path: str,
