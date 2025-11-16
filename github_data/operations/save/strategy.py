@@ -30,10 +30,10 @@ class SaveEntityStrategy(ABC):
 
         raw_data = getattr(github_service, service_method)(repo_name)
 
-        # Import converters dynamically to avoid circular imports
-        from github_data.github import converters
+        # Get converter from registry
+        from github_data.github.converter_registry import get_converter
 
-        converter = getattr(converters, converter_name)
+        converter = get_converter(converter_name)
         return [converter(item) for item in raw_data]
 
     @abstractmethod
