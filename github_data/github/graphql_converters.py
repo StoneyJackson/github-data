@@ -58,10 +58,10 @@ def convert_graphql_issues_to_rest_format(
                 "html_url": issue["author"].get("url"),
             }
 
-        # Convert milestone
+        # Convert milestone - keep as dict for entity converter to handle
         milestone = None
         if issue.get("milestone"):
-            milestone = get_converter("convert_to_milestone")(issue["milestone"])
+            milestone = issue["milestone"]
 
         rest_issue = {
             "id": issue["id"],
@@ -162,10 +162,10 @@ def convert_graphql_pull_requests_to_rest_format(
             for assignee in pr.get("assignees", {}).get("nodes", [])
         ]
 
-        # Convert milestone
+        # Convert milestone - keep as dict for entity converter to handle
         milestone = None
         if pr.get("milestone"):
-            milestone = get_converter("convert_to_milestone")(pr["milestone"])
+            milestone = pr["milestone"]
 
         # Extract merge commit SHA
         merge_commit_sha = None
