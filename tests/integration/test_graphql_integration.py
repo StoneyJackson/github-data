@@ -8,7 +8,10 @@ from github_data.github.graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,
+    convert_graphql_pull_requests_to_rest_format,
 )
+from github_data.entities.issues.converters import convert_to_issue
+from github_data.entities.pull_requests.converters import convert_to_pull_request
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium]
 
@@ -79,6 +82,128 @@ class TestGraphQLConverters:
         assert issue["user"]["login"] == "testuser"
         assert len(issue["labels"]) == 1
         assert issue["labels"][0]["name"] == "bug"
+
+    def test_convert_graphql_issues_with_milestone_to_entity(self):
+        """Test that GraphQL issues with milestones can be converted to Issue entities.
+
+        This tests the full conversion pipeline: GraphQL -> REST format -> Issue entity.
+        Regression test for bug where milestone was double-converted causing AttributeError.
+        """
+        graphql_issues = [
+            {
+                "id": "MDU6SXNzdWUxMjM0NTY3ODk=",
+                "number": 1,
+                "title": "Test Issue with Milestone",
+                "body": "Test body",
+                "state": "OPEN",
+                "stateReason": None,
+                "url": "https://github.com/owner/repo/issues/1",
+                "createdAt": "2023-01-15T10:30:00Z",
+                "updatedAt": "2023-01-15T14:20:00Z",
+                "author": {
+                    "login": "testuser",
+                    "id": "MDQ6VXNlcjEyMzQ1Njc4OQ==",
+                    "avatarUrl": "https://avatars.githubusercontent.com/u/123?v=4",
+                    "url": "https://github.com/testuser",
+                },
+                "labels": {"nodes": []},
+                "milestone": {
+                    "id": "MDk6TWlsZXN0b25lMTIzNDU2Nzg5",
+                    "number": 1,
+                    "title": "v1.0",
+                    "description": "First release",
+                    "state": "OPEN",
+                    "createdAt": "2023-01-01T00:00:00Z",
+                    "updatedAt": "2023-01-01T00:00:00Z",
+                    "dueOn": None,
+                    "closedAt": None,
+                    "url": "https://github.com/owner/repo/milestone/1",
+                    "creator": {
+                        "login": "creator",
+                        "id": "MDQ6VXNlcjk4NzY1NDMyMQ==",
+                        "avatarUrl": "https://avatars.githubusercontent.com/u/987?v=4",
+                        "url": "https://github.com/creator",
+                    },
+                    "issues": {"totalCount": 5},
+                },
+            }
+        ]
+
+        # Convert from GraphQL to REST format
+        rest_issues = convert_graphql_issues_to_rest_format(graphql_issues, "owner/repo")
+
+        # This should not raise AttributeError: 'Milestone' object has no attribute 'get'
+        issue = convert_to_issue(rest_issues[0])
+
+        assert issue.number == 1
+        assert issue.title == "Test Issue with Milestone"
+        assert issue.milestone is not None
+        assert issue.milestone.number == 1
+        assert issue.milestone.title == "v1.0"
+
+    def test_convert_graphql_pull_requests_with_milestone_to_entity(self):
+        """Test that GraphQL PRs with milestones can be converted to PullRequest entities.
+
+        This tests the full conversion pipeline: GraphQL -> REST format -> PullRequest entity.
+        Regression test for bug where milestone was double-converted causing AttributeError.
+        """
+        graphql_prs = [
+            {
+                "id": "MDExOlB1bGxSZXF1ZXN0MTIzNDU2Nzg5",
+                "number": 1,
+                "title": "Test PR with Milestone",
+                "body": "Test PR body",
+                "state": "OPEN",
+                "url": "https://github.com/owner/repo/pull/1",
+                "createdAt": "2023-01-15T10:30:00Z",
+                "updatedAt": "2023-01-15T14:20:00Z",
+                "closedAt": None,
+                "mergedAt": None,
+                "mergeCommit": None,
+                "baseRef": {"name": "main"},
+                "headRef": {"name": "feature"},
+                "author": {
+                    "login": "testuser",
+                    "id": "MDQ6VXNlcjEyMzQ1Njc4OQ==",
+                    "avatarUrl": "https://avatars.githubusercontent.com/u/123?v=4",
+                    "url": "https://github.com/testuser",
+                },
+                "assignees": {"nodes": []},
+                "labels": {"nodes": []},
+                "comments": {"totalCount": 0},
+                "milestone": {
+                    "id": "MDk6TWlsZXN0b25lMTIzNDU2Nzg5",
+                    "number": 1,
+                    "title": "v1.0",
+                    "description": "First release",
+                    "state": "OPEN",
+                    "createdAt": "2023-01-01T00:00:00Z",
+                    "updatedAt": "2023-01-01T00:00:00Z",
+                    "dueOn": None,
+                    "closedAt": None,
+                    "url": "https://github.com/owner/repo/milestone/1",
+                    "creator": {
+                        "login": "creator",
+                        "id": "MDQ6VXNlcjk4NzY1NDMyMQ==",
+                        "avatarUrl": "https://avatars.githubusercontent.com/u/987?v=4",
+                        "url": "https://github.com/creator",
+                    },
+                    "issues": {"totalCount": 5},
+                },
+            }
+        ]
+
+        # Convert from GraphQL to REST format
+        rest_prs = convert_graphql_pull_requests_to_rest_format(graphql_prs, "owner/repo")
+
+        # This should not raise AttributeError: 'Milestone' object has no attribute 'get'
+        pr = convert_to_pull_request(rest_prs[0])
+
+        assert pr.number == 1
+        assert pr.title == "Test PR with Milestone"
+        assert pr.milestone is not None
+        assert pr.milestone.number == 1
+        assert pr.milestone.title == "v1.0"
 
     def test_convert_graphql_comments_to_rest_format(self):
         """Test converting GraphQL comments to REST format."""
