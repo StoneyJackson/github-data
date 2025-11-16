@@ -6,7 +6,6 @@ the existing REST-based data processing pipeline.
 """
 
 from typing import Dict, List, Any
-from .converter_registry import get_converter
 
 
 def convert_graphql_labels_to_rest_format(

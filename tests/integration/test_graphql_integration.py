@@ -84,10 +84,12 @@ class TestGraphQLConverters:
         assert issue["labels"][0]["name"] == "bug"
 
     def test_convert_graphql_issues_with_milestone_to_entity(self):
-        """Test that GraphQL issues with milestones can be converted to Issue entities.
+        """Test GraphQL issues with milestones convert to Issue entities.
 
-        This tests the full conversion pipeline: GraphQL -> REST format -> Issue entity.
-        Regression test for bug where milestone was double-converted causing AttributeError.
+        This tests the full conversion pipeline:
+        GraphQL -> REST format -> Issue entity.
+        Regression test for bug where milestone was double-converted
+        causing AttributeError.
         """
         graphql_issues = [
             {
@@ -130,9 +132,12 @@ class TestGraphQLConverters:
         ]
 
         # Convert from GraphQL to REST format
-        rest_issues = convert_graphql_issues_to_rest_format(graphql_issues, "owner/repo")
+        rest_issues = convert_graphql_issues_to_rest_format(
+            graphql_issues, "owner/repo"
+        )
 
-        # This should not raise AttributeError: 'Milestone' object has no attribute 'get'
+        # This should not raise AttributeError:
+        # 'Milestone' object has no attribute 'get'
         issue = convert_to_issue(rest_issues[0])
 
         assert issue.number == 1
@@ -142,10 +147,12 @@ class TestGraphQLConverters:
         assert issue.milestone.title == "v1.0"
 
     def test_convert_graphql_pull_requests_with_milestone_to_entity(self):
-        """Test that GraphQL PRs with milestones can be converted to PullRequest entities.
+        """Test GraphQL PRs with milestones convert to PullRequest entities.
 
-        This tests the full conversion pipeline: GraphQL -> REST format -> PullRequest entity.
-        Regression test for bug where milestone was double-converted causing AttributeError.
+        This tests the full conversion pipeline:
+        GraphQL -> REST format -> PullRequest entity.
+        Regression test for bug where milestone was double-converted
+        causing AttributeError.
         """
         graphql_prs = [
             {
@@ -194,9 +201,12 @@ class TestGraphQLConverters:
         ]
 
         # Convert from GraphQL to REST format
-        rest_prs = convert_graphql_pull_requests_to_rest_format(graphql_prs, "owner/repo")
+        rest_prs = convert_graphql_pull_requests_to_rest_format(
+            graphql_prs, "owner/repo"
+        )
 
-        # This should not raise AttributeError: 'Milestone' object has no attribute 'get'
+        # This should not raise AttributeError:
+        # 'Milestone' object has no attribute 'get'
         pr = convert_to_pull_request(rest_prs[0])
 
         assert pr.number == 1
