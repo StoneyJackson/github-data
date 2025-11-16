@@ -1,3 +1,13 @@
+## [2.1.3](https://github.com/StoneyJackson/github-data/compare/v2.1.2...v2.1.3) (2025-11-16)
+
+
+### Bug Fixes
+
+* **graphql:** add missing creator field to milestone fragments ([3d71890](https://github.com/StoneyJackson/github-data/commit/3d71890e2a0a40c443f87b651a3887372fc3de68))
+* **graphql:** prevent double conversion of milestone objects ([fe6782c](https://github.com/StoneyJackson/github-data/commit/fe6782c8534413bb9db80c74508413c033fa7799))
+* **lint:** remove unused import and fix line length violations ([5ff6b3b](https://github.com/StoneyJackson/github-data/commit/5ff6b3bbe81ad857053021ec1b7142c3cbba6ffa))
+* **save:** update SaveEntityStrategy to use converter registry ([db0c87c](https://github.com/StoneyJackson/github-data/commit/db0c87cb04366da52d581e82feb1151753ce0739))
+
 ## [2.1.2](https://github.com/StoneyJackson/github-data/compare/v2.1.1...v2.1.2) (2025-11-10)
 
 
