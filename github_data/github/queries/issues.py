@@ -53,6 +53,14 @@ REPOSITORY_ISSUES_QUERY = gql(
                         title
                         description
                         state
+                        creator {
+                            login
+                            ... on User {
+                                id
+                                avatarUrl
+                                url
+                            }
+                        }
                         createdAt
                         updatedAt
                         dueOn
