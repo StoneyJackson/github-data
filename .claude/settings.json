@@ -23,7 +23,8 @@
       "Bash(chmod:*)",
       "Bash(pytest:*)",
       "Bash(cat:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(pdm run:*)"
     ]
   },
   "enabledPlugins": {

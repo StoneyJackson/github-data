@@ -116,7 +116,7 @@ def main():
 
     # Initialize EntityRegistry from environment
     try:
-        registry = EntityRegistry.from_environment(strict=False)
+        registry = EntityRegistry.from_environment(is_strict=False)
     except ValueError as e:
         print(f"Error initializing registry: {e}")
         sys.exit(1)

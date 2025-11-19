@@ -103,7 +103,7 @@ config = ApplicationConfig.from_environment()
 ```python
 from src.entities.registry import EntityRegistry
 
-registry = EntityRegistry.from_environment(strict=False)
+registry = EntityRegistry.from_environment(is_strict=False)
 enabled = registry.get_enabled_entities()
 # Use registry...
 ```

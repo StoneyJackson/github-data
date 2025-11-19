@@ -1,6 +1,6 @@
 import pytest
 import logging
-from github_data.entities.registry import EntityRegistry
+from github_data.entities.registry import EntityRegistry, DependencyValidator
 from github_data.entities.base import RegisteredEntity
 
 
@@ -40,8 +40,14 @@ def test_validate_dependencies_auto_disables_when_parent_disabled(
     # Disable parent
     registry_with_dependencies._entities["issues"].enabled = False
 
+    validator = DependencyValidator(
+        registry_with_dependencies._entities,
+        registry_with_dependencies._explicitly_set,
+        is_strict=False,
+    )
+
     with caplog.at_level(logging.WARNING):
-        registry_with_dependencies._validate_dependencies(strict=False)
+        validator.validate()
 
     # Comments should be auto-disabled
     assert registry_with_dependencies._entities["comments"].enabled is False
@@ -61,14 +67,25 @@ def test_validate_dependencies_explicit_conflict_fails_strict(
     # Mark comments as explicitly set (simulate user set INCLUDE_COMMENTS=true)
     registry_with_dependencies._explicitly_set = {"comments"}
 
+    validator = DependencyValidator(
+        registry_with_dependencies._entities,
+        registry_with_dependencies._explicitly_set,
+        is_strict=True,
+    )
+
     with pytest.raises(ValueError, match="requires"):
-        registry_with_dependencies._validate_dependencies(strict=True)
+        validator.validate()
 
 
 def test_validate_dependencies_passes_when_all_satisfied(registry_with_dependencies):
     """Test validation passes when dependencies satisfied."""
     # Both enabled (default state)
-    registry_with_dependencies._validate_dependencies(strict=False)
+    validator = DependencyValidator(
+        registry_with_dependencies._entities,
+        registry_with_dependencies._explicitly_set,
+        is_strict=False,
+    )
+    validator.validate()
 
     # Should still be enabled
     assert registry_with_dependencies._entities["issues"].enabled is True

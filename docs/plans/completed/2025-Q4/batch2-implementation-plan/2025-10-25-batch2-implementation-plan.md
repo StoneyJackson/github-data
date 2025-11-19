@@ -134,7 +134,7 @@ def test_issues_disabled_when_milestones_disabled():
     os.environ["INCLUDE_MILESTONES"] = "false"
     os.environ["INCLUDE_ISSUES"] = "true"
 
-    registry = EntityRegistry.from_environment(strict=False)
+    registry = EntityRegistry.from_environment(is_strict=False)
     issues_entity = registry.get_entity("issues")
 
     # Issues should be auto-disabled with warning
@@ -272,7 +272,7 @@ def test_comments_disabled_when_issues_disabled():
     os.environ["INCLUDE_ISSUES"] = "false"
     os.environ["INCLUDE_ISSUE_COMMENTS"] = "true"
 
-    registry = EntityRegistry.from_environment(strict=False)
+    registry = EntityRegistry.from_environment(is_strict=False)
     comments = registry.get_entity("comments")
 
     assert comments.is_enabled() is False
@@ -487,7 +487,7 @@ def test_batch2_auto_disable_on_missing_dependency():
     os.environ["INCLUDE_ISSUE_COMMENTS"] = "true"
     os.environ["INCLUDE_SUB_ISSUES"] = "true"
 
-    registry = EntityRegistry.from_environment(strict=False)
+    registry = EntityRegistry.from_environment(is_strict=False)
     enabled_names = [e.config.name for e in registry.get_enabled_entities()]
 
     # Comments and sub_issues should be auto-disabled
@@ -507,7 +507,7 @@ def test_batch2_strict_mode_raises_on_violation():
     os.environ["INCLUDE_ISSUE_COMMENTS"] = "true"
 
     with pytest.raises(ValueError, match="requires.*INCLUDE_ISSUES"):
-        EntityRegistry.from_environment(strict=True)
+        EntityRegistry.from_environment(is_strict=True)
 
     # Cleanup
     del os.environ["INCLUDE_ISSUES"]

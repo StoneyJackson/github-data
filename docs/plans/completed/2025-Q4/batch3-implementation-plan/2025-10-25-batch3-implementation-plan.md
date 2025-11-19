@@ -568,7 +568,7 @@ def test_cascading_dependency_disable():
     # Disable milestones - should cascade to issues and PRs
     os.environ["INCLUDE_MILESTONES"] = "false"
 
-    registry = EntityRegistry.from_environment(strict=False)
+    registry = EntityRegistry.from_environment(is_strict=False)
     enabled_names = [e.config.name for e in registry.get_enabled_entities()]
 
     # These should all be disabled due to cascade
@@ -597,7 +597,7 @@ def test_pr_branch_independence():
     # Disable pr_reviews - should only affect pr_review_comments, not pr_comments
     os.environ["INCLUDE_PR_REVIEWS"] = "false"
 
-    registry = EntityRegistry.from_environment(strict=False)
+    registry = EntityRegistry.from_environment(is_strict=False)
     enabled_names = [e.config.name for e in registry.get_enabled_entities()]
 
     # pr_review_comments should be disabled
