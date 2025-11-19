@@ -25,19 +25,11 @@ class TestEntityEntityConfig:
     # Write __init__.py
     (entity_dir / "__init__.py").write_text("")
 
-    # Monkeypatch to use temp directory
-    import github_data.entities.registry as registry_module
-
-    def mock_get_entities_path():
-        return tmp_path / "entities"
-
-    monkeypatch.setattr(registry_module, "_get_entities_path", mock_get_entities_path)
-
     # Add temp path to sys.path for imports
     sys.path.insert(0, str(tmp_path))
 
     try:
-        registry = EntityRegistry()
+        registry = EntityRegistry(tmp_path / "entities")
 
         # Should have discovered test_entity
         assert "test_entity" in registry._entities

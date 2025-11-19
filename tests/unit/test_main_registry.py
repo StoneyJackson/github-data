@@ -41,7 +41,7 @@ def test_main_initializes_registry_from_environment(
         main()
 
         # Verify registry initialized from environment
-        mock_registry_class.from_environment.assert_called_once_with(strict=False)
+        mock_registry_class.from_environment.assert_called_once_with(is_strict=False)
     finally:
         # Cleanup
         del os.environ["OPERATION"]
