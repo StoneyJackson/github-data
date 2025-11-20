@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/StoneyJackson/github-data/compare/v2.1.3...v2.2.0) (2025-11-20)
+
+
+### Features
+
+* **sanitization:** implement GitHub mention sanitization ([0ae90da](https://github.com/StoneyJackson/github-data/commit/0ae90daf361e4cc6e5f8563dbbec8f5a40e98de9))
+
 ## [2.1.3](https://github.com/StoneyJackson/github-data/compare/v2.1.2...v2.1.3) (2025-11-16)
 
 
