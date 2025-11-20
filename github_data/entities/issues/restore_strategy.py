@@ -73,13 +73,12 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
     def transform(
         self, issue: Issue, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
-        # Prepare issue body with metadata if needed
-        if self._include_original_metadata:
-            from github_data.github.metadata import add_issue_metadata_footer
+        # Prepare issue body with metadata and sanitization
+        from github_data.github.metadata import prepare_issue_body_for_restore
 
-            issue_body = add_issue_metadata_footer(issue)
-        else:
-            issue_body = issue.body or ""
+        issue_body = prepare_issue_body_for_restore(
+            issue, include_metadata=self._include_original_metadata
+        )
 
         # Convert label objects to names
         label_names = [label.name for label in issue.labels]

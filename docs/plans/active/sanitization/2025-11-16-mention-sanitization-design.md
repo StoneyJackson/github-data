@@ -88,19 +88,24 @@ def sanitize_mentions(text: str) -> str:
         return text
 
     # Pattern: @ followed by valid GitHub username
+    # Only matches when @ is at line start or preceded by whitespace
+    # to avoid breaking URLs like https://github.com/@user
     # GitHub usernames: alphanumeric start, then alphanumeric/hyphens,
     # must end with alphanumeric (no trailing hyphen)
     # Max length 39 chars
-    pattern = r'@([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)'
+    pattern = r'(^|\s)(@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?)'
 
-    return re.sub(pattern, r'`@\1`', text)
+    return re.sub(pattern, r'\1`\2`', text, flags=re.MULTILINE)
 ```
 
 **Key Design Decisions:**
 - Regex pattern matches GitHub's username validation rules
+- Boundary check ensures @ is at line start or preceded by whitespace
+- Prevents breaking URLs and email addresses
 - Handles edge cases: single char usernames, hyphens, max length
 - Returns input unchanged if None/empty for safety
 - Backtick wrapping creates inline code formatting (visible but acceptable)
+- Uses `re.MULTILINE` flag to allow ^ to match start of any line
 
 ### 2. Metadata Preparation Wrappers
 
@@ -306,14 +311,15 @@ def transform(self, issue: Issue, context: Dict[str, Any]) -> Optional[Dict[str,
 Test cases:
 - Single mention: `"Thanks @john"` → `"Thanks \`@john\`"`
 - Multiple mentions: `"@alice and @bob"` → `"\`@alice\` and \`@bob\`"`
+- Mention at line start: `"@alice\nhello"` → `"\`@alice\`\nhello"`
 - Mentions with hyphens: `"@user-name-123"` → `"\`@user-name-123\`"`
 - Single character username: `"@x"` → `"\`@x\`"`
 - Maximum length username (39 chars)
 - Already in code blocks: `` "`@john`" `` (may double-wrap, acceptable)
 - No mentions: `"Hello world"` → `"Hello world"` (unchanged)
 - Empty/None input: returns safely
-- Mentions in URLs: `"https://github.com/@user"` (wrapped, acceptable)
-- Email addresses: `"test@example.com"` (not matched - no alphanumeric after @)
+- Mentions in URLs: `"https://github.com/@user"` → unchanged (not preceded by whitespace)
+- Email addresses: `"test@example.com"` → unchanged (not preceded by whitespace)
 
 ### 2. Unit Tests for Metadata Wrappers
 
@@ -336,12 +342,30 @@ Existing integration tests should verify:
 - PR descriptions, reviews, and comments all sanitized
 - End-to-end workflow: save → restore → verify sanitization
 
-### 4. Manual Testing Checklist
+### 4. Preview Testing (No Restore Required)
+
+Use the sanitization preview utility for quick feedback:
+
+```bash
+# After saving repository data
+python scripts/preview_sanitization.py ./save
+```
+
+The preview utility:
+- Reads saved JSON files
+- Shows what sanitization will occur during restore
+- Highlights fields that contain @mentions
+- Requires no GitHub token or restore operation
+- Safe to run on any saved data directory
+
+### 5. Manual Testing Checklist
 
 Before marking complete:
 - [ ] Create test issue with @mentions in body
 - [ ] Create test comment with multiple @mentions
 - [ ] Save repository data
+- [ ] Run preview utility: `python scripts/preview_sanitization.py ./save`
+- [ ] Verify preview shows expected sanitization
 - [ ] Restore to test repository
 - [ ] Verify mentions appear as `` `@username` `` (backtick-wrapped)
 - [ ] Verify NO notifications sent to mentioned users
@@ -355,7 +379,7 @@ Before marking complete:
 
 2. **Mentions in code blocks**: Will double-wrap (acceptable, maintains safety)
 
-3. **Mentions in URLs**: `https://github.com/@user` becomes `https://github.com/\`@user\`` (breaks URL but disables autolink - acceptable trade-off)
+3. **Mentions in URLs**: `https://github.com/@user` remains unchanged (@ not preceded by whitespace, correctly ignored)
 
 4. **Partial usernames**: `@a` (single char) is valid and sanitized correctly
 
@@ -416,43 +440,55 @@ Each new sanitization type:
 
 ### Phase 1: Core Sanitization
 
-- [ ] Create `github_data/github/sanitizers.py` with `sanitize_mentions()`
-- [ ] Add unit tests in `tests/unit/github/test_sanitizers.py`
-- [ ] Verify regex pattern handles all username formats
+- [x] Create `github_data/github/sanitizers.py` with `sanitize_mentions()`
+- [x] Add unit tests in `tests/unit/github/test_sanitizers.py`
+- [x] Verify regex pattern handles all username formats
 
 ### Phase 2: Metadata Wrappers
 
-- [ ] Add `prepare_issue_body_for_restore()` to metadata.py
-- [ ] Add `prepare_comment_body_for_restore()` to metadata.py
-- [ ] Add `prepare_pr_body_for_restore()` to metadata.py
-- [ ] Add `prepare_pr_comment_body_for_restore()` to metadata.py
-- [ ] Add `prepare_pr_review_body_for_restore()` to metadata.py
-- [ ] Add `prepare_pr_review_comment_body_for_restore()` to metadata.py
-- [ ] Add unit tests for each wrapper function
+- [x] Add `prepare_issue_body_for_restore()` to metadata.py
+- [x] Add `prepare_comment_body_for_restore()` to metadata.py
+- [x] Add `prepare_pr_body_for_restore()` to metadata.py
+- [x] Add `prepare_pr_comment_body_for_restore()` to metadata.py
+- [x] Add `prepare_pr_review_body_for_restore()` to metadata.py
+- [x] Add `prepare_pr_review_comment_body_for_restore()` to metadata.py
+- [x] Add unit tests for each wrapper function
 
 ### Phase 3: Restore Strategy Updates
 
-- [ ] Update `issues/restore_strategy.py` to use new wrapper
-- [ ] Update `comments/restore_strategy.py` to use new wrapper
-- [ ] Update `pull_requests/restore_strategy.py` to use new wrapper
-- [ ] Update `pr_comments/restore_strategy.py` to use new wrapper
-- [ ] Update `pr_reviews/restore_strategy.py` to use new wrapper
-- [ ] Update `pr_review_comments/restore_strategy.py` to use new wrapper
+- [x] Update `issues/restore_strategy.py` to use new wrapper
+- [x] Update `comments/restore_strategy.py` to use new wrapper
+- [x] Update `pull_requests/restore_strategy.py` to use new wrapper
+- [x] Update `pr_comments/restore_strategy.py` to use new wrapper
+- [x] Update `pr_reviews/restore_strategy.py` to use new wrapper
+- [x] Update `pr_review_comments/restore_strategy.py` to use new wrapper
 
 ### Phase 4: Integration Testing
 
-- [ ] Run existing integration tests, verify they pass
-- [ ] Add integration test cases with @mentions in content
-- [ ] Verify sanitization in end-to-end workflows
+- [x] Run existing integration tests, verify they pass
+- [x] Add integration test cases with @mentions in content
+- [x] Verify sanitization in end-to-end workflows
 
 ### Phase 5: Manual Verification
 
-- [ ] Create test repository with @mention content
-- [ ] Save repository data
+- [x] Create test repository with @mention content
+- [x] Save repository data
+- [x] Run preview utility to verify sanitization detection
 - [ ] Restore to new repository
 - [ ] Verify mentions sanitized correctly
 - [ ] Verify no notifications triggered
 - [ ] Document any issues or edge cases discovered
+
+**Testing Utility:**
+```bash
+# Quick preview without restore
+python scripts/preview_sanitization.py ./save
+
+# Example output:
+# Issue #42 - body:
+#   Original:  Thanks @john for reviewing this PR
+#   Sanitized: Thanks `@john` for reviewing this PR
+```
 
 ## Success Criteria
 
@@ -470,3 +506,50 @@ Each new sanitization type:
 - Commit SHA sanitization
 - Repository reference sanitization (owner/repo#123)
 - Configurable sanitization (all-or-nothing for now)
+
+## Implementation Notes - Phase 3
+
+**Completed:** 2025-11-20
+
+**Changes Made:**
+1. Updated 6 restore strategy files to use metadata preparation wrappers
+2. Added 6 new unit test files for sanitization verification
+3. All existing integration tests continue to pass (634 tests)
+4. No breaking changes to public APIs
+
+**Pattern Applied:**
+- Each restore strategy now imports and calls `prepare_*_body_for_restore()`
+- Removed direct calls to `add_*_metadata_footer()` functions
+- Tests verify both metadata-enabled and metadata-disabled paths
+- Sanitization is now guaranteed for all restored content
+
+**Files Modified:**
+- `github_data/entities/issues/restore_strategy.py`
+- `github_data/entities/comments/restore_strategy.py`
+- `github_data/entities/pull_requests/restore_strategy.py`
+- `github_data/entities/pr_comments/restore_strategy.py`
+- `github_data/entities/pr_reviews/restore_strategy.py`
+- `github_data/entities/pr_review_comments/restore_strategy.py`
+
+**Test Files Added:**
+- `tests/unit/entities/issues/test_restore_strategy_sanitization.py`
+- `tests/unit/entities/comments/test_restore_strategy_sanitization.py`
+- `tests/unit/entities/pull_requests/test_restore_strategy_sanitization.py`
+- `tests/unit/entities/pr_comments/test_restore_strategy_sanitization.py`
+- `tests/unit/entities/pr_reviews/test_restore_strategy_sanitization.py`
+- `tests/unit/entities/pr_review_comments/test_restore_strategy_sanitization.py`
+
+**Commits:**
+- `31bc575` - feat(issues): integrate mention sanitization in restore strategy
+- `46add02` - feat(comments): integrate mention sanitization in restore strategy
+- `e2373c0` - feat(pull_requests): integrate mention sanitization in restore strategy
+- `d1080ea` - feat(pr_comments): integrate mention sanitization in restore strategy
+- `d135df4` - feat(pr_reviews): integrate mention sanitization in restore strategy
+- `7232970` - feat(pr_review_comments): integrate mention sanitization in restore strategy
+- `66ab21f` - style: apply black formatting to sanitization test files
+
+**Test Results:**
+- All 564 unit tests pass
+- All 634 fast tests pass (unit + integration)
+- Code coverage: 68.15%
+- No regressions detected

@@ -167,12 +167,12 @@ class PullRequestsRestoreStrategy(RestoreEntityStrategy):
         return self._conflict_strategy.resolve_conflicts([], entities_to_restore)
 
     def _prepare_pr_body(self, pr: PullRequest) -> str:
-        """Prepare pull request body with optional metadata."""
-        if self._include_original_metadata:
-            from github_data.github.metadata import add_pr_metadata_footer
+        """Prepare pull request body with optional metadata and sanitization."""
+        from github_data.github.metadata import prepare_pr_body_for_restore
 
-            return add_pr_metadata_footer(pr)
-        return pr.body or ""
+        return prepare_pr_body_for_restore(
+            pr, include_metadata=self._include_original_metadata
+        )
 
     def _handle_pr_state(
         self,

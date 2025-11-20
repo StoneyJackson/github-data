@@ -7,6 +7,7 @@ issue and comment bodies during restore operations.
 
 from datetime import datetime
 
+from .sanitizers import sanitize_mentions
 from ..entities import (
     Issue,
     Comment,
@@ -34,6 +35,50 @@ def add_issue_metadata_footer(issue: Issue) -> str:
         return f"{original_body}\n\n{metadata_footer}"
     else:
         return metadata_footer
+
+
+def prepare_issue_body_for_restore(
+    issue: Issue,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare issue body for restore with optional metadata and sanitization.
+
+    Args:
+        issue: The issue to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized issue body ready for restore operation
+    """
+    if include_metadata:
+        body = add_issue_metadata_footer(issue)
+    else:
+        body = issue.body or ""
+
+    return sanitize_mentions(body) or ""
+
+
+def prepare_comment_body_for_restore(
+    comment: Comment,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare comment body for restore with optional metadata and sanitization.
+
+    Args:
+        comment: The comment to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized comment body ready for restore operation
+    """
+    if include_metadata:
+        body = add_comment_metadata_footer(comment)
+    else:
+        body = comment.body
+
+    return sanitize_mentions(body) or ""
 
 
 def add_comment_metadata_footer(comment: Comment) -> str:
@@ -117,6 +162,28 @@ def add_pr_metadata_footer(pr: PullRequest) -> str:
         return metadata_footer
 
 
+def prepare_pr_body_for_restore(
+    pr: PullRequest,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare pull request body for restore with optional metadata and sanitization.
+
+    Args:
+        pr: The pull request to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized PR body ready for restore operation
+    """
+    if include_metadata:
+        body = add_pr_metadata_footer(pr)
+    else:
+        body = pr.body or ""
+
+    return sanitize_mentions(body) or ""
+
+
 def add_pr_comment_metadata_footer(comment: PullRequestComment) -> str:
     """
     Add original metadata footer to a PR comment body.
@@ -131,6 +198,28 @@ def add_pr_comment_metadata_footer(comment: PullRequestComment) -> str:
     metadata_footer = _format_pr_comment_metadata(comment)
 
     return f"{original_body}\n\n{metadata_footer}"
+
+
+def prepare_pr_comment_body_for_restore(
+    comment: PullRequestComment,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare PR comment body for restore with optional metadata and sanitization.
+
+    Args:
+        comment: The PR comment to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized PR comment body ready for restore operation
+    """
+    if include_metadata:
+        body = add_pr_comment_metadata_footer(comment)
+    else:
+        body = comment.body
+
+    return sanitize_mentions(body) or ""
 
 
 def _format_pr_metadata(pr: PullRequest) -> str:
@@ -195,6 +284,28 @@ def add_pr_review_metadata_footer(review: PullRequestReview) -> str:
         return metadata_footer
 
 
+def prepare_pr_review_body_for_restore(
+    review: PullRequestReview,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare PR review body for restore with optional metadata and sanitization.
+
+    Args:
+        review: The PR review to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized PR review body ready for restore operation
+    """
+    if include_metadata:
+        body = add_pr_review_metadata_footer(review)
+    else:
+        body = review.body or ""
+
+    return sanitize_mentions(body) or ""
+
+
 def add_pr_review_comment_metadata_footer(comment: PullRequestReviewComment) -> str:
     """
     Add original metadata footer to a pull request review comment body.
@@ -209,6 +320,28 @@ def add_pr_review_comment_metadata_footer(comment: PullRequestReviewComment) -> 
     metadata_footer = _format_pr_review_comment_metadata(comment)
 
     return f"{original_body}\n\n{metadata_footer}"
+
+
+def prepare_pr_review_comment_body_for_restore(
+    comment: PullRequestReviewComment,
+    include_metadata: bool = True,
+) -> str:
+    """
+    Prepare PR review comment body for restore with optional metadata and sanitization.
+
+    Args:
+        comment: The PR review comment to prepare
+        include_metadata: Whether to append original metadata footer
+
+    Returns:
+        Sanitized PR review comment body ready for restore operation
+    """
+    if include_metadata:
+        body = add_pr_review_comment_metadata_footer(comment)
+    else:
+        body = comment.body
+
+    return sanitize_mentions(body) or ""
 
 
 def _format_pr_review_metadata(review: PullRequestReview) -> str:

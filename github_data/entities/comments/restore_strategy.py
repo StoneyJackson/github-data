@@ -45,13 +45,12 @@ class CommentsRestoreStrategy(RestoreEntityStrategy):
             )
             return None  # Skip this comment
 
-        # Prepare comment body
-        if self._include_original_metadata:
-            from github_data.github.metadata import add_comment_metadata_footer
+        # Prepare comment body with metadata and sanitization
+        from github_data.github.metadata import prepare_comment_body_for_restore
 
-            comment_body = add_comment_metadata_footer(comment)
-        else:
-            comment_body = comment.body
+        comment_body = prepare_comment_body_for_restore(
+            comment, include_metadata=self._include_original_metadata
+        )
 
         return {
             "body": comment_body,
