@@ -10,10 +10,11 @@
       "Bash(git stage:*)",
       "Bash(git log:*)",
       "Bash(git switch -c:*)",
+      "Bash(git rev-parse HEAD)",
 
       "Bash(gh pr:*)",
       "Bash(make:*)",
-      "Bash(pdm run pytest:*)",
+      "Bash(pdm run:*)",
       "Bash(time make:*)",
       "Bash(sed:*)",
       "Bash(tree:*)",
@@ -24,7 +25,9 @@
       "Bash(pytest:*)",
       "Bash(cat:*)",
       "Bash(echo:*)",
-      "Bash(pdm run:*)"
+      "Bash(pdm run:*)",
+      "Bash(python:*)",
+      "Bash(black:*)"
     ]
   },
   "enabledPlugins": {

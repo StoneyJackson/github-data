@@ -104,12 +104,12 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
         return self._conflict_strategy.resolve_conflicts([], entities_to_restore)
 
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
-        """Prepare comment body with optional metadata."""
-        if self._include_original_metadata:
-            from github_data.github.metadata import add_pr_comment_metadata_footer
+        """Prepare comment body with optional metadata and sanitization."""
+        from github_data.github.metadata import prepare_pr_comment_body_for_restore
 
-            return add_pr_comment_metadata_footer(comment)
-        return comment.body
+        return prepare_pr_comment_body_for_restore(
+            comment, include_metadata=self._include_original_metadata
+        )
 
 
 class DefaultPRCommentConflictStrategy(RestoreConflictStrategy):

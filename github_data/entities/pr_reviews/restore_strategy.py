@@ -49,13 +49,12 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
             )
             return None  # Skip this review
 
-        # Prepare review body
-        if self._include_original_metadata:
-            from github_data.github.metadata import add_pr_review_metadata_footer
+        # Prepare review body with metadata and sanitization
+        from github_data.github.metadata import prepare_pr_review_body_for_restore
 
-            review_body = add_pr_review_metadata_footer(review)
-        else:
-            review_body = review.body or ""
+        review_body = prepare_pr_review_body_for_restore(
+            review, include_metadata=self._include_original_metadata
+        )
 
         return {
             "body": review_body,
