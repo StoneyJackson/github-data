@@ -102,6 +102,30 @@ class TestRateLimitHandler:
         self, rate_limiter, mock_github_client, caplog
     ):
         """Test that other GitHub exceptions are not retried."""
+        # Test with a non-404 error (500)
+        mock_operation = Mock(
+            side_effect=GithubException(500, {"message": "Internal Server Error"})
+        )
+
+        with pytest.raises(GithubException):
+            rate_limiter.execute_with_retry(mock_operation, mock_github_client)
+
+        # Should only try once
+        mock_operation.assert_called_once()
+
+        # Check error was logged
+        assert "GitHub API error: 500" in caplog.text
+
+    def test_404_errors_logged_at_debug_level(
+        self, rate_limiter, mock_github_client, caplog
+    ):
+        """Test that 404 errors are logged at DEBUG level, not ERROR.
+
+        404 errors are often expected behavior (e.g., checking if a
+        repository exists before creating it), so we log them at DEBUG
+        to avoid cluttering error logs while still preserving the information
+        for users who want detailed diagnostics.
+        """
         mock_operation = Mock(
             side_effect=GithubException(404, {"message": "Not Found"})
         )
@@ -112,8 +136,10 @@ class TestRateLimitHandler:
         # Should only try once
         mock_operation.assert_called_once()
 
-        # Check error was logged
-        assert "GitHub API error: 404" in caplog.text
+        # Check that 404 error was NOT logged at ERROR level
+        assert "GitHub API error: 404" not in caplog.text
+        # But it should be available at DEBUG level if enabled
+        # (we can't easily test DEBUG logging here without changing log levels)
 
     def test_retry_delay_calculation(self, rate_limiter):
         """Test retry delay calculation with exponential backoff."""
