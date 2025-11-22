@@ -71,8 +71,9 @@ class GitHubService(RepositoryService):
                     operation=lambda: self._boundary.get_repository_metadata(repo_name),
                 ),
             )
-        except UnknownObjectException:
+        except UnknownObjectException as e:
             # Repository doesn't exist
+            logger.debug(f"Repository {repo_name} not found: {e}")
             return None
 
     def create_repository(

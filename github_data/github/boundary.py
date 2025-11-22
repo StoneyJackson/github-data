@@ -34,7 +34,7 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         self._github = Github(auth=Auth.Token(token))
         self._token = token
         self._graphql_client = GitHubGraphQLClient(token)
-        self._rest_client = GitHubRestApiClient(token)
+        self._rest_client = GitHubRestApiClient(token, github_instance=self._github)
 
     # Public API - Repository Data Operations (GraphQL-enhanced)
 
@@ -84,6 +84,11 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
             created_repo = org.create_repo(
                 name=repo, private=private, description=description
             )
+
+        # Cache the repository object in REST client to avoid 404s on subsequent operations
+        # The repository object from creation is immediately valid, bypassing eventual consistency issues
+        if hasattr(self, '_rest_client') and self._rest_client is not None:
+            self._rest_client._repo_cache[repo_name] = created_repo
 
         return created_repo.raw_data
 

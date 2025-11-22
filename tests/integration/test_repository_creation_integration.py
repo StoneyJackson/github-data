@@ -35,7 +35,9 @@ class TestRepositoryCreationIntegration:
             main._github_service.get_repository_metadata.return_value = None
 
             # Should create repository
-            with patch("builtins.print"):
+            with patch("builtins.print"), patch.object(
+                main, "_wait_for_repository_availability"
+            ):
                 main._ensure_repository_exists()
 
             main._github_service.create_repository.assert_called_once_with(

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from typing import Optional, List, Dict, Any
 
 from github_data.entities.registry import EntityRegistry
@@ -138,6 +139,55 @@ class Main:
         )
         visibility = "private" if private else "public"
         print(f"Created {visibility} repository: {self._repo_name}")
+
+        # Note: The repository object from creation is cached in the REST client,
+        # so subsequent operations will use the valid object and avoid 404 errors
+
+        # Wait for repository to be available via metadata endpoint
+        # (for verification purposes, though cached repo object will be used for operations)
+        self._wait_for_repository_availability()
+
+    def _wait_for_repository_availability(
+        self, max_attempts: int = 10, delay_seconds: float = 2.0
+    ) -> None:
+        """Wait for newly created repository to be available via API.
+
+        After creating a repository, GitHub's eventual consistency may cause
+        a brief delay before the repository is accessible through all API endpoints.
+        This method polls the repository until it's accessible or timeout occurs.
+
+        Args:
+            max_attempts: Maximum number of attempts to check availability
+            delay_seconds: Seconds to wait between attempts
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        print("Waiting for repository to be available...")
+        for attempt in range(1, max_attempts + 1):
+            time.sleep(delay_seconds)
+
+            try:
+                # Attempt to verify repository is accessible
+                metadata = self._github_service.get_repository_metadata(self._repo_name)
+                if metadata is not None:
+                    print(f"Repository is available (verified after {attempt * delay_seconds}s)")
+                    logger.info(f"Repository {self._repo_name} verified available with metadata: {metadata.get('id', 'unknown')}")
+                    return
+                else:
+                    logger.debug(f"Attempt {attempt}: get_repository_metadata returned None")
+            except Exception as e:
+                # Repository still not available, continue waiting
+                logger.debug(f"Attempt {attempt}: Exception during availability check: {e}")
+                pass
+
+            if attempt < max_attempts:
+                print(f"Repository not yet available, retrying... (attempt {attempt}/{max_attempts})")
+
+        # Timeout reached but continue anyway - the repository was created
+        # and might become available during the restore process
+        print(f"Warning: Repository availability check timed out after {max_attempts * delay_seconds}s")
+        print("Continuing with restore operation...")
 
     def _build_github_service(self) -> None:
         self._github_service = create_github_service(self._github_token)

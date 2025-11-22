@@ -292,7 +292,9 @@ def test_ensure_repository_exists_creates_when_missing_and_flag_true():
         main._github_service = MagicMock()
         main._github_service.get_repository_metadata.return_value = None
 
-        with patch("builtins.print"):
+        with patch("builtins.print"), patch.object(
+            main, "_wait_for_repository_availability"
+        ):
             main._ensure_repository_exists()
 
         main._github_service.create_repository.assert_called_once_with(
@@ -315,12 +317,77 @@ def test_ensure_repository_exists_creates_private_when_visibility_private():
         main._github_service = MagicMock()
         main._github_service.get_repository_metadata.return_value = None
 
-        with patch("builtins.print"):
+        with patch("builtins.print"), patch.object(
+            main, "_wait_for_repository_availability"
+        ):
             main._ensure_repository_exists()
 
         main._github_service.create_repository.assert_called_once_with(
             "owner/repo", private=True, description=""
         )
+
+
+@pytest.mark.unit
+def test_wait_for_repository_availability_succeeds_immediately():
+    """Test _wait_for_repository_availability succeeds on first attempt."""
+    from unittest.mock import patch, MagicMock
+    from github_data.main import Main
+
+    with patch.dict(os.environ, {"OPERATION": "restore"}):
+        main = Main()
+        main._repo_name = "owner/repo"
+        main._github_service = MagicMock()
+        main._github_service.get_repository_metadata.return_value = {"id": 123}
+
+        with patch("builtins.print"), patch("time.sleep"):
+            main._wait_for_repository_availability(max_attempts=3, delay_seconds=0.1)
+
+        # Should only call once since it succeeds immediately
+        assert main._github_service.get_repository_metadata.call_count == 1
+
+
+@pytest.mark.unit
+def test_wait_for_repository_availability_succeeds_after_retries():
+    """Test _wait_for_repository_availability succeeds after retries."""
+    from unittest.mock import patch, MagicMock
+    from github_data.main import Main
+
+    with patch.dict(os.environ, {"OPERATION": "restore"}):
+        main = Main()
+        main._repo_name = "owner/repo"
+        main._github_service = MagicMock()
+        # Return None first 2 times, then success
+        main._github_service.get_repository_metadata.side_effect = [
+            None,
+            None,
+            {"id": 123},
+        ]
+
+        with patch("builtins.print"), patch("time.sleep"):
+            main._wait_for_repository_availability(max_attempts=5, delay_seconds=0.1)
+
+        # Should call 3 times before succeeding
+        assert main._github_service.get_repository_metadata.call_count == 3
+
+
+@pytest.mark.unit
+def test_wait_for_repository_availability_times_out():
+    """Test _wait_for_repository_availability times out gracefully."""
+    from unittest.mock import patch, MagicMock
+    from github_data.main import Main
+
+    with patch.dict(os.environ, {"OPERATION": "restore"}):
+        main = Main()
+        main._repo_name = "owner/repo"
+        main._github_service = MagicMock()
+        main._github_service.get_repository_metadata.return_value = None
+
+        with patch("builtins.print"), patch("time.sleep"):
+            # Should not raise an exception even after timeout
+            main._wait_for_repository_availability(max_attempts=3, delay_seconds=0.1)
+
+        # Should call max_attempts times
+        assert main._github_service.get_repository_metadata.call_count == 3
 
 
 @pytest.mark.unit
