@@ -106,7 +106,16 @@ class RateLimitHandler(RateLimitHandlerProtocol):
         )
 
     def _handle_github_api_error(self, error: GithubException) -> None:
-        """Handle general GitHub API errors."""
+        """Handle general GitHub API errors.
+
+        Note: 404 errors are logged at DEBUG level as they are often expected
+        (e.g., checking if a repository exists before creating it).
+        """
+        # Log 404 errors at DEBUG level - they're often expected behavior
+        if error.status == 404:
+            logger.debug(f"GitHub API 404: {error.data}")
+            return
+
         logger.error(f"GitHub API error: {error.status} - {error.data}")
 
     def _monitor_rate_limit_status(self, github_client: Any) -> None:
