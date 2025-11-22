@@ -15,6 +15,34 @@ class RepositoryService(ABC):
     # Repository Data Operations (Read)
 
     @abstractmethod
+    def get_repository_metadata(self, repo_name: str) -> Optional[Dict[str, Any]]:
+        """Get repository metadata.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+
+        Returns:
+            Dictionary containing repository metadata, or None if not found
+        """
+        ...
+
+    @abstractmethod
+    def create_repository(
+        self, repo_name: str, private: bool = False, description: str = ""
+    ) -> Dict[str, Any]:
+        """Create a new repository.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+            private: Whether repository should be private
+            description: Repository description
+
+        Returns:
+            Dictionary containing repository metadata
+        """
+        ...
+
+    @abstractmethod
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository."""
         pass

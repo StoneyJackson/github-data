@@ -26,6 +26,8 @@ class Main:
         self._data_path: str
         self._orchestrator: StrategyBasedOrchestrator
         self._git_service: Optional[GitRepositoryServiceImpl] = None
+        self._create_repository_if_missing: bool = True
+        self._repository_visibility: str = "public"
 
     def main(self) -> None:
         """Execute save or restore operation based on environment variables."""
@@ -34,8 +36,11 @@ class Main:
         self._load_github_token_from_environment()
         self._load_github_repo_from_environment()
         self._load_data_path_from_environment()
+        self._load_create_repository_if_missing_from_environment()
+        self._load_repository_visibility_from_environment()
         self._build_github_service()
         self._build_storage_service()
+        self._ensure_repository_exists()
         self._build_git_service()
         self._build_orchestrator()
         self._execute_operation()
@@ -71,6 +76,68 @@ class Main:
 
     def _load_data_path_from_environment(self) -> None:
         self._data_path = os.getenv("DATA_PATH", "/data")
+
+    def _load_create_repository_if_missing_from_environment(self) -> None:
+        """Load CREATE_REPOSITORY_IF_MISSING setting (restore only)."""
+        if self._operation != "restore":
+            return
+
+        value = os.getenv("CREATE_REPOSITORY_IF_MISSING", "true")
+        try:
+            from github_data.config.number_parser import NumberSpecificationParser
+
+            self._create_repository_if_missing = (
+                NumberSpecificationParser.parse_boolean_value(value)
+            )
+        except ValueError as e:
+            exit(f"Error: Invalid CREATE_REPOSITORY_IF_MISSING value. {e}")
+
+    def _load_repository_visibility_from_environment(self) -> None:
+        """Load REPOSITORY_VISIBILITY setting (restore only)."""
+        if self._operation != "restore":
+            return
+
+        value = os.getenv("REPOSITORY_VISIBILITY", "public").lower()
+        if value not in ["public", "private"]:
+            exit(
+                f"Error: Invalid REPOSITORY_VISIBILITY '{value}'. "
+                f"Must be 'public' or 'private'."
+            )
+        self._repository_visibility = value
+
+    def _ensure_repository_exists(self) -> None:
+        """Ensure target repository exists, creating if necessary.
+
+        Only runs for restore operations.
+        Checks if repository exists and creates it if
+        CREATE_REPOSITORY_IF_MISSING is true.
+        """
+        if self._operation != "restore":
+            return
+
+        # Check if repository exists
+        metadata = self._github_service.get_repository_metadata(self._repo_name)
+
+        if metadata is not None:
+            # Repository exists, nothing to do
+            return
+
+        # Repository doesn't exist
+        if not self._create_repository_if_missing:
+            exit(
+                f"Error: Repository '{self._repo_name}' does not exist. "
+                f"Set CREATE_REPOSITORY_IF_MISSING=true to create it "
+                f"automatically."
+            )
+
+        # Create repository
+        print(f"Repository '{self._repo_name}' does not exist. Creating...")
+        private = self._repository_visibility == "private"
+        self._github_service.create_repository(
+            self._repo_name, private=private, description=""
+        )
+        visibility = "private" if private else "public"
+        print(f"Created {visibility} repository: {self._repo_name}")
 
     def _build_github_service(self) -> None:
         self._github_service = create_github_service(self._github_token)

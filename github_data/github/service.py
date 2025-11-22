@@ -52,6 +52,52 @@ class GitHubService(RepositoryService):
 
     # Public API - Repository Data Operations
 
+    def get_repository_metadata(self, repo_name: str) -> Optional[Dict[str, Any]]:
+        """Get repository metadata with rate limiting.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+
+        Returns:
+            Dictionary containing repository metadata, or None if not found
+        """
+        from github import UnknownObjectException
+
+        try:
+            return cast(
+                Dict[str, Any],
+                self._execute_with_cross_cutting_concerns(
+                    cache_key=None,  # Don't cache metadata checks
+                    operation=lambda: self._boundary.get_repository_metadata(repo_name),
+                ),
+            )
+        except UnknownObjectException:
+            # Repository doesn't exist
+            return None
+
+    def create_repository(
+        self, repo_name: str, private: bool = False, description: str = ""
+    ) -> Dict[str, Any]:
+        """Create repository with rate limiting and retry logic.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+            private: Whether repository should be private
+            description: Repository description
+
+        Returns:
+            Dictionary containing repository metadata
+        """
+        return cast(
+            Dict[str, Any],
+            self._execute_with_cross_cutting_concerns(
+                cache_key=None,  # Don't cache repository creation
+                operation=lambda: self._boundary.create_repository(
+                    repo_name, private=private, description=description
+                ),
+            ),
+        )
+
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository with rate limiting and caching."""
         return cast(

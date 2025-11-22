@@ -74,6 +74,8 @@ docker run --rm \
 | `INCLUDE_RELEASES` | No | Include releases in save/restore operations (default: `true`) |
 | `INCLUDE_RELEASE_ASSETS` | No | Include release asset binaries in save/restore operations (default: `true`) |
 | `GIT_AUTH_METHOD` | No | Git authentication method: `token`, `ssh` (default: `token`) |
+| `CREATE_REPOSITORY_IF_MISSING` | No | Create repository if it doesn't exist during restore (default: `true`) |
+| `REPOSITORY_VISIBILITY` | No | Repository visibility when creating: `public` or `private` (default: `public`) |
 
 ### Label Conflict Strategies
 
@@ -85,9 +87,45 @@ When restoring labels to a repository that already has labels, you can choose ho
 - **`skip`**: Skip restoring labels that already exist, create only new ones
 - **`delete-all`**: Delete all existing labels before restoring
 
+### Repository Creation Behavior
+
+When restoring to a repository that doesn't exist, you can control the creation behavior:
+
+- **`true`** (default): Automatically create the repository if it doesn't exist
+- **`false`**: Fail with an error message if the repository doesn't exist
+
+Control repository visibility when creating:
+- **`public`** (default): Create publicly visible repository
+- **`private`**: Create private repository
+
+**Example - Create private repository if missing:**
+```bash
+docker run --rm \
+  -e OPERATION=restore \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e CREATE_REPOSITORY_IF_MISSING=true \
+  -e REPOSITORY_VISIBILITY=private \
+  -v "${PWD}:/data" \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Example - Fail if repository doesn't exist:**
+```bash
+docker run --rm \
+  -e OPERATION=restore \
+  -e GITHUB_TOKEN=your_token_here \
+  -e GITHUB_REPO=owner/repository \
+  -e CREATE_REPOSITORY_IF_MISSING=false \
+  -v "${PWD}:/data" \
+  ghcr.io/stoneyjackson/github-data:latest
+```
+
+**Note**: These parameters only apply to restore operations and are ignored during save operations.
+
 ### Boolean Environment Variables
 
-Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_LABELS`, `INCLUDE_MILESTONES`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_PR_REVIEWS`, `INCLUDE_PR_REVIEW_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`) accept the following values:
+Boolean environment variables (`INCLUDE_GIT_REPO`, `INCLUDE_LABELS`, `INCLUDE_MILESTONES`, `INCLUDE_ISSUES`, `INCLUDE_ISSUE_COMMENTS`, `INCLUDE_PULL_REQUESTS`, `INCLUDE_PULL_REQUEST_COMMENTS`, `INCLUDE_PR_REVIEWS`, `INCLUDE_PR_REVIEW_COMMENTS`, `INCLUDE_SUB_ISSUES`, `INCLUDE_RELEASES`, `INCLUDE_RELEASE_ASSETS`, `CREATE_REPOSITORY_IF_MISSING`) accept the following values:
 - **True values**: `true`, `True`, `TRUE`, `1`, `yes`, `YES`, `on`, `ON`
 - **False values**: `false`, `False`, `FALSE`, `0`, `no`, `NO`, `off`, `OFF`, or any other value
 
