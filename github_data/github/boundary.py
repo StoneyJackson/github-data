@@ -7,12 +7,13 @@ Focused solely on API access - no rate limiting, caching, or retry logic.
 """
 
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, cast
 from .protocols import GitHubApiBoundary as GitHubApiBoundaryProtocol
 from .graphql_client import GitHubGraphQLClient
 from .restapi_client import GitHubRestApiClient
 from github import Github, Auth
 from github.Repository import Repository
+from github.AuthenticatedUser import AuthenticatedUser
 
 
 class GitHubApiBoundary(GitHubApiBoundaryProtocol):
@@ -33,9 +34,64 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         self._github = Github(auth=Auth.Token(token))
         self._token = token
         self._graphql_client = GitHubGraphQLClient(token)
-        self._rest_client = GitHubRestApiClient(token)
+        self._rest_client = GitHubRestApiClient(token, github_instance=self._github)
 
     # Public API - Repository Data Operations (GraphQL-enhanced)
+
+    def get_repository_metadata(self, repo_name: str) -> Dict[str, Any]:
+        """Get repository metadata.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+
+        Returns:
+            Raw JSON dictionary of repository metadata
+
+        Raises:
+            UnknownObjectException: If repository not found (404)
+            GithubException: For other API errors
+        """
+        repo = self._github.get_repo(repo_name)
+        return repo.raw_data
+
+    def create_repository(
+        self, repo_name: str, private: bool = False, description: str = ""
+    ) -> Dict[str, Any]:
+        """Create a new repository.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+            private: Whether repository should be private
+            description: Repository description
+
+        Returns:
+            Raw JSON dictionary of created repository
+
+        Raises:
+            GithubException: If repository creation fails
+        """
+        owner, repo = repo_name.split("/", 1)
+        user = cast(AuthenticatedUser, self._github.get_user())
+
+        if user.login.lower() == owner.lower():
+            # Create in user account
+            created_repo = user.create_repo(
+                name=repo, private=private, description=description
+            )
+        else:
+            # Create in organization
+            org = self._github.get_organization(owner)
+            created_repo = org.create_repo(
+                name=repo, private=private, description=description
+            )
+
+        # Cache the repository object in REST client to avoid 404s on
+        # subsequent operations. The repository object from creation is
+        # immediately valid, bypassing eventual consistency issues
+        if hasattr(self, "_rest_client") and self._rest_client is not None:
+            self._rest_client._repo_cache[repo_name] = created_repo
+
+        return created_repo.raw_data
 
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository using GraphQL for better performance."""

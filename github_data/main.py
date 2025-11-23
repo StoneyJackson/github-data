@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 from typing import Optional, List, Dict, Any
 
 from github_data.entities.registry import EntityRegistry
@@ -26,6 +27,8 @@ class Main:
         self._data_path: str
         self._orchestrator: StrategyBasedOrchestrator
         self._git_service: Optional[GitRepositoryServiceImpl] = None
+        self._create_repository_if_missing: bool = True
+        self._repository_visibility: str = "public"
 
     def main(self) -> None:
         """Execute save or restore operation based on environment variables."""
@@ -34,8 +37,11 @@ class Main:
         self._load_github_token_from_environment()
         self._load_github_repo_from_environment()
         self._load_data_path_from_environment()
+        self._load_create_repository_if_missing_from_environment()
+        self._load_repository_visibility_from_environment()
         self._build_github_service()
         self._build_storage_service()
+        self._ensure_repository_exists()
         self._build_git_service()
         self._build_orchestrator()
         self._execute_operation()
@@ -71,6 +77,137 @@ class Main:
 
     def _load_data_path_from_environment(self) -> None:
         self._data_path = os.getenv("DATA_PATH", "/data")
+
+    def _load_create_repository_if_missing_from_environment(self) -> None:
+        """Load CREATE_REPOSITORY_IF_MISSING setting (restore only)."""
+        if self._operation != "restore":
+            return
+
+        value = os.getenv("CREATE_REPOSITORY_IF_MISSING", "true")
+        try:
+            from github_data.config.number_parser import NumberSpecificationParser
+
+            self._create_repository_if_missing = (
+                NumberSpecificationParser.parse_boolean_value(value)
+            )
+        except ValueError as e:
+            exit(f"Error: Invalid CREATE_REPOSITORY_IF_MISSING value. {e}")
+
+    def _load_repository_visibility_from_environment(self) -> None:
+        """Load REPOSITORY_VISIBILITY setting (restore only)."""
+        if self._operation != "restore":
+            return
+
+        value = os.getenv("REPOSITORY_VISIBILITY", "public").lower()
+        if value not in ["public", "private"]:
+            exit(
+                f"Error: Invalid REPOSITORY_VISIBILITY '{value}'. "
+                f"Must be 'public' or 'private'."
+            )
+        self._repository_visibility = value
+
+    def _ensure_repository_exists(self) -> None:
+        """Ensure target repository exists, creating if necessary.
+
+        Only runs for restore operations.
+        Checks if repository exists and creates it if
+        CREATE_REPOSITORY_IF_MISSING is true.
+        """
+        if self._operation != "restore":
+            return
+
+        # Check if repository exists
+        metadata = self._github_service.get_repository_metadata(self._repo_name)
+
+        if metadata is not None:
+            # Repository exists, nothing to do
+            return
+
+        # Repository doesn't exist
+        if not self._create_repository_if_missing:
+            exit(
+                f"Error: Repository '{self._repo_name}' does not exist. "
+                f"Set CREATE_REPOSITORY_IF_MISSING=true to create it "
+                f"automatically."
+            )
+
+        # Create repository
+        print(f"Repository '{self._repo_name}' does not exist. Creating...")
+        private = self._repository_visibility == "private"
+        self._github_service.create_repository(
+            self._repo_name, private=private, description=""
+        )
+        visibility = "private" if private else "public"
+        print(f"Created {visibility} repository: {self._repo_name}")
+
+        # Note: The repository object from creation is cached in the REST client,
+        # so subsequent operations will use the valid object and avoid 404 errors
+
+        # Wait for repository to be available via metadata endpoint
+        # (for verification purposes, though cached repo object will be
+        # used for operations)
+        self._wait_for_repository_availability()
+
+    def _wait_for_repository_availability(
+        self, max_attempts: int = 10, delay_seconds: float = 2.0
+    ) -> None:
+        """Wait for newly created repository to be available via API.
+
+        After creating a repository, GitHub's eventual consistency may cause
+        a brief delay before the repository is accessible through all API endpoints.
+        This method polls the repository until it's accessible or timeout occurs.
+
+        Args:
+            max_attempts: Maximum number of attempts to check availability
+            delay_seconds: Seconds to wait between attempts
+        """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        print("Waiting for repository to be available...")
+        for attempt in range(1, max_attempts + 1):
+            time.sleep(delay_seconds)
+
+            try:
+                # Attempt to verify repository is accessible
+                metadata = self._github_service.get_repository_metadata(self._repo_name)
+                if metadata is not None:
+                    verify_time = attempt * delay_seconds
+                    print(
+                        f"Repository is available " f"(verified after {verify_time}s)"
+                    )
+                    repo_id = metadata.get("id", "unknown")
+                    logger.info(
+                        f"Repository {self._repo_name} verified available "
+                        f"with metadata: {repo_id}"
+                    )
+                    return
+                else:
+                    logger.debug(
+                        f"Attempt {attempt}: get_repository_metadata returned None"
+                    )
+            except Exception as e:
+                # Repository still not available, continue waiting
+                logger.debug(
+                    f"Attempt {attempt}: Exception during availability check: {e}"
+                )
+                pass
+
+            if attempt < max_attempts:
+                print(
+                    f"Repository not yet available, retrying... "
+                    f"(attempt {attempt}/{max_attempts})"
+                )
+
+        # Timeout reached but continue anyway - the repository was created
+        # and might become available during the restore process
+        timeout_duration = max_attempts * delay_seconds
+        print(
+            f"Warning: Repository availability check timed out "
+            f"after {timeout_duration}s"
+        )
+        print("Continuing with restore operation...")
 
     def _build_github_service(self) -> None:
         self._github_service = create_github_service(self._github_token)
