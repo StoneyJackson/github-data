@@ -21,15 +21,20 @@ class GitHubRestApiClient:
     for the boundary layer.
     """
 
-    def __init__(self, token: str):
+    def __init__(self, token: str, github_instance: Optional[Github] = None):
         """
         Initialize GitHub REST API client with authentication.
 
         Args:
             token: GitHub authentication token
+            github_instance: Optional Github instance to reuse
+                (to avoid multiple instances)
         """
-        self._github = Github(auth=Auth.Token(token))
+        self._github = (
+            github_instance if github_instance else Github(auth=Auth.Token(token))
+        )
         self._token = token
+        self._repo_cache: Dict[str, Repository] = {}
 
     # Repository Operations
 
@@ -44,8 +49,40 @@ class GitHubRestApiClient:
         return owner, name
 
     def _get_repository(self, repo_name: str) -> Repository:
-        """Get repository object from GitHub API."""
-        return self._github.get_repo(repo_name)
+        """Get repository object from GitHub API with caching and retry logic.
+
+        After repository creation, GitHub may need a moment for the repository
+        to be available through all API endpoints. This method caches repository
+        objects and retries on 404 errors to handle eventual consistency.
+        """
+        # Check cache first
+        if repo_name in self._repo_cache:
+            return self._repo_cache[repo_name]
+
+        # Try to fetch with retry logic for newly created repositories
+        import time
+        from github import UnknownObjectException
+
+        max_attempts = 3
+        delay = 2.0
+
+        for attempt in range(max_attempts):
+            try:
+                repo = self._github.get_repo(repo_name)
+                # Cache successfully fetched repository
+                self._repo_cache[repo_name] = repo
+                return repo
+            except UnknownObjectException:
+                if attempt < max_attempts - 1:
+                    # Repository might be newly created, wait and retry
+                    time.sleep(delay)
+                    delay *= 1.5  # Exponential backoff
+                else:
+                    # Final attempt failed, re-raise
+                    raise
+
+        # Should never reach here, but satisfy type checker
+        raise UnknownObjectException(404, {"message": "Repository not found"}, None)
 
     # Issue Comment Operations
 
