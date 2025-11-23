@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/StoneyJackson/github-data/compare/v2.2.0...v2.3.0) (2025-11-23)
+
+
+### Features
+
+* add repository creation control for restore operations ([0b665eb](https://github.com/StoneyJackson/github-data/commit/0b665ebd388d349ac5f8f31e4adff857c1ce6835))
+
 # [2.2.0](https://github.com/StoneyJackson/github-data/compare/v2.1.3...v2.2.0) (2025-11-20)
 
 
