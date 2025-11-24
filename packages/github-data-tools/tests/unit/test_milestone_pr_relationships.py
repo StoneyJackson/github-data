@@ -15,7 +15,7 @@ from github_data_tools.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
 from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
-from tests.shared.fixtures.support.boundary_factory import MockBoundaryFactory
+from ..shared.mocks.boundary_factory import MockBoundaryFactory
 
 # Required markers following docs/testing.md
 pytestmark = [

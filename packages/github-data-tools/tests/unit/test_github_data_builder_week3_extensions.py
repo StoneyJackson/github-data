@@ -1,7 +1,7 @@
 """Tests for Week 3 GitHubDataBuilder extensions - Users and Repositories."""
 
 import pytest
-from tests.shared.builders.github_data_builder import GitHubDataBuilder
+from ..shared.builders.github_data_builder import GitHubDataBuilder
 
 
 class TestStandaloneUserSupport:

@@ -5,7 +5,7 @@ This module tests the PR review workflow functionality added in Week 2
 of the GitHubDataBuilder extensions implementation.
 """
 
-from tests.shared.builders.github_data_builder import GitHubDataBuilder
+from ..shared.builders.github_data_builder import GitHubDataBuilder
 
 
 class TestPRReviewsSupport:

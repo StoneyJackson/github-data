@@ -2,8 +2,8 @@
 
 import pytest
 
-from tests.shared.builders.github_data_builder import GitHubDataBuilder
-from tests.shared.builders.migration_utilities import FixtureToBuilderMigrator
+from ..shared.builders.github_data_builder import GitHubDataBuilder
+from ..shared.builders.migration_utilities import FixtureToBuilderMigrator
 
 
 class TestMilestoneSupport:
