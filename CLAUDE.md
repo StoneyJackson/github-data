@@ -4,33 +4,80 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is the GitHub Data project - a containerized solution for saving and restoring GitHub repository labels, issues, sub-issues, comments, and pull requests. It provides tools to save and restore GitHub repository issue management data, hierarchical sub-issue relationships, and pull request workflows.
+This is the GitHub Data project - a monorepo containing multiple Python packages for saving and restoring GitHub repository data. It provides tools to save and restore GitHub repository issue management data, hierarchical sub-issue relationships, pull request workflows, and Git repositories.
+
+## Monorepo Architecture
+
+The project uses **PDM workspace** for monorepo management with five independent packages:
+
+### Package Structure
+
+```
+packages/
+├── core/                    # github-data-core - Core infrastructure
+│   ├── config/             # Configuration and parsing utilities
+│   ├── entities/           # Base entity framework
+│   ├── storage/            # Storage abstractions
+│   └── operations/         # Base orchestrator patterns
+│
+├── git-repo-tools/         # Git repository backup/restore
+│   ├── git/                # Git service implementation
+│   └── entities/           # Git repository entity
+│
+├── github-repo-manager/    # Repository lifecycle management
+│   ├── github/             # Repository creation API
+│   └── operations/         # Create/check operations
+│
+├── github-data-tools/      # GitHub data operations (largest package)
+│   ├── github/             # GitHub API boundary and service
+│   ├── entities/           # 11 entity types (issues, PRs, labels, etc.)
+│   ├── operations/         # Save/restore orchestrators
+│   └── tools/              # Entity generation tools
+│
+└── kit-orchestrator/       # Convenience orchestrator
+    ├── __main__.py         # Backward-compatible CLI
+    └── tests/              # End-to-end container tests
+```
+
+### Dependency Graph
+
+```
+kit-orchestrator
+    ├─> github-data-tools
+    ├─> github-repo-manager
+    ├─> git-repo-tools
+    └─> github-data-core
+
+github-data-tools ──> github-data-core
+github-repo-manager ──> github-data-core
+git-repo-tools ──> github-data-core
+```
+
+All packages depend on `core`, and `kit-orchestrator` depends on all others to provide a unified interface.
 
 ## Project Status
 
-This GitHub Data project is in initial development phase. The foundation includes:
-- DevContainer environment for consistent development
-- Docker-in-Docker support for containerized operations
-- Python project with PDM package management
-- Development tooling (pytest, black, flake8, mypy)
-- Base tooling for GitHub API interactions
+**Current Status:** Monorepo conversion complete (v2.0.0)
 
 **Completed features:**
-- Comprehensive GitHub API client with GraphQL and REST support
-- Label save and restore functionality with conflict resolution
-- Issue save and restore capabilities with metadata preservation
-- Comment save and restore functionality
-- Milestone save and restore with project organization
-- Sub-issues support with hierarchical relationships and two-phase restore
-- Pull request save and restore capabilities
-- Release save and restore with asset metadata support (NEW)
-- Rate limiting and caching for API operations
-- CLI interface for repository data operations
+- ✅ Monorepo structure with 5 independent packages
+- ✅ PDM workspace for dependency management
+- ✅ Selective testing (test only changed packages)
+- ✅ Per-package Docker builds
+- ✅ Comprehensive GitHub API client with GraphQL and REST support
+- ✅ Label, milestone, and release save/restore
+- ✅ Issue and comment save/restore with selective filtering
+- ✅ Sub-issues support with hierarchical relationships
+- ✅ Pull request save/restore with reviews and comments
+- ✅ Git repository backup/restore
+- ✅ Rate limiting and caching for API operations
+- ✅ Kit orchestrator with backward compatibility
 
-**Future development phases:**
-- Enhanced CLI options for selective PR and sub-issues save/restore
+**Future development:**
+- Enhanced CLI options for individual packages
 - Configuration management for multiple repositories
 - Advanced filtering and selection options
+- Package-specific versioning and releases
 
 ## Getting Started
 
@@ -130,26 +177,65 @@ For manual agent invocation or configuration changes, refer to the Claude Code d
 
 ## Package Management
 
-This project uses [PDM](https://pdm.fming.dev/) for modern Python dependency management:
-- Dependencies defined in `pyproject.toml` following PEP 621
-- Lock file (`pdm.lock`) ensures reproducible builds
-- Development dependencies separate from production
+This project uses [PDM](https://pdm.fming.dev/) with **workspace support** for monorepo management:
+
+- **Root workspace**: Defines member packages and shared dev dependencies
+- **Package pyproject.toml**: Each package has independent version and dependencies
+- **Lock file**: Single `pdm.lock` at repository root ensures consistent versions
+- **Workspace members**: All 5 packages listed in root `pyproject.toml`
+
+### Working with Packages
+
+```bash
+# Install all packages and dev dependencies
+make install-dev
+
+# Work on a specific package
+cd packages/github-data-tools
+pdm run pytest tests/
+
+# Test imports across packages
+cd packages/kit-orchestrator
+pdm run python -c "from github_data_core.entities import EntityRegistry; print('OK')"
+```
 
 ## Development Commands
 
-All development uses PDM for package management:
+### All-Packages Commands
 
-- `make install-dev` - Install all dependencies (including dev tools)
-- `make test` - Run all tests with source code coverage
-- `make test-fast` - Run all tests except slow container tests (recommended for development)
-- `make test-with-test-coverage` - Run all tests with test file coverage analysis
-- `make test-fast-with-test-coverage` - Run fast tests with test file coverage analysis
-- `make lint` - Run flake8 linting
-- `make format` - Format code with black
-- `make type-check` - Run mypy type checking
-- `make check` - Run all quality checks (excluding container tests for speed)
-- `make check-all` - Run all quality checks including container integration tests
-- `make docker-build` - Build the container image
+- `make install-dev` - Install all packages with dev dependencies
+- `make test-all` - All tests including container tests
+- `make test-fast` - All tests except container tests (recommended for dev)
+- `make lint` - Run flake8 on all packages
+- `make format` - Format code in all packages with black
+- `make type-check` - Run mypy on all package sources
+- `make check` - All quality checks excluding container tests (fast)
+- `make check-all` - Complete quality validation including container tests
+
+### Per-Package Testing
+
+- `make test-core` - Core package tests only
+- `make test-git` - Git repo tools tests only
+- `make test-github-manager` - GitHub repo manager tests only
+- `make test-github-data` - GitHub data tools tests only
+- `make test-orchestrator` - Kit orchestrator tests only
+
+### Selective Testing (Recommended)
+
+- `make test-changed` - Test only packages with changes on current branch
+- `make test-fast-changed` - Fast tests for changed packages only
+
+The selective testing commands automatically detect which packages changed since main and run only those tests. If core changes, all packages are tested since they all depend on core.
+
+### Docker Builds
+
+- `make docker-build-all` - Build all containers (base + all subprojects)
+- `make docker-build-base` - Build base image only
+- `make docker-build-git-base` - Build git base image
+- `make docker-build-git` - Build git-repo-tools container
+- `make docker-build-github-manager` - Build github-repo-manager container
+- `make docker-build-github-data` - Build github-data-tools container
+- `make docker-build-orchestrator` - Build kit-orchestrator container (recommended)
 
 ## Testing
 

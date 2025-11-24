@@ -152,10 +152,11 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "Generated tags: ${TAGS}"
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (kit-orchestrator)
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: docker/kit-orchestrator.Dockerfile
           push: true
           tags: ${{ steps.version_tags.outputs.tags }}
           cache-from: type=gha

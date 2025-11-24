@@ -1,0 +1,40 @@
+[project]
+name = "github-data-tools"
+version = "1.0.0+core1.0"
+description = "Tools for saving and restoring GitHub repository data (issues, PRs, labels, etc.)"
+authors = [
+    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "github-data-core>=1.0.0,<2.0.0",
+    "PyGithub>=2.1.1",
+    "gql[requests]>=4.0.0",
+    "jinja2>=3.1.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-timeout>=2.1.0",
+    "docker>=7.0.0",
+]
+
+[project.scripts]
+github-data-tools = "github_data_tools.__main__:main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = ["src/github_data_tools"]
+package-dir = "src"

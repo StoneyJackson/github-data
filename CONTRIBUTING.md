@@ -75,8 +75,55 @@ By signing off, you certify that:
 ### Setup
 
 1. Fork and clone the repository
-2. Follow setup instructions in the [README](README.md)
-3. Create a new branch for your changes
+2. Install PDM: `pip install pdm`
+3. Install all dependencies: `make install-dev`
+4. Create a new branch for your changes: `git checkout -b feature/your-feature-name`
+
+### Monorepo Workflow
+
+This project uses a monorepo structure with 5 independent packages:
+
+**Package Locations:**
+- `packages/core/` - Core infrastructure (github-data-core)
+- `packages/git-repo-tools/` - Git operations
+- `packages/github-repo-manager/` - Repository management
+- `packages/github-data-tools/` - GitHub data operations
+- `packages/kit-orchestrator/` - Unified orchestrator
+
+**Working on a specific package:**
+
+```bash
+# Test a specific package
+make test-core              # Test core only
+make test-github-data       # Test github-data-tools only
+make test-orchestrator      # Test kit-orchestrator only
+
+# Test only changed packages (recommended during development)
+make test-changed           # Test packages modified in your branch
+make test-fast-changed      # Fast tests for changed packages
+
+# Run all tests before submitting PR
+make check                  # Fast quality checks
+make check-all              # Complete validation including container tests
+```
+
+**Adding dependencies:**
+
+```bash
+# Add dependency to a specific package
+cd packages/github-data-tools
+pdm add requests
+
+# Add dev dependency to workspace root
+pdm add -d pytest --group dev
+```
+
+**Import namespaces:**
+- `github_data_core.*` - Core infrastructure
+- `git_repo_tools.*` - Git operations
+- `github_repo_manager.*` - Repository management
+- `github_data_tools.*` - GitHub data operations
+- `kit_orchestrator.*` - Orchestrator
 
 ### Making Changes
 

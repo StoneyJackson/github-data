@@ -6,6 +6,7 @@ A containerized tool for saving and restoring GitHub repository data.
 
 ## Table of Contents
 
+- [Architecture](#architecture)
 - [Authentication](#authentication)
 - [Usage](#usage)
   - [Save Data](#save-data)
@@ -16,6 +17,32 @@ A containerized tool for saving and restoring GitHub repository data.
 - [Data Format](#data-format)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Architecture
+
+This project uses a **monorepo architecture** with multiple independent packages that can be used standalone or together:
+
+### Packages
+
+- **`github-data-core`** - Core infrastructure, base classes, and shared utilities
+- **`git-repo-tools`** - Git repository backup and restore operations
+- **`github-repo-manager`** - Repository lifecycle management (create, delete, etc.)
+- **`github-data-tools`** - GitHub data save/restore operations (issues, PRs, labels, etc.)
+- **`kit-orchestrator`** - Convenience orchestrator that bundles all tools together
+
+### For Users
+
+The **kit-orchestrator** package provides a single Docker container that includes all functionality with full backward compatibility. This is the recommended way to use GitHub Data.
+
+### For Developers
+
+Each package can be developed, tested, and deployed independently. The monorepo structure enables:
+- Focused development on specific functionality
+- Selective testing of changed packages
+- Independent versioning and releases
+- Clear dependency boundaries
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and workflow.
 
 ## Authentication
 
