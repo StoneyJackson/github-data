@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-from tests.shared.fixtures.support.boundary_factory import MockBoundaryFactory
+from tests.shared.mocks.boundary_factory import MockBoundaryFactory
 
 
 class TestEnhancedBoundaryFactory:
