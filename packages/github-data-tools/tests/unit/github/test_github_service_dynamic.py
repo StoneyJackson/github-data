@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from github_data.github.service import GitHubService
+from github_data_tools.github.service import GitHubService
 
 
 def test_github_service_initializes_with_registry():
@@ -81,7 +81,7 @@ def test_unknown_method_raises_helpful_error():
 
 def test_dynamic_method_applies_converter():
     """Dynamic method should apply converter if specified."""
-    from github_data.entities.releases.models import Release
+    from github_data_tools.entities.releases.models import Release
 
     mock_boundary = Mock()
     mock_boundary.get_test_releases.return_value = [

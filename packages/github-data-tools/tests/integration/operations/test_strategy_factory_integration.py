@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from github_data.operations.strategy_factory import StrategyFactory
-from github_data.entities.registry import EntityRegistry
+from github_data_core.operations.strategy_factory import StrategyFactory
+from github_data_core.entities.registry import EntityRegistry
 
 
 @pytest.mark.integration
@@ -64,8 +64,8 @@ def test_create_restore_strategies_all_entities(all_entity_names):
 @pytest.mark.integration
 def test_create_restore_strategies_labels_with_conflict_strategy():
     """Test labels restore with custom conflict strategy."""
-    from github_data.entities.labels.conflict_strategies import LabelConflictStrategy
-    from github_data.entities.labels.restore_strategy import FailIfConflictStrategy
+    from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
+    from github_data_tools.entities.labels.restore_strategy import FailIfConflictStrategy
 
     registry = EntityRegistry()
 

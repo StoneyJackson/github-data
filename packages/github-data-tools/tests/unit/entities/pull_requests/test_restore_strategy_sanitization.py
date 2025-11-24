@@ -1,12 +1,12 @@
 """Test mention sanitization in pull requests restore strategy."""
 
 import pytest
-from github_data.entities.pull_requests.restore_strategy import (
+from github_data_tools.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
-from github_data.entities.pull_requests.models import PullRequest
-from github_data.entities.users.models import GitHubUser
-from github_data.operations.restore.strategy import RestoreConflictStrategy
+from github_data_tools.entities.pull_requests.models import PullRequest
+from github_data_tools.entities.users.models import GitHubUser
+from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
 
 
 class MockConflictStrategy(RestoreConflictStrategy):

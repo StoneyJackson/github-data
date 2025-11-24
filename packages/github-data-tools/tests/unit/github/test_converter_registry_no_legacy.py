@@ -1,6 +1,6 @@
 """Test that legacy converter fallback has been removed."""
 
-from github_data.github.converter_registry import ConverterRegistry
+from github_data_tools.github.converter_registry import ConverterRegistry
 
 
 class TestNoLegacyFallback:

@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 import pytest
 from github.GithubException import RateLimitExceededException, GithubException
 
-from github_data.github.boundary import GitHubApiBoundary
-from github_data.github.rate_limiter import RateLimitHandler
+from github_data_tools.github.boundary import GitHubApiBoundary
+from github_data_tools.github.rate_limiter import RateLimitHandler
 
 # Fixtures are auto-injected by pytest via conftest.py
 

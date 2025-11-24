@@ -13,8 +13,8 @@ from github_data_tools.entities.pr_comments.models import PullRequestComment
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
@@ -105,7 +105,7 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
 
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
         """Prepare comment body with optional metadata and sanitization."""
-        from github_data.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
 
         return prepare_pr_comment_body_for_restore(
             comment, include_metadata=self._include_original_metadata

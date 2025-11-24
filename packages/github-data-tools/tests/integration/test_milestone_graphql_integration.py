@@ -8,14 +8,14 @@ import pytest
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime
 
-from github_data.github.graphql_client import GitHubGraphQLClient
-from github_data.github.queries.milestones import (
+from github_data_tools.github.graphql_client import GitHubGraphQLClient
+from github_data_tools.github.queries.milestones import (
     REPOSITORY_MILESTONES_QUERY,
     build_milestones_query_variables,
 )
-from github_data.github.queries.issues import REPOSITORY_ISSUES_QUERY
-from github_data.github.queries.pull_requests import REPOSITORY_PULL_REQUESTS_QUERY
-from github_data.github.converter_registry import get_converter
+from github_data_tools.github.queries.issues import REPOSITORY_ISSUES_QUERY
+from github_data_tools.github.queries.pull_requests import REPOSITORY_PULL_REQUESTS_QUERY
+from github_data_tools.github.converter_registry import get_converter
 
 
 @pytest.mark.integration

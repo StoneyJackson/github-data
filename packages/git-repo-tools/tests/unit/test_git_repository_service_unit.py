@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import Mock, patch
 from pathlib import Path
-from github_data.git.service import GitRepositoryServiceImpl
-from github_data.git.command_executor import GitCommandExecutorImpl
-from github_data.entities.git_repositories.models import GitBackupFormat
+from git_repo_tools.git.service import GitRepositoryServiceImpl
+from git_repo_tools.git.command_executor import GitCommandExecutorImpl
+from git_repo_tools.entities.models import GitBackupFormat
 
 # Test markers following project standards
 pytestmark = [pytest.mark.unit, pytest.mark.fast]

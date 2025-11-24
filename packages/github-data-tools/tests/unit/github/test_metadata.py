@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from github_data.entities import (
+from github_data_tools.entities import (
     Comment,
     Issue,
     PullRequest,
@@ -12,7 +12,7 @@ from github_data.entities import (
     PullRequestReview,
     PullRequestReviewComment,
 )
-from github_data.entities.users import GitHubUser
+from github_data_tools.entities.users import GitHubUser
 
 
 def _create_test_user(login: str = "testuser") -> GitHubUser:
@@ -58,7 +58,7 @@ class TestPrepareIssueBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in issue body."""
-        from github_data.github.metadata import prepare_issue_body_for_restore
+        from github_data_tools.github.metadata import prepare_issue_body_for_restore
 
         issue = _create_test_issue(body="Thanks @john for the help")
         result = prepare_issue_body_for_restore(issue, include_metadata=False)
@@ -66,7 +66,7 @@ class TestPrepareIssueBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import prepare_issue_body_for_restore
+        from github_data_tools.github.metadata import prepare_issue_body_for_restore
 
         issue = _create_test_issue(body="Thanks @alice", user_login="bob")
         result = prepare_issue_body_for_restore(issue, include_metadata=True)
@@ -81,7 +81,7 @@ class TestPrepareIssueBodyForRestore:
 
     def test_empty_body_with_metadata(self) -> None:
         """Should handle empty body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_issue_body_for_restore
+        from github_data_tools.github.metadata import prepare_issue_body_for_restore
 
         issue = _create_test_issue(body="", user_login="charlie")
         result = prepare_issue_body_for_restore(issue, include_metadata=True)
@@ -91,7 +91,7 @@ class TestPrepareIssueBodyForRestore:
 
     def test_none_body_with_metadata(self) -> None:
         """Should handle None body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_issue_body_for_restore
+        from github_data_tools.github.metadata import prepare_issue_body_for_restore
 
         issue = _create_test_issue(body="")
         issue.body = None
@@ -125,7 +125,7 @@ class TestPrepareCommentBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in comment body."""
-        from github_data.github.metadata import prepare_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_comment_body_for_restore
 
         comment = _create_test_comment(body="Great work @alice!")
         result = prepare_comment_body_for_restore(comment, include_metadata=False)
@@ -133,7 +133,7 @@ class TestPrepareCommentBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import prepare_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_comment_body_for_restore
 
         comment = _create_test_comment(body="Thanks @bob", user_login="alice")
         result = prepare_comment_body_for_restore(comment, include_metadata=True)
@@ -145,7 +145,7 @@ class TestPrepareCommentBodyForRestore:
 
     def test_multiple_mentions(self) -> None:
         """Should sanitize multiple @mentions."""
-        from github_data.github.metadata import prepare_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_comment_body_for_restore
 
         comment = _create_test_comment(body="@alice @bob @charlie please review")
         result = prepare_comment_body_for_restore(comment, include_metadata=False)
@@ -187,7 +187,7 @@ class TestPreparePrBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in PR body."""
-        from github_data.github.metadata import prepare_pr_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_body_for_restore
 
         pr = _create_test_pr(body="Fixes issue reported by @alice")
         result = prepare_pr_body_for_restore(pr, include_metadata=False)
@@ -195,7 +195,7 @@ class TestPreparePrBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import prepare_pr_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_body_for_restore
 
         pr = _create_test_pr(body="Review needed @bob", user_login="alice")
         result = prepare_pr_body_for_restore(pr, include_metadata=True)
@@ -207,7 +207,7 @@ class TestPreparePrBodyForRestore:
 
     def test_empty_body_with_metadata(self) -> None:
         """Should handle empty body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_pr_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_body_for_restore
 
         pr = _create_test_pr(body="", user_login="charlie")
         result = prepare_pr_body_for_restore(pr, include_metadata=True)
@@ -217,7 +217,7 @@ class TestPreparePrBodyForRestore:
 
     def test_none_body_with_metadata(self) -> None:
         """Should handle None body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_pr_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_body_for_restore
 
         pr = _create_test_pr(body="")
         pr.body = None
@@ -251,7 +251,7 @@ class TestPreparePrCommentBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in PR comment body."""
-        from github_data.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
 
         comment = _create_test_pr_comment(body="LGTM @alice")
         result = prepare_pr_comment_body_for_restore(comment, include_metadata=False)
@@ -259,7 +259,7 @@ class TestPreparePrCommentBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
 
         comment = _create_test_pr_comment(body="Thanks @bob", user_login="alice")
         result = prepare_pr_comment_body_for_restore(comment, include_metadata=True)
@@ -297,7 +297,7 @@ class TestPreparePrReviewBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in PR review body."""
-        from github_data.github.metadata import prepare_pr_review_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_review_body_for_restore
 
         review = _create_test_pr_review(body="Great work @alice!")
         result = prepare_pr_review_body_for_restore(review, include_metadata=False)
@@ -305,7 +305,7 @@ class TestPreparePrReviewBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import prepare_pr_review_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_review_body_for_restore
 
         review = _create_test_pr_review(body="Thanks @bob", user_login="alice")
         result = prepare_pr_review_body_for_restore(review, include_metadata=True)
@@ -317,7 +317,7 @@ class TestPreparePrReviewBodyForRestore:
 
     def test_empty_body_with_metadata(self) -> None:
         """Should handle empty body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_pr_review_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_review_body_for_restore
 
         review = _create_test_pr_review(body="", user_login="charlie")
         result = prepare_pr_review_body_for_restore(review, include_metadata=True)
@@ -327,7 +327,7 @@ class TestPreparePrReviewBodyForRestore:
 
     def test_none_body_with_metadata(self) -> None:
         """Should handle None body and sanitize metadata mentions."""
-        from github_data.github.metadata import prepare_pr_review_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_review_body_for_restore
 
         review = _create_test_pr_review(body="")
         review.body = None
@@ -366,7 +366,7 @@ class TestPreparePrReviewCommentBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in PR review comment body."""
-        from github_data.github.metadata import (
+        from github_data_tools.github.metadata import (
             prepare_pr_review_comment_body_for_restore,
         )
 
@@ -378,7 +378,7 @@ class TestPreparePrReviewCommentBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data.github.metadata import (
+        from github_data_tools.github.metadata import (
             prepare_pr_review_comment_body_for_restore,
         )
 

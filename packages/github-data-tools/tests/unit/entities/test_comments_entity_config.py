@@ -1,7 +1,7 @@
 """Tests for comments entity configuration."""
 
-from github_data.entities.comments.entity_config import CommentsEntityConfig
-from github_data.entities.strategy_context import StrategyContext
+from github_data_tools.entities.comments.entity_config import CommentsEntityConfig
+from github_data_core.entities.strategy_context import StrategyContext
 
 
 def test_comments_create_save_strategy():

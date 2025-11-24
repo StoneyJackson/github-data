@@ -1,6 +1,6 @@
 """Test that legacy converter loading has been removed."""
 
-from github_data.github.converter_registry import ConverterRegistry
+from github_data_tools.github.converter_registry import ConverterRegistry
 
 
 class TestNoLegacyConverters:
@@ -47,7 +47,7 @@ class TestNoLegacyConverters:
     def test_entity_converters_not_in_monolithic_file(self):
         """Monolithic converters.py should only contain common converters."""
         import inspect
-        from github_data.github import converters as converters_module
+        from github_data_tools.github import converters as converters_module
 
         # Get all functions from the module
         functions = [

@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.integration
 def test_registry_loads_all_legacy_converters():
     """Registry should load all converters from monolithic converters.py."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
     converters = registry.list_converters()
@@ -34,7 +34,7 @@ def test_registry_loads_all_legacy_converters():
 @pytest.mark.integration
 def test_get_converter_singleton_works_across_modules():
     """get_converter() should work from different modules."""
-    from github_data.github.converter_registry import get_converter
+    from github_data_tools.github.converter_registry import get_converter
 
     # Get converter
     converter1 = get_converter("convert_to_label")
@@ -48,8 +48,8 @@ def test_get_converter_singleton_works_across_modules():
 @pytest.mark.integration
 def test_registry_validates_all_operations():
     """Registry should validate all operations reference valid converters."""
-    from github_data.github.converter_registry import ConverterRegistry
-    from github_data.github.operation_registry import GitHubOperationRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.operation_registry import GitHubOperationRegistry
 
     # Should not raise - all validation should pass
     registry = ConverterRegistry()
@@ -68,7 +68,7 @@ def test_registry_validates_all_operations():
 @pytest.mark.integration
 def test_converter_can_call_other_converters():
     """Converters should be able to call other converters via get_converter()."""
-    from github_data.github.converter_registry import get_converter
+    from github_data_tools.github.converter_registry import get_converter
 
     # Get a converter
     label_converter = get_converter("convert_to_label")
@@ -86,7 +86,7 @@ def test_converter_can_call_other_converters():
 def test_registry_startup_performance():
     """Registry initialization should complete quickly."""
     import time
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     start = time.time()
     registry = ConverterRegistry()

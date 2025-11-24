@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import List, Dict, Any, TYPE_CHECKING, Callable
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class SaveEntityStrategy(ABC):
@@ -31,7 +31,7 @@ class SaveEntityStrategy(ABC):
         raw_data = getattr(github_service, service_method)(repo_name)
 
         # Get converter from registry
-        from github_data.github.converter_registry import get_converter
+        from github_data_tools.github.converter_registry import get_converter
 
         converter = get_converter(converter_name)
         return [converter(item) for item in raw_data]

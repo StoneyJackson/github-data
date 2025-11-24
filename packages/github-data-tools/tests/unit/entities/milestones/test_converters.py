@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_milestone_loads_from_milestones_entity():
     """convert_to_milestone should load from milestones entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -20,8 +20,8 @@ def test_convert_to_milestone_loads_from_milestones_entity():
 @pytest.mark.unit
 def test_convert_to_milestone_transforms_data():
     """convert_to_milestone should transform raw data to Milestone model."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.milestones.models import Milestone
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.milestones.models import Milestone
 
     converter = get_converter("convert_to_milestone")
 

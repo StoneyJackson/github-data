@@ -1,7 +1,7 @@
 """Tests for issues entity configuration."""
 
-from github_data.entities.issues.entity_config import IssuesEntityConfig
-from github_data.entities.strategy_context import StrategyContext
+from github_data_tools.entities.issues.entity_config import IssuesEntityConfig
+from github_data_core.entities.strategy_context import StrategyContext
 
 
 def test_issues_create_save_strategy():

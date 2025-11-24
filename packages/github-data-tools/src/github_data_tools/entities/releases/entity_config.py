@@ -3,9 +3,9 @@
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.releases.save_strategy import ReleasesSaveStrategy
-    from github_data.entities.releases.restore_strategy import (
+    from github_data_core.entities.strategy_context import StrategyContext
+    from github_data_tools.entities.releases.save_strategy import ReleasesSaveStrategy
+    from github_data_tools.entities.releases.restore_strategy import (
         ReleasesRestoreStrategy,
     )
 
@@ -66,7 +66,7 @@ class ReleasesEntityConfig:
         Returns:
             ReleasesSaveStrategy instance
         """
-        from github_data.entities.releases.save_strategy import ReleasesSaveStrategy
+        from github_data_tools.entities.releases.save_strategy import ReleasesSaveStrategy
 
         return ReleasesSaveStrategy()
 
@@ -82,7 +82,7 @@ class ReleasesEntityConfig:
         Returns:
             ReleasesRestoreStrategy instance
         """
-        from github_data.entities.releases.restore_strategy import (
+        from github_data_tools.entities.releases.restore_strategy import (
             ReleasesRestoreStrategy,
         )
 

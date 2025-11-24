@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from github_data.operations.strategy_factory import StrategyFactory
-from github_data.entities.strategy_context import StrategyContext
+from github_data_core.operations.strategy_factory import StrategyFactory
+from github_data_core.entities.strategy_context import StrategyContext
 
 
 def test_validate_requirements_passes_when_service_available():

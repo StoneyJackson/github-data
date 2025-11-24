@@ -3,9 +3,9 @@
 from typing import Union, Set, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.issues.save_strategy import IssuesSaveStrategy
-    from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
+    from github_data_core.entities.strategy_context import StrategyContext
+    from github_data_tools.entities.issues.save_strategy import IssuesSaveStrategy
+    from github_data_tools.entities.issues.restore_strategy import IssuesRestoreStrategy
 
 
 class IssuesEntityConfig:
@@ -62,7 +62,7 @@ class IssuesEntityConfig:
         Returns:
             IssuesSaveStrategy instance
         """
-        from github_data.entities.issues.save_strategy import IssuesSaveStrategy
+        from github_data_tools.entities.issues.save_strategy import IssuesSaveStrategy
 
         return IssuesSaveStrategy()
 
@@ -78,7 +78,7 @@ class IssuesEntityConfig:
         Returns:
             IssuesRestoreStrategy instance
         """
-        from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
+        from github_data_tools.entities.issues.restore_strategy import IssuesRestoreStrategy
 
         return IssuesRestoreStrategy(
             include_original_metadata=context.include_original_metadata

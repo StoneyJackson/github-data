@@ -1,9 +1,9 @@
 """Test mention sanitization in comments restore strategy."""
 
 import pytest
-from github_data.entities.comments.restore_strategy import CommentsRestoreStrategy
-from github_data.entities.comments.models import Comment
-from github_data.entities.users.models import GitHubUser
+from github_data_tools.entities.comments.restore_strategy import CommentsRestoreStrategy
+from github_data_tools.entities.comments.models import Comment
+from github_data_tools.entities.users.models import GitHubUser
 
 
 @pytest.mark.unit

@@ -3,13 +3,13 @@
 import time
 from pathlib import Path
 from typing import List, Dict, Any, TYPE_CHECKING
-from github_data.operations.save.strategy import SaveEntityStrategy  # TODO: Will move to github-data-tools
+from github_data_tools.operations.save.strategy import SaveEntityStrategy
 from git_repo_tools.git.protocols import GitRepositoryService
 from git_repo_tools.entities.models import GitBackupFormat
 
 if TYPE_CHECKING:
     from github_data_core.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService  # TODO: Will be split between packages
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class GitRepositorySaveStrategy(SaveEntityStrategy):

@@ -15,8 +15,8 @@ from github_data_tools.entities.labels.conflict_strategies import (
 )
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class LabelsRestoreStrategy(RestoreEntityStrategy):
@@ -86,7 +86,7 @@ class LabelsRestoreStrategy(RestoreEntityStrategy):
             self._conflict_strategy.set_repo_name(repo_name)
 
         # Get existing labels
-        from github_data.github.converter_registry import get_converter
+        from github_data_tools.github.converter_registry import get_converter
 
         raw_existing = github_service.get_repository_labels(repo_name)
         existing_labels = [

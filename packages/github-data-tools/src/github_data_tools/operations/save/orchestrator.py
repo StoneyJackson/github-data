@@ -5,11 +5,11 @@ from github_data_core.operations.strategy_factory import StrategyFactory
 from github_data_core.operations.orchestrator_base import StrategyBasedOrchestrator
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
-    from github_data.git.protocols import GitRepositoryService
-    from github_data.entities.registry import EntityRegistry
-    from github_data.entities.base import BaseSaveStrategy
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
+    from git_repo_tools.git.protocols import GitRepositoryService
+    from github_data_core.entities.registry import EntityRegistry
+    from github_data_core.entities.base import BaseSaveStrategy
 
 
 class StrategyBasedSaveOrchestrator(StrategyBasedOrchestrator):

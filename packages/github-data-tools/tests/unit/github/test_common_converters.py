@@ -1,6 +1,6 @@
 """Test that converters.py contains only common/shared converters."""
 
-from github_data.github import converters
+from github_data_tools.github import converters
 
 
 class TestCommonConvertersOnly:

@@ -3,9 +3,9 @@
 import pytest
 from unittest.mock import Mock
 from datetime import datetime, timezone
-from github_data.entities.releases.restore_strategy import ReleasesRestoreStrategy
-from github_data.entities.releases.models import Release
-from github_data.entities.users.models import GitHubUser
+from github_data_tools.entities.releases.restore_strategy import ReleasesRestoreStrategy
+from github_data_tools.entities.releases.models import Release
+from github_data_tools.entities.users.models import GitHubUser
 
 
 pytestmark = [

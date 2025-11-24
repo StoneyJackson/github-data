@@ -546,7 +546,7 @@ class GitHubService(RepositoryService):
         Returns:
             Converter function
         """
-        from github_data.github.converter_registry import get_converter
+        from github_data_tools.github.converter_registry import get_converter
 
         return get_converter(converter_name)
 

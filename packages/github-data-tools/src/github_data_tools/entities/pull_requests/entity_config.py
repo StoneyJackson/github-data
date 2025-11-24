@@ -3,11 +3,11 @@
 from typing import Union, Set, Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.pull_requests.save_strategy import (
+    from github_data_core.entities.strategy_context import StrategyContext
+    from github_data_tools.entities.pull_requests.save_strategy import (
         PullRequestsSaveStrategy,
     )
-    from github_data.entities.pull_requests.restore_strategy import (
+    from github_data_tools.entities.pull_requests.restore_strategy import (
         PullRequestsRestoreStrategy,
     )
 
@@ -63,7 +63,7 @@ class PullRequestsEntityConfig:
         Returns:
             PullRequestsSaveStrategy instance
         """
-        from github_data.entities.pull_requests.save_strategy import (
+        from github_data_tools.entities.pull_requests.save_strategy import (
             PullRequestsSaveStrategy,
         )
 
@@ -81,7 +81,7 @@ class PullRequestsEntityConfig:
         Returns:
             PullRequestsRestoreStrategy instance
         """
-        from github_data.entities.pull_requests.restore_strategy import (
+        from github_data_tools.entities.pull_requests.restore_strategy import (
             PullRequestsRestoreStrategy,
             DefaultPullRequestConflictStrategy,
         )

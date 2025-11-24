@@ -1,7 +1,7 @@
 """Unit tests for NumberSpecificationParser."""
 
 import pytest
-from github_data.config.number_parser import NumberSpecificationParser
+from github_data_core.config.number_parser import NumberSpecificationParser
 
 
 class TestNumberSpecificationParser:

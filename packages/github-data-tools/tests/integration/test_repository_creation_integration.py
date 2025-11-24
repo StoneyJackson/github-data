@@ -3,7 +3,7 @@
 import pytest
 import os
 from unittest.mock import patch, MagicMock
-from github_data.main import Main
+from github_data_tools.main import Main
 
 
 @pytest.mark.integration

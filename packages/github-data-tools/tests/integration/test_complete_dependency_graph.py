@@ -1,7 +1,7 @@
 """Integration tests for complete 10-entity dependency graph."""
 
 import pytest
-from github_data.entities.registry import EntityRegistry
+from github_data_core.entities.registry import EntityRegistry
 
 
 @pytest.mark.integration

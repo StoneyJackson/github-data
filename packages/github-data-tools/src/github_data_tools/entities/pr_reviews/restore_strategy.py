@@ -8,8 +8,8 @@ from github_data_tools.operations.restore.strategy import RestoreEntityStrategy
 from github_data_tools.entities.pr_reviews.models import PullRequestReview
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
@@ -50,7 +50,7 @@ class PullRequestReviewsRestoreStrategy(RestoreEntityStrategy):
             return None  # Skip this review
 
         # Prepare review body with metadata and sanitization
-        from github_data.github.metadata import prepare_pr_review_body_for_restore
+        from github_data_tools.github.metadata import prepare_pr_review_body_for_restore
 
         review_body = prepare_pr_review_body_for_restore(
             review, include_metadata=self._include_original_metadata

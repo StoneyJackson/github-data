@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from github_data.github.operation_registry import (
+from github_data_tools.github.operation_registry import (
     ValidationError,
     Operation,
     GitHubOperationRegistry,

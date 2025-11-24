@@ -6,16 +6,16 @@ Following docs/testing.md comprehensive guidelines.
 import pytest
 from unittest.mock import Mock
 
-from github_data.entities.pull_requests.models import PullRequest
-from github_data.entities.milestones.models import Milestone
-from github_data.entities.pull_requests.save_strategy import (
+from github_data_tools.entities.pull_requests.models import PullRequest
+from github_data_tools.entities.milestones.models import Milestone
+from github_data_tools.entities.pull_requests.save_strategy import (
     PullRequestsSaveStrategy,
 )
-from github_data.entities.pull_requests.restore_strategy import (
+from github_data_tools.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
-from github_data.operations.restore.strategy import RestoreConflictStrategy
-from tests.shared.mocks.boundary_factory import MockBoundaryFactory
+from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
+from tests.shared.fixtures.support.boundary_factory import MockBoundaryFactory
 
 # Required markers following docs/testing.md
 pytestmark = [
@@ -51,7 +51,7 @@ class TestMilestonePullRequestRelationships:
         strategy = pr_restore_strategy
 
         # Create sample PR with milestone
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_1",
@@ -90,7 +90,7 @@ class TestMilestonePullRequestRelationships:
         strategy = pr_restore_strategy
 
         # Create sample PR without milestone
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_1",
@@ -130,7 +130,7 @@ class TestMilestonePullRequestRelationships:
         strategy = pr_restore_strategy
 
         # Create sample PR with milestone
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_1",
@@ -173,7 +173,7 @@ class TestMilestonePullRequestRelationships:
         """Test error handling when milestone mapping contains invalid data."""
         strategy = pr_restore_strategy
 
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_1",
@@ -238,7 +238,7 @@ class TestMilestonePullRequestRelationships:
         """Test milestone context propagation through PR transformations."""
         strategy = pr_restore_strategy
 
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_5",
@@ -289,7 +289,7 @@ class TestMilestonePullRequestRelationships:
         """Test handling of edge case where milestone number is 0."""
         strategy = pr_restore_strategy
 
-        from github_data.entities.users.models import GitHubUser
+        from github_data_tools.entities.users.models import GitHubUser
 
         pr = PullRequest(
             id="pr_1",
@@ -386,7 +386,7 @@ def pr_restore_strategy():
 @pytest.fixture
 def sample_milestone():
     """Create a sample milestone for testing."""
-    from github_data.entities.users.models import GitHubUser
+    from github_data_tools.entities.users.models import GitHubUser
 
     return Milestone(
         id="milestone_1",

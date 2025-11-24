@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_pull_request_loads_from_pull_requests_entity():
     """convert_to_pull_request should load from pull_requests entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -20,8 +20,8 @@ def test_convert_to_pull_request_loads_from_pull_requests_entity():
 @pytest.mark.unit
 def test_convert_to_pull_request_transforms_data_with_all_fields():
     """convert_to_pull_request should handle all fields including merge data."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.pull_requests.models import PullRequest
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.pull_requests.models import PullRequest
 
     converter = get_converter("convert_to_pull_request")
 
@@ -106,8 +106,8 @@ def test_convert_to_pull_request_transforms_data_with_all_fields():
 @pytest.mark.unit
 def test_convert_to_pull_request_handles_minimal_data():
     """convert_to_pull_request should handle minimal required data."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.pull_requests.models import PullRequest
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.pull_requests.models import PullRequest
 
     converter = get_converter("convert_to_pull_request")
 

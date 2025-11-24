@@ -8,11 +8,11 @@ from github_data_core.operations.orchestrator_base import StrategyBasedOrchestra
 
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
-    from github_data.git.protocols import GitRepositoryService
-    from github_data.entities.registry import EntityRegistry
-    from github_data.entities.base import BaseRestoreStrategy
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
+    from git_repo_tools.git.protocols import GitRepositoryService
+    from github_data_core.entities.registry import EntityRegistry
+    from github_data_core.entities.base import BaseRestoreStrategy
 
 
 class StrategyBasedRestoreOrchestrator(StrategyBasedOrchestrator):
@@ -101,7 +101,7 @@ class StrategyBasedRestoreOrchestrator(StrategyBasedOrchestrator):
                         strategy._conflict_strategy, OverwriteConflictStrategy
                     ):
                         # Get existing labels for overwrite strategy
-                        from github_data.github.converter_registry import get_converter
+                        from github_data_tools.github.converter_registry import get_converter
 
                         raw_existing = self._github_service.get_repository_labels(
                             repo_name

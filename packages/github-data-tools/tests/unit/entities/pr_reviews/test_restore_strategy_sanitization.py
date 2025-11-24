@@ -1,11 +1,11 @@
 """Test mention sanitization in PR reviews restore strategy."""
 
 import pytest
-from github_data.entities.pr_reviews.restore_strategy import (
+from github_data_tools.entities.pr_reviews.restore_strategy import (
     PullRequestReviewsRestoreStrategy,
 )
-from github_data.entities.pr_reviews.models import PullRequestReview
-from github_data.entities.users.models import GitHubUser
+from github_data_tools.entities.pr_reviews.models import PullRequestReview
+from github_data_tools.entities.users.models import GitHubUser
 
 
 @pytest.mark.unit

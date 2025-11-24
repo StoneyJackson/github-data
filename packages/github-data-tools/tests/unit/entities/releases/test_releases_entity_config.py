@@ -1,8 +1,8 @@
 """Tests for releases entity configuration."""
 
 import pytest
-from github_data.entities.releases.entity_config import ReleasesEntityConfig
-from github_data.entities.strategy_context import StrategyContext
+from github_data_tools.entities.releases.entity_config import ReleasesEntityConfig
+from github_data_core.entities.strategy_context import StrategyContext
 
 
 pytestmark = [

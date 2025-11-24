@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import Mock
-from github_data.entities.registry import EntityRegistry
-from github_data.operations.strategy_factory import StrategyFactory
+from github_data_core.entities.registry import EntityRegistry
+from github_data_core.operations.strategy_factory import StrategyFactory
 
 
 @pytest.mark.integration

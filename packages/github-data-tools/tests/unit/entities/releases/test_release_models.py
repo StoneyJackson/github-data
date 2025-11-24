@@ -2,8 +2,8 @@
 
 import pytest
 from datetime import datetime, timezone
-from github_data.entities.releases.models import ReleaseAsset, Release
-from github_data.entities.users.models import GitHubUser
+from github_data_tools.entities.releases.models import ReleaseAsset, Release
+from github_data_tools.entities.users.models import GitHubUser
 
 
 # Test markers following docs/testing.md
@@ -205,7 +205,7 @@ class TestRelease:
 
 def test_entity_exports():
     """Test that models are properly exported from package."""
-    from github_data.entities.releases import Release, ReleaseAsset
+    from github_data_tools.entities.releases import Release, ReleaseAsset
 
     assert Release is not None
     assert ReleaseAsset is not None

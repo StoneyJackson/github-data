@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import MagicMock
-from github_data.github.boundary import GitHubApiBoundary
+from github_data_tools.github.boundary import GitHubApiBoundary
 
 
 class TestGitHubApiBoundary:

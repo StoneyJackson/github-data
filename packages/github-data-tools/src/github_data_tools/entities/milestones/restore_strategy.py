@@ -7,8 +7,8 @@ from github_data_tools.operations.restore.strategy import RestoreEntityStrategy
 from github_data_tools.entities.milestones.models import Milestone
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 logger = logging.getLogger(__name__)
 

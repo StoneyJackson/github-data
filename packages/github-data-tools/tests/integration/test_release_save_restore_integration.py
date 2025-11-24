@@ -8,10 +8,10 @@ import json
 from unittest.mock import Mock
 from datetime import datetime, timezone
 
-from github_data.entities.releases.models import Release, ReleaseAsset
-from github_data.entities.users.models import GitHubUser
-from github_data.entities.releases.save_strategy import ReleasesSaveStrategy
-from github_data.entities.releases.restore_strategy import ReleasesRestoreStrategy
+from github_data_tools.entities.releases.models import Release, ReleaseAsset
+from github_data_tools.entities.users.models import GitHubUser
+from github_data_tools.entities.releases.save_strategy import ReleasesSaveStrategy
+from github_data_tools.entities.releases.restore_strategy import ReleasesRestoreStrategy
 
 # Required markers following docs/testing/README.md
 pytestmark = [

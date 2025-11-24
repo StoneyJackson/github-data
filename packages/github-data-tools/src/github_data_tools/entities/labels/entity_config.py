@@ -3,9 +3,9 @@
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.labels.save_strategy import LabelsSaveStrategy
-    from github_data.entities.labels.restore_strategy import LabelsRestoreStrategy
+    from github_data_core.entities.strategy_context import StrategyContext
+    from github_data_tools.entities.labels.save_strategy import LabelsSaveStrategy
+    from github_data_tools.entities.labels.restore_strategy import LabelsRestoreStrategy
 
 
 class LabelsEntityConfig:
@@ -66,7 +66,7 @@ class LabelsEntityConfig:
         Returns:
             LabelsSaveStrategy instance
         """
-        from github_data.entities.labels.save_strategy import LabelsSaveStrategy
+        from github_data_tools.entities.labels.save_strategy import LabelsSaveStrategy
 
         return LabelsSaveStrategy()
 
@@ -85,11 +85,11 @@ class LabelsEntityConfig:
         Note:
             Conflict strategy resolution handled internally with github_service
         """
-        from github_data.entities.labels.restore_strategy import (
+        from github_data_tools.entities.labels.restore_strategy import (
             LabelsRestoreStrategy,
             create_conflict_strategy,
         )
-        from github_data.entities.labels.conflict_strategies import (
+        from github_data_tools.entities.labels.conflict_strategies import (
             LabelConflictStrategy,
         )
 

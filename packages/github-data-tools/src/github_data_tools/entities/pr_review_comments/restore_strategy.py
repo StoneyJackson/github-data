@@ -8,8 +8,8 @@ from github_data_tools.operations.restore.strategy import RestoreEntityStrategy
 from github_data_tools.entities.pr_review_comments.models import PullRequestReviewComment
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
@@ -50,7 +50,7 @@ class PullRequestReviewCommentsRestoreStrategy(RestoreEntityStrategy):
             return None  # Skip this comment
 
         # Prepare comment body with metadata and sanitization
-        from github_data.github.metadata import (
+        from github_data_tools.github.metadata import (
             prepare_pr_review_comment_body_for_restore,
         )
 

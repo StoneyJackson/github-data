@@ -109,8 +109,8 @@ class ConverterRegistry:
 
     def _load_all_converters(self) -> None:
         """Scan EntityRegistry and eagerly import all declared converters."""
-        from github_data.entities.registry import EntityRegistry
-        from github_data.github.common_converters_config import CommonConvertersConfig
+        from github_data_core.entities.registry import EntityRegistry
+        from github_data_tools.github.common_converters_config import CommonConvertersConfig
 
         # Load common converters first
         common_config = CommonConvertersConfig()
@@ -150,7 +150,7 @@ class ConverterRegistry:
         # 2. Cross-validate: operations reference valid converters
         # We pass self to the operation registry's validation
         # to avoid circular dependency
-        from github_data.github.operation_registry import (
+        from github_data_tools.github.operation_registry import (
             GitHubOperationRegistry,
         )
 

@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_comment_loads_from_comments_entity():
     """convert_to_comment should be loadable from comments entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -22,8 +22,8 @@ def test_convert_to_comment_loads_from_comments_entity():
 @pytest.mark.unit
 def test_convert_to_comment_transforms_raw_data_correctly():
     """convert_to_comment should transform raw GitHub API data to Comment model."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.comments.models import Comment
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.comments.models import Comment
 
     converter = get_converter("convert_to_comment")
 

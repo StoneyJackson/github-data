@@ -7,8 +7,8 @@ from github_data_tools.operations.restore.strategy import RestoreEntityStrategy
 from github_data_tools.entities.issues.models import Issue
 
 if TYPE_CHECKING:
-    from github_data.storage.protocols import StorageService
-    from github_data.github.protocols import RepositoryService
+    from github_data_core.storage.protocols import StorageService
+    from github_data_tools.github.protocols import RepositoryService
 
 
 class IssuesRestoreStrategy(RestoreEntityStrategy):
@@ -74,7 +74,7 @@ class IssuesRestoreStrategy(RestoreEntityStrategy):
         self, issue: Issue, context: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
         # Prepare issue body with metadata and sanitization
-        from github_data.github.metadata import prepare_issue_body_for_restore
+        from github_data_tools.github.metadata import prepare_issue_body_for_restore
 
         issue_body = prepare_issue_body_for_restore(
             issue, include_metadata=self._include_original_metadata

@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_issue_loads_from_issues_entity():
     """convert_to_issue should load from issues entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -20,8 +20,8 @@ def test_convert_to_issue_loads_from_issues_entity():
 @pytest.mark.unit
 def test_convert_to_issue_transforms_data_with_all_nested_entities():
     """convert_to_issue should handle all nested entities."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.issues.models import Issue
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.issues.models import Issue
 
     converter = get_converter("convert_to_issue")
 
@@ -103,8 +103,8 @@ def test_convert_to_issue_transforms_data_with_all_nested_entities():
 @pytest.mark.unit
 def test_convert_to_issue_handles_minimal_data():
     """convert_to_issue should handle minimal required data."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.issues.models import Issue
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.issues.models import Issue
 
     converter = get_converter("convert_to_issue")
 

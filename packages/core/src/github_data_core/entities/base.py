@@ -4,7 +4,7 @@ from typing import Protocol, Optional, List, Union, Set, Type, Any, TYPE_CHECKIN
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
+    from github_data_core.entities.strategy_context import StrategyContext
 
 
 class EntityConfig(Protocol):

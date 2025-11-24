@@ -6,9 +6,9 @@ import pytest
 @pytest.fixture
 def error_handling_workflow_services(boundary_with_partial_failures, temp_data_dir):
     """Pre-configured services for error handling workflow testing."""
-    from github_data.github.service import GitHubService
-    from github_data.github.rate_limiter import RateLimitHandler
-    from github_data.storage import create_storage_service
+    from github_data_tools.github.service import GitHubService
+    from github_data_tools.github.rate_limiter import RateLimitHandler
+    from github_data_tools.storage import create_storage_service
 
     # Configure GitHub service with minimal retry for fast error testing
     rate_limiter = RateLimitHandler(max_retries=1, base_delay=0.01)

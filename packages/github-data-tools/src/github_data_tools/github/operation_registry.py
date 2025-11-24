@@ -66,7 +66,7 @@ class Operation:
 
         # Fallback: try to get from global registry
         try:
-            from github_data.github.converter_registry import get_converter
+            from github_data_tools.github.converter_registry import get_converter
 
             get_converter(converter_name)
             return True
@@ -118,7 +118,7 @@ class GitHubOperationRegistry:
 
     def _load_operations(self) -> None:
         """Scan all entity configs and register operations."""
-        from github_data.entities.registry import EntityRegistry
+        from github_data_core.entities.registry import EntityRegistry
 
         entity_registry = EntityRegistry()
 

@@ -1,14 +1,12 @@
-"""Operations package - orchestrator interface.
+"""Operations package - base orchestrator interface.
 
-Legacy save/restore functions removed. Use orchestrators with EntityRegistry.
+Concrete save/restore orchestrators are in github_data_tools.operations.
 """
 
-from .save.orchestrator import StrategyBasedSaveOrchestrator
-from .restore.orchestrator import StrategyBasedRestoreOrchestrator
 from .orchestrator_base import StrategyBasedOrchestrator
+from .strategy_factory import StrategyFactory
 
 __all__ = [
-    "StrategyBasedSaveOrchestrator",
-    "StrategyBasedRestoreOrchestrator",
     "StrategyBasedOrchestrator",
+    "StrategyFactory",
 ]

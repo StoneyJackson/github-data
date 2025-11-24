@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_release_loads_from_releases_entity():
     """convert_to_release should load from releases entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -20,7 +20,7 @@ def test_convert_to_release_loads_from_releases_entity():
 @pytest.mark.unit
 def test_convert_to_release_asset_loads_from_releases_entity():
     """convert_to_release_asset should load from releases entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -34,8 +34,8 @@ def test_convert_to_release_asset_loads_from_releases_entity():
 @pytest.mark.unit
 def test_convert_to_release_transforms_data():
     """convert_to_release should transform raw data correctly."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.releases.models import Release
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.releases.models import Release
 
     converter = get_converter("convert_to_release")
 
@@ -68,8 +68,8 @@ def test_convert_to_release_transforms_data():
 @pytest.mark.unit
 def test_convert_to_release_asset_transforms_data():
     """convert_to_release_asset should transform raw data correctly."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.releases.models import ReleaseAsset
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.releases.models import ReleaseAsset
 
     converter = get_converter("convert_to_release_asset")
 

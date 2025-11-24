@@ -8,16 +8,16 @@ import json
 from unittest.mock import Mock
 from datetime import datetime
 
-from github_data.entities.milestones.models import Milestone
-from github_data.entities.issues.models import Issue
-from github_data.entities.pull_requests.models import PullRequest
-from github_data.entities.users.models import GitHubUser
-from github_data.entities.milestones.save_strategy import MilestonesSaveStrategy
-from github_data.entities.milestones.restore_strategy import (
+from github_data_tools.entities.milestones.models import Milestone
+from github_data_tools.entities.issues.models import Issue
+from github_data_tools.entities.pull_requests.models import PullRequest
+from github_data_tools.entities.users.models import GitHubUser
+from github_data_tools.entities.milestones.save_strategy import MilestonesSaveStrategy
+from github_data_tools.entities.milestones.restore_strategy import (
     MilestonesRestoreStrategy,
 )
-from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
-from github_data.entities.pull_requests.restore_strategy import (
+from github_data_tools.entities.issues.restore_strategy import IssuesRestoreStrategy
+from github_data_tools.entities.pull_requests.restore_strategy import (
     PullRequestsRestoreStrategy,
 )
 
@@ -251,7 +251,7 @@ class TestMilestoneSaveRestoreIntegration:
         self, tmp_path, sample_milestones, sample_github_user
     ):
         """Test save/restore cycle with PRs that have milestone associations."""
-        from github_data.operations.restore.strategy import RestoreConflictStrategy
+        from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
         from unittest.mock import Mock
 
         # Setup

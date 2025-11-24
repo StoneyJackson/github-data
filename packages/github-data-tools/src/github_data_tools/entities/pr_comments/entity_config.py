@@ -3,11 +3,11 @@
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from github_data.entities.strategy_context import StrategyContext
-    from github_data.entities.pr_comments.save_strategy import (
+    from github_data_core.entities.strategy_context import StrategyContext
+    from github_data_tools.entities.pr_comments.save_strategy import (
         PullRequestCommentsSaveStrategy,
     )
-    from github_data.entities.pr_comments.restore_strategy import (
+    from github_data_tools.entities.pr_comments.restore_strategy import (
         PullRequestCommentsRestoreStrategy,
     )
 
@@ -58,7 +58,7 @@ class PrCommentsEntityConfig:
         Returns:
             PullRequestCommentsSaveStrategy instance
         """
-        from github_data.entities.pr_comments.save_strategy import (
+        from github_data_tools.entities.pr_comments.save_strategy import (
             PullRequestCommentsSaveStrategy,
         )
 
@@ -76,7 +76,7 @@ class PrCommentsEntityConfig:
         Returns:
             PullRequestCommentsRestoreStrategy instance
         """
-        from github_data.entities.pr_comments.restore_strategy import (
+        from github_data_tools.entities.pr_comments.restore_strategy import (
             PullRequestCommentsRestoreStrategy,
             DefaultPRCommentConflictStrategy,
         )

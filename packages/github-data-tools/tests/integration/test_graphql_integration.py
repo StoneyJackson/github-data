@@ -3,15 +3,15 @@
 import pytest
 from unittest.mock import Mock, patch
 
-from github_data.github.boundary import GitHubApiBoundary
-from github_data.github.graphql_converters import (
+from github_data_tools.github.boundary import GitHubApiBoundary
+from github_data_tools.github.graphql_converters import (
     convert_graphql_labels_to_rest_format,
     convert_graphql_issues_to_rest_format,
     convert_graphql_comments_to_rest_format,
     convert_graphql_pull_requests_to_rest_format,
 )
-from github_data.entities.issues.converters import convert_to_issue
-from github_data.entities.pull_requests.converters import convert_to_pull_request
+from github_data_tools.entities.issues.converters import convert_to_issue
+from github_data_tools.entities.pull_requests.converters import convert_to_pull_request
 
 pytestmark = [pytest.mark.integration, pytest.mark.medium]
 

@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock
-from github_data.github.service import GitHubService
+from github_data_tools.github.service import GitHubService
 
 
 pytestmark = [

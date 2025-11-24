@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.unit
 def test_convert_to_label_loads_from_labels_entity():
     """convert_to_label should be loadable from labels entity package."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -22,8 +22,8 @@ def test_convert_to_label_loads_from_labels_entity():
 @pytest.mark.unit
 def test_convert_to_label_transforms_raw_data_correctly():
     """convert_to_label should transform raw GitHub API data to Label model."""
-    from github_data.github.converter_registry import get_converter
-    from github_data.entities.labels.models import Label
+    from github_data_tools.github.converter_registry import get_converter
+    from github_data_tools.entities.labels.models import Label
 
     converter = get_converter("convert_to_label")
 

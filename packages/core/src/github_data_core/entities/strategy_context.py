@@ -4,8 +4,8 @@ from typing import Optional, Any, TYPE_CHECKING, Callable
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
-    from github_data.git.service import GitRepositoryService
-    from github_data.github.service import GitHubService
+    from git_repo_tools.git.service import GitRepositoryService
+    from github_data_tools.github.service import GitHubService
 
 
 def service_property(func: Callable[[Any], Any]) -> property:

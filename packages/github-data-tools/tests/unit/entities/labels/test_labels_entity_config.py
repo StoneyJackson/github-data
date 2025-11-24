@@ -1,9 +1,9 @@
 """Tests for labels entity configuration."""
 
 from unittest.mock import Mock
-from github_data.entities.labels.entity_config import LabelsEntityConfig
-from github_data.entities.labels.conflict_strategies import LabelConflictStrategy
-from github_data.entities.strategy_context import StrategyContext
+from github_data_tools.entities.labels.entity_config import LabelsEntityConfig
+from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
+from github_data_core.entities.strategy_context import StrategyContext
 
 
 def test_labels_create_save_strategy():

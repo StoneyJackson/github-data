@@ -3,12 +3,12 @@
 import pytest
 from datetime import datetime, timezone
 
-from github_data.entities.pr_comments.restore_strategy import (
+from github_data_tools.entities.pr_comments.restore_strategy import (
     PullRequestCommentsRestoreStrategy,
 )
-from github_data.entities.pr_comments.models import PullRequestComment
-from github_data.entities.users.models import GitHubUser
-from github_data.operations.restore.strategy import RestoreConflictStrategy
+from github_data_tools.entities.pr_comments.models import PullRequestComment
+from github_data_tools.entities.users.models import GitHubUser
+from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
 
 
 class MockConflictStrategy(RestoreConflictStrategy):

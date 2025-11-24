@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock
-from github_data.entities.releases.save_strategy import ReleasesSaveStrategy
+from github_data_tools.entities.releases.save_strategy import ReleasesSaveStrategy
 
 
 pytestmark = [

@@ -1,9 +1,9 @@
 """Test mention sanitization in issues restore strategy."""
 
 import pytest
-from github_data.entities.issues.restore_strategy import IssuesRestoreStrategy
-from github_data.entities.issues.models import Issue
-from github_data.entities.users.models import GitHubUser
+from github_data_tools.entities.issues.restore_strategy import IssuesRestoreStrategy
+from github_data_tools.entities.issues.models import Issue
+from github_data_tools.entities.users.models import GitHubUser
 
 
 @pytest.mark.unit

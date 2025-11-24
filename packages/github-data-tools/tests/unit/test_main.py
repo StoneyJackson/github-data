@@ -55,7 +55,7 @@ def test_bad_boolean():
 
 
 def assert_main_errors():
-    from github_data.main import main
+    from github_data_tools.main import main
 
     with pytest.raises(SystemExit) as exc_info:
         main()
@@ -93,7 +93,7 @@ def cleanup_environment(*args):
 def test_load_create_repository_if_missing_default():
     """Test CREATE_REPOSITORY_IF_MISSING defaults to true."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}, clear=True):
         main = Main()
@@ -107,7 +107,7 @@ def test_load_create_repository_if_missing_default():
 def test_load_create_repository_if_missing_true_values():
     """Test CREATE_REPOSITORY_IF_MISSING accepts true values."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     for value in ["true", "True", "TRUE", "yes", "on"]:
         with patch.dict(
@@ -126,7 +126,7 @@ def test_load_create_repository_if_missing_true_values():
 def test_load_create_repository_if_missing_false_values():
     """Test CREATE_REPOSITORY_IF_MISSING accepts false values."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     for value in ["false", "False", "FALSE", "no", "off"]:
         with patch.dict(
@@ -145,7 +145,7 @@ def test_load_create_repository_if_missing_false_values():
 def test_load_create_repository_if_missing_invalid_value_exits():
     """Test CREATE_REPOSITORY_IF_MISSING exits on invalid value."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(
         os.environ, {"OPERATION": "restore", "CREATE_REPOSITORY_IF_MISSING": "maybe"}
@@ -161,7 +161,7 @@ def test_load_create_repository_if_missing_invalid_value_exits():
 def test_load_create_repository_if_missing_skipped_for_save():
     """Test CREATE_REPOSITORY_IF_MISSING not loaded for save operation."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(
         os.environ, {"OPERATION": "save", "CREATE_REPOSITORY_IF_MISSING": "false"}
@@ -179,7 +179,7 @@ def test_load_create_repository_if_missing_skipped_for_save():
 def test_load_repository_visibility_default():
     """Test REPOSITORY_VISIBILITY defaults to public."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}, clear=True):
         main = Main()
@@ -193,7 +193,7 @@ def test_load_repository_visibility_default():
 def test_load_repository_visibility_valid_values():
     """Test REPOSITORY_VISIBILITY accepts public and private."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     for value in ["public", "Public", "PUBLIC"]:
         with patch.dict(
@@ -222,7 +222,7 @@ def test_load_repository_visibility_valid_values():
 def test_load_repository_visibility_invalid_value_exits():
     """Test REPOSITORY_VISIBILITY exits on invalid value."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(
         os.environ, {"OPERATION": "restore", "REPOSITORY_VISIBILITY": "internal"}
@@ -238,7 +238,7 @@ def test_load_repository_visibility_invalid_value_exits():
 def test_load_repository_visibility_skipped_for_save():
     """Test REPOSITORY_VISIBILITY not loaded for save operation."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(
         os.environ, {"OPERATION": "save", "REPOSITORY_VISIBILITY": "private"}
@@ -259,7 +259,7 @@ def test_load_repository_visibility_skipped_for_save():
 def test_ensure_repository_exists_when_repo_exists():
     """Test _ensure_repository_exists does nothing when repo exists."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -281,7 +281,7 @@ def test_ensure_repository_exists_when_repo_exists():
 def test_ensure_repository_exists_creates_when_missing_and_flag_true():
     """Test _ensure_repository_exists creates repo when missing and flag is true."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -307,7 +307,7 @@ def test_ensure_repository_exists_creates_when_missing_and_flag_true():
 def test_ensure_repository_exists_creates_private_when_visibility_private():
     """Test _ensure_repository_exists creates private repo."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -333,7 +333,7 @@ def test_ensure_repository_exists_creates_private_when_visibility_private():
 def test_wait_for_repository_availability_succeeds_immediately():
     """Test _wait_for_repository_availability succeeds on first attempt."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -352,7 +352,7 @@ def test_wait_for_repository_availability_succeeds_immediately():
 def test_wait_for_repository_availability_succeeds_after_retries():
     """Test _wait_for_repository_availability succeeds after retries."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -376,7 +376,7 @@ def test_wait_for_repository_availability_succeeds_after_retries():
 def test_wait_for_repository_availability_times_out():
     """Test _wait_for_repository_availability times out gracefully."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -396,7 +396,7 @@ def test_wait_for_repository_availability_times_out():
 def test_ensure_repository_exists_fails_when_missing_and_flag_false():
     """Test _ensure_repository_exists exits when repo missing."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "restore"}):
         main = Main()
@@ -414,7 +414,7 @@ def test_ensure_repository_exists_fails_when_missing_and_flag_false():
 def test_ensure_repository_exists_skipped_for_save():
     """Test _ensure_repository_exists does nothing for save operation."""
     from unittest.mock import patch, MagicMock
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(os.environ, {"OPERATION": "save"}):
         main = Main()
@@ -433,7 +433,7 @@ def test_ensure_repository_exists_skipped_for_save():
 def test_main_calls_ensure_repository_exists_for_restore():
     """Test main() calls _ensure_repository_exists for restore."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     with patch.dict(
         os.environ,
@@ -460,7 +460,7 @@ def test_main_calls_ensure_repository_exists_for_restore():
 def test_main_execution_order():
     """Test main() calls methods in correct order."""
     from unittest.mock import patch
-    from github_data.main import Main
+    from github_data_tools.main import Main
 
     env = {
         "OPERATION": "restore",

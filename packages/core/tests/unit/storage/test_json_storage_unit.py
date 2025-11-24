@@ -9,7 +9,7 @@ from tempfile import TemporaryDirectory
 from pydantic import BaseModel
 from unittest.mock import patch
 
-from github_data.storage.json_storage import save_json_data, load_json_data
+from github_data_core.storage.json_storage import save_json_data, load_json_data
 
 # Fixtures are auto-injected by pytest via conftest.py
 
@@ -355,7 +355,7 @@ class TestJsonStorageIntegration:
 
     def test_storage_error_handling_integration(self, temp_data_dir):
         """Test storage error handling in integration scenarios."""
-        from github_data.storage import create_storage_service
+        from github_data_core.storage import create_storage_service
 
         service = create_storage_service("json")
         service._base_path = temp_data_dir

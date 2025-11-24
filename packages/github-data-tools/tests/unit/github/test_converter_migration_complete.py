@@ -1,7 +1,7 @@
 """Tests to verify all entities have been migrated to distributed converters."""
 
-from github_data.entities.registry import EntityRegistry
-from github_data.github.converter_registry import ConverterRegistry
+from github_data_core.entities.registry import EntityRegistry
+from github_data_tools.github.converter_registry import ConverterRegistry
 
 
 class TestConverterMigrationComplete:
@@ -55,7 +55,7 @@ class TestConverterMigrationComplete:
 
     def test_only_common_converters_in_monolithic_file(self):
         """converters.py should only contain common/shared converters."""
-        from github_data.github import converters as legacy_module
+        from github_data_tools.github import converters as legacy_module
 
         # Define allowed common converters
         allowed_common = {

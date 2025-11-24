@@ -77,6 +77,13 @@ testpaths = ["packages/*/tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+pythonpath = [
+    "packages/core/src",
+    "packages/git-repo-tools/src",
+    "packages/github-repo-manager/src",
+    "packages/github-data-tools/src",
+    "packages/kit-orchestrator/src"
+]
 addopts = "-v --tb=short"
 markers = [
     "unit: Unit tests (fast, isolated component tests)",

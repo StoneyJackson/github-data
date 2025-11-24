@@ -5,7 +5,7 @@ import pytest
 
 def test_converter_not_found_error_is_exception():
     """ConverterNotFoundError should be an Exception subclass."""
-    from github_data.github.converter_registry import ConverterNotFoundError
+    from github_data_tools.github.converter_registry import ConverterNotFoundError
 
     error = ConverterNotFoundError("test message")
     assert isinstance(error, Exception)
@@ -14,7 +14,7 @@ def test_converter_not_found_error_is_exception():
 
 def test_validation_error_is_exception():
     """ValidationError should be an Exception subclass."""
-    from github_data.github.converter_registry import ValidationError
+    from github_data_tools.github.converter_registry import ValidationError
 
     error = ValidationError("invalid config")
     assert isinstance(error, Exception)
@@ -23,7 +23,7 @@ def test_validation_error_is_exception():
 
 def test_converter_registry_instantiates():
     """ConverterRegistry should instantiate successfully."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -36,7 +36,7 @@ def test_converter_registry_instantiates():
 
 def test_get_returns_registered_converter():
     """get() should return registered converter function."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -53,7 +53,7 @@ def test_get_returns_registered_converter():
 
 def test_get_raises_not_found_for_missing_converter():
     """get() should raise ConverterNotFoundError for unregistered converter."""
-    from github_data.github.converter_registry import (
+    from github_data_tools.github.converter_registry import (
         ConverterRegistry,
         ConverterNotFoundError,
     )
@@ -69,7 +69,7 @@ def test_get_raises_not_found_for_missing_converter():
 
 def test_get_suggests_similar_names_for_typos():
     """get() should suggest similar converter names for typos."""
-    from github_data.github.converter_registry import (
+    from github_data_tools.github.converter_registry import (
         ConverterRegistry,
         ConverterNotFoundError,
     )
@@ -89,7 +89,7 @@ def test_get_suggests_similar_names_for_typos():
 
 def test_list_converters_returns_all_names():
     """list_converters() should return all registered converter names."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -110,7 +110,7 @@ def test_list_converters_returns_all_names():
 
 def test_list_converters_auto_loads_on_init():
     """Registry should auto-load converters on instantiation."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -124,7 +124,7 @@ def test_list_converters_auto_loads_on_init():
 
 def test_load_converter_imports_from_spec():
     """_load_converter() should import converter from module spec."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     # Create registry (will auto-load)
     registry = ConverterRegistry()
@@ -156,7 +156,7 @@ def test_load_converter_imports_from_spec():
 
 def test_load_converter_detects_naming_collisions():
     """_load_converter() should detect when two entities declare same name."""
-    from github_data.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
 
     # Create registry (will auto-load)
     registry = ConverterRegistry()
@@ -191,7 +191,7 @@ def test_load_converter_detects_naming_collisions():
 
 def test_load_converter_raises_validation_error_for_bad_module():
     """_load_converter() should raise ValidationError for missing module."""
-    from github_data.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
 
     registry = ConverterRegistry()
 
@@ -211,7 +211,7 @@ def test_load_converter_raises_validation_error_for_bad_module():
 
 def test_load_converter_raises_validation_error_for_bad_function():
     """_load_converter() should raise ValidationError for missing function."""
-    from github_data.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
 
     registry = ConverterRegistry()
 
@@ -230,7 +230,7 @@ def test_load_converter_raises_validation_error_for_bad_function():
 
 def test_load_all_converters_discovers_entity_converters():
     """_load_all_converters() should scan EntityRegistry and load converters."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -246,7 +246,7 @@ def test_load_all_converters_discovers_entity_converters():
 
 def test_load_all_converters_skips_entities_without_converters():
     """_load_all_converters() should skip entities with no converter config."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -257,7 +257,7 @@ def test_load_all_converters_skips_entities_without_converters():
 
 def test_registry_initialization_loads_all_converters():
     """Registry should load all converters on instantiation."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     # Simply instantiating should load everything
     registry = ConverterRegistry()
@@ -274,7 +274,7 @@ def test_registry_initialization_loads_all_converters():
 
 def test_common_converters_are_registered():
     """Common converters should be registered with 'common' entity."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     registry = ConverterRegistry()
 
@@ -299,7 +299,7 @@ def test_common_converters_are_registered():
 
 def test_validate_all_checks_converters_are_callable():
     """_validate_all() should verify all converters are callable."""
-    from github_data.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
 
     registry = ConverterRegistry()
 
@@ -321,8 +321,8 @@ def test_validate_all_checks_converters_are_callable():
 
 def test_validate_all_checks_operation_converter_references():
     """_validate_all() should verify operations reference valid converters."""
-    from github_data.github.converter_registry import ConverterRegistry
-    from github_data.github.operation_registry import (
+    from github_data_tools.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.operation_registry import (
         GitHubOperationRegistry,
         ValidationError,
     )
@@ -362,7 +362,7 @@ def test_validate_all_checks_operation_converter_references():
 
 def test_registry_validates_on_initialization():
     """Registry should run full validation on instantiation."""
-    from github_data.github.converter_registry import ConverterRegistry
+    from github_data_tools.github.converter_registry import ConverterRegistry
 
     # Should not raise - all converters and operations should be valid
     registry = ConverterRegistry()
@@ -378,7 +378,7 @@ def test_registry_validates_on_initialization():
 
 def test_get_converter_function_returns_converter():
     """get_converter() module function should return converter from singleton."""
-    from github_data.github.converter_registry import get_converter
+    from github_data_tools.github.converter_registry import get_converter
 
     # Should work without explicitly creating registry
     converter = get_converter("convert_to_label")
@@ -389,7 +389,7 @@ def test_get_converter_function_returns_converter():
 
 def test_get_converter_uses_singleton_registry():
     """get_converter() should reuse the same registry instance."""
-    from github_data.github import converter_registry
+    from github_data_tools.github import converter_registry
 
     # Reset singleton for clean test
     converter_registry._registry_instance = None
@@ -412,7 +412,7 @@ def test_get_converter_uses_singleton_registry():
 
 def test_get_converter_raises_for_unknown_converter():
     """get_converter() should raise ConverterNotFoundError for invalid name."""
-    from github_data.github.converter_registry import (
+    from github_data_tools.github.converter_registry import (
         get_converter,
         ConverterNotFoundError,
     )
