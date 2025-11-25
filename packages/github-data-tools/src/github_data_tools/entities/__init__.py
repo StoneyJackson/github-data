@@ -7,7 +7,16 @@ from .comments.models import Comment
 from .issues.models import Issue
 
 # Pull Requests
-from .pull_requests.models import PullRequest, PullRequestComment, PullRequestReview, PullRequestReviewComment
+from .pull_requests.models import PullRequest
+
+# PR Comments
+from .pr_comments.models import PullRequestComment
+
+# PR Reviews
+from .pr_reviews.models import PullRequestReview
+
+# PR Review Comments
+from .pr_review_comments.models import PullRequestReviewComment
 
 # Milestones
 from .milestones.models import Milestone
@@ -17,6 +26,12 @@ from .labels.models import Label
 
 # Releases
 from .releases.models import Release, ReleaseAsset
+
+# Sub Issues
+from .sub_issues.models import SubIssue
+
+# Users
+from .users.models import GitHubUser
 
 __all__ = [
     "Comment",
@@ -29,4 +44,6 @@ __all__ = [
     "PullRequestReviewComment",
     "Release",
     "ReleaseAsset",
+    "SubIssue",
+    "GitHubUser",
 ]

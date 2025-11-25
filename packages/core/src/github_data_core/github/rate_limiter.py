@@ -9,7 +9,6 @@ import time
 import random
 import logging
 from typing import Callable, TypeVar, Any
-from .protocols import RateLimitHandler as RateLimitHandlerProtocol
 from github.GithubException import RateLimitExceededException, GithubException
 
 logger = logging.getLogger(__name__)
@@ -17,7 +16,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class RateLimitHandler(RateLimitHandlerProtocol):
+class RateLimitHandler:
     """
     Handles rate limiting logic for GitHub API operations.
 
