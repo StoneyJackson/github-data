@@ -10,7 +10,7 @@ import logging
 from typing import Dict, List, Any, Optional, cast
 from .protocols import GitHubApiBoundary as GitHubApiBoundaryProtocol
 from .graphql_client import GitHubGraphQLClient
-from .restapi_client import GitHubRestApiClient
+from github_data_core.github.restapi_client import GitHubRestApiClient
 from github import Github, Auth
 from github.Repository import Repository
 from github.AuthenticatedUser import AuthenticatedUser

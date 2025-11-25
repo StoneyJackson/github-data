@@ -9,8 +9,8 @@ import logging
 from typing import Dict, List, Any, Optional, Callable, cast
 from .protocols import RepositoryService
 from .boundary import GitHubApiBoundary
-from .rate_limiter import RateLimitHandler
-from .cache import setup_global_cache, clear_cache, CacheConfig
+from github_data_core.github.rate_limiter import RateLimitHandler
+from github_data_core.github.cache import setup_global_cache, clear_cache, CacheConfig
 from .operation_registry import GitHubOperationRegistry, Operation
 
 logger = logging.getLogger(__name__)
