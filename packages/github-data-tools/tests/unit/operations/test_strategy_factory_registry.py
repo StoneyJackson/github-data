@@ -45,7 +45,7 @@ def test_strategy_factory_creates_milestones_strategy():
 @pytest.mark.unit
 def test_strategy_factory_creates_restore_strategy():
     """Test that StrategyFactory creates restore strategies via factory methods."""
-    from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
+    from github_data_core.entities.labels.conflict_strategies import LabelConflictStrategy
 
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
