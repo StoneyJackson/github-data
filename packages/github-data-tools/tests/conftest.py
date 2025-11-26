@@ -38,3 +38,27 @@ from .shared.fixtures.workflow_services.error_handling_workflow_services import 
 from .shared.fixtures.workflow_services.restore_workflow_services import *  # noqa: F401,F403
 from .shared.fixtures.workflow_services.save_workflow_services import *  # noqa: F401,F403
 from .shared.fixtures.workflow_services.sync_workflow_services import *  # noqa: F401,F403
+
+# Entity registry fixture for monorepo
+import pytest
+from pathlib import Path
+from github_data_core.entities.registry import EntityRegistry
+
+
+@pytest.fixture(autouse=True)
+def patch_entity_registry_default(monkeypatch):
+    """Automatically patch EntityRegistry to find entities in github-data-tools package.
+
+    This fixture runs automatically for all tests in github-data-tools package,
+    ensuring that EntityRegistry() without arguments will find entities in the
+    correct location.
+    """
+    original_init = EntityRegistry.__init__
+
+    def patched_init(self, entities_dir=None):
+        if entities_dir is None:
+            # Default to github-data-tools entities directory
+            entities_dir = Path(__file__).parent.parent / "src/github_data_tools/entities"
+        original_init(self, entities_dir)
+
+    monkeypatch.setattr(EntityRegistry, "__init__", patched_init)
