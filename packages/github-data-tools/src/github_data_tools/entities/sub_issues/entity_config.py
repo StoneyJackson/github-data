@@ -30,7 +30,7 @@ class SubIssuesEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_sub_issue": {
-            "module": "github_data.entities.sub_issues.converters",
+            "module": "github_data_tools.entities.sub_issues.converters",
             "function": "convert_to_sub_issue",
             "target_model": "SubIssue",
         },

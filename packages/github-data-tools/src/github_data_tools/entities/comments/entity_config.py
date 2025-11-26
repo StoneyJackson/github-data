@@ -28,7 +28,7 @@ class CommentsEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_comment": {
-            "module": "github_data.entities.comments.converters",
+            "module": "github_data_tools.entities.comments.converters",
             "function": "convert_to_comment",
             "target_model": "Comment",
         },

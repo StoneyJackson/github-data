@@ -32,7 +32,7 @@ class PrReviewsEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_pr_review": {
-            "module": "github_data.entities.pr_reviews.converters",
+            "module": "github_data_tools.entities.pr_reviews.converters",
             "function": "convert_to_pr_review",
             "target_model": "PullRequestReview",
         },

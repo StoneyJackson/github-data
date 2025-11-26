@@ -109,6 +109,7 @@ class ConverterRegistry:
 
     def _load_all_converters(self) -> None:
         """Scan EntityRegistry and eagerly import all declared converters."""
+        from pathlib import Path
         from github_data_core.entities.registry import EntityRegistry
         from github_data_tools.github.common_converters_config import CommonConvertersConfig
 
@@ -120,7 +121,9 @@ class ConverterRegistry:
                     self._load_converter(converter_name, spec, "common")
 
         # Load entity-specific converters
-        entity_registry = EntityRegistry()
+        # Point to github-data-tools entities directory
+        entities_dir = Path(__file__).parent.parent / "entities"
+        entity_registry = EntityRegistry(entities_dir=entities_dir)
 
         for entity_name, entity in entity_registry._entities.items():
             config = entity.config

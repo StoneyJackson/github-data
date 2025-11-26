@@ -29,7 +29,7 @@ class IssuesEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_issue": {
-            "module": "github_data.entities.issues.converters",
+            "module": "github_data_tools.entities.issues.converters",
             "function": "convert_to_issue",
             "target_model": "Issue",
         },

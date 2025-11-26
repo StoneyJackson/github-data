@@ -33,7 +33,7 @@ class PullRequestsEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_pull_request": {
-            "module": "github_data.entities.pull_requests.converters",
+            "module": "github_data_tools.entities.pull_requests.converters",
             "function": "convert_to_pull_request",
             "target_model": "PullRequest",
         },

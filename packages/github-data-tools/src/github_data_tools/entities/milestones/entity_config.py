@@ -31,7 +31,7 @@ class MilestonesEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_milestone": {
-            "module": "github_data.entities.milestones.converters",
+            "module": "github_data_tools.entities.milestones.converters",
             "function": "convert_to_milestone",
             "target_model": "Milestone",
         },

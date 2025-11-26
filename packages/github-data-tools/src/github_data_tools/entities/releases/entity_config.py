@@ -31,12 +31,12 @@ class ReleasesEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_release": {
-            "module": "github_data.entities.releases.converters",
+            "module": "github_data_tools.entities.releases.converters",
             "function": "convert_to_release",
             "target_model": "Release",
         },
         "convert_to_release_asset": {
-            "module": "github_data.entities.releases.converters",
+            "module": "github_data_tools.entities.releases.converters",
             "function": "convert_to_release_asset",
             "target_model": "ReleaseAsset",
         },

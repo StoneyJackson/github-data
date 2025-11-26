@@ -32,7 +32,7 @@ class PrCommentsEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_pr_comment": {
-            "module": "github_data.entities.pr_comments.converters",
+            "module": "github_data_tools.entities.pr_comments.converters",
             "function": "convert_to_pr_comment",
             "target_model": "PullRequestComment",
         },

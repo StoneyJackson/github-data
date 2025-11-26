@@ -31,7 +31,7 @@ class LabelsEntityConfig:
     # Converter declarations
     converters = {
         "convert_to_label": {
-            "module": "github_data.entities.labels.converters",
+            "module": "github_data_tools.entities.labels.converters",
             "function": "convert_to_label",
             "target_model": "Label",
         },
