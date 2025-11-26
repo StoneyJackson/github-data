@@ -56,16 +56,18 @@ def test_save_orchestrator_returns_failure_status_on_error():
 
     # Enable only milestones for simpler test
     registry.get_entity("milestones").enabled = True
-    registry.get_entity("git_repository").enabled = False
-    registry.get_entity("labels").enabled = False
-    registry.get_entity("issues").enabled = False
-    registry.get_entity("comments").enabled = False
-    registry.get_entity("pull_requests").enabled = False
-    registry.get_entity("pr_comments").enabled = False
-    registry.get_entity("pr_reviews").enabled = False
-    registry.get_entity("pr_review_comments").enabled = False
-    registry.get_entity("sub_issues").enabled = False
-    registry.get_entity("releases").enabled = False
+
+    # Disable all other entities (ignore if they don't exist in this package)
+    for entity_name in [
+        "git_repository", "labels", "issues", "comments",
+        "pull_requests", "pr_comments", "pr_reviews",
+        "pr_review_comments", "sub_issues", "releases"
+    ]:
+        try:
+            registry.get_entity(entity_name).enabled = False
+        except ValueError:
+            # Entity doesn't exist in this package (e.g., git_repository)
+            pass
 
     github_service = Mock()
     storage_service = Mock()

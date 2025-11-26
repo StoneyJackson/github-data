@@ -45,7 +45,7 @@ def test_strategy_factory_creates_milestones_strategy():
 @pytest.mark.unit
 def test_strategy_factory_creates_restore_strategy():
     """Test that StrategyFactory creates restore strategies via factory methods."""
-    from github_data_core.entities.labels.conflict_strategies import LabelConflictStrategy
+    from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
 
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
@@ -79,10 +79,15 @@ def test_strategy_factory_creates_all_batch1_and_batch2():
         assert entity_name in strategy_names, f"Failed to create {entity_name}"
 
     # Verify git_repository entity is discovered and created with git_service
-    git_entity = registry.get_entity("git_repository")
-    assert git_entity is not None
-    assert git_entity.config.name == "git_repository"
-    assert "git_repository" in strategy_names
+    # (Skip if git_repository not in this package - it's in git-repo-tools)
+    try:
+        git_entity = registry.get_entity("git_repository")
+        assert git_entity is not None
+        assert git_entity.config.name == "git_repository"
+        assert "git_repository" in strategy_names
+    except ValueError:
+        # git_repository entity is in git-repo-tools package, not github-data-tools
+        pass
 
 
 @pytest.mark.unit
