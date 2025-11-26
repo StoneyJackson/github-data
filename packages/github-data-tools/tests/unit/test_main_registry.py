@@ -6,10 +6,10 @@ import os
 
 
 @pytest.mark.unit
-@patch("github_data.main.StrategyBasedSaveOrchestrator")
-@patch("github_data.main.EntityRegistry")
-@patch("github_data.main.create_github_service")
-@patch("github_data.main.create_storage_service")
+@patch("github_data_tools.main.StrategyBasedSaveOrchestrator")
+@patch("github_data_tools.main.EntityRegistry")
+@patch("github_data_tools.main.create_github_service")
+@patch("github_data_tools.main.create_storage_service")
 def test_main_initializes_registry_from_environment(
     mock_storage_factory,
     mock_github_factory,
@@ -57,10 +57,10 @@ def test_main_passes_registry_to_orchestrator():
 
 
 @pytest.mark.unit
-@patch("github_data.main.StrategyBasedSaveOrchestrator")
-@patch("github_data.main.EntityRegistry")
-@patch("github_data.main.create_github_service")
-@patch("github_data.main.create_storage_service")
+@patch("github_data_tools.main.StrategyBasedSaveOrchestrator")
+@patch("github_data_tools.main.EntityRegistry")
+@patch("github_data_tools.main.create_github_service")
+@patch("github_data_tools.main.create_storage_service")
 def test_main_exits_with_error_code_on_save_failure(
     mock_storage_factory,
     mock_github_factory,

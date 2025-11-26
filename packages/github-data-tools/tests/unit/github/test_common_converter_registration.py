@@ -22,4 +22,4 @@ class TestCommonConverterRegistration:
 
         metadata = registry._converter_metadata["convert_to_user"]
         assert metadata["entity"] == "common"
-        assert metadata["module"] == "github_data.github.converters"
+        assert metadata["module"] == "github_data_tools.github.converters"

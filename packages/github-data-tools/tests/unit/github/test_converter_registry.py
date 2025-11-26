@@ -135,7 +135,7 @@ def test_load_converter_imports_from_spec():
 
     # Using entity converters module
     spec = {
-        "module": "github_data.entities.labels.converters",
+        "module": "github_data_tools.entities.labels.converters",
         "function": "convert_to_label",
         "target_model": "Label",
     }
@@ -150,7 +150,7 @@ def test_load_converter_imports_from_spec():
     # Should have metadata
     metadata = registry._converter_metadata["convert_to_label"]
     assert metadata["entity"] == "labels"
-    assert metadata["module"] == "github_data.entities.labels.converters"
+    assert metadata["module"] == "github_data_tools.entities.labels.converters"
     assert metadata["target_model"] == "Label"
 
 
@@ -167,7 +167,7 @@ def test_load_converter_detects_naming_collisions():
 
     # Load first converter
     spec = {
-        "module": "github_data.entities.labels.converters",
+        "module": "github_data_tools.entities.labels.converters",
         "function": "convert_to_label",
         "target_model": "Label",
     }
@@ -175,7 +175,7 @@ def test_load_converter_detects_naming_collisions():
 
     # Try to load another converter with same name from different entity
     duplicate_spec = {
-        "module": "github_data.entities.issues.converters",
+        "module": "github_data_tools.entities.issues.converters",
         "function": "convert_to_issue",  # Different function, same name
         "target_model": "Issue",
     }
@@ -216,7 +216,7 @@ def test_load_converter_raises_validation_error_for_bad_function():
     registry = ConverterRegistry()
 
     spec = {
-        "module": "github_data.github.converters",  # Module exists
+        "module": "github_data_tools.github.converters",  # Module exists
         "function": "nonexistent_function",  # Function doesn't
         "target_model": "Something",
     }
@@ -293,7 +293,7 @@ def test_common_converters_are_registered():
             meta["entity"] == "common"
         ), f"Converter {name} should be from 'common' entity, not {meta['entity']}"
         assert (
-            meta["module"] == "github_data.github.converters"
+            meta["module"] == "github_data_tools.github.converters"
         ), f"Converter {name} should be from converters module"
 
 

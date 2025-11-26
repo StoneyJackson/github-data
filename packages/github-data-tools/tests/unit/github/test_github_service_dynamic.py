@@ -10,7 +10,7 @@ def test_github_service_initializes_with_registry():
     mock_boundary = Mock()
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_registry = Mock()
         mock_registry.list_operations.return_value = ["get_repository_releases"]
@@ -30,7 +30,7 @@ def test_dynamic_method_generation_for_registered_operation():
 
     # Patch registry to return a test operation
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_operation = Mock()
         mock_operation.method_name = "get_test_data"
@@ -62,7 +62,7 @@ def test_unknown_method_raises_helpful_error():
     mock_boundary = Mock()
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_registry = Mock()
         mock_registry.list_operations.return_value = ["get_repository_releases"]
@@ -108,7 +108,7 @@ def test_dynamic_method_applies_converter():
     ]
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_operation = Mock()
         mock_operation.method_name = "get_test_releases"
@@ -142,7 +142,7 @@ def test_dynamic_method_uses_caching_for_read_operations():
     mock_boundary.get_test_data.return_value = [{"id": 1}]
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_operation = Mock()
         mock_operation.method_name = "get_test_data"
@@ -180,7 +180,7 @@ def test_dynamic_method_skips_caching_for_write_operations():
     mock_boundary.create_test_data.return_value = {"id": 1, "name": "test"}
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         mock_operation = Mock()
         mock_operation.method_name = "create_test_data"
@@ -226,7 +226,7 @@ def test_explicit_method_overrides_registry():
     mock_boundary.get_test_data.return_value = [{"id": 1, "name": "boundary"}]
 
     with patch(
-        "github_data.github.service.GitHubOperationRegistry"
+        "github_data_tools.github.service.GitHubOperationRegistry"
     ) as mock_registry_class:
         # Registry has an operation for "custom_explicit_method"
         mock_operation = Mock()

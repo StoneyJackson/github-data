@@ -40,7 +40,7 @@ class TestNoLegacyConverters:
             # Should be either from entity package or common converters
             assert (
                 "github_data.entities." in module
-                or module == "github_data.github.converters"
+                or module == "github_data_tools.github.converters"
                 and entity == "common"
             ), f"Converter {name} from unexpected location: {module}"
 
