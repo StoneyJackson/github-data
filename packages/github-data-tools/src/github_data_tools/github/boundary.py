@@ -54,8 +54,44 @@ class GitHubApiBoundary(GitHubApiBoundaryProtocol):
         repo = self._github.get_repo(repo_name)
         return repo.raw_data
 
-    # NOTE: create_repository method moved to github-repo-manager package
-    # for focused repository lifecycle management
+    def create_repository(
+        self, repo_name: str, private: bool = False, description: str = ""
+    ) -> Dict[str, Any]:
+        """Create a new repository.
+
+        Args:
+            repo_name: Repository name in format "owner/repo"
+            private: Whether repository should be private
+            description: Repository description
+
+        Returns:
+            Raw JSON dictionary of created repository
+
+        Raises:
+            GithubException: If repository creation fails
+        """
+        owner, repo = repo_name.split("/", 1)
+        user = cast(AuthenticatedUser, self._github.get_user())
+
+        if user.login.lower() == owner.lower():
+            # Create in user account
+            created_repo = user.create_repo(
+                name=repo, private=private, description=description
+            )
+        else:
+            # Create in organization
+            org = self._github.get_organization(owner)
+            created_repo = org.create_repo(
+                name=repo, private=private, description=description
+            )
+
+        # Cache the repository object in REST client to avoid 404s on
+        # subsequent operations. The repository object from creation is
+        # immediately valid, bypassing eventual consistency issues
+        if hasattr(self, "_rest_client") and self._rest_client is not None:
+            self._rest_client._repo_cache[repo_name] = created_repo
+
+        return created_repo.raw_data
 
     def get_repository_labels(self, repo_name: str) -> List[Dict[str, Any]]:
         """Get all labels from repository using GraphQL for better performance."""
