@@ -9,8 +9,9 @@ from github_data_core.operations.strategy_factory import StrategyFactory
 def test_git_repository_requires_git_service_for_save():
     """Test that github-data-tools entities work without git_service.
 
-    Note: git_repository entity is in git-repo-tools package, not github-data-tools.
-    This test validates that github-data-tools entities don't have git_service requirement.
+    Note: git_repository entity is in git-repo-tools package, not
+    github-data-tools. This test validates that github-data-tools
+    entities don't have git_service requirement.
     """
     registry = EntityRegistry()
     factory = StrategyFactory(registry)

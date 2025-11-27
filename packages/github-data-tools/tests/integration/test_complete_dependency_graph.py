@@ -6,7 +6,10 @@ from github_data_core.entities.registry import EntityRegistry
 
 @pytest.mark.integration
 def test_all_10_entities_discovered():
-    """Test all 10 entities discovered by registry (github-data-tools package only)."""
+    """Test all 10 entities discovered by registry.
+
+    (github-data-tools package only)
+    """
     registry = EntityRegistry()
     names = registry.get_all_entity_names()
 
@@ -29,7 +32,10 @@ def test_all_10_entities_discovered():
 
 @pytest.mark.integration
 def test_complete_dependency_graph():
-    """Test complete dependency relationships for all entities (github-data-tools only)."""
+    """Test complete dependency relationships for all entities.
+
+    (github-data-tools only)
+    """
     registry = EntityRegistry()
 
     # Verify each entity's dependencies

@@ -9,7 +9,10 @@ from github_data_core.entities.registry import EntityRegistry
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_save_strategies_all_entities(all_entity_names):
-    """Test creating save strategies for all enabled entities (github-data-tools only)."""
+    """Test creating save strategies for all enabled entities.
+
+    (github-data-tools only)
+    """
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
     strategies = factory.create_save_strategies()
@@ -23,7 +26,10 @@ def test_create_save_strategies_all_entities(all_entity_names):
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_save_strategies_with_git_repository(all_entity_names):
-    """Test save strategies work even when git_service is provided (github-data-tools entities don't use it)."""
+    """Test save strategies work even when git_service is provided.
+
+    (github-data-tools entities don't use it)
+    """
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
     mock_git_service = Mock()
@@ -39,7 +45,10 @@ def test_create_save_strategies_with_git_repository(all_entity_names):
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_restore_strategies_all_entities(all_entity_names):
-    """Test creating restore strategies for all enabled entities (github-data-tools only)."""
+    """Test creating restore strategies for all enabled entities.
+
+    (github-data-tools only)
+    """
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
     mock_github_service = Mock()
@@ -54,8 +63,12 @@ def test_create_restore_strategies_all_entities(all_entity_names):
 @pytest.mark.integration
 def test_create_restore_strategies_labels_with_conflict_strategy():
     """Test labels restore with custom conflict strategy (github-data-tools only)."""
-    from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
-    from github_data_tools.entities.labels.restore_strategy import FailIfConflictStrategy
+    from github_data_tools.entities.labels.conflict_strategies import (
+        LabelConflictStrategy,
+    )
+    from github_data_tools.entities.labels.restore_strategy import (
+        FailIfConflictStrategy,
+    )
 
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
@@ -86,5 +99,7 @@ def test_git_repository_requires_git_service():
 
     # Same for restore
     mock_github_service = Mock()
-    restore_strategies = factory.create_restore_strategies(github_service=mock_github_service)
+    restore_strategies = factory.create_restore_strategies(
+        github_service=mock_github_service
+    )
     assert len(restore_strategies) > 0  # Should have created strategies

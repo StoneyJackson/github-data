@@ -30,13 +30,18 @@ class GitHubDataBuilder:
         """Add labels to the test data."""
         for i in range(count):
             label_id = self._label_counter
-            self._data["labels"].append({
-                "id": 1000 + label_id,
-                "name": f"label-{label_id}",
-                "color": "d73a4a",
-                "description": f"Test label {label_id}",
-                "url": f"https://api.github.com/repos/owner/repo/labels/label-{label_id}",
-            })
+            self._data["labels"].append(
+                {
+                    "id": 1000 + label_id,
+                    "name": f"label-{label_id}",
+                    "color": "d73a4a",
+                    "description": f"Test label {label_id}",
+                    "url": (
+                        f"https://api.github.com/repos/owner/repo/"
+                        f"labels/label-{label_id}"
+                    ),
+                }
+            )
             self._label_counter += 1
         return self
 
@@ -44,26 +49,28 @@ class GitHubDataBuilder:
         """Add issues to the test data."""
         for i in range(count):
             issue_id = self._issue_counter
-            self._data["issues"].append({
-                "id": 2000 + issue_id,
-                "number": issue_id,
-                "title": f"Issue {issue_id}",
-                "body": f"Test issue {issue_id}",
-                "state": "open",
-                "user": {
-                    "login": "testuser",
-                    "id": 3001,
-                    "avatar_url": "https://github.com/testuser.png",
-                    "html_url": "https://github.com/testuser",
-                },
-                "assignees": [],
-                "labels": [],
-                "created_at": "2023-01-15T10:30:00Z",
-                "updated_at": "2023-01-15T14:20:00Z",
-                "closed_at": None,
-                "html_url": f"https://github.com/owner/repo/issues/{issue_id}",
-                "comments": 0,
-            })
+            self._data["issues"].append(
+                {
+                    "id": 2000 + issue_id,
+                    "number": issue_id,
+                    "title": f"Issue {issue_id}",
+                    "body": f"Test issue {issue_id}",
+                    "state": "open",
+                    "user": {
+                        "login": "testuser",
+                        "id": 3001,
+                        "avatar_url": "https://github.com/testuser.png",
+                        "html_url": "https://github.com/testuser",
+                    },
+                    "assignees": [],
+                    "labels": [],
+                    "created_at": "2023-01-15T10:30:00Z",
+                    "updated_at": "2023-01-15T14:20:00Z",
+                    "closed_at": None,
+                    "html_url": f"https://github.com/owner/repo/issues/{issue_id}",
+                    "comments": 0,
+                }
+            )
             self._issue_counter += 1
         return self
 
@@ -72,21 +79,30 @@ class GitHubDataBuilder:
         for issue in self._data["issues"]:
             for i in range(comments_per_issue):
                 comment_id = self._comment_counter
-                self._data["comments"].append({
-                    "id": 4000 + comment_id,
-                    "body": f"Comment {comment_id}",
-                    "user": {
-                        "login": "testuser",
-                        "id": 3001,
-                        "avatar_url": "https://github.com/testuser.png",
-                        "html_url": "https://github.com/testuser",
-                    },
-                    "created_at": "2023-01-15T12:00:00Z",
-                    "updated_at": "2023-01-15T12:00:00Z",
-                    "html_url": f"https://github.com/owner/repo/issues/{issue['number']}#issuecomment-{4000 + comment_id}",
-                    "issue_url": f"https://api.github.com/repos/owner/repo/issues/{issue['number']}",
-                    "issue_number": issue["number"],
-                })
+                self._data["comments"].append(
+                    {
+                        "id": 4000 + comment_id,
+                        "body": f"Comment {comment_id}",
+                        "user": {
+                            "login": "testuser",
+                            "id": 3001,
+                            "avatar_url": "https://github.com/testuser.png",
+                            "html_url": "https://github.com/testuser",
+                        },
+                        "created_at": "2023-01-15T12:00:00Z",
+                        "updated_at": "2023-01-15T12:00:00Z",
+                        "html_url": (
+                            f"https://github.com/owner/repo/issues/"
+                            f"{issue['number']}#issuecomment-"
+                            f"{4000 + comment_id}"
+                        ),
+                        "issue_url": (
+                            f"https://api.github.com/repos/owner/repo/"
+                            f"issues/{issue['number']}"
+                        ),
+                        "issue_number": issue["number"],
+                    }
+                )
                 self._comment_counter += 1
                 issue["comments"] = comments_per_issue
         return self
@@ -108,13 +124,15 @@ class GitHubDataBuilder:
                 sub_issue_idx = parent_idx + j + 1
                 sub_issue = self._data["issues"][sub_issue_idx]
 
-                self._data["sub_issues"].append({
-                    "sub_issue_id": sub_issue["id"],
-                    "sub_issue_number": sub_issue["number"],
-                    "parent_issue_id": parent_issue["id"],
-                    "parent_issue_number": parent_issue["number"],
-                    "position": j + 1,
-                })
+                self._data["sub_issues"].append(
+                    {
+                        "sub_issue_id": sub_issue["id"],
+                        "sub_issue_number": sub_issue["number"],
+                        "parent_issue_id": parent_issue["id"],
+                        "parent_issue_number": parent_issue["number"],
+                        "position": j + 1,
+                    }
+                )
 
         return self
 
@@ -131,8 +149,14 @@ class ParametrizedDataFactory:
         builder = GitHubDataBuilder()
 
         scenarios = {
-            "basic": lambda: builder.with_labels(2).with_issues(2).with_comments(1).build(),
-            "large": lambda: builder.with_labels(10).with_issues(50).with_comments(3).build(),
+            "basic": lambda: builder.with_labels(2)
+            .with_issues(2)
+            .with_comments(1)
+            .build(),
+            "large": lambda: builder.with_labels(10)
+            .with_issues(50)
+            .with_comments(3)
+            .build(),
             "mixed_states": lambda: self._create_mixed_states(builder),
             "empty": lambda: builder.build(),
         }

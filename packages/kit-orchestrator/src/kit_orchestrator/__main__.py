@@ -139,15 +139,26 @@ class Main:
             )
 
         # Create repository using github-repo-manager
-        from github_repo_manager.github.repo_boundary import GitHubRepoBoundary
-        from github_repo_manager.operations.create import create_repository_operation
+        from github import Github
+        from github_repo_manager.github.repo_boundary import (
+            GitHubRepositoryBoundary,
+        )
+        from github_repo_manager.github.repo_service import (
+            GitHubRepositoryService,
+        )
+        from github_repo_manager.operations.create import (
+            create_repository_operation,
+        )
 
         print(f"Repository '{self._repo_name}' does not exist. Creating...")
         private = self._repository_visibility == "private"
 
-        repo_boundary = GitHubRepoBoundary(self._github_token)
+        assert self._github_token is not None
+        github_client = Github(self._github_token)
+        repo_boundary = GitHubRepositoryBoundary(github_client)
+        repo_service = GitHubRepositoryService(repo_boundary)
         create_repository_operation(
-            repo_boundary, self._repo_name, private=private, description=""
+            repo_service, self._repo_name, private=private, description=""
         )
 
         visibility = "private" if private else "public"
@@ -218,6 +229,7 @@ class Main:
         print("Continuing with restore operation...")
 
     def _build_github_service(self) -> None:
+        assert self._github_token is not None
         self._github_service = create_github_service(self._github_token)
 
     def _build_storage_service(self) -> None:
@@ -230,15 +242,19 @@ class Main:
 
     def _build_orchestrator(self) -> None:
         if self._operation == "save":
-            Orchestrator = StrategyBasedSaveOrchestrator
+            self._orchestrator = StrategyBasedSaveOrchestrator(
+                registry=self._registry,
+                github_service=self._github_service,
+                storage_service=self._storage_service,
+                git_service=self._git_service,
+            )
         else:
-            Orchestrator = StrategyBasedRestoreOrchestrator
-        self._orchestrator = Orchestrator(
-            registry=self._registry,
-            github_service=self._github_service,
-            storage_service=self._storage_service,
-            git_service=self._git_service,
-        )
+            self._orchestrator = StrategyBasedRestoreOrchestrator(
+                registry=self._registry,
+                github_service=self._github_service,
+                storage_service=self._storage_service,
+                git_service=self._git_service,
+            )
 
     def _execute_operation(self) -> None:
         self._print_start_message()

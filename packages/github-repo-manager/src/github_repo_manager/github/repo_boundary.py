@@ -4,7 +4,8 @@ This module provides a focused interface for repository CRUD operations only.
 """
 
 from typing import Dict, Any, cast
-from github import Github, AuthenticatedUser
+from github import Github
+from github.AuthenticatedUser import AuthenticatedUser
 
 
 class GitHubRepositoryBoundary:
@@ -39,6 +40,7 @@ class GitHubRepositoryBoundary:
             GithubException: If repository creation fails
         """
         owner, repo = repo_name.split("/", 1)
+        # get_user() returns authenticated user when called without arguments
         user = cast(AuthenticatedUser, self._github.get_user())
 
         if user.login.lower() == owner.lower():
@@ -53,7 +55,9 @@ class GitHubRepositoryBoundary:
                 name=repo, private=private, description=description
             )
 
-        return created_repo.raw_data
+        # PyGithub's raw_data attribute contains the raw JSON response
+        result: Dict[str, Any] = created_repo.raw_data
+        return result
 
     def repository_exists(self, repo_name: str) -> bool:
         """Check if a repository exists.
@@ -83,4 +87,5 @@ class GitHubRepositoryBoundary:
             GithubException: If repository not found
         """
         repo = self._github.get_repo(repo_name)
-        return repo.raw_data
+        result: Dict[str, Any] = repo.raw_data
+        return result

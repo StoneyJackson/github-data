@@ -43,7 +43,10 @@ def test_batch1_entities_no_dependencies():
 
 @pytest.mark.integration
 def test_batch1_save_strategies_create():
-    """Test that save strategies create for Batch 1 entities (github-data-tools only)."""
+    """Test that save strategies create for Batch 1 entities.
+
+    (github-data-tools only)
+    """
     registry = EntityRegistry()
     factory = StrategyFactory(registry=registry)
 
