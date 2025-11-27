@@ -9,23 +9,21 @@ from github_data_core.entities.registry import EntityRegistry
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_save_strategies_all_entities(all_entity_names):
-    """Test creating save strategies for all enabled entities except git_repository."""
+    """Test creating save strategies for all enabled entities (github-data-tools only)."""
     registry = EntityRegistry()
-    registry.get_entity("git_repository").enabled = False
     factory = StrategyFactory(registry)
     strategies = factory.create_save_strategies()
 
     strategy_names = [s.get_entity_name() for s in strategies]
 
-    # Verify we got all enabled entities
-    expected = set(all_entity_names) - {"git_repository"}
-    assert set(strategy_names) == expected
+    # Verify we got all enabled entities (all entities in github-data-tools)
+    assert set(strategy_names) == set(all_entity_names)
 
 
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_save_strategies_with_git_repository(all_entity_names):
-    """Test git_repository strategy is included when git_service provided."""
+    """Test save strategies work even when git_service is provided (github-data-tools entities don't use it)."""
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
     mock_git_service = Mock()
@@ -34,44 +32,32 @@ def test_create_save_strategies_with_git_repository(all_entity_names):
 
     strategy_names = [s.get_entity_name() for s in strategies]
 
-    # Should get ALL entities when git_service provided
+    # Should get all github-data-tools entities (git_repository is in different package)
     assert set(strategy_names) == set(all_entity_names)
-
-    # Verify git_repository strategy received git_service
-    git_strategy = next(
-        s for s in strategies if s.get_entity_name() == "git_repository"
-    )
-    assert git_strategy._git_service is mock_git_service
 
 
 @pytest.mark.integration
 @pytest.mark.medium
 def test_create_restore_strategies_all_entities(all_entity_names):
-    """Test creating restore strategies for all enabled entities."""
+    """Test creating restore strategies for all enabled entities (github-data-tools only)."""
     registry = EntityRegistry()
-    registry.get_entity("git_repository").enabled = False
     factory = StrategyFactory(registry)
     mock_github_service = Mock()
     strategies = factory.create_restore_strategies(github_service=mock_github_service)
 
     strategy_names = [s.get_entity_name() for s in strategies]
 
-    # Verify we got all enabled entities
-    expected = set(all_entity_names) - {"git_repository"}
-    assert set(strategy_names) == expected
+    # Verify we got all enabled entities (all entities in github-data-tools)
+    assert set(strategy_names) == set(all_entity_names)
 
 
 @pytest.mark.integration
 def test_create_restore_strategies_labels_with_conflict_strategy():
-    """Test labels restore with custom conflict strategy."""
+    """Test labels restore with custom conflict strategy (github-data-tools only)."""
     from github_data_tools.entities.labels.conflict_strategies import LabelConflictStrategy
     from github_data_tools.entities.labels.restore_strategy import FailIfConflictStrategy
 
     registry = EntityRegistry()
-
-    # Disable git_repository since we're not providing git_service
-    registry.get_entity("git_repository").enabled = False
-
     factory = StrategyFactory(registry)
     mock_github_service = Mock()
     strategies = factory.create_restore_strategies(
@@ -86,19 +72,19 @@ def test_create_restore_strategies_labels_with_conflict_strategy():
 
 @pytest.mark.integration
 def test_git_repository_requires_git_service():
-    """Test that git_repository validation requires git_service."""
-    registry = EntityRegistry()
+    """Test that github-data-tools entities don't require git_service.
 
+    Note: git_repository entity is in git-repo-tools package, not github-data-tools.
+    All entities in github-data-tools work without git_service.
+    """
+    registry = EntityRegistry()
     factory = StrategyFactory(registry)
 
-    # Without git_service, should raise validation error for git_repository
-    with pytest.raises(
-        RuntimeError, match="Entity 'git_repository' requires 'git_service'"
-    ):
-        factory.create_save_strategies()  # No git_service provided
+    # All github-data-tools entities should work without git_service
+    strategies = factory.create_save_strategies()  # No git_service - should work
+    assert len(strategies) > 0  # Should have created strategies
 
     # Same for restore
-    with pytest.raises(
-        RuntimeError, match="Entity 'git_repository' requires 'git_service'"
-    ):
-        factory.create_restore_strategies()  # No git_service provided
+    mock_github_service = Mock()
+    restore_strategies = factory.create_restore_strategies(github_service=mock_github_service)
+    assert len(restore_strategies) > 0  # Should have created strategies

@@ -7,23 +7,19 @@ from github_data_core.operations.strategy_factory import StrategyFactory
 
 @pytest.mark.integration
 def test_git_repository_requires_git_service_for_save():
-    """Test that git_repository entity validation fails without git_service."""
+    """Test that github-data-tools entities work without git_service.
+
+    Note: git_repository entity is in git-repo-tools package, not github-data-tools.
+    This test validates that github-data-tools entities don't have git_service requirement.
+    """
     registry = EntityRegistry()
     factory = StrategyFactory(registry)
 
-    # git_repository entity is enabled by default
-    # Disable all other entities to isolate the test
-    for entity_name in registry.get_all_entity_names():
-        entity = registry.get_entity(entity_name)
-        if entity_name != "git_repository":
-            entity.enabled = False
+    # All github-data-tools entities should work without git_service
+    strategies = factory.create_save_strategies()
 
-    # Try to create save strategies without git_service
-    with pytest.raises(
-        RuntimeError,
-        match="Entity 'git_repository' requires 'git_service' for save operation",
-    ):
-        factory.create_save_strategies()
+    # Should succeed - no git_service required for github-data-tools entities
+    assert len(strategies) > 0
 
 
 @pytest.mark.integration

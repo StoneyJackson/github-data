@@ -6,21 +6,21 @@ from github_data_core.entities.registry import EntityRegistry
 
 @pytest.mark.integration
 def test_all_10_entities_discovered():
-    """Test all 10 entities discovered by registry."""
+    """Test all 10 entities discovered by registry (github-data-tools package only)."""
     registry = EntityRegistry()
     names = registry.get_all_entity_names()
 
-    # Batch 1
+    # Batch 1 (independent entities)
     assert "labels" in names
     assert "milestones" in names
-    assert "git_repository" in names
+    assert "releases" in names
 
-    # Batch 2
+    # Batch 2 (issue hierarchy)
     assert "issues" in names
     assert "comments" in names
     assert "sub_issues" in names
 
-    # Batch 3
+    # Batch 3 (pull request hierarchy)
     assert "pull_requests" in names
     assert "pr_reviews" in names
     assert "pr_review_comments" in names
@@ -29,18 +29,21 @@ def test_all_10_entities_discovered():
 
 @pytest.mark.integration
 def test_complete_dependency_graph():
-    """Test complete dependency relationships for all entities."""
+    """Test complete dependency relationships for all entities (github-data-tools only)."""
     registry = EntityRegistry()
 
     # Verify each entity's dependencies
+    # Batch 1: Independent entities (no dependencies)
     assert registry.get_entity("labels").get_dependencies() == []
     assert registry.get_entity("milestones").get_dependencies() == []
-    assert registry.get_entity("git_repository").get_dependencies() == []
+    assert registry.get_entity("releases").get_dependencies() == []
 
+    # Batch 2: Issue hierarchy
     assert registry.get_entity("issues").get_dependencies() == ["milestones"]
     assert registry.get_entity("comments").get_dependencies() == ["issues"]
     assert registry.get_entity("sub_issues").get_dependencies() == ["issues"]
 
+    # Batch 3: Pull request hierarchy
     assert registry.get_entity("pull_requests").get_dependencies() == ["milestones"]
     assert registry.get_entity("pr_reviews").get_dependencies() == ["pull_requests"]
     assert registry.get_entity("pr_review_comments").get_dependencies() == [
@@ -94,9 +97,9 @@ def test_cascading_dependency_disable():
     assert "pr_review_comments" not in enabled_names
     assert "pr_comments" not in enabled_names
 
-    # These should still be enabled (independent)
+    # These should still be enabled (independent, no dependencies)
     assert "labels" in enabled_names
-    assert "git_repository" in enabled_names
+    assert "releases" in enabled_names
 
     # Cleanup
     del os.environ["INCLUDE_MILESTONES"]
