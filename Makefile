@@ -16,7 +16,8 @@ help:
 	@echo "  make sync                     Sync dependencies (update lock file)"
 	@echo ""
 	@echo "Testing:"
-	@echo "  make test-all                 All tests including container tests"
+	@echo "  make test                     All tests with source code coverage"
+	@echo "  make test-all                 Alias for 'test'"
 	@echo "  make test-fast                All tests except container tests (recommended for dev)"
 	@echo "  make test-unit                Unit tests only (fastest)"
 	@echo "  make test-integration         Integration tests excluding container tests"
@@ -64,8 +65,10 @@ sync:
 	pdm sync
 
 # Testing - All tests
-test-all:
+test:
 	pdm run pytest --cov=packages --cov-config=pyproject.toml
+
+test-all: test
 
 # Testing - Fast (excluding container tests)
 test-fast:
