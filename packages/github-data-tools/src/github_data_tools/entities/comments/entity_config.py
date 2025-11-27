@@ -5,7 +5,9 @@ from typing import Optional, List, TYPE_CHECKING
 if TYPE_CHECKING:
     from github_data_core.entities.strategy_context import StrategyContext
     from github_data_tools.entities.comments.save_strategy import CommentsSaveStrategy
-    from github_data_tools.entities.comments.restore_strategy import CommentsRestoreStrategy
+    from github_data_tools.entities.comments.restore_strategy import (
+        CommentsRestoreStrategy,
+    )
 
 
 class CommentsEntityConfig:
@@ -61,7 +63,9 @@ class CommentsEntityConfig:
         Returns:
             CommentsSaveStrategy instance
         """
-        from github_data_tools.entities.comments.save_strategy import CommentsSaveStrategy
+        from github_data_tools.entities.comments.save_strategy import (
+            CommentsSaveStrategy,
+        )
 
         return CommentsSaveStrategy()
 

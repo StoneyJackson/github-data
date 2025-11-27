@@ -41,7 +41,9 @@ class KitOrchestratorTestHelper:
             ".",
         ]
 
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd="/workspaces/github-data")
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd="/workspaces/github-data"
+        )
         if result.returncode != 0:
             raise RuntimeError(f"Docker build failed: {result.stderr}")
 
@@ -133,7 +135,9 @@ class TestKitOrchestratorBuild:
 class TestKitOrchestratorEndToEnd:
     """End-to-end tests for complete freeze/restore workflows."""
 
-    def test_save_operation_requires_operation_env(self, kit_orchestrator_image, test_data_dir):
+    def test_save_operation_requires_operation_env(
+        self, kit_orchestrator_image, test_data_dir
+    ):
         """Verify container fails without OPERATION environment variable."""
         environment = {
             "GITHUB_TOKEN": "dummy_token",
@@ -148,7 +152,9 @@ class TestKitOrchestratorEndToEnd:
         assert result.returncode != 0
         assert "OPERATION environment variable required" in result.stderr
 
-    def test_save_operation_requires_github_token(self, kit_orchestrator_image, test_data_dir):
+    def test_save_operation_requires_github_token(
+        self, kit_orchestrator_image, test_data_dir
+    ):
         """Verify container fails without GITHUB_TOKEN."""
         environment = {
             "OPERATION": "save",
@@ -163,7 +169,9 @@ class TestKitOrchestratorEndToEnd:
         assert result.returncode != 0
         assert "GITHUB_TOKEN environment variable required" in result.stderr
 
-    def test_save_operation_requires_github_repo(self, kit_orchestrator_image, test_data_dir, github_token):
+    def test_save_operation_requires_github_repo(
+        self, kit_orchestrator_image, test_data_dir, github_token
+    ):
         """Verify container fails without GITHUB_REPO."""
         environment = {
             "OPERATION": "save",

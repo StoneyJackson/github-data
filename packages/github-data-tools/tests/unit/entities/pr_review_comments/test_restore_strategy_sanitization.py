@@ -4,7 +4,9 @@ import pytest
 from github_data_tools.entities.pr_review_comments.restore_strategy import (
     PullRequestReviewCommentsRestoreStrategy,
 )
-from github_data_tools.entities.pr_review_comments.models import PullRequestReviewComment
+from github_data_tools.entities.pr_review_comments.models import (
+    PullRequestReviewComment,
+)
 from github_data_tools.entities.users.models import GitHubUser
 
 

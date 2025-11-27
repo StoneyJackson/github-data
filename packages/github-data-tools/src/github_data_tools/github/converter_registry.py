@@ -111,7 +111,9 @@ class ConverterRegistry:
         """Scan EntityRegistry and eagerly import all declared converters."""
         from pathlib import Path
         from github_data_core.entities.registry import EntityRegistry
-        from github_data_tools.github.common_converters_config import CommonConvertersConfig
+        from github_data_tools.github.common_converters_config import (
+            CommonConvertersConfig,
+        )
 
         # Load common converters first
         common_config = CommonConvertersConfig()

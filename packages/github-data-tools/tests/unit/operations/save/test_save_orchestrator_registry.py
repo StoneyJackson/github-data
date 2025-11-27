@@ -59,9 +59,16 @@ def test_save_orchestrator_returns_failure_status_on_error():
 
     # Disable all other entities (ignore if they don't exist in this package)
     for entity_name in [
-        "git_repository", "labels", "issues", "comments",
-        "pull_requests", "pr_comments", "pr_reviews",
-        "pr_review_comments", "sub_issues", "releases"
+        "git_repository",
+        "labels",
+        "issues",
+        "comments",
+        "pull_requests",
+        "pr_comments",
+        "pr_reviews",
+        "pr_review_comments",
+        "sub_issues",
+        "releases",
     ]:
         try:
             registry.get_entity(entity_name).enabled = False

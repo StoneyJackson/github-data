@@ -156,7 +156,10 @@ def test_load_converter_imports_from_spec():
 
 def test_load_converter_detects_naming_collisions():
     """_load_converter() should detect when two entities declare same name."""
-    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import (
+        ConverterRegistry,
+        ValidationError,
+    )
 
     # Create registry (will auto-load)
     registry = ConverterRegistry()
@@ -191,7 +194,10 @@ def test_load_converter_detects_naming_collisions():
 
 def test_load_converter_raises_validation_error_for_bad_module():
     """_load_converter() should raise ValidationError for missing module."""
-    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import (
+        ConverterRegistry,
+        ValidationError,
+    )
 
     registry = ConverterRegistry()
 
@@ -211,7 +217,10 @@ def test_load_converter_raises_validation_error_for_bad_module():
 
 def test_load_converter_raises_validation_error_for_bad_function():
     """_load_converter() should raise ValidationError for missing function."""
-    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import (
+        ConverterRegistry,
+        ValidationError,
+    )
 
     registry = ConverterRegistry()
 
@@ -299,7 +308,10 @@ def test_common_converters_are_registered():
 
 def test_validate_all_checks_converters_are_callable():
     """_validate_all() should verify all converters are callable."""
-    from github_data_tools.github.converter_registry import ConverterRegistry, ValidationError
+    from github_data_tools.github.converter_registry import (
+        ConverterRegistry,
+        ValidationError,
+    )
 
     registry = ConverterRegistry()
 

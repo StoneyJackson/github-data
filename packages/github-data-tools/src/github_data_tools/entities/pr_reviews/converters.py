@@ -4,7 +4,10 @@
 from typing import Dict, Any
 from .models import PullRequestReview
 from github_data_tools.github.converter_registry import get_converter
-from github_data_tools.github.converters import _parse_datetime, _extract_pr_number_from_url
+from github_data_tools.github.converters import (
+    _parse_datetime,
+    _extract_pr_number_from_url,
+)
 
 
 def convert_to_pr_review(api_data: Dict[str, Any]) -> PullRequestReview:

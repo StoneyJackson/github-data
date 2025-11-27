@@ -251,7 +251,9 @@ class TestMilestoneSaveRestoreIntegration:
         self, tmp_path, sample_milestones, sample_github_user
     ):
         """Test save/restore cycle with PRs that have milestone associations."""
-        from github_data_tools.operations.restore.strategy import RestoreConflictStrategy
+        from github_data_tools.operations.restore.strategy import (
+            RestoreConflictStrategy,
+        )
         from unittest.mock import Mock
 
         # Setup

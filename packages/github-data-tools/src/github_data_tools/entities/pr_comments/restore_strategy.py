@@ -105,7 +105,9 @@ class PullRequestCommentsRestoreStrategy(RestoreEntityStrategy):
 
     def _prepare_comment_body(self, comment: PullRequestComment) -> str:
         """Prepare comment body with optional metadata and sanitization."""
-        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import (
+            prepare_pr_comment_body_for_restore,
+        )
 
         return prepare_pr_comment_body_for_restore(
             comment, include_metadata=self._include_original_metadata

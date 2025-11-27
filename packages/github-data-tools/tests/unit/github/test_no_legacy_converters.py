@@ -38,9 +38,8 @@ class TestNoLegacyConverters:
             entity = meta["entity"]
 
             # Should be either from entity package or common converters
-            assert (
-                "github_data_tools.entities." in module
-                or (module == "github_data_tools.github.converters" and entity == "common")
+            assert "github_data_tools.entities." in module or (
+                module == "github_data_tools.github.converters" and entity == "common"
             ), f"Converter {name} from unexpected location: {module}"
 
     def test_entity_converters_not_in_monolithic_file(self):

@@ -22,29 +22,24 @@ def main() -> int:
     )
 
     parser.add_argument(
-        "operation",
-        choices=["save", "restore"],
-        help="Operation to perform"
+        "operation", choices=["save", "restore"], help="Operation to perform"
     )
 
     parser.add_argument(
-        "--repo-path",
-        type=Path,
-        required=True,
-        help="Path to Git repository"
+        "--repo-path", type=Path, required=True, help="Path to Git repository"
     )
 
     parser.add_argument(
         "--output",
         type=Path,
-        help="Output path for save operation or input path for restore operation"
+        help="Output path for save operation or input path for restore operation",
     )
 
     parser.add_argument(
         "--format",
         choices=["bundle", "archive"],
         default="bundle",
-        help="Backup format (default: bundle)"
+        help="Backup format (default: bundle)",
     )
 
     args = parser.parse_args()

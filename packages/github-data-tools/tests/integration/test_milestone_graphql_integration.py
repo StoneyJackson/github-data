@@ -14,7 +14,9 @@ from github_data_tools.github.queries.milestones import (
     build_milestones_query_variables,
 )
 from github_data_tools.github.queries.issues import REPOSITORY_ISSUES_QUERY
-from github_data_tools.github.queries.pull_requests import REPOSITORY_PULL_REQUESTS_QUERY
+from github_data_tools.github.queries.pull_requests import (
+    REPOSITORY_PULL_REQUESTS_QUERY,
+)
 from github_data_tools.github.converter_registry import get_converter
 
 

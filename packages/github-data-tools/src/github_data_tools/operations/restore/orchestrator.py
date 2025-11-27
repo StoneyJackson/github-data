@@ -101,7 +101,9 @@ class StrategyBasedRestoreOrchestrator(StrategyBasedOrchestrator):
                         strategy._conflict_strategy, OverwriteConflictStrategy
                     ):
                         # Get existing labels for overwrite strategy
-                        from github_data_tools.github.converter_registry import get_converter
+                        from github_data_tools.github.converter_registry import (
+                            get_converter,
+                        )
 
                         raw_existing = self._github_service.get_repository_labels(
                             repo_name

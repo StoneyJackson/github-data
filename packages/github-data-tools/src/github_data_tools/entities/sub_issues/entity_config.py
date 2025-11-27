@@ -4,7 +4,9 @@ from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data_core.entities.strategy_context import StrategyContext
-    from github_data_tools.entities.sub_issues.save_strategy import SubIssuesSaveStrategy
+    from github_data_tools.entities.sub_issues.save_strategy import (
+        SubIssuesSaveStrategy,
+    )
     from github_data_tools.entities.sub_issues.restore_strategy import (
         SubIssuesRestoreStrategy,
     )
@@ -68,7 +70,9 @@ class SubIssuesEntityConfig:
         Returns:
             SubIssuesSaveStrategy instance
         """
-        from github_data_tools.entities.sub_issues.save_strategy import SubIssuesSaveStrategy
+        from github_data_tools.entities.sub_issues.save_strategy import (
+            SubIssuesSaveStrategy,
+        )
 
         return SubIssuesSaveStrategy()
 

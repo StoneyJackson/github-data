@@ -251,7 +251,9 @@ class TestPreparePrCommentBodyForRestore:
 
     def test_sanitizes_mentions_in_body(self) -> None:
         """Should sanitize @mentions in PR comment body."""
-        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import (
+            prepare_pr_comment_body_for_restore,
+        )
 
         comment = _create_test_pr_comment(body="LGTM @alice")
         result = prepare_pr_comment_body_for_restore(comment, include_metadata=False)
@@ -259,7 +261,9 @@ class TestPreparePrCommentBodyForRestore:
 
     def test_sanitizes_mentions_with_metadata(self) -> None:
         """Should sanitize @mentions in both body and metadata footer."""
-        from github_data_tools.github.metadata import prepare_pr_comment_body_for_restore
+        from github_data_tools.github.metadata import (
+            prepare_pr_comment_body_for_restore,
+        )
 
         comment = _create_test_pr_comment(body="Thanks @bob", user_login="alice")
         result = prepare_pr_comment_body_for_restore(comment, include_metadata=True)

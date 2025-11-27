@@ -78,7 +78,9 @@ class IssuesEntityConfig:
         Returns:
             IssuesRestoreStrategy instance
         """
-        from github_data_tools.entities.issues.restore_strategy import IssuesRestoreStrategy
+        from github_data_tools.entities.issues.restore_strategy import (
+            IssuesRestoreStrategy,
+        )
 
         return IssuesRestoreStrategy(
             include_original_metadata=context.include_original_metadata

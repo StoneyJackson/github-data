@@ -1,7 +1,7 @@
 """Tests for git_repositories entity configuration."""
 
 from unittest.mock import Mock
-from git_repo_tools.entities.entity_config import (
+from git_repo_tools.entities.git_repositories.entity_config import (
     GitRepositoryEntityConfig,
 )
 from github_data_core.entities.strategy_context import StrategyContext

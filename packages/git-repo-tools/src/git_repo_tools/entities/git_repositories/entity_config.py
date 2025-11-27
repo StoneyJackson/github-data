@@ -4,10 +4,10 @@ from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from github_data_core.entities.strategy_context import StrategyContext
-    from git_repo_tools.entities.save_strategy import (
+    from git_repo_tools.entities.git_repositories.save_strategy import (
         GitRepositorySaveStrategy,
     )
-    from git_repo_tools.entities.restore_strategy import (
+    from git_repo_tools.entities.git_repositories.restore_strategy import (
         GitRepositoryRestoreStrategy,
     )
 
@@ -45,7 +45,7 @@ class GitRepositoryEntityConfig:
         Note:
             Validation ensures git_service is available, no None check needed
         """
-        from git_repo_tools.entities.save_strategy import (
+        from git_repo_tools.entities.git_repositories.save_strategy import (
             GitRepositorySaveStrategy,
         )
 
@@ -66,7 +66,7 @@ class GitRepositoryEntityConfig:
         Note:
             Validation ensures git_service is available, no None check needed
         """
-        from git_repo_tools.entities.restore_strategy import (
+        from git_repo_tools.entities.git_repositories.restore_strategy import (
             GitRepositoryRestoreStrategy,
         )
 

@@ -163,7 +163,9 @@ def test_operation_should_not_cache_for_write_operations():
 
 def test_registry_initializes_empty():
     """Registry should initialize with empty operations."""
-    with patch("github_data_core.entities.registry.EntityRegistry") as mock_entity_registry:
+    with patch(
+        "github_data_core.entities.registry.EntityRegistry"
+    ) as mock_entity_registry:
         mock_entity_registry.return_value._entities = {}
 
         registry = GitHubOperationRegistry()
@@ -185,7 +187,9 @@ def test_registry_discovers_operations_from_entity_configs():
     mock_entity = Mock()
     mock_entity.config = mock_config
 
-    with patch("github_data_core.entities.registry.EntityRegistry") as mock_entity_registry:
+    with patch(
+        "github_data_core.entities.registry.EntityRegistry"
+    ) as mock_entity_registry:
         mock_entity_registry.return_value._entities = {"releases": mock_entity}
 
         registry = GitHubOperationRegistry()
@@ -202,7 +206,9 @@ def test_registry_skips_entities_without_github_api_operations():
     mock_entity = Mock()
     mock_entity.config = mock_config
 
-    with patch("github_data_core.entities.registry.EntityRegistry") as mock_entity_registry:
+    with patch(
+        "github_data_core.entities.registry.EntityRegistry"
+    ) as mock_entity_registry:
         mock_entity_registry.return_value._entities = {"some_entity": mock_entity}
 
         registry = GitHubOperationRegistry()
@@ -223,7 +229,9 @@ def test_registry_validates_all_operations_at_startup():
     mock_entity = Mock()
     mock_entity.config = mock_config
 
-    with patch("github_data_core.entities.registry.EntityRegistry") as mock_entity_registry:
+    with patch(
+        "github_data_core.entities.registry.EntityRegistry"
+    ) as mock_entity_registry:
         mock_entity_registry.return_value._entities = {"test_entity": mock_entity}
 
         with pytest.raises(ValidationError, match="Invalid operation spec"):
@@ -244,7 +252,9 @@ def test_write_operations_auto_detected():
     mock_entity = Mock()
     mock_entity.config = mock_config
 
-    with patch("github_data_core.entities.registry.EntityRegistry") as mock_entity_registry:
+    with patch(
+        "github_data_core.entities.registry.EntityRegistry"
+    ) as mock_entity_registry:
         mock_entity_registry.return_value._entities = {"test": mock_entity}
 
         registry = GitHubOperationRegistry()

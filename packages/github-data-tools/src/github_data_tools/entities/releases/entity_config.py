@@ -66,7 +66,9 @@ class ReleasesEntityConfig:
         Returns:
             ReleasesSaveStrategy instance
         """
-        from github_data_tools.entities.releases.save_strategy import ReleasesSaveStrategy
+        from github_data_tools.entities.releases.save_strategy import (
+            ReleasesSaveStrategy,
+        )
 
         return ReleasesSaveStrategy()
 

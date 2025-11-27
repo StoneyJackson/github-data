@@ -5,7 +5,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from github_data_tools.operations.restore.strategy import RestoreEntityStrategy
-from github_data_tools.entities.pr_review_comments.models import PullRequestReviewComment
+from github_data_tools.entities.pr_review_comments.models import (
+    PullRequestReviewComment,
+)
 
 if TYPE_CHECKING:
     from github_data_core.storage.protocols import StorageService

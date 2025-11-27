@@ -5,6 +5,8 @@ Using direct imports instead of pytest_plugins to avoid the
 "non-top-level conftest" error.
 """
 
+import pytest
+
 # Import all fixtures to register them with pytest
 # Test data fixtures
 from .shared.fixtures.test_data.sample_github_data import (  # noqa: F401
@@ -102,11 +104,8 @@ from .shared.fixtures.support.performance_monitoring_services import (  # noqa: 
 )
 
 # Entity registry fixture for monorepo
-import pytest
 from pathlib import Path
 from github_data_core.entities.registry import EntityRegistry
-import tempfile
-import shutil
 
 
 @pytest.fixture(autouse=True)
@@ -128,12 +127,3 @@ def patch_entity_registry_default(monkeypatch):
         original_init(self, entities_dir)
 
     monkeypatch.setattr(EntityRegistry, "__init__", patched_init)
-
-
-@pytest.fixture
-def temp_data_dir():
-    """Create a temporary directory for test data."""
-    temp_dir = tempfile.mkdtemp()
-    yield temp_dir
-    # Cleanup
-    shutil.rmtree(temp_dir, ignore_errors=True)

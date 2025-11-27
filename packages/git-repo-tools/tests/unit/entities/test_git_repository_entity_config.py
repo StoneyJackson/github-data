@@ -1,15 +1,21 @@
 """Tests for git_repository entity configuration."""
 
 import importlib
+from pathlib import Path
 
 import pytest
 from github_data_core.entities.registry import EntityRegistry
 
 
+def get_git_repo_tools_entities_dir():
+    """Get the entities directory for git-repo-tools package."""
+    return Path(__file__).parent.parent.parent.parent / "src/git_repo_tools/entities"
+
+
 @pytest.mark.unit
 def test_git_repository_entity_discovered():
     """Test that git_repository entity is discovered by registry."""
-    registry = EntityRegistry()
+    registry = EntityRegistry(get_git_repo_tools_entities_dir())
     entity = registry.get_entity("git_repository")
 
     assert entity.config.name == "git_repository"
@@ -23,7 +29,7 @@ def test_git_repository_entity_discovered():
 @pytest.mark.unit
 def test_git_repository_entity_no_dependencies():
     """Test that git_repository entity has no dependencies."""
-    registry = EntityRegistry()
+    registry = EntityRegistry(get_git_repo_tools_entities_dir())
     entity = registry.get_entity("git_repository")
 
     assert entity.get_dependencies() == []
@@ -32,7 +38,7 @@ def test_git_repository_entity_no_dependencies():
 @pytest.mark.unit
 def test_git_repository_entity_enabled_by_default():
     """Test that git_repository entity is enabled by default."""
-    registry = EntityRegistry()
+    registry = EntityRegistry(get_git_repo_tools_entities_dir())
     entity = registry.get_entity("git_repository")
 
     assert entity.is_enabled() is True
@@ -42,7 +48,7 @@ def test_git_repository_entity_enabled_by_default():
 def test_git_repository_save_strategy_exists():
     """Test that git_repository save strategy exists at expected location."""
     module = importlib.import_module(
-        "github_data.entities.git_repositories.save_strategy"
+        "git_repo_tools.entities.git_repositories.save_strategy"
     )
     strategy_class = getattr(module, "GitRepositorySaveStrategy")
     assert strategy_class is not None
@@ -52,7 +58,7 @@ def test_git_repository_save_strategy_exists():
 def test_git_repository_restore_strategy_exists():
     """Test that git_repository restore strategy exists at expected location."""
     module = importlib.import_module(
-        "github_data.entities.git_repositories.restore_strategy"
+        "git_repo_tools.entities.git_repositories.restore_strategy"
     )
     strategy_class = getattr(module, "GitRepositoryRestoreStrategy")
     assert strategy_class is not None

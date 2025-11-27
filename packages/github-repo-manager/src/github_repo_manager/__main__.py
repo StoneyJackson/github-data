@@ -22,45 +22,38 @@ def main() -> int:
     )
 
     parser.add_argument(
-        "operation",
-        choices=["create", "check", "delete"],
-        help="Operation to perform"
+        "operation", choices=["create", "check", "delete"], help="Operation to perform"
     )
 
     parser.add_argument(
-        "--repo",
-        required=True,
-        help="Repository name in format owner/repo"
+        "--repo", required=True, help="Repository name in format owner/repo"
     )
 
     parser.add_argument(
-        "--private",
-        action="store_true",
-        help="Create repository as private"
+        "--private", action="store_true", help="Create repository as private"
     )
 
-    parser.add_argument(
-        "--description",
-        default="",
-        help="Repository description"
-    )
+    parser.add_argument("--description", default="", help="Repository description")
 
     parser.add_argument(
         "--create-if-missing",
         action="store_true",
-        help="Create repository if it doesn't exist (for check operation)"
+        help="Create repository if it doesn't exist (for check operation)",
     )
 
     parser.add_argument(
         "--token",
         default=os.environ.get("GITHUB_TOKEN"),
-        help="GitHub access token (or set GITHUB_TOKEN env var)"
+        help="GitHub access token (or set GITHUB_TOKEN env var)",
     )
 
     args = parser.parse_args()
 
     if not args.token:
-        print("Error: GitHub token required. Use --token or set GITHUB_TOKEN", file=sys.stderr)
+        print(
+            "Error: GitHub token required. Use --token or set GITHUB_TOKEN",
+            file=sys.stderr,
+        )
         return 1
 
     # TODO: Implement actual operations

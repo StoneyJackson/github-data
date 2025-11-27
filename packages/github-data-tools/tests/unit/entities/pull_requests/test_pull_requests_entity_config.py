@@ -2,7 +2,9 @@
 
 import pytest
 from github_data_core.entities.registry import EntityRegistry
-from github_data_tools.entities.pull_requests.entity_config import PullRequestsEntityConfig
+from github_data_tools.entities.pull_requests.entity_config import (
+    PullRequestsEntityConfig,
+)
 from github_data_tools.entities.pull_requests.restore_strategy import (
     DefaultPullRequestConflictStrategy,
 )

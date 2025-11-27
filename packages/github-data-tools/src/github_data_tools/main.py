@@ -8,7 +8,9 @@ from typing import Optional, List, Dict, Any
 from github_data_core.entities.registry import EntityRegistry
 from github_data_tools.operations import StrategyBasedOrchestrator
 from github_data_tools.operations.save.orchestrator import StrategyBasedSaveOrchestrator
-from github_data_tools.operations.restore.orchestrator import StrategyBasedRestoreOrchestrator
+from github_data_tools.operations.restore.orchestrator import (
+    StrategyBasedRestoreOrchestrator,
+)
 from github_data_tools.github import create_github_service
 from github_data_tools.storage import create_storage_service
 from git_repo_tools.git.service import GitRepositoryServiceImpl
