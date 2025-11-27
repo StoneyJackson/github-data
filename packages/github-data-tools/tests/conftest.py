@@ -39,10 +39,19 @@ from .shared.fixtures.workflow_services.restore_workflow_services import *  # no
 from .shared.fixtures.workflow_services.save_workflow_services import *  # noqa: F401,F403
 from .shared.fixtures.workflow_services.sync_workflow_services import *  # noqa: F401,F403
 
+# Additional support fixtures
+from .shared.fixtures.support.entity_fixtures import all_entity_names, enabled_entity_names  # noqa: F401
+from .shared.fixtures.support.github_service_registry import validate_github_service_registry  # noqa: F401
+from .shared.fixtures.support.data_builders import github_data_builder, parametrized_data_factory  # noqa: F401
+from .shared.fixtures.support.test_environments import integration_test_environment, rate_limiting_test_services  # noqa: F401
+from .shared.fixtures.support.performance_monitoring_services import performance_monitoring_services  # noqa: F401
+
 # Entity registry fixture for monorepo
 import pytest
 from pathlib import Path
 from github_data_core.entities.registry import EntityRegistry
+import tempfile
+import shutil
 
 
 @pytest.fixture(autouse=True)
@@ -62,3 +71,12 @@ def patch_entity_registry_default(monkeypatch):
         original_init(self, entities_dir)
 
     monkeypatch.setattr(EntityRegistry, "__init__", patched_init)
+
+
+@pytest.fixture
+def temp_data_dir():
+    """Create a temporary directory for test data."""
+    temp_dir = tempfile.mkdtemp()
+    yield temp_dir
+    # Cleanup
+    shutil.rmtree(temp_dir, ignore_errors=True)

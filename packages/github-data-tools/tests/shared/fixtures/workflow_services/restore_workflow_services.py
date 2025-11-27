@@ -9,14 +9,12 @@ def restore_workflow_services(
 ):
     """Pre-configured services for restore workflow testing."""
     from github_data_tools.github.service import GitHubService
-    from github_data_tools.github.rate_limiter import RateLimitHandler
     from github_data_tools.storage import create_storage_service
     import json
     import os
 
     # Configure GitHub service for restore operations
-    rate_limiter = RateLimitHandler(max_retries=3, base_delay=0.1)
-    github_service = GitHubService(boundary_with_empty_repository, rate_limiter)
+    github_service = GitHubService(boundary_with_empty_repository)
 
     # Configure storage service and pre-populate with sample data
     storage_service = create_storage_service("json")

@@ -7,12 +7,10 @@ import pytest
 def sync_workflow_services(boundary_with_repository_data, temp_data_dir):
     """Pre-configured services for sync workflow testing."""
     from github_data_tools.github.service import GitHubService
-    from github_data_tools.github.rate_limiter import RateLimitHandler
     from github_data_tools.storage import create_storage_service
 
     # Configure GitHub service with aggressive rate limiting for sync scenarios
-    rate_limiter = RateLimitHandler(max_retries=5, base_delay=0.05)
-    github_service = GitHubService(boundary_with_repository_data, rate_limiter)
+    github_service = GitHubService(boundary_with_repository_data)
 
     # Configure storage service
     storage_service = create_storage_service("json")
