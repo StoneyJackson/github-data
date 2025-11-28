@@ -207,7 +207,7 @@ class TestDockerComposeExecution:
 
         # Copy compose file to temp directory and fix build context
         # Find project root dynamically
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent.parent.parent
         compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
@@ -243,7 +243,7 @@ class TestDockerComposeExecution:
 
         # Copy compose file to temp directory and fix build context
         # Find project root dynamically
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent.parent.parent
         compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
@@ -305,7 +305,7 @@ class TestDockerComposeExecution:
 
         # Copy compose file to temp directory and fix build context
         # Find project root dynamically
-        project_root = Path(__file__).parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent.parent.parent
         compose_source = project_root / "docker-compose.test.yml"
         compose_dest = Path(compose_temp_dir) / "docker-compose.test.yml"
         compose_content = compose_source.read_text()
@@ -448,7 +448,7 @@ class TestDockerComposePerformance:
 
             # Copy compose file and fix build context
             # Find project root dynamically
-            project_root = Path(__file__).parent.parent.parent
+            project_root = Path(__file__).parent.parent.parent.parent.parent
             compose_source = project_root / "docker-compose.test.yml"
             compose_dest = Path(temp_dir) / "docker-compose.test.yml"
             compose_content = compose_source.read_text()

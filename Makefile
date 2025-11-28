@@ -129,6 +129,10 @@ check: format lint type-check test-fast
 check-all: format lint type-check test-all
 
 # Docker builds
+# Root image (all-in-one workspace build)
+docker-build:
+	docker build -t github-data:latest .
+
 docker-build-base:
 	docker build -t github-data-base:latest -f docker/base.Dockerfile .
 

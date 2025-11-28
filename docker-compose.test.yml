@@ -51,9 +51,9 @@ services:
     profiles:
       - health
       - test
-    command: ["python", "-c", "import github_data.main; print('Health check passed')"]
+    command: ["python", "-c", "import kit_orchestrator; print('Health check passed')"]
     healthcheck:
-      test: ["CMD", "python", "-c", "import github_data.main"]
+      test: ["CMD", "python", "-c", "import kit_orchestrator"]
       interval: 10s
       timeout: 5s
       retries: 3

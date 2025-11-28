@@ -186,8 +186,8 @@ except Exception as e:
         """Test that Git repository service can be imported in container."""
         python_script = """
 try:
-    from github_data_tools.git.service import GitRepositoryServiceImpl
-    from github_data_tools.entities.git_repositories.models import GitBackupFormat
+    from git_repo_tools.git.service import GitRepositoryServiceImpl
+    from git_repo_tools.entities.models import GitBackupFormat
     print("SUCCESS: Git repository modules imported successfully")
 
     # Test basic instantiation
@@ -321,8 +321,8 @@ class TestGitContainerIntegration:
 import sys
 import os
 from pathlib import Path
-from github_data_tools.git.service import GitRepositoryServiceImpl
-from github_data_tools.entities.git_repositories.models import GitBackupFormat
+from git_repo_tools.git.service import GitRepositoryServiceImpl
+from git_repo_tools.entities.models import GitBackupFormat
 
 try:
     # Test service creation
@@ -375,11 +375,11 @@ except Exception as e:
 import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
-from github_data_tools.git.service import GitRepositoryServiceImpl
-from github_data_tools.entities.git_repositories.save_strategy import (
+from git_repo_tools.git.service import GitRepositoryServiceImpl
+from git_repo_tools.entities.git_repositories.save_strategy import (
     GitRepositorySaveStrategy,
 )
-from github_data_tools.entities.git_repositories.models import (
+from git_repo_tools.entities.models import (
     GitBackupFormat,
     GitOperationResult,
 )
@@ -451,7 +451,7 @@ from pathlib import Path
 try:
     # Patch the orchestrator to avoid actual GitHub API calls
     with patch(
-        'github_data.main.StrategyBasedSaveOrchestrator'
+        'kit_orchestrator.main.StrategyBasedSaveOrchestrator'
     ) as mock_orchestrator_class:
         # Create mock orchestrator instance
         mock_orchestrator = Mock()
@@ -465,7 +465,7 @@ try:
         mock_orchestrator_class.return_value = mock_orchestrator
 
         # Import and run main after patching
-        from github_data_tools.main import main
+        from kit_orchestrator.main import main
         main()
 
         # Verify the orchestrator was created and execute was called

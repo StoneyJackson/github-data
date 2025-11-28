@@ -128,8 +128,8 @@ class TestDockerBuild:
         assert result.returncode == 0, f"Container inspection failed: {result.stderr}"
         output = result.stdout
 
-        # Check for expected files/directories
-        assert "github_data" in output, "Source directory should be present"
+        # Check for expected files/directories (monorepo structure)
+        assert "packages" in output, "Packages directory should be present"
         assert "pyproject.toml" in output, "pyproject.toml should be present"
 
     def test_built_image_has_python_dependencies(self):
