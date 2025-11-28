@@ -6,6 +6,7 @@ Provides backward-compatible interface matching the original monolithic containe
 import os
 import sys
 import time
+from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 from github_data_core.entities.registry import EntityRegistry
@@ -16,6 +17,44 @@ from github_data_tools.operations.restore.orchestrator import (
 from github_data_tools.github.service import create_github_service
 from github_data_core.storage import create_storage_service
 from git_repo_tools.git.service import GitRepositoryServiceImpl
+
+
+def create_monorepo_entity_registry() -> EntityRegistry:
+    """Create EntityRegistry with all entities from the monorepo.
+
+    In the monorepo structure, entities are distributed across multiple packages:
+    - github-data-tools: labels, milestones, releases, issues, comments, etc.
+    - git-repo-tools: git_repository
+
+    This function creates a registry that discovers entities from github-data-tools
+    (which has most entities), then manually registers entities from git-repo-tools.
+
+    Returns:
+        EntityRegistry instance with all monorepo entities registered
+    """
+    # Start with github-data-tools entities (the majority)
+    # __file__ is /app/packages/kit-orchestrator/src/kit_orchestrator/__main__.py
+    # We need /app/packages/github-data-tools/src/github_data_tools/entities
+    app_packages_dir = Path(__file__).parent.parent.parent.parent
+    github_data_tools_entities = (
+        app_packages_dir / "github-data-tools/src/github_data_tools/entities"
+    )
+    registry = EntityRegistry(entities_dir=github_data_tools_entities)
+
+    # Manually register git-repo-tools entities
+    from git_repo_tools.entities.git_repositories.entity_config import (
+        GitRepositoryEntityConfig,
+    )
+    from github_data_core.entities.base import RegisteredEntity
+
+    # Create RegisteredEntity with default enabled state
+    git_repo_entity = RegisteredEntity(
+        config=GitRepositoryEntityConfig,
+        enabled=GitRepositoryEntityConfig.default_value
+    )
+    registry._entities[GitRepositoryEntityConfig.name] = git_repo_entity
+
+    return registry
 
 
 def main() -> None:
@@ -64,7 +103,8 @@ class Main:
 
     def _load_registry_from_environment(self) -> None:
         try:
-            self._registry = EntityRegistry.from_environment(is_strict=False)
+            self._registry = create_monorepo_entity_registry()
+            self._registry._load_from_environment(is_strict=False)
         except ValueError as e:
             exit(f"Error initializing registry: {e}")
 
