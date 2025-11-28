@@ -114,7 +114,15 @@ class TestKitOrchestratorBuild:
     def test_image_has_python(self, kit_orchestrator_image):
         """Verify image contains Python runtime."""
         result = subprocess.run(
-            ["docker", "run", "--rm", kit_orchestrator_image, "python", "--version"],
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--entrypoint=",
+                kit_orchestrator_image,
+                "python",
+                "--version",
+            ],
             capture_output=True,
             text=True,
         )
@@ -124,7 +132,15 @@ class TestKitOrchestratorBuild:
     def test_image_has_git(self, kit_orchestrator_image):
         """Verify image contains git for git operations."""
         result = subprocess.run(
-            ["docker", "run", "--rm", kit_orchestrator_image, "git", "--version"],
+            [
+                "docker",
+                "run",
+                "--rm",
+                "--entrypoint=",
+                kit_orchestrator_image,
+                "git",
+                "--version",
+            ],
             capture_output=True,
             text=True,
         )

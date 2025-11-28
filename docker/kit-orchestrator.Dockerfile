@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir pdm
 WORKDIR /build
 
 # Copy workspace configuration
-COPY pyproject.toml pdm.lock ./
+COPY pyproject.toml pdm.lock README.md ./
 
 # Copy all package sources
 COPY packages/core ./packages/core
@@ -19,8 +19,21 @@ COPY packages/github-repo-manager ./packages/github-repo-manager
 COPY packages/github-data-tools ./packages/github-data-tools
 COPY packages/kit-orchestrator ./packages/kit-orchestrator
 
-# Install all dependencies (including all packages)
-RUN pdm install --prod --no-editable
+# Create README.md files for packages that reference them in pyproject.toml
+RUN for pkg in packages/core packages/git-repo-tools packages/github-repo-manager packages/github-data-tools; do \
+        if [ ! -f "$pkg/README.md" ]; then cp README.md "$pkg/README.md"; fi; \
+    done
+
+# Install dependencies first (without workspace packages)
+RUN pdm export --prod -o requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Build and install each package in dependency order
+RUN cd packages/core && pip install --no-cache-dir . && \
+    cd ../git-repo-tools && pip install --no-cache-dir . && \
+    cd ../github-repo-manager && pip install --no-cache-dir . && \
+    cd ../github-data-tools && pip install --no-cache-dir . && \
+    cd ../kit-orchestrator && pip install --no-cache-dir .
 
 # Runtime stage
 FROM python:3.11-slim
@@ -32,12 +45,12 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy installed dependencies from builder
-COPY --from=builder /build/.venv /app/.venv
+# Copy package sources (needed for entity configs and data files)
+COPY --from=builder /build/packages /app/packages
 
-# Set up environment
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONPATH="/app/.venv/lib/python3.11/site-packages"
+# Copy installed packages from builder's Python site-packages
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Entry point
 ENTRYPOINT ["python", "-m", "kit_orchestrator"]

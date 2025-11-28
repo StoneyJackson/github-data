@@ -33,12 +33,24 @@ def create_monorepo_entity_registry() -> EntityRegistry:
         EntityRegistry instance with all monorepo entities registered
     """
     # Start with github-data-tools entities (the majority)
-    # __file__ is /app/packages/kit-orchestrator/src/kit_orchestrator/__main__.py
-    # We need /app/packages/github-data-tools/src/github_data_tools/entities
+    # Try different paths based on installation mode:
+    # 1. Development/editable mode: /app/packages/...
+    # 2. Docker production mode: /app/packages/...
+    # 3. Installed package mode: use package __file__ location
+
+    # First, try to find entities relative to this file (dev/docker mode)
     app_packages_dir = Path(__file__).parent.parent.parent.parent
     github_data_tools_entities = (
         app_packages_dir / "github-data-tools/src/github_data_tools/entities"
     )
+
+    # If that doesn't exist, try /app/packages (docker runtime)
+    if not github_data_tools_entities.exists():
+        app_packages_dir = Path("/app/packages")
+        github_data_tools_entities = (
+            app_packages_dir / "github-data-tools/src/github_data_tools/entities"
+        )
+
     registry = EntityRegistry(entities_dir=github_data_tools_entities)
 
     # Manually register git-repo-tools entities
