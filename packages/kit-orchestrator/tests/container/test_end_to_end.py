@@ -30,7 +30,8 @@ class KitOrchestratorTestHelper:
         """Build kit-orchestrator Docker image and return the tag."""
         image_tag = tag or KitOrchestratorTestHelper.IMAGE_NAME
 
-        # Find repository root (current file is in packages/kit-orchestrator/tests/container/)
+        # Find repository root
+        # (current file: packages/kit-orchestrator/tests/container/)
         repo_root = Path(__file__).parent.parent.parent.parent.parent
 
         # Build from repository root
@@ -44,9 +45,7 @@ class KitOrchestratorTestHelper:
             ".",
         ]
 
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, cwd=str(repo_root)
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(repo_root))
         if result.returncode != 0:
             raise RuntimeError(f"Docker build failed: {result.stderr}")
 
