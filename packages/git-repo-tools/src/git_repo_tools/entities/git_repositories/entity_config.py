@@ -1,15 +1,10 @@
 """Git repository entity configuration for EntityRegistry."""
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, List, TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
     from github_data_core.entities.strategy_context import StrategyContext
-    from git_repo_tools.entities.git_repositories.save_strategy import (
-        GitRepositorySaveStrategy,
-    )
-    from git_repo_tools.entities.git_repositories.restore_strategy import (
-        GitRepositoryRestoreStrategy,
-    )
+    from github_data_core.entities.base import BaseSaveStrategy, BaseRestoreStrategy
 
 
 class GitRepositoryEntityConfig:
@@ -23,17 +18,17 @@ class GitRepositoryEntityConfig:
     env_var = "INCLUDE_GIT_REPO"
     default_value = True
     value_type = bool
-    dependencies: list = []
+    dependencies: List[str] = []
     description = "Git repository clone for full backup"
 
     # Service requirements (NEW)
-    required_services_save = ["git_service"]
-    required_services_restore = ["git_service"]
+    required_services_save: List[str] = ["git_service"]
+    required_services_restore: List[str] = ["git_service"]
 
     @staticmethod
     def create_save_strategy(
         context: "StrategyContext",
-    ) -> Optional["GitRepositorySaveStrategy"]:
+    ) -> Optional["BaseSaveStrategy"]:
         """Create save strategy instance.
 
         Args:
@@ -49,12 +44,12 @@ class GitRepositoryEntityConfig:
             GitRepositorySaveStrategy,
         )
 
-        return GitRepositorySaveStrategy(context.git_service)
+        return cast("BaseSaveStrategy", GitRepositorySaveStrategy(context.git_service))
 
     @staticmethod
     def create_restore_strategy(
         context: "StrategyContext",
-    ) -> Optional["GitRepositoryRestoreStrategy"]:
+    ) -> Optional["BaseRestoreStrategy"]:
         """Create restore strategy instance.
 
         Args:
@@ -70,4 +65,6 @@ class GitRepositoryEntityConfig:
             GitRepositoryRestoreStrategy,
         )
 
-        return GitRepositoryRestoreStrategy(context.git_service)
+        return cast(
+            "BaseRestoreStrategy", GitRepositoryRestoreStrategy(context.git_service)
+        )

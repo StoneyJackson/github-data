@@ -57,14 +57,18 @@ def create_monorepo_entity_registry() -> EntityRegistry:
     from git_repo_tools.entities.git_repositories.entity_config import (
         GitRepositoryEntityConfig,
     )
-    from github_data_core.entities.base import RegisteredEntity
+    from github_data_core.entities.base import RegisteredEntity, EntityConfig
+    from typing import cast
 
     # Create RegisteredEntity with default enabled state
+    # Instantiate the config class (following the same pattern as EntityDiscovery)
+    config = GitRepositoryEntityConfig()
+    # Cast to EntityConfig to satisfy mypy's strict protocol checking
     git_repo_entity = RegisteredEntity(
-        config=GitRepositoryEntityConfig,
-        enabled=GitRepositoryEntityConfig.default_value
+        config=cast(EntityConfig, config),
+        enabled=config.default_value,
     )
-    registry._entities[GitRepositoryEntityConfig.name] = git_repo_entity
+    registry._entities[config.name] = git_repo_entity
 
     return registry
 
