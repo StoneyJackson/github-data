@@ -3,9 +3,8 @@
 
 FROM github-data-git-base:latest
 
-# Copy and install git-repo-tools package
-COPY packages/git-repo-tools /app
-RUN cd /app && pdm install --prod
+# All packages are already installed in base image
+# This image just provides a specific entrypoint for git-repo-tools
 
 # Set entrypoint
 ENTRYPOINT ["pdm", "run", "git-repo-tools"]

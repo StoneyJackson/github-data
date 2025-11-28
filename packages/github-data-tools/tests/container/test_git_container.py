@@ -315,7 +315,7 @@ class TestGitContainerIntegration:
     def test_git_service_container_integration(self, docker_image, temp_data_dir):
         """Test Git service integration within container environment."""
         volumes = {temp_data_dir: "/data"}
-        environment = {"PYTHONPATH": "/app", "DATA_PATH": "/data"}
+        environment = {"DATA_PATH": "/data"}
 
         python_script = """
 import sys
@@ -366,7 +366,6 @@ except Exception as e:
         """Test Git strategy integration within container environment."""
         volumes = {temp_data_dir: "/data"}
         environment = {
-            "PYTHONPATH": "/app",
             "DATA_PATH": "/data",
             "INCLUDE_GIT_REPO": "true",
         }
@@ -438,7 +437,6 @@ except Exception as e:
             "GITHUB_REPO": "test/repo",
             "DATA_PATH": "/data",
             "INCLUDE_GIT_REPO": "true",
-            "PYTHONPATH": "/app",
         }
 
         # Create a test script that mocks the GitHub service to avoid actual API calls
@@ -451,7 +449,7 @@ from pathlib import Path
 try:
     # Patch the orchestrator to avoid actual GitHub API calls
     with patch(
-        'kit_orchestrator.main.StrategyBasedSaveOrchestrator'
+        'kit_orchestrator.__main__.StrategyBasedSaveOrchestrator'
     ) as mock_orchestrator_class:
         # Create mock orchestrator instance
         mock_orchestrator = Mock()
@@ -465,7 +463,7 @@ try:
         mock_orchestrator_class.return_value = mock_orchestrator
 
         # Import and run main after patching
-        from kit_orchestrator.main import main
+        from kit_orchestrator.__main__ import main
         main()
 
         # Verify the orchestrator was created and execute was called

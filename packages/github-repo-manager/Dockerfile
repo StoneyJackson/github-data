@@ -3,9 +3,8 @@
 
 FROM github-data-base:latest
 
-# Copy and install github-repo-manager package
-COPY packages/github-repo-manager /app
-RUN cd /app && pdm install --prod
+# All packages are already installed in base image
+# This image just provides a specific entrypoint for github-repo-manager
 
 # Set entrypoint
 ENTRYPOINT ["pdm", "run", "github-repo-manager"]

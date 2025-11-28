@@ -3,9 +3,8 @@
 
 FROM github-data-base:latest
 
-# Copy and install github-data-tools package
-COPY packages/github-data-tools /app
-RUN cd /app && pdm install --prod
+# All packages are already installed in base image
+# This image just provides a specific entrypoint for github-data-tools
 
 # Set entrypoint
 ENTRYPOINT ["pdm", "run", "github-data-tools"]
