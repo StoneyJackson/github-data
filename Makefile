@@ -1,145 +1,167 @@
-.PHONY: install install-dev test test-unit test-integration test-container test-containers test-fast lint format type-check clean build docker-build docker-run sync check check-all docker-compose-up-save docker-compose-up-restore docker-compose-test docker-compose-health docker-compose-down
+.PHONY: help install-dev sync clean
+.PHONY: test test-all test-fast test-unit test-integration test-container
+.PHONY: test-core test-git test-github-manager test-github-data test-orchestrator
+.PHONY: test-changed test-fast-changed
+.PHONY: test-with-test-coverage test-fast-with-test-coverage
+.PHONY: lint format type-check check check-all
+.PHONY: docker-build-all docker-build-base docker-build-git-base
+.PHONY: docker-build-git docker-build-github-manager docker-build-github-data docker-build-orchestrator
 
-# Install production dependencies only
-install:
-	pdm install --prod
+# Default target
+help:
+	@echo "GitHub Data Monorepo Makefile"
+	@echo ""
+	@echo "Installation:"
+	@echo "  make install-dev              Install all packages with dev dependencies"
+	@echo "  make sync                     Sync dependencies (update lock file)"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test                     All tests with source code coverage"
+	@echo "  make test-all                 Alias for 'test'"
+	@echo "  make test-fast                All tests except container tests (recommended for dev)"
+	@echo "  make test-unit                Unit tests only (fastest)"
+	@echo "  make test-integration         Integration tests excluding container tests"
+	@echo "  make test-container           Container integration tests only"
+	@echo ""
+	@echo "Per-package testing:"
+	@echo "  make test-core                Core tests only"
+	@echo "  make test-git                 Git repo tools tests only"
+	@echo "  make test-github-manager      GitHub repo manager tests only"
+	@echo "  make test-github-data         GitHub data tools tests only"
+	@echo "  make test-orchestrator        Kit orchestrator tests only"
+	@echo ""
+	@echo "Selective testing:"
+	@echo "  make test-changed             Test only packages with changes on current branch"
+	@echo "  make test-fast-changed        Fast tests for changed packages only"
+	@echo ""
+	@echo "Coverage:"
+	@echo "  make test-with-test-coverage       Coverage analysis of test files"
+	@echo "  make test-fast-with-test-coverage  Fast tests with test file coverage"
+	@echo ""
+	@echo "Quality checks:"
+	@echo "  make lint                     Run flake8 linting"
+	@echo "  make format                   Format code with black"
+	@echo "  make type-check               Run mypy type checking"
+	@echo "  make check                    All quality checks excluding container tests (fast)"
+	@echo "  make check-all                Complete quality validation including container tests"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build-all         Build all containers (base + all subprojects)"
+	@echo "  make docker-build-base        Build base image only"
+	@echo "  make docker-build-git-base    Build git base image"
+	@echo "  make docker-build-git         Build git-repo-tools container"
+	@echo "  make docker-build-github-manager  Build github-repo-manager container"
+	@echo "  make docker-build-github-data     Build github-data-tools container"
+	@echo "  make docker-build-orchestrator    Build kit-orchestrator container"
+	@echo ""
+	@echo "Utilities:"
+	@echo "  make clean                    Clean build artifacts"
 
-# Install all dependencies (including dev)
+# Installation
 install-dev:
 	pdm install
 
-# Sync dependencies (update lock file)
 sync:
 	pdm sync
 
-# Run tests (excludes test files from coverage)
+# Testing - All tests
 test:
-	pdm run pytest --cov=github_data --cov-config=pytest.ini
+	pdm run pytest --cov=packages --cov-config=pyproject.toml
 
-# Run unit tests only (excludes test files from coverage)
-test-unit:
-	pdm run pytest --cov=github_data --cov-config=pytest.ini -m unit
+test-all: test
 
-# Run integration tests (non-container, excludes test files from coverage)
-test-integration:
-	pdm run pytest --cov=github_data --cov-config=pytest.ini -m "integration and not container"
-
-# Run container integration tests only (excludes test files from coverage)
-test-container:
-	pdm run pytest --cov=github_data --cov-config=pytest.ini -m container
-
-# Alias for test-container (plural form)
-test-containers: test-container
-
-# Run all tests except container tests (excludes test files from coverage)
+# Testing - Fast (excluding container tests)
 test-fast:
-	pdm run pytest --durations=0 --durations-min=1 --cov=github_data --cov-config=pytest.ini -m "not container and not slow"
+	pdm run pytest --durations=0 --durations-min=1 --cov=packages --cov-config=pyproject.toml -m "not container and not slow"
 
-# Run tests with coverage of test files only
+# Testing - By type
+test-unit:
+	pdm run pytest --cov=packages --cov-config=pyproject.toml -m unit
+
+test-integration:
+	pdm run pytest --cov=packages --cov-config=pyproject.toml -m "integration and not container"
+
+test-container:
+	pdm run pytest --cov=packages --cov-config=pyproject.toml -m container
+
+# Testing - Per package
+test-core:
+	pdm run pytest packages/core/tests --cov=packages/core/src --cov-config=pyproject.toml
+
+test-git:
+	pdm run pytest packages/git-repo-tools/tests --cov=packages/git-repo-tools/src --cov-config=pyproject.toml
+
+test-github-manager:
+	pdm run pytest packages/github-repo-manager/tests --cov=packages/github-repo-manager/src --cov-config=pyproject.toml
+
+test-github-data:
+	pdm run pytest packages/github-data-tools/tests --cov=packages/github-data-tools/src --cov-config=pyproject.toml
+
+test-orchestrator:
+	pdm run pytest packages/kit-orchestrator/tests --cov=packages/kit-orchestrator/src --cov-config=pyproject.toml
+
+# Testing - Selective (based on git changes)
+test-changed:
+	@bash scripts/test-changed.sh
+
+test-fast-changed:
+	@bash scripts/test-changed.sh --fast
+
+# Testing - Coverage of test files
 test-with-test-coverage:
-	pdm run pytest --cov=tests --cov-config=pytest.ini
+	pdm run pytest --cov=packages/*/tests --cov-config=pyproject.toml
 
-# Run fast tests with coverage of test files only
 test-fast-with-test-coverage:
-	pdm run pytest --cov=tests --cov-config=pytest.ini -m "not container and not slow"
+	pdm run pytest --cov=packages/*/tests --cov-config=pyproject.toml -m "not container and not slow"
 
-# Test commands with markers
-.PHONY: test-fast test-unit test-integration test-container test-by-feature
-
-test-fast-only:  ## Run fast tests only (< 1 second)
-	pdm run python -m pytest -m fast
-
-test-unit-only:  ## Run unit tests only
-	pdm run python -m pytest -m unit
-
-test-integration-only:  ## Run integration tests only (excluding container tests)
-	pdm run python -m pytest -m "integration and not container"
-
-test-container-only:  ## Run container tests only
-	pdm run python -m pytest -m container
-
-test-by-feature:  ## Run tests for specific feature (usage: make test-by-feature FEATURE=labels)
-	pdm run python -m pytest -m $(FEATURE)
-
-# Combined test workflows
-test-dev:  ## Development test workflow (fast + integration, no container)
-	pdm run python -m pytest -m "fast or (integration and not container)"
-
-test-ci:  ## CI test workflow (all tests with coverage)
-	pdm run python -m pytest --cov=github_data --cov-report=term-missing --cov-report=html
-
-# Test discovery and information
-test-list-markers:  ## List all available test markers
-	pdm run python -m pytest --markers
-
-test-collect-only:  ## Show test collection without running tests
-	pdm run python -m pytest --collect-only
-
-test-by-markers:  ## Run tests by custom marker expression (usage: make test-by-markers MARKERS="fast and labels")
-	pdm run python -m pytest -m "$(MARKERS)"
-
-# Run linting
+# Quality checks
 lint:
-	pdm run flake8 github_data tests
+	pdm run flake8 packages/*/src packages/*/tests
 
-# Format code
 format:
-	pdm run black github_data tests
+	pdm run black packages/*/src packages/*/tests
 
-# Type checking
 type-check:
-	pdm run mypy github_data
+	pdm run mypy packages/core/src packages/git-repo-tools/src packages/github-repo-manager/src packages/github-data-tools/src packages/kit-orchestrator/src
 
-# Run all quality checks (excluding container tests for speed)
 check: format lint type-check test-fast
 
-# Run all quality checks including container integration tests
-check-all: format lint type-check test
+check-all: format lint type-check test-all
 
-# Clean build artifacts
+# Docker builds
+# Root image (all-in-one workspace build)
+docker-build:
+	docker build -t github-data:latest .
+
+docker-build-base:
+	docker build -t github-data-base:latest -f docker/base.Dockerfile .
+
+docker-build-git-base: docker-build-base
+	docker build -t github-data-git-base:latest -f docker/git-base.Dockerfile .
+
+docker-build-git: docker-build-git-base
+	docker build -t git-repo-tools:1.0.0 -f packages/git-repo-tools/Dockerfile .
+
+docker-build-github-manager: docker-build-base
+	docker build -t github-repo-manager:1.0.0 -f packages/github-repo-manager/Dockerfile .
+
+docker-build-github-data: docker-build-base
+	docker build -t github-data-tools:1.0.0 -f packages/github-data-tools/Dockerfile .
+
+docker-build-orchestrator:
+	docker build -t kit-orchestrator:1.0.0 -f docker/kit-orchestrator.Dockerfile .
+
+docker-build-all: docker-build-base docker-build-git-base docker-build-git docker-build-github-manager docker-build-github-data docker-build-orchestrator
+
+# Clean
 clean:
 	rm -rf build/
 	rm -rf dist/
 	rm -rf *.egg-info/
 	rm -rf .pytest_cache/
 	rm -rf htmlcov/
+	rm -rf coverage_html_report/
 	rm -rf .pdm-python
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
-
-# Build the Docker image
-docker-build:
-	docker build -t github-data .
-
-# Run the Docker container (example)
-docker-run-save:
-	docker run --rm \
-		-v $(PWD)/data:/data \
-		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
-		-e GITHUB_REPO=$(GITHUB_REPO) \
-		-e OPERATION=save \
-		github-data
-
-docker-run-restore:
-	docker run --rm \
-		-v $(PWD)/data:/data \
-		-e GITHUB_TOKEN=$(GITHUB_TOKEN) \
-		-e GITHUB_REPO=$(GITHUB_REPO) \
-		-e OPERATION=restore \
-		github-data
-
-# Docker Compose commands
-docker-compose-up-save:
-	docker-compose -f docker-compose.test.yml --profile save up --build github-data-save
-
-docker-compose-up-restore:
-	docker-compose -f docker-compose.test.yml --profile restore up --build github-data-restore
-
-docker-compose-test:
-	docker-compose -f docker-compose.test.yml --profile test up --build github-data-test
-
-docker-compose-health:
-	docker-compose -f docker-compose.test.yml --profile health up --build github-data-health
-
-docker-compose-down:
-	docker-compose -f docker-compose.test.yml down -v --remove-orphans
+	find . -type d -name "*.egg-info" -exec rm -rf {} +

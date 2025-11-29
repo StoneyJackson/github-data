@@ -1,0 +1,39 @@
+[project]
+name = "kit-orchestrator"
+version = "1.0.0"
+description = "Convenience orchestrator bundling all GitHub data tools"
+authors = [
+    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "github-data-core>=1.0.0,<2.0.0",
+    "git-repo-tools>=1.0.0,<2.0.0",
+    "github-repo-manager>=1.0.0,<2.0.0",
+    "github-data-tools>=1.0.0,<2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "docker>=7.0.0",
+]
+
+[project.scripts]
+kit-orchestrator = "kit_orchestrator.__main__:main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = ["src/kit_orchestrator"]
+package-dir = "src"

@@ -1,1 +1,0 @@
-"""Core infrastructure fixtures for GitHub Data tests."""

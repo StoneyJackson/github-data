@@ -69,10 +69,11 @@ jobs:
         run: echo "repository=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
         id: lowercase_repo
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (kit-orchestrator)
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: docker/kit-orchestrator.Dockerfile
           push: true
           tags: |
             ghcr.io/${{ steps.lowercase_repo.outputs.repository }}:${{ steps.generate_tag.outputs.pr_tag }}

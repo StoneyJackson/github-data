@@ -1,0 +1,36 @@
+[project]
+name = "git-repo-tools"
+version = "1.0.0+core1.0"
+description = "Tools for saving and restoring Git repositories"
+authors = [
+    {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "github-data-core>=1.0.0,<2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "docker>=7.0.0",
+]
+
+[project.scripts]
+git-repo-tools = "git_repo_tools.__main__:main"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+includes = ["src/git_repo_tools"]
+package-dir = "src"

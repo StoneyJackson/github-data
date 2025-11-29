@@ -1,65 +1,50 @@
 [project]
-name = "github-data"
-version = "0.1.0"
-description = "A containerized tool for saving and restoring GitHub repository labels, issues, comments, and pull requests"
+name = "github-data-workspace"
+version = "2.0.0"
+description = "Monorepo workspace for GitHub data management tools"
 authors = [
     {name = "Stoney Jackson", email = "dr.stoney@gmail.com"},
 ]
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">=3.9"
-keywords = ["github", "backup", "issues", "labels", "pull-requests", "data"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-
-dependencies = [
-    "PyGithub>=2.1.1",
-    "requests>=2.31.0",
-    "requests-cache>=1.1.0",
-    "pydantic>=2.5.2",
-    "gql[requests]>=4.0.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.4",
-    "pytest-cov>=4.1.0",
-    "pytest-mock>=3.12.0",
-    "pytest-timeout>=2.1.0",
-    "black>=23.12.1",
-    "flake8>=7.0.0",
-    "mypy>=1.8.0",
-    "types-requests>=2.31.0.20240106",
-    "docker>=7.0.0",
-    "psutil>=5.9.0",
-    "pytest-asyncio>=1.2.0",
-    "jinja2>=3.1.2",
-]
-
-[project.scripts]
-github-data = "github_data.main:main"
+requires-python = ">=3.11"
+keywords = ["github", "backup", "issues", "labels", "pull-requests", "data", "monorepo"]
+dependencies = ["gql[requests]>=4.0.0", "PyGithub>=2.8.1", "jinja2>=3.1.6", "aiohttp>=3.13.2", "requests-cache>=1.2.1", "pydantic>=2.5.2"]
 
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm]
-distribution = true
+distribution = false
+
+[tool.pdm.workspace]
+members = [
+    "packages/core",
+    "packages/git-repo-tools",
+    "packages/github-repo-manager",
+    "packages/github-data-tools",
+    "packages/kit-orchestrator"
+]
 
 [tool.pdm.dev-dependencies]
-dev = {extras = ["dev"], include-self = true}
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "pytest-timeout>=2.1.0",
+    "black>=24.0.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "types-requests>=2.31.0",
+    "docker>=7.0.0",
+    "psutil>=5.9.0",
+    "pytest-asyncio>=1.2.0",
+]
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ['py311']
 include = '\.pyi?$'
 extend-exclude = '''
 /(
@@ -72,7 +57,7 @@ extend-exclude = '''
 '''
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -85,10 +70,58 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
+follow_imports = "normal"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
-addopts = ""
+testpaths = ["packages/*/tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+pythonpath = [
+    "packages/core/src",
+    "packages/git-repo-tools/src",
+    "packages/github-repo-manager/src",
+    "packages/github-data-tools/src",
+    "packages/kit-orchestrator/src"
+]
+addopts = "-v --tb=short"
+markers = [
+    "unit: Unit tests (fast, isolated component tests)",
+    "integration: Integration tests (component interaction tests)",
+    "container: Container integration tests (full Docker workflow tests)",
+    "fast: Fast-running tests (< 1s)",
+    "medium: Medium-speed tests (1-10s)",
+    "slow: Slow-running tests (> 10s)",
+    "performance: Performance-critical tests",
+    "save_workflow: Save workflow tests",
+    "restore_workflow: Restore workflow tests",
+    "github_api: GitHub API interaction tests",
+    "storage: Storage operation tests",
+    "error_handling: Error handling and resilience tests",
+    "enhanced_fixtures: Tests using enhanced fixtures",
+    "data_builders: Tests using data builder patterns",
+    "error_simulation: Tests using error simulation",
+    "workflow_services: Tests using workflow service fixtures",
+    "empty_repository: Empty repository scenario tests",
+    "large_dataset: Large dataset scenario tests",
+    "rate_limiting: Rate limiting scenario tests",
+    "api_errors: API error scenario tests",
+]
+
+[tool.coverage.run]
+source = ["packages/*/src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+    "*/venv/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.coverage.html]
+directory = "coverage_html_report"
